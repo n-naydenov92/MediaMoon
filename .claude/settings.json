@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -c \"\nimport json, os\nskills = [\n    'skills/senior-architect/SKILL.md',\n    'skills/clean-code/SKILL.md',\n    'skills/react-best-practices/SKILL.md',\n    'skills/frontend-design/SKILL.md'\n]\ncontent = ''\nfor s in skills:\n    try:\n        with open(s, encoding='utf-8') as f:\n            content += '\\n\\n=== ' + s + ' ===\\n' + f.read()\n    except Exception as e:\n        content += '\\n\\n=== ' + s + ' === ERROR: ' + str(e)\nprint(json.dumps({'hookSpecificOutput': {'hookEventName': 'SessionStart', 'additionalContext': content.strip()}}))\n\"",
+            "statusMessage": "Loading project skills..."
+          }
+        ]
+      }
+    ]
+  }
+}

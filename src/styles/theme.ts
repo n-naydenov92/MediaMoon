@@ -1,0 +1,193 @@
+'use client'
+
+import { createTheme, type ThemeOptions } from '@mui/material/styles'
+
+// ─── Design tokens (synced with skills/frontend-design/SKILL.md) ─────────────
+
+const FONT_HEADING = '"Syne", "Inter", system-ui, sans-serif'
+const FONT_BODY = '"DM Sans", "Inter", system-ui, sans-serif'
+const FONT_MONO = '"JetBrains Mono", ui-monospace, monospace'
+
+const RADIUS_SM = 4
+const RADIUS_MD = 8
+const RADIUS_LG = 12
+
+const COLORS_DARK = {
+  bgBase: '#0A0A0F',
+  bgSurface: '#12121A',
+  bgElevated: '#1A1A24',
+  borderSubtle: '#22222E',
+  borderStrong: '#2E2E3E',
+  textPrimary: '#F5F5F7',
+  textSecondary: '#9A9AA8',
+  textMuted: '#5A5A6A',
+  accent: '#6C63FF',
+  accentHover: '#7D75FF',
+  viral: '#F59E0B',
+  hot: '#F97316',
+  normal: '#64748B',
+  success: '#10B981',
+  error: '#EF4444',
+  warning: '#EAB308',
+} as const
+
+const COLORS_LIGHT = {
+  bgBase: '#FAFAFB',
+  bgSurface: '#FFFFFF',
+  bgElevated: '#F4F4F6',
+  borderSubtle: '#E4E4EA',
+  borderStrong: '#D1D1DA',
+  textPrimary: '#0A0A0F',
+  textSecondary: '#4A4A58',
+  textMuted: '#8A8A98',
+  accent: '#5B52E5',
+  accentHover: '#6C63FF',
+  viral: '#D97706',
+  hot: '#EA580C',
+  normal: '#475569',
+  success: '#059669',
+  error: '#DC2626',
+  warning: '#CA8A04',
+} as const
+
+// ─── Typography ──────────────────────────────────────────────────────────────
+
+const typography: ThemeOptions['typography'] = {
+  fontFamily: FONT_BODY,
+  fontSize: 14,
+  htmlFontSize: 16,
+  h1: { fontFamily: FONT_HEADING, fontSize: 24, fontWeight: 600, letterSpacing: '-0.01em' },
+  h2: { fontFamily: FONT_HEADING, fontSize: 20, fontWeight: 600, letterSpacing: '-0.01em' },
+  h3: { fontFamily: FONT_BODY, fontSize: 16, fontWeight: 600 },
+  h4: { fontFamily: FONT_BODY, fontSize: 14, fontWeight: 600 },
+  body1: { fontSize: 14, fontWeight: 400, lineHeight: 1.55 },
+  body2: { fontSize: 13, fontWeight: 400, lineHeight: 1.5 },
+  caption: { fontSize: 12, fontWeight: 500, letterSpacing: '0.02em' },
+  button: { fontFamily: FONT_BODY, fontWeight: 500, textTransform: 'none', letterSpacing: 0 },
+}
+
+// ─── Theme factory (intent: one source of truth, two modes) ──────────────────
+
+type Mode = 'dark' | 'light'
+
+function buildPalette(mode: Mode): ThemeOptions['palette'] {
+  const c = mode === 'dark' ? COLORS_DARK : COLORS_LIGHT
+  return {
+    mode,
+    primary: { main: c.accent, dark: c.accent, light: c.accentHover, contrastText: '#FFFFFF' },
+    error: { main: c.error },
+    warning: { main: c.warning },
+    success: { main: c.success },
+    background: { default: c.bgBase, paper: c.bgSurface },
+    text: { primary: c.textPrimary, secondary: c.textSecondary, disabled: c.textMuted },
+    divider: c.borderSubtle,
+  }
+}
+
+function buildComponents(mode: Mode): ThemeOptions['components'] {
+  const c = mode === 'dark' ? COLORS_DARK : COLORS_LIGHT
+  return {
+    MuiCssBaseline: {
+      styleOverrides: {
+        body: {
+          fontFeatureSettings: '"tnum" on, "lnum" on',
+          backgroundColor: c.bgBase,
+          color: c.textPrimary,
+        },
+        '*:focus-visible': {
+          outline: `2px solid ${c.accent}`,
+          outlineOffset: 2,
+        },
+      },
+    },
+    MuiPaper: { defaultProps: { elevation: 0 } },
+    MuiCard: {
+      defaultProps: { elevation: 0 },
+      styleOverrides: {
+        root: {
+          backgroundColor: c.bgSurface,
+          border: `1px solid ${c.borderSubtle}`,
+          borderRadius: RADIUS_LG,
+          transition: 'border-color 80ms ease-out, background-color 80ms ease-out',
+          '&:hover': { borderColor: c.borderStrong },
+        },
+      },
+    },
+    MuiCardContent: {
+      styleOverrides: {
+        root: { padding: 20, '&:last-child': { paddingBottom: 20 } },
+      },
+    },
+    MuiButton: {
+      defaultProps: { disableElevation: true, disableRipple: false },
+      styleOverrides: {
+        root: { borderRadius: RADIUS_SM, height: 36, paddingInline: 14 },
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: { borderRadius: RADIUS_SM, fontWeight: 500, height: 24 },
+      },
+    },
+    MuiTabs: {
+      styleOverrides: {
+        root: { minHeight: 40, borderBottom: `1px solid ${c.borderSubtle}` },
+        indicator: { height: 2, backgroundColor: c.accent },
+      },
+    },
+    MuiTab: {
+      styleOverrides: {
+        root: {
+          minHeight: 40,
+          textTransform: 'none',
+          fontSize: 14,
+          fontWeight: 500,
+          color: c.textSecondary,
+          '&.Mui-selected': { color: c.textPrimary },
+        },
+      },
+    },
+    MuiAppBar: {
+      defaultProps: { elevation: 0, color: 'transparent' },
+      styleOverrides: {
+        root: {
+          backgroundColor: c.bgBase,
+          borderBottom: `1px solid ${c.borderSubtle}`,
+        },
+      },
+    },
+    MuiDrawer: {
+      styleOverrides: {
+        paper: {
+          backgroundColor: c.bgSurface,
+          borderRight: `1px solid ${c.borderSubtle}`,
+        },
+      },
+    },
+    MuiAlert: {
+      styleOverrides: { root: { borderRadius: RADIUS_MD } },
+    },
+  }
+}
+
+export function buildTheme(mode: Mode) {
+  return createTheme({
+    palette: buildPalette(mode),
+    typography,
+    shape: { borderRadius: RADIUS_MD },
+    spacing: 4, // base unit; use multiples: 1=4px, 2=8px, 3=12px, 4=16px...
+    components: buildComponents(mode),
+  })
+}
+
+export const darkTheme = buildTheme('dark')
+export const lightTheme = buildTheme('light')
+
+// ─── Semantic tokens exported for non-MUI styling (e.g., CSS modules) ────────
+
+export const SEMANTIC_COLORS = {
+  dark: COLORS_DARK,
+  light: COLORS_LIGHT,
+} as const
+
+export const FONTS = { heading: FONT_HEADING, body: FONT_BODY, mono: FONT_MONO } as const
