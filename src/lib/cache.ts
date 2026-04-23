@@ -27,5 +27,5 @@ export function withCache<T>(params: {
 }
 
 export function invalidate(key: string): void {
-  revalidateTag(key)
+  revalidateTag(key, 'default')
 }
