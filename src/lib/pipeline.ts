@@ -36,6 +36,7 @@ const MS_PER_SECOND = 1000
 export async function getNewsForTabMarket(params: {
   readonly tab: TabConfig
   readonly market: Market
+  readonly includeSearchApi?: boolean
 }): Promise<NewsResult> {
   if (!isTopicTab(params.tab)) {
     throw new Error(`Only topic tabs can be pipeline-fetched: ${params.tab.id}`)
@@ -43,14 +44,14 @@ export async function getNewsForTabMarket(params: {
   const key = buildCacheKey(params.tab.id, params.market)
   return withCache({
     key,
-    fetcher: () => runPipeline(params.tab as TopicTabConfig, params.market),
+    fetcher: () => runPipeline(params.tab as TopicTabConfig, params.market, params.includeSearchApi ?? false),
   })
 }
 
 // ─── Pipeline steps ─────────────────────────────────────────────────────────
 
-async function runPipeline(tab: TopicTabConfig, market: Market): Promise<NewsResult> {
-  const { articles, sourceCounts, sourceErrors } = await fetchArticles(tab, market)
+async function runPipeline(tab: TopicTabConfig, market: Market, includeSearchApi: boolean): Promise<NewsResult> {
+  const { articles, sourceCounts, sourceErrors } = await fetchArticles(tab, market, includeSearchApi)
   const unique = deduplicateByUrl(articles)
   const rawClusters = await safeCluster(unique)
   const enriched = await enrichWithTrends(rawClusters, market, tab.id)
@@ -61,10 +62,11 @@ async function runPipeline(tab: TopicTabConfig, market: Market): Promise<NewsRes
 async function fetchArticles(
   tab: TopicTabConfig,
   market: Market,
+  includeSearchApi: boolean,
 ): Promise<{ articles: readonly RssArticle[]; sourceCounts: SourceCounts; sourceErrors: SourceErrors }> {
   const [googleNews, searchApi] = await Promise.allSettled([
     fetchFromGoogleNews(tab, market),
-    fetchFromSearchApiSource(tab, market),
+    includeSearchApi ? fetchFromSearchApiSource(tab, market) : Promise.resolve([] as readonly RssArticle[]),
   ])
 
   const resolve = (r: PromiseSettledResult<readonly RssArticle[]>) =>

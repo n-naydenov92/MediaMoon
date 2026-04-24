@@ -27,7 +27,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   invalidate(buildCacheKey(tab.id, market))
   try {
-    const fresh = await getNewsForTabMarket({ tab, market })
+    const fresh = await getNewsForTabMarket({ tab, market, includeSearchApi: true })
     return NextResponse.json(fresh)
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error'
