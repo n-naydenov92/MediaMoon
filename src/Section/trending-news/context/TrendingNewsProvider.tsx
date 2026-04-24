@@ -107,8 +107,12 @@ export default memo(function TrendingNewsProvider({ role, children }: Props): JS
     if (!tab || !isTopicTab(tab)) {
       return
     }
+    const key = cacheKey(state.activeTabId, state.activeMarket)
+    if (state.dataByKey.has(key)) {
+      return
+    }
     void fetchFor(state.activeTabId, state.activeMarket, false)
-  }, [state.activeTabId, state.activeMarket, fetchFor])
+  }, [state.activeTabId, state.activeMarket, fetchFor, state.dataByKey])
 
   const refresh = useCallback(async (): Promise<void> => {
     const tab = findTabById(state.activeTabId)
