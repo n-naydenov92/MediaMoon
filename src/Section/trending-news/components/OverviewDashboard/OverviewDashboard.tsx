@@ -1,10 +1,9 @@
 'use client'
 
-import { memo, useEffect, useMemo } from 'react'
+import { memo, useEffect } from 'react'
 import Grid from '@mui/material/Grid'
 import Stack from '@mui/material/Stack'
-import type { AsyncState, Market, NewsResult, NewsStats } from '@/types'
-import { getTopicTabs } from '@/Section/trending-news/config'
+import type { AsyncState, NewsResult, NewsStats } from '@/types'
 import { cacheKey } from '@/Section/trending-news/context/trendingNewsCtx'
 import { useTrendingNewsContext } from '@/Section/trending-news/context/useTrendingNewsContext'
 import { LABELS } from '@/Section/trending-news/labels'
@@ -13,23 +12,23 @@ import NewsBlock from '../NewsBlock/NewsBlock'
 import StatsRow from '../StatsRow/StatsRow'
 import HighlightsSidebar from '../HighlightsSidebar/HighlightsSidebar'
 import LoadingOverview from './LoadingOverview/LoadingOverview'
+import styles from './OverviewDashboard.module.css'
 
 /**
- * Aggregates cached results from every topic tab × market combination.
- * Triggers background fetches for anything not yet in cache.
+ * Aggregates cached results across every market of the active brand's topic.
+ * Triggers background fetches for any market not yet in cache.
  */
 export default memo(function OverviewDashboard(): JSX.Element {
-  const { dataByKey, ensureLoaded } = useTrendingNewsContext()
-  const combinations = useMemo(listAllCombinations, [])
+  const { brandId, topic, dataByKey, ensureLoaded } = useTrendingNewsContext()
 
   useEffect(() => {
-    for (const combo of combinations) {
-      ensureLoaded(combo.tabId, combo.market)
+    for (const market of topic.markets) {
+      ensureLoaded(market)
     }
-  }, [combinations, ensureLoaded])
+  }, [topic.markets, ensureLoaded])
 
-  const results = combinations
-    .map((c) => dataByKey.get(cacheKey(c.tabId, c.market)))
+  const results = topic.markets
+    .map((m) => dataByKey.get(cacheKey(brandId, m)))
     .filter(isSuccess)
 
   if (results.length === 0) {
@@ -47,17 +46,18 @@ export default memo(function OverviewDashboard(): JSX.Element {
     <Stack spacing={6}>
       <StatsRow stats={stats} />
       <Grid container spacing={6}>
-        <Grid item xs={12} md={8}>
-          <Stack spacing={4}>
-            {allClusters.map((cluster) => (
+        <Grid item xs={12} md={8} className={styles.mainColumn}>
+          <Stack spacing={3}>
+            {allClusters.map((cluster, index) => (
               <NewsBlock
                 key={`${cluster.market}-${cluster.representativeTitle}`}
                 cluster={cluster}
+                defaultExpanded={index === 0}
               />
             ))}
           </Stack>
         </Grid>
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={4} className={styles.sidebarColumn}>
           <HighlightsSidebar clusters={allClusters} />
         </Grid>
       </Grid>
@@ -66,21 +66,6 @@ export default memo(function OverviewDashboard(): JSX.Element {
 })
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
-
-interface Combination {
-  readonly tabId: string
-  readonly market: Market
-}
-
-function listAllCombinations(): readonly Combination[] {
-  const out: Combination[] = []
-  for (const tab of getTopicTabs()) {
-    for (const market of tab.markets) {
-      out.push({ tabId: tab.id, market })
-    }
-  }
-  return out
-}
 
 function isSuccess(
   state: AsyncState<NewsResult> | undefined,

@@ -1,0 +1,17 @@
+@media (min-width: 900px) {
+  .mainColumn {
+    padding-right: 8px;
+  }
+
+  .sidebarColumn {
+    border-left: 1px solid #E4E4EA;
+    padding-left: 16px;
+    align-self: stretch;
+  }
+}
+
+@media (min-width: 900px) and (prefers-color-scheme: dark) {
+  .sidebarColumn {
+    border-left-color: #22222E;
+  }
+}

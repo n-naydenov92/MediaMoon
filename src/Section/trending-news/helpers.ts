@@ -1,4 +1,7 @@
+import type { AsyncState, NewsResult, RssArticle } from '@/types'
 import { LABELS } from './labels'
+
+const SUMMARY_SOURCE_LIMIT = 3
 
 /**
  * Formats a UTC ISO date string as a human-readable relative time label.
@@ -18,4 +21,42 @@ export function formatRelative(iso: string): string {
   }
   const diffDays = Math.floor(diffHours / 24)
   return `${diffDays}${LABELS.relativeTime.dAgo}`
+}
+
+export function pickTopSources(articles: readonly RssArticle[]): string {
+  const seen = new Set<string>()
+  const ordered: string[] = []
+  for (const a of articles) {
+    if (!seen.has(a.source)) {
+      seen.add(a.source)
+      ordered.push(a.source)
+    }
+  }
+  const head = ordered.slice(0, SUMMARY_SOURCE_LIMIT)
+  const overflow = ordered.length - head.length
+  return overflow > 0 ? `${head.join(', ')} +${overflow}` : head.join(', ')
+}
+
+export function pickLatestPubDate(articles: readonly RssArticle[]): string | null {
+  if (articles.length === 0) {
+    return null
+  }
+  return articles
+    .map((a) => a.pubDate)
+    .reduce((latest, current) => (current > latest ? current : latest))
+}
+
+export function pickLatestExpiry(
+  states: ReadonlyMap<string, AsyncState<NewsResult>>,
+): string | null {
+  let latest: string | null = null
+  for (const state of states.values()) {
+    if (state.status !== 'success') {
+      continue
+    }
+    if (!latest || state.data.cacheExpiresAt > latest) {
+      latest = state.data.cacheExpiresAt
+    }
+  }
+  return latest
 }

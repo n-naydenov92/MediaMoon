@@ -8,7 +8,6 @@ import ErrorPanel from '@/components/ui/ErrorPanel/ErrorPanel'
 import type { AsyncState, NewsResult } from '@/types'
 import { LABELS } from '@/Section/trending-news/labels'
 import NewsBlock from '../../NewsBlock/NewsBlock'
-import SourceDebugRow from '../../SourceDebugRow/SourceDebugRow'
 import StatsRow from '../../StatsRow/StatsRow'
 import LoadingSkeleton from '../LoadingSkeleton/LoadingSkeleton'
 
@@ -47,16 +46,13 @@ export default memo(function TopicContent({ state, onRetry }: Props): JSX.Elemen
       }
       return (
         <Stack spacing={6}>
-          <SourceDebugRow
-            sourceCounts={state.data.sourceCounts}
-            sourceErrors={state.data.sourceErrors}
-          />
           <StatsRow stats={state.data.stats} />
-          <Stack spacing={4}>
-            {state.data.clusters.map((cluster) => (
+          <Stack spacing={3}>
+            {state.data.clusters.map((cluster, index) => (
               <NewsBlock
                 key={`${cluster.market}-${cluster.representativeTitle}`}
                 cluster={cluster}
+                defaultExpanded={index === 0}
               />
             ))}
           </Stack>

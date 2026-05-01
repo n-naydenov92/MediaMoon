@@ -9,10 +9,10 @@ export const LABELS = {
     WORLD: 'Worldwide',
   } as const,
   newsBlock: {
-    coverage: 'Coverage',
     sources: 'sources',
-    trends: 'Trends',
-    outOf: '/100',
+    last: 'last',
+    expand: 'Show articles',
+    collapse: 'Hide articles',
   },
   highlightsSidebar: {
     title: 'Top Highlights',
@@ -27,6 +27,18 @@ export const LABELS = {
   },
   topicPanel: {
     preparing: 'Preparing...',
+  },
+  keywordsPopover: {
+    tooltip: 'Show search keywords',
+    title: 'Searching for:',
+  },
+  sourceStatsPopover: {
+    tooltip: 'Source stats',
+    title: 'Articles per source',
+  },
+  refreshButton: {
+    aria: 'Refresh data',
+    action: 'Refresh now',
   },
   overviewDashboard: {
     emptyLast24h: 'No stories in the last 24 hours',
