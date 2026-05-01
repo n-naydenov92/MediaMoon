@@ -1,0 +1,13 @@
+.contentWrapper {
+  padding: 24px 16px;
+  max-width: 1440px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (min-width: 900px) {
+  .contentWrapper {
+    padding: 24px;
+  }
+}

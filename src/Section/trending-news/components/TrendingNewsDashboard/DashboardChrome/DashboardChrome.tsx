@@ -9,6 +9,7 @@ import { useTrendingNewsContext } from '@/Section/trending-news/context/useTrend
 import { LABELS } from '@/Section/trending-news/labels'
 import TabNavigation from '../../TabNavigation/TabNavigation'
 import ActivePanel from '../ActivePanel/ActivePanel'
+import styles from './DashboardChrome.module.css'
 
 const MODULE_ICON = 'TrendingUp'
 
@@ -24,7 +25,7 @@ export default memo(function DashboardChrome(): JSX.Element {
         iconColor={brand?.color}
         subtitle={brand?.label ?? null}
       />
-      <Box sx={{ px: { xs: 4, md: 6 }, py: 6, maxWidth: 1440, width: '100%', mx: 'auto' }}>
+      <Box className={styles.contentWrapper}>
         <Stack spacing={6}>
           <TabNavigation />
           <ActivePanel activeView={activeView} />
