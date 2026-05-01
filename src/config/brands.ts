@@ -7,6 +7,7 @@ export const BRAND_REGISTRY: readonly BrandConfig[] = [
     emoji: '💪',
     color: '#FF6B35',
     description: 'Performance nutrition brand',
+    markets: ['BG', 'ES', 'WORLD'],
   },
   {
     id: 'thegreenbear',
@@ -14,6 +15,7 @@ export const BRAND_REGISTRY: readonly BrandConfig[] = [
     emoji: '🐻',
     color: '#10B981',
     description: 'Sustainable lifestyle brand',
+    markets: ['BG'],
   },
   {
     id: 'sapphire',
@@ -21,6 +23,7 @@ export const BRAND_REGISTRY: readonly BrandConfig[] = [
     emoji: '💎',
     color: '#1877F2',
     description: 'Luxury jewellery brand',
+    markets: ['BG'],
   },
 ]
 

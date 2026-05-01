@@ -1,12 +1,15 @@
 'use client'
 
-import { memo, useEffect } from 'react'
+import { memo } from 'react'
 import Grid from '@mui/material/Grid'
 import Stack from '@mui/material/Stack'
-import type { AsyncState, NewsResult, NewsStats } from '@/types'
+import type { AsyncState, NewsResult } from '@/types'
+import { useBrandShellContext } from '@/contexts/brandShell/useBrandShellContext'
 import { cacheKey } from '@/Section/trending-news/context/trendingNewsCtx'
 import { useTrendingNewsContext } from '@/Section/trending-news/context/useTrendingNewsContext'
 import { LABELS } from '@/Section/trending-news/labels'
+import { mergeStats } from '@/Section/trending-news/helpers'
+import { useEnsureMarketsLoaded } from '@/Section/trending-news/hooks/useEnsureMarketsLoaded'
 import EmptyState from '@/components/ui/EmptyState/EmptyState'
 import NewsBlock from '../NewsBlock/NewsBlock'
 import StatsRow from '../StatsRow/StatsRow'
@@ -15,15 +18,12 @@ import LoadingOverview from './LoadingOverview/LoadingOverview'
 import styles from './OverviewDashboard.module.css'
 
 export default memo(function OverviewDashboard(): JSX.Element {
-  const { brandId, topic, dataByKey, ensureLoaded } = useTrendingNewsContext()
+  const { brandId, dataByKey, ensureLoaded } = useTrendingNewsContext()
+  const { markets } = useBrandShellContext()
 
-  useEffect(() => {
-    for (const market of topic.markets) {
-      ensureLoaded(market)
-    }
-  }, [topic.markets, ensureLoaded])
+  useEnsureMarketsLoaded(markets, ensureLoaded)
 
-  const results = topic.markets
+  const results = markets
     .map((m) => dataByKey.get(cacheKey(brandId, m)))
     .filter(isSuccess)
 
@@ -65,16 +65,4 @@ function isSuccess(
   state: AsyncState<NewsResult> | undefined,
 ): state is { status: 'success'; data: NewsResult } {
   return state?.status === 'success'
-}
-
-function mergeStats(all: readonly NewsStats[]): NewsStats {
-  return all.reduce<NewsStats>(
-    (acc, s) => ({
-      totalArticles: acc.totalArticles + s.totalArticles,
-      totalClusters: acc.totalClusters + s.totalClusters,
-      viralCount: acc.viralCount + s.viralCount,
-      hotCount: acc.hotCount + s.hotCount,
-    }),
-    { totalArticles: 0, totalClusters: 0, viralCount: 0, hotCount: 0 },
-  )
 }

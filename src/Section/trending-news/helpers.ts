@@ -1,4 +1,5 @@
-import type { AsyncState, NewsResult, RssArticle } from '@/types'
+import type { AsyncState, Market, NewsResult, NewsStats, RssArticle, SourceErrors } from '@/types'
+import { cacheKey } from './context/trendingNewsCtx'
 import { LABELS } from './labels'
 
 const SUMMARY_SOURCE_LIMIT = 3
@@ -66,4 +67,38 @@ export function pickLatestExpiry(
     }
   }
   return latest
+}
+
+export function pickActiveExpiry(
+  states: ReadonlyMap<string, AsyncState<NewsResult>>,
+  brandId: string,
+  market: Market,
+): string | null {
+  const state = states.get(cacheKey(brandId, market))
+  return state?.status === 'success' ? state.data.cacheExpiresAt : null
+}
+
+export function isAnyLoading(states: ReadonlyMap<string, AsyncState<NewsResult>>): boolean {
+  for (const state of states.values()) {
+    if (state.status === 'loading') {
+      return true
+    }
+  }
+  return false
+}
+
+export function hasAnyError(errors: SourceErrors): boolean {
+  return Object.values(errors).some((e) => Boolean(e))
+}
+
+export function mergeStats(all: readonly NewsStats[]): NewsStats {
+  return all.reduce<NewsStats>(
+    (acc, s) => ({
+      totalArticles: acc.totalArticles + s.totalArticles,
+      totalClusters: acc.totalClusters + s.totalClusters,
+      viralCount: acc.viralCount + s.viralCount,
+      hotCount: acc.hotCount + s.hotCount,
+    }),
+    { totalArticles: 0, totalClusters: 0, viralCount: 0, hotCount: 0 },
+  )
 }

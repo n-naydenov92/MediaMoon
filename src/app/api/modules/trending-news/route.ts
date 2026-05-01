@@ -1,40 +1,19 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import type { Market } from '@/types'
-import { findBrandTopic } from '@/Section/trending-news/config'
 import { getNewsForBrandMarket } from '@/lib/pipeline'
-
-const VALID_MARKETS: readonly Market[] = ['BG', 'ES', 'WORLD']
+import { isValidationError, validateBrandMarket } from '@/Section/trending-news/api/validators'
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const { searchParams } = new URL(request.url)
-  const brandId = searchParams.get('brandId')
-  const marketRaw = searchParams.get('market')
-
-  const topic = brandId ? findBrandTopic(brandId) : null
-  if (!topic) {
-    return NextResponse.json({ error: 'Unknown brand' }, { status: 400 })
-  }
-
-  const market = parseMarket(marketRaw)
-  if (!market) {
-    return NextResponse.json({ error: 'Invalid market' }, { status: 400 })
-  }
-  if (!topic.markets.includes(market)) {
-    return NextResponse.json({ error: 'Market not supported for this brand' }, { status: 400 })
+  const result = validateBrandMarket(searchParams.get('brandId'), searchParams.get('market'))
+  if (isValidationError(result)) {
+    return NextResponse.json({ error: result.error }, { status: result.status })
   }
 
   try {
-    const result = await getNewsForBrandMarket({ topic, market })
-    return NextResponse.json(result)
+    const data = await getNewsForBrandMarket({ topic: result.topic, market: result.market })
+    return NextResponse.json(data)
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error'
     return NextResponse.json({ error: message }, { status: 500 })
   }
-}
-
-function parseMarket(value: string | null): Market | null {
-  if (!value) {
-    return null
-  }
-  return VALID_MARKETS.find((m) => m === value) ?? null
 }

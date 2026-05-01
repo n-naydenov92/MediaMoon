@@ -8,7 +8,7 @@ import { resolveActiveBrand } from '@/lib/navigation'
 import { getFirstNavigableModule } from '@/config/modules'
 import BrandSwitcherTrigger from './BrandSwitcherTrigger'
 import BrandMenu from './BrandMenu'
-import { useDismissPopover } from './useDismissPopover'
+import { useDismissPopover } from '@/components/layout/hooks/useDismissPopover'
 import styles from './BrandSwitcher.module.css'
 
 interface Props {

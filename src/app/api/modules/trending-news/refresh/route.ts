@@ -1,10 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import type { Market } from '@/types'
 import { buildCacheKey, invalidate } from '@/lib/cache'
-import { findBrandTopic } from '@/Section/trending-news/config'
 import { getNewsForBrandMarket } from '@/lib/pipeline'
-
-const VALID_MARKETS: readonly Market[] = ['BG', 'ES', 'WORLD']
+import { isValidationError, validateBrandMarket } from '@/Section/trending-news/api/validators'
 
 interface RefreshBody {
   readonly brandId?: unknown
@@ -13,21 +10,18 @@ interface RefreshBody {
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const body = (await request.json().catch(() => ({}))) as RefreshBody
-  const brandId = typeof body.brandId === 'string' ? body.brandId : null
-  const marketRaw = typeof body.market === 'string' ? body.market : null
-
-  const topic = brandId ? findBrandTopic(brandId) : null
-  if (!topic) {
-    return NextResponse.json({ error: 'Invalid brand' }, { status: 400 })
-  }
-  const market = VALID_MARKETS.find((m) => m === marketRaw)
-  if (!market || !topic.markets.includes(market)) {
-    return NextResponse.json({ error: 'Invalid market' }, { status: 400 })
+  const result = validateBrandMarket(body.brandId, body.market)
+  if (isValidationError(result)) {
+    return NextResponse.json({ error: result.error }, { status: result.status })
   }
 
-  invalidate(buildCacheKey(topic.brandId, market))
+  invalidate(buildCacheKey(result.topic.brandId, result.market))
   try {
-    const fresh = await getNewsForBrandMarket({ topic, market, includeSearchApi: true })
+    const fresh = await getNewsForBrandMarket({
+      topic: result.topic,
+      market: result.market,
+      includeSearchApi: true,
+    })
     return NextResponse.json(fresh)
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error'

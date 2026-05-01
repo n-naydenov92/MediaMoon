@@ -9,14 +9,10 @@ import type { BrandTopicConfig } from '@/Section/trending-news/config'
  * The Provider and the hook live in sibling files (Context Triad pattern).
  */
 
-export type ActiveView = 'overview' | Market
-
 export interface TrendingNewsContextValue {
   readonly brandId: string
   readonly topic: BrandTopicConfig
-  readonly activeView: ActiveView
   readonly dataByKey: ReadonlyMap<string, AsyncState<NewsResult>>
-  readonly setActiveView: (view: ActiveView) => void
   readonly refresh: () => Promise<void>
   readonly refreshAll: () => Promise<void>
   readonly ensureLoaded: (market: Market) => void

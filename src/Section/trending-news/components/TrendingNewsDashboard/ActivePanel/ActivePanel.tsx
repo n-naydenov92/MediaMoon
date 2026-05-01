@@ -1,17 +1,17 @@
 'use client'
 
 import { memo } from 'react'
-import type { ActiveView } from '@/Section/trending-news/context/trendingNewsCtx'
+import { ALL_MARKETS, type MarketSelection } from '@/lib/markets'
 import OverviewDashboard from '../../OverviewDashboard/OverviewDashboard'
 import MarketPanel from '../../MarketPanel/MarketPanel'
 
 interface Props {
-  readonly activeView: ActiveView
+  readonly selectedMarket: MarketSelection
 }
 
-export default memo(function ActivePanel({ activeView }: Props): JSX.Element {
-  if (activeView === 'overview') {
+export default memo(function ActivePanel({ selectedMarket }: Props): JSX.Element {
+  if (selectedMarket === ALL_MARKETS) {
     return <OverviewDashboard />
   }
-  return <MarketPanel market={activeView} />
+  return <MarketPanel market={selectedMarket} />
 })

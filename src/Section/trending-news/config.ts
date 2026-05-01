@@ -2,14 +2,16 @@ import type { LanguageConfig, Market } from '@/types'
 
 /**
  * Per-brand trending-news topic configuration.
- * Each brand has exactly one topic with markets, queries, and language settings.
+ *
+ * Markets supported by each brand are declared in BRAND_REGISTRY (single
+ * source of truth). This config carries only the per-market query strings
+ * and language settings used by the pipeline.
  *
  * Adding a new brand topic: add one entry here. Nothing else is touched. (OCP)
  */
 export interface BrandTopicConfig {
   readonly brandId: string
-  readonly markets: readonly Market[]
-  readonly queries: Readonly<Record<Market, string>>
+  readonly queries: Readonly<Partial<Record<Market, string>>>
   readonly language: Readonly<Record<Market, LanguageConfig>>
   /** SearchAPI.io Google News query per market. Searches full Google News index by keyword. */
   readonly searchApiQuery?: Readonly<Partial<Record<Market, string>>>
@@ -24,7 +26,6 @@ const LANGUAGE_DEFAULTS: Readonly<Record<Market, LanguageConfig>> = {
 export const BRAND_TOPICS: readonly BrandTopicConfig[] = [
   {
     brandId: 'stoitchkov',
-    markets: ['BG', 'ES', 'WORLD'],
     queries: {
       BG: 'Христо Стоичков',
       ES: 'Hristo Stoitchkov OR Hristo Stoichkov OR Stoitchkov OR Stoichkov',
@@ -39,11 +40,8 @@ export const BRAND_TOPICS: readonly BrandTopicConfig[] = [
   },
   {
     brandId: 'sapphire',
-    markets: ['BG'],
     queries: {
       BG: 'Неделя Щонова OR "Д-р Неделя Щонова" OR Nedelia Shtonova OR "д-р Щонова"',
-      ES: '',
-      WORLD: '',
     },
     language: LANGUAGE_DEFAULTS,
     searchApiQuery: {
@@ -52,11 +50,8 @@ export const BRAND_TOPICS: readonly BrandTopicConfig[] = [
   },
   {
     brandId: 'thegreenbear',
-    markets: ['BG'],
     queries: {
       BG: 'thegreenbear OR "the green bear"',
-      ES: '',
-      WORLD: '',
     },
     language: LANGUAGE_DEFAULTS,
     searchApiQuery: {

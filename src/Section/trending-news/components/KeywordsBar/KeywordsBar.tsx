@@ -8,22 +8,24 @@ import Stack from '@mui/material/Stack'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import InfoOutlined from '@mui/icons-material/InfoOutlined'
+import { ALL_MARKETS } from '@/lib/markets'
+import { useBrandShellContext } from '@/contexts/brandShell/useBrandShellContext'
 import { useTrendingNewsContext } from '@/Section/trending-news/context/useTrendingNewsContext'
 import { LABELS } from '@/Section/trending-news/labels'
 import { parseQuery } from '@/Section/trending-news/helpers'
+import { POPOVER_ANCHOR, POPOVER_TRANSFORM } from '../popoverConfig'
 import styles from './KeywordsBar.module.css'
 
-const POPOVER_ANCHOR = { vertical: 'bottom', horizontal: 'right' } as const
-const POPOVER_TRANSFORM = { vertical: 'top', horizontal: 'right' } as const
 const POPOVER_SLOT_PROPS = { paper: { className: styles.popoverPaper } } as const
 
 export default memo(function KeywordsPopover(): JSX.Element | null {
-  const { topic, activeView } = useTrendingNewsContext()
+  const { topic } = useTrendingNewsContext()
+  const { selectedMarket } = useBrandShellContext()
   const anchorRef = useRef<HTMLButtonElement>(null)
   const [open, setOpen] = useState(false)
 
-  const market = activeView === 'overview' ? null : activeView
-  const rawQuery = market ? topic.queries[market] : ''
+  const market = selectedMarket === ALL_MARKETS ? null : selectedMarket
+  const rawQuery = market ? (topic.queries[market] ?? '') : ''
   const terms = useMemo(() => parseQuery(rawQuery), [rawQuery])
 
   const handleOpen = useCallback((): void => setOpen(true), [])

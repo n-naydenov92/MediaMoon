@@ -7,6 +7,10 @@
   min-height: 56px !important;
   padding-left: 16px;
   padding-right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
 }
 
 @media (min-width: 900px) {
@@ -16,27 +20,26 @@
   }
 }
 
+.leftSlot {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
 .titleRow {
-  flex: 1;
+  min-width: 0;
+}
+
+.rightSlot {
+  display: flex;
+  align-items: center;
+  min-width: 0;
 }
 
 .title {
-  font-size: 18px;
-}
-
-.dot {
-  color: #8A8A98;
-}
-
-.subtitle {
-  color: #4A4A58;
-}
-
-@media (prefers-color-scheme: dark) {
-  .dot {
-    color: #5A5A6A;
-  }
-  .subtitle {
-    color: #9A9AA8;
-  }
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ms-text-primary, inherit);
+  letter-spacing: 0;
 }

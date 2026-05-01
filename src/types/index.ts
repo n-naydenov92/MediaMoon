@@ -45,6 +45,7 @@ export interface BrandConfig {
   readonly emoji: string        // '💪'
   readonly color: string        // '#FF6B35'
   readonly description: string
+  readonly markets: readonly Market[]
 }
 
 // ─── Async State (discriminated union) ───────────────────────────────────────
