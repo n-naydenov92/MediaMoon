@@ -6,7 +6,6 @@ import type { BrandConfig, ModuleConfig } from '@/types'
 import { LABELS } from '@/components/layout/labels'
 import { resolveActiveBrand } from '@/lib/navigation'
 import { getFirstNavigableModule } from '@/config/modules'
-import SidebarTooltip from '@/components/layout/ui/SidebarTooltip'
 import BrandSwitcherTrigger from './BrandSwitcherTrigger'
 import BrandMenu from './BrandMenu'
 import { useDismissPopover } from './useDismissPopover'
@@ -61,16 +60,14 @@ export default memo(function BrandSwitcher({
 
   return (
     <div className={styles.root} ref={rootRef}>
-      <SidebarTooltip label={triggerLabel} enabled={isCollapsed}>
-        <BrandSwitcherTrigger
-          activeBrand={activeBrand}
-          triggerLabel={triggerLabel}
-          menuId={menuId}
-          isCollapsed={isCollapsed}
-          isOpen={isOpen}
-          onToggle={toggleOpen}
-        />
-      </SidebarTooltip>
+      <BrandSwitcherTrigger
+        activeBrand={activeBrand}
+        triggerLabel={triggerLabel}
+        menuId={menuId}
+        isCollapsed={isCollapsed}
+        isOpen={isOpen}
+        onToggle={toggleOpen}
+      />
 
       {isOpen && (
         <BrandMenu

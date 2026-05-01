@@ -5,6 +5,7 @@ import CheckIcon from '@mui/icons-material/Check'
 import type { BrandConfig } from '@/types'
 import { LABELS } from '@/components/layout/labels'
 import { cssVars } from '@/lib/css'
+import SidebarTooltip from '@/components/layout/ui/SidebarTooltip'
 import styles from './BrandSwitcher.module.css'
 
 const OVERVIEW_GLYPH = '◎'
@@ -26,21 +27,23 @@ const BrandMenuItem = memo(function BrandMenuItem({
 
   return (
     <li>
-      <button
-        type="button"
-        role="option"
-        aria-selected={isSelected}
-        className={styles.option}
-        onClick={onSelect}
-      >
-        <span className={styles.optionGlyph} aria-hidden="true" style={glyphStyle}>
-          {glyph}
-        </span>
-        <span className={styles.optionLabel}>{label}</span>
-        {isSelected && (
-          <CheckIcon className={styles.optionCheck} fontSize="small" />
-        )}
-      </button>
+      <SidebarTooltip label={label} enabled>
+        <button
+          type="button"
+          role="option"
+          aria-selected={isSelected}
+          className={styles.option}
+          onClick={onSelect}
+        >
+          <span className={styles.optionGlyph} aria-hidden="true" style={glyphStyle}>
+            {glyph}
+          </span>
+          <span className={styles.optionLabel}>{label}</span>
+          {isSelected && (
+            <CheckIcon className={styles.optionCheck} fontSize="small" />
+          )}
+        </button>
+      </SidebarTooltip>
     </li>
   )
 })
