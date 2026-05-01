@@ -5,16 +5,24 @@ import type { SvgIconProps } from '@mui/material'
 import TrendingUpIcon from '@mui/icons-material/TrendingUp'
 import LocalShippingIcon from '@mui/icons-material/LocalShipping'
 import DashboardIcon from '@mui/icons-material/Dashboard'
+import CampaignIcon from '@mui/icons-material/Campaign'
+import FacebookIcon from '@mui/icons-material/Facebook'
+import GoogleIcon from '@mui/icons-material/Google'
+import MusicNoteIcon from '@mui/icons-material/MusicNote'
+import { cssVars } from '@/lib/css'
+import styles from './ModuleIcon.module.css'
 
-/**
- * Icon name resolver for MODULE_REGISTRY.icon string.
- * Adding a new icon: register here, use the string name in modules.ts.
- */
-const ICON_MAP: Record<string, React.ComponentType<SvgIconProps>> = {
+const ICON_MAP = {
   TrendingUp: TrendingUpIcon,
   LocalShipping: LocalShippingIcon,
   Dashboard: DashboardIcon,
-}
+  Campaign: CampaignIcon,
+  Facebook: FacebookIcon,
+  Google: GoogleIcon,
+  MusicNote: MusicNoteIcon,
+} as const satisfies Record<string, React.ComponentType<SvgIconProps>>
+
+const DEFAULT_ICON_SIZE_PX = 20
 
 interface Props {
   readonly name: string
@@ -22,7 +30,21 @@ interface Props {
   readonly color?: string
 }
 
-export default memo(function ModuleIcon({ name, size = 20, color }: Props): JSX.Element {
-  const Icon = ICON_MAP[name] ?? DashboardIcon
-  return <Icon sx={{ fontSize: size, color }} />
+export default memo(function ModuleIcon({
+  name,
+  size = DEFAULT_ICON_SIZE_PX,
+  color,
+}: Props): JSX.Element {
+  const Icon = (ICON_MAP as Record<string, React.ComponentType<SvgIconProps>>)[name] ?? DashboardIcon
+
+  const vars: Record<`--${string}`, string> = { '--icon-size': `${size}px` }
+  if (color) {
+    vars['--icon-color'] = color
+  }
+
+  return (
+    <span className={styles.root} style={cssVars(vars)} aria-hidden="true">
+      <Icon className={styles.icon} />
+    </span>
+  )
 })

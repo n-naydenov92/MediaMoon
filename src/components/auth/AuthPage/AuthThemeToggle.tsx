@@ -1,6 +1,6 @@
 'use client'
 
-import { useThemeMode } from '@/styles/ThemeModeProvider'
+import { useThemeMode } from '@/styles/useThemeMode'
 import { LABELS } from '@/components/layout/labels'
 import { MoonIcon, SunIcon } from './icons'
 import styles from './AuthThemeToggle.module.css'

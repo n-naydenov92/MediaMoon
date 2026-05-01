@@ -1,0 +1,20 @@
+.root {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--sb-text-secondary);
+  cursor: pointer;
+  transition: background-color 80ms ease-out, color 80ms ease-out;
+}
+
+.root:hover {
+  background-color: var(--sb-bg-elevated);
+  color: var(--sb-text-primary);
+}

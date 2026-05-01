@@ -33,6 +33,8 @@ export interface ModuleConfig {
   readonly path: string
   readonly roles: readonly UserRole[]
   readonly color: string
+  readonly children?: readonly ModuleConfig[]
+  readonly global?: boolean
 }
 
 // ─── Brand Registry ──────────────────────────────────────────────────────────

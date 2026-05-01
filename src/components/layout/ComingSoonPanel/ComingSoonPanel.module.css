@@ -1,0 +1,45 @@
+.root {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 64px);
+  padding: 48px 24px;
+  color: inherit;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 480px;
+  width: 100%;
+  padding: 32px;
+  border: 1px solid currentColor;
+  border-radius: 12px;
+  opacity: 1;
+}
+
+.eyebrow {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.6;
+}
+
+.heading {
+  margin: 0;
+  font-family: var(--font-syne), system-ui, sans-serif;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.body {
+  margin: 0;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.55;
+  opacity: 0.72;
+}

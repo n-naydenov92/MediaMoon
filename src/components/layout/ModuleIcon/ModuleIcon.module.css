@@ -1,0 +1,16 @@
+.root {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+  width: var(--icon-size);
+  height: var(--icon-size);
+  color: var(--icon-color, currentColor);
+}
+
+.icon.icon {
+  width: var(--icon-size);
+  height: var(--icon-size);
+  font-size: var(--icon-size);
+  color: inherit;
+}

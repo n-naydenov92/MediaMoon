@@ -1,6 +1,6 @@
 'use client'
 
-import { useThemeMode } from '@/styles/ThemeModeProvider'
+import { useThemeMode } from '@/styles/useThemeMode'
 import AuthBrandPanel from './AuthBrandPanel'
 import AuthForm from './AuthForm'
 import AuthThemeToggle from './AuthThemeToggle'
