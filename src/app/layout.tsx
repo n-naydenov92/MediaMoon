@@ -6,6 +6,7 @@ import { ThemeModeProvider } from '@/styles/ThemeModeProvider'
 import AppShell from '@/components/layout/AppShell/AppShell'
 import { getCurrentUserRole } from '@/lib/currentUserRole'
 import { getModulesForRole } from '@/config/modules'
+import { BRAND_REGISTRY } from '@/config/brands'
 import '@/styles/globals.css'
 
 const syne = Syne({
@@ -38,7 +39,7 @@ export default async function RootLayout({ children }: Props): Promise<JSX.Eleme
       <html lang="en" className={`${syne.variable} ${dmSans.variable}`}>
         <body>
           <ThemeModeProvider>
-            <AppShell modules={modules}>{children}</AppShell>
+            <AppShell modules={modules} brands={BRAND_REGISTRY}>{children}</AppShell>
           </ThemeModeProvider>
         </body>
       </html>

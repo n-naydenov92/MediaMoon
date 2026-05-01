@@ -4,21 +4,22 @@ import { memo } from 'react'
 import type { ReactNode } from 'react'
 import Box from '@mui/material/Box'
 import Sidebar from '@/components/layout/Sidebar/Sidebar'
-import type { ModuleConfig } from '@/types'
+import type { BrandConfig, ModuleConfig } from '@/types'
 import styles from './AppShell.module.css'
 
 interface Props {
   readonly modules: readonly ModuleConfig[]
+  readonly brands: readonly BrandConfig[]
   readonly children: ReactNode
 }
 
 /**
  * Root application shell composing the persistent sidebar and main content area.
  */
-export default memo(function AppShell({ modules, children }: Props): JSX.Element {
+export default memo(function AppShell({ modules, brands, children }: Props): JSX.Element {
   return (
     <Box className={styles.shell}>
-      <Sidebar modules={modules} />
+      <Sidebar modules={modules} brands={brands} />
       <Box component="main" className={styles.main}>
         {children}
       </Box>

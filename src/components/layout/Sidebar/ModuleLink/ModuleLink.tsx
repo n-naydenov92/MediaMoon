@@ -11,15 +11,17 @@ import styles from './ModuleLink.module.css'
 interface Props {
   readonly module: ModuleConfig
   readonly active: boolean
+  readonly hrefOverride?: string
 }
 
 /**
  * Single sidebar navigation link for one registered module.
  * Renders with active state highlighting and a left accent border.
  */
-export default memo(function ModuleLink({ module: mod, active }: Props): JSX.Element {
+export default memo(function ModuleLink({ module: mod, active, hrefOverride }: Props): JSX.Element {
+  const href = hrefOverride ?? mod.path
   return (
-    <Link href={mod.path} className={styles.link} aria-current={active ? 'page' : undefined}>
+    <Link href={href} className={styles.link} aria-current={active ? 'page' : undefined}>
       <Stack
         direction="row"
         alignItems="center"
