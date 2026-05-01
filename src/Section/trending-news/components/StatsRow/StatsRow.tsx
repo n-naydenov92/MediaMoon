@@ -1,29 +1,30 @@
 'use client'
 
-import { memo } from 'react'
-import Box from '@mui/material/Box'
+import { memo, type ComponentType } from 'react'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
+import type { SvgIconProps } from '@mui/material/SvgIcon'
 import ArticleOutlined from '@mui/icons-material/ArticleOutlined'
 import LayersOutlined from '@mui/icons-material/LayersOutlined'
 import WhatshotOutlined from '@mui/icons-material/WhatshotOutlined'
 import LocalFireDepartmentOutlined from '@mui/icons-material/LocalFireDepartmentOutlined'
 import type { NewsStats } from '@/types'
 import { LABELS } from '@/Section/trending-news/labels'
+import styles from './StatsRow.module.css'
 
 interface Props {
   readonly stats: NewsStats
 }
 
-const VIRAL_COLOR = '#F59E0B'
-const HOT_COLOR = '#F97316'
-
 interface Item {
   readonly key: keyof NewsStats
   readonly label: string
-  readonly Icon: React.ComponentType<{ sx?: object; fontSize?: 'small' | 'inherit' | 'large' | 'medium' }>
+  readonly Icon: ComponentType<SvgIconProps>
   readonly accent?: string
 }
+
+const VIRAL_COLOR = '#F59E0B'
+const HOT_COLOR = '#F97316'
 
 const ITEMS: readonly Item[] = [
   { key: 'totalArticles', label: LABELS.statsRow.articles, Icon: ArticleOutlined },
@@ -39,43 +40,28 @@ export default memo(function StatsRow({ stats }: Props): JSX.Element {
       spacing={6}
       flexWrap="wrap"
       useFlexGap
-      sx={{
-        py: 2,
-        px: 3,
-        borderBottom: 1,
-        borderColor: 'divider',
-      }}
+      className={styles.row}
     >
       {ITEMS.map(({ key, label, Icon, accent }) => (
         <Stack
           key={key}
           direction="row"
-          spacing={1.5}
+          spacing={2}
           alignItems="center"
-          sx={{ minHeight: 32 }}
+          className={styles.item}
         >
-          <Icon fontSize="small" sx={{ color: accent ?? 'text.secondary' }} />
-          <Box
-            component="span"
-            sx={{
-              fontFamily: 'var(--font-syne), sans-serif',
-              fontSize: 18,
-              fontWeight: 700,
-              color: accent ?? 'text.primary',
-              fontVariantNumeric: 'tabular-nums',
-              lineHeight: 1,
-            }}
+          <Icon
+            fontSize="small"
+            className={styles.icon}
+            style={accent ? { color: accent } : undefined}
+          />
+          <span
+            className={styles.value}
+            style={accent ? { color: accent } : undefined}
           >
             {stats[key]}
-          </Box>
-          <Typography
-            variant="caption"
-            sx={{
-              color: 'text.secondary',
-              textTransform: 'uppercase',
-              letterSpacing: '0.06em',
-            }}
-          >
+          </span>
+          <Typography variant="caption" className={styles.label}>
             {label}
           </Typography>
         </Stack>

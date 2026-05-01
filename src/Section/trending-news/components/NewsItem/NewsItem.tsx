@@ -21,51 +21,16 @@ export default memo(function NewsItem({ article }: Props): JSX.Element {
       rel="noopener noreferrer"
       className={styles.link}
     >
-      <Stack
-        direction="row"
-        spacing={2}
-        alignItems="flex-start"
-        sx={(theme) => ({
-          py: 2,
-          px: 2,
-          borderRadius: 1,
-          borderBottom: `1px solid ${theme.palette.divider}`,
-          '&:last-child': { borderBottom: 'none' },
-          transition: 'background-color 80ms ease-out',
-          '&:hover': {
-            backgroundColor: theme.palette.action.hover,
-            '& .news-item-title': { color: theme.palette.primary.main },
-          },
-        })}
-      >
-        <ArticleOutlined
-          fontSize="small"
-          sx={{ color: 'text.secondary', flexShrink: 0, mt: 0.5 }}
-        />
-        <Stack spacing={0.5} sx={{ flex: 1, minWidth: 0 }}>
-          <Typography
-            variant="body2"
-            className="news-item-title"
-            sx={{
-              color: 'text.primary',
-              fontWeight: 500,
-              transition: 'color 80ms ease-out',
-            }}
-          >
+      <Stack direction="row" spacing={2} alignItems="flex-start" className={styles.row}>
+        <ArticleOutlined fontSize="small" className={styles.icon} />
+        <Stack spacing={1} className={styles.body}>
+          <Typography variant="body2" className={`${styles.title} news-item-title`}>
             {article.title}
           </Typography>
-          <Stack
-            direction="row"
-            spacing={1}
-            alignItems="center"
-            sx={{ color: 'text.secondary' }}
-          >
+          <Stack direction="row" spacing={1} alignItems="center" className={styles.meta}>
             <Typography variant="caption">{article.source}</Typography>
             <Typography variant="caption">·</Typography>
-            <Typography
-              variant="caption"
-              sx={{ fontVariantNumeric: 'tabular-nums' }}
-            >
+            <Typography variant="caption" className={styles.metaTime}>
               {formatRelative(article.pubDate)}
             </Typography>
           </Stack>

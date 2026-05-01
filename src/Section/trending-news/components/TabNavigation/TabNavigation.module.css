@@ -6,6 +6,10 @@
   border-bottom: none;
 }
 
+.tabs :global(.MuiTabs-indicator) {
+  height: 3px;
+}
+
 @media (prefers-color-scheme: dark) {
   .wrapper {
     border-bottom-color: #22222E;

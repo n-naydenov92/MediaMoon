@@ -3,9 +3,6 @@ import { LABELS } from './labels'
 
 const SUMMARY_SOURCE_LIMIT = 3
 
-/**
- * Formats a UTC ISO date string as a human-readable relative time label.
- */
 export function formatRelative(iso: string): string {
   const diffMs = Date.now() - new Date(iso).getTime()
   const diffMinutes = Math.floor(diffMs / 60_000)
@@ -44,6 +41,16 @@ export function pickLatestPubDate(articles: readonly RssArticle[]): string | nul
   return articles
     .map((a) => a.pubDate)
     .reduce((latest, current) => (current > latest ? current : latest))
+}
+
+export function parseQuery(query: string): readonly string[] {
+  if (!query.trim()) {
+    return []
+  }
+  return query
+    .split(' OR ')
+    .map((part) => part.trim().replace(/^"(.*)"$/, '$1').trim())
+    .filter((part) => part.length > 0)
 }
 
 export function pickLatestExpiry(

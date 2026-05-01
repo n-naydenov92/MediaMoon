@@ -1,0 +1,40 @@
+.header {
+  cursor: pointer;
+  user-select: none;
+}
+
+.titleColumn {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  transition: color 200ms ease-out;
+}
+
+.header:hover .title {
+  color: #6C63FF;
+}
+
+.subline {
+  color: #4A4A58;
+  font-variant-numeric: tabular-nums;
+}
+
+.actions {
+  flex-shrink: 0;
+}
+
+.chevron {
+  transition: transform 200ms ease-out;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+@media (prefers-color-scheme: dark) {
+  .subline {
+    color: #9A9AA8;
+  }
+}

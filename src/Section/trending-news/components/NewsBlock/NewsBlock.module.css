@@ -1,0 +1,11 @@
+.block {
+  border-left-width: 3px;
+  border-left-style: solid;
+  padding-left: 16px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.list {
+  margin-top: 12px;
+}

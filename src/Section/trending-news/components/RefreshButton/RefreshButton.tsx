@@ -13,25 +13,28 @@ import { useTrendingNewsContext } from '@/Section/trending-news/context/useTrend
 import { cacheKey } from '@/Section/trending-news/context/trendingNewsCtx'
 import { LABELS } from '@/Section/trending-news/labels'
 import { pickLatestExpiry } from '@/Section/trending-news/helpers'
+import styles from './RefreshButton.module.css'
 
 const COUNTDOWN_TICK_MS = 30_000
-const SPIN_DURATION_MS = 800
 
 export default memo(function RefreshButton(): JSX.Element {
   const { brandId, activeView, dataByKey, refresh, refreshAll } = useTrendingNewsContext()
-  const isOverview = activeView === 'overview'
 
+  const isOverview = activeView === 'overview'
   const expiry = isOverview
     ? pickLatestExpiry(dataByKey)
     : pickActiveExpiry(dataByKey, brandId, activeView)
-
   const isRefreshing = isOverview
-    ? [...dataByKey.values()].some((s) => s.status === 'loading')
+    ? isAnyLoading(dataByKey)
     : dataByKey.get(cacheKey(brandId, activeView))?.status === 'loading'
 
   const [countdown, setCountdown] = useState<string>(() =>
     expiry ? formatRemaining(expiry) : '',
   )
+
+  const handleClick = useCallback((): void => {
+    void (isOverview ? refreshAll() : refresh())
+  }, [isOverview, refresh, refreshAll])
 
   useEffect(() => {
     if (!expiry) {
@@ -42,12 +45,10 @@ export default memo(function RefreshButton(): JSX.Element {
     const timer = setInterval(() => {
       setCountdown(formatRemaining(expiry))
     }, COUNTDOWN_TICK_MS)
-    return () => clearInterval(timer)
+    return () => {
+      clearInterval(timer)
+    }
   }, [expiry])
-
-  const handleClick = useCallback((): void => {
-    void (isOverview ? refreshAll() : refresh())
-  }, [isOverview, refresh, refreshAll])
 
   return (
     <Tooltip title={renderTooltip(countdown)} placement="bottom" arrow>
@@ -60,12 +61,7 @@ export default memo(function RefreshButton(): JSX.Element {
         >
           <RefreshOutlined
             fontSize="small"
-            sx={{
-              animation: isRefreshing
-                ? `tn-spin ${SPIN_DURATION_MS}ms linear infinite`
-                : 'none',
-              '@keyframes tn-spin': { to: { transform: 'rotate(360deg)' } },
-            }}
+            className={isRefreshing ? styles.spinning : styles.icon}
           />
         </IconButton>
       </span>
@@ -82,14 +78,23 @@ function pickActiveExpiry(
   return state?.status === 'success' ? state.data.cacheExpiresAt : null
 }
 
+function isAnyLoading(states: ReadonlyMap<string, AsyncState<NewsResult>>): boolean {
+  for (const state of states.values()) {
+    if (state.status === 'loading') {
+      return true
+    }
+  }
+  return false
+}
+
 function renderTooltip(countdown: string): React.ReactNode {
   return (
-    <Stack spacing={0.5} sx={{ py: 0.5 }}>
-      <Typography variant="caption" sx={{ fontWeight: 600 }}>
+    <Stack spacing={1} className={styles.tooltipBody}>
+      <Typography variant="caption" className={styles.tooltipAction}>
         {LABELS.refreshButton.action}
       </Typography>
       {countdown && (
-        <Typography variant="caption" sx={{ opacity: 0.7 }}>
+        <Typography variant="caption" className={styles.tooltipInfo}>
           {APP_LABELS.topbar.refreshesIn} {countdown}
         </Typography>
       )}

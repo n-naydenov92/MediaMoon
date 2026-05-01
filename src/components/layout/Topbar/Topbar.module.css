@@ -2,3 +2,41 @@
   height: 56px;
   justify-content: center;
 }
+
+.toolbar {
+  min-height: 56px !important;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+@media (min-width: 900px) {
+  .toolbar {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
+
+.titleRow {
+  flex: 1;
+}
+
+.title {
+  font-size: 18px;
+}
+
+.dot {
+  color: #8A8A98;
+}
+
+.subtitle {
+  color: #4A4A58;
+}
+
+@media (prefers-color-scheme: dark) {
+  .dot {
+    color: #5A5A6A;
+  }
+  .subtitle {
+    color: #9A9AA8;
+  }
+}

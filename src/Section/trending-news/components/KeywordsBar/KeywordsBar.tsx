@@ -1,7 +1,6 @@
 'use client'
 
-import { memo, useMemo, useRef, useState } from 'react'
-import Box from '@mui/material/Box'
+import { memo, useCallback, useMemo, useRef, useState } from 'react'
 import Chip from '@mui/material/Chip'
 import IconButton from '@mui/material/IconButton'
 import Popover from '@mui/material/Popover'
@@ -11,6 +10,12 @@ import Typography from '@mui/material/Typography'
 import InfoOutlined from '@mui/icons-material/InfoOutlined'
 import { useTrendingNewsContext } from '@/Section/trending-news/context/useTrendingNewsContext'
 import { LABELS } from '@/Section/trending-news/labels'
+import { parseQuery } from '@/Section/trending-news/helpers'
+import styles from './KeywordsBar.module.css'
+
+const POPOVER_ANCHOR = { vertical: 'bottom', horizontal: 'right' } as const
+const POPOVER_TRANSFORM = { vertical: 'top', horizontal: 'right' } as const
+const POPOVER_SLOT_PROPS = { paper: { className: styles.popoverPaper } } as const
 
 export default memo(function KeywordsPopover(): JSX.Element | null {
   const { topic, activeView } = useTrendingNewsContext()
@@ -21,12 +26,12 @@ export default memo(function KeywordsPopover(): JSX.Element | null {
   const rawQuery = market ? topic.queries[market] : ''
   const terms = useMemo(() => parseQuery(rawQuery), [rawQuery])
 
+  const handleOpen = useCallback((): void => setOpen(true), [])
+  const handleClose = useCallback((): void => setOpen(false), [])
+
   if (!market || terms.length === 0) {
     return null
   }
-
-  const handleOpen = (): void => setOpen(true)
-  const handleClose = (): void => setOpen(false)
 
   return (
     <>
@@ -44,31 +49,21 @@ export default memo(function KeywordsPopover(): JSX.Element | null {
         open={open}
         anchorEl={anchorRef.current}
         onClose={handleClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        slotProps={{ paper: { sx: { p: 3, maxWidth: 360 } } }}
+        anchorOrigin={POPOVER_ANCHOR}
+        transformOrigin={POPOVER_TRANSFORM}
+        slotProps={POPOVER_SLOT_PROPS}
       >
         <Stack spacing={2}>
-          <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+          <Typography variant="caption" className={styles.title}>
             {LABELS.keywordsPopover.title}
           </Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+          <div className={styles.chips}>
             {terms.map((term) => (
               <Chip key={term} label={term} size="small" variant="outlined" />
             ))}
-          </Box>
+          </div>
         </Stack>
       </Popover>
     </>
   )
 })
-
-function parseQuery(query: string): readonly string[] {
-  if (!query.trim()) {
-    return []
-  }
-  return query
-    .split(' OR ')
-    .map((part) => part.trim().replace(/^"(.*)"$/, '$1').trim())
-    .filter((part) => part.length > 0)
-}

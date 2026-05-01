@@ -10,6 +10,7 @@ import {
   formatRelative,
   pickLatestPubDate,
 } from '@/Section/trending-news/helpers'
+import styles from './HighlightItem.module.css'
 
 interface Props {
   readonly cluster: NewsCluster
@@ -22,32 +23,15 @@ const HEAT_LINE_COLOR: Record<HeatLevel, string> = {
 }
 
 export default memo(function HighlightItem({ cluster }: Props): JSX.Element {
-  const latestDate = pickLatestPubDate(cluster.articles)
-  const metaParts = [
-    cluster.market,
-    `${cluster.coverage} ${LABELS.newsBlock.sources}`,
-  ]
-  if (latestDate) {
-    metaParts.push(formatRelative(latestDate))
-  }
+  const meta = buildMeta(cluster)
 
   return (
     <Stack
       spacing={1}
-      sx={(theme) => ({
-        borderLeft: 3,
-        borderLeftColor: HEAT_LINE_COLOR[cluster.heat],
-        pl: 2.5,
-        py: 1.5,
-        borderRadius: 1,
-        transition: 'background-color 80ms ease-out',
-        '&:hover': { backgroundColor: theme.palette.action.hover },
-      })}
+      className={styles.item}
+      style={{ borderLeftColor: HEAT_LINE_COLOR[cluster.heat] }}
     >
-      <Typography
-        variant="body2"
-        sx={{ color: 'text.primary', fontWeight: 500 }}
-      >
+      <Typography variant="body2" className={styles.title}>
         {cluster.representativeTitle}
       </Typography>
       <Stack
@@ -56,17 +40,23 @@ export default memo(function HighlightItem({ cluster }: Props): JSX.Element {
         justifyContent="space-between"
         spacing={2}
       >
-        <Typography
-          variant="caption"
-          sx={{
-            color: 'text.secondary',
-            fontVariantNumeric: 'tabular-nums',
-          }}
-        >
-          {metaParts.join(' · ')}
+        <Typography variant="caption" className={styles.meta}>
+          {meta}
         </Typography>
         <HeatBadge heat={cluster.heat} />
       </Stack>
     </Stack>
   )
 })
+
+function buildMeta(cluster: NewsCluster): string {
+  const parts: string[] = [
+    cluster.market,
+    `${cluster.coverage} ${LABELS.newsBlock.sources}`,
+  ]
+  const latestDate = pickLatestPubDate(cluster.articles)
+  if (latestDate) {
+    parts.push(formatRelative(latestDate))
+  }
+  return parts.join(' · ')
+}

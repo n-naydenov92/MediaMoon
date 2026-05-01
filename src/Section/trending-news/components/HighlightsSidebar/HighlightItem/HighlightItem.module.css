@@ -1,0 +1,35 @@
+.item {
+  border-left-width: 3px;
+  border-left-style: solid;
+  padding-left: 12px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  border-radius: 4px;
+  transition: background-color 80ms ease-out;
+}
+
+.item:hover {
+  background-color: rgba(108, 99, 255, 0.04);
+}
+
+.title {
+  color: #0A0A0F;
+  font-weight: 500;
+}
+
+.meta {
+  color: #4A4A58;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-color-scheme: dark) {
+  .item:hover {
+    background-color: rgba(108, 99, 255, 0.08);
+  }
+  .title {
+    color: #F5F5F7;
+  }
+  .meta {
+    color: #9A9AA8;
+  }
+}

@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, type SyntheticEvent } from 'react'
+import { memo, useCallback, type SyntheticEvent } from 'react'
 import Stack from '@mui/material/Stack'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
@@ -13,18 +13,19 @@ import SourceStatsPopover from '../SourceStatsPopover/SourceStatsPopover'
 import RefreshButton from '../RefreshButton/RefreshButton'
 import styles from './TabNavigation.module.css'
 
-/**
- * Horizontal tab strip for switching between Overview and the brand's market tabs.
- * The active indicator uses the brand color.
- */
+const DEFAULT_ACCENT = '#6C63FF'
+
 export default memo(function TabNavigation(): JSX.Element {
   const { brandId, topic, activeView, setActiveView } = useTrendingNewsContext()
   const brand = findBrandById(brandId)
-  const accent = brand?.color ?? 'primary.main'
+  const accent = brand?.color ?? DEFAULT_ACCENT
 
-  const handleChange = (_event: SyntheticEvent, value: ActiveView): void => {
-    setActiveView(value)
-  }
+  const handleChange = useCallback(
+    (_event: SyntheticEvent, value: ActiveView): void => {
+      setActiveView(value)
+    },
+    [setActiveView],
+  )
 
   return (
     <Stack
@@ -37,14 +38,22 @@ export default memo(function TabNavigation(): JSX.Element {
         value={activeView}
         onChange={handleChange}
         aria-label={LABELS.aria.tabs}
-        sx={{
-          '& .MuiTabs-indicator': { backgroundColor: accent, height: 3 },
-          '& .MuiTab-root.Mui-selected': { color: accent },
-        }}
+        className={styles.tabs}
+        TabIndicatorProps={{ style: { backgroundColor: accent } }}
+        textColor="inherit"
       >
-        <Tab value="overview" label={LABELS.tabs.overview} />
+        <Tab
+          value="overview"
+          label={LABELS.tabs.overview}
+          style={activeView === 'overview' ? { color: accent } : undefined}
+        />
         {topic.markets.map((market) => (
-          <Tab key={market} value={market} label={LABELS.markets[market]} />
+          <Tab
+            key={market}
+            value={market}
+            label={LABELS.markets[market]}
+            style={activeView === market ? { color: accent } : undefined}
+          />
         ))}
       </Tabs>
       <Stack direction="row" spacing={1} alignItems="center">

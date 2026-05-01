@@ -14,10 +14,6 @@ import HighlightsSidebar from '../HighlightsSidebar/HighlightsSidebar'
 import LoadingOverview from './LoadingOverview/LoadingOverview'
 import styles from './OverviewDashboard.module.css'
 
-/**
- * Aggregates cached results across every market of the active brand's topic.
- * Triggers background fetches for any market not yet in cache.
- */
 export default memo(function OverviewDashboard(): JSX.Element {
   const { brandId, topic, dataByKey, ensureLoaded } = useTrendingNewsContext()
 
@@ -64,8 +60,6 @@ export default memo(function OverviewDashboard(): JSX.Element {
     </Stack>
   )
 })
-
-// ─── Helpers ────────────────────────────────────────────────────────────────
 
 function isSuccess(
   state: AsyncState<NewsResult> | undefined,

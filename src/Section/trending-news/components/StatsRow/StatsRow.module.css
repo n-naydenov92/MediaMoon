@@ -1,0 +1,40 @@
+.row {
+  padding: 8px 12px;
+  border-bottom: 1px solid #E4E4EA;
+}
+
+.item {
+  min-height: 32px;
+}
+
+.icon {
+  color: #4A4A58;
+}
+
+.value {
+  font-family: var(--font-syne), "Syne", sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #0A0A0F;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.label {
+  color: #4A4A58;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+@media (prefers-color-scheme: dark) {
+  .row {
+    border-bottom-color: #22222E;
+  }
+  .icon,
+  .label {
+    color: #9A9AA8;
+  }
+  .value {
+    color: #F5F5F7;
+  }
+}

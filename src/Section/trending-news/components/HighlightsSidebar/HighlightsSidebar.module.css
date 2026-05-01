@@ -1,0 +1,18 @@
+.sidebar {
+  position: sticky;
+  top: 80px;
+}
+
+.headerIcon {
+  color: #4A4A58;
+}
+
+@media (prefers-color-scheme: dark) {
+  .headerIcon {
+    color: #9A9AA8;
+  }
+}
+
+.empty {
+  color: #4A4A58;
+}

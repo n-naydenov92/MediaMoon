@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, useRef, useState } from 'react'
+import { memo, useCallback, useRef, useState } from 'react'
 import Badge from '@mui/material/Badge'
 import IconButton from '@mui/material/IconButton'
 import Popover from '@mui/material/Popover'
@@ -8,15 +8,24 @@ import Stack from '@mui/material/Stack'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import DataUsageOutlined from '@mui/icons-material/DataUsageOutlined'
+import type { SourceErrors } from '@/types'
 import { useTrendingNewsContext } from '@/Section/trending-news/context/useTrendingNewsContext'
 import { cacheKey } from '@/Section/trending-news/context/trendingNewsCtx'
 import { LABELS } from '@/Section/trending-news/labels'
 import SourceDebugRow from '../SourceDebugRow/SourceDebugRow'
+import styles from './SourceStatsPopover.module.css'
+
+const POPOVER_ANCHOR = { vertical: 'bottom', horizontal: 'right' } as const
+const POPOVER_TRANSFORM = { vertical: 'top', horizontal: 'right' } as const
+const POPOVER_SLOT_PROPS = { paper: { className: styles.popoverPaper } } as const
 
 export default memo(function SourceStatsPopover(): JSX.Element | null {
   const { brandId, activeView, dataByKey } = useTrendingNewsContext()
   const anchorRef = useRef<HTMLButtonElement>(null)
   const [open, setOpen] = useState(false)
+
+  const handleOpen = useCallback((): void => setOpen(true), [])
+  const handleClose = useCallback((): void => setOpen(false), [])
 
   if (activeView === 'overview') {
     return null
@@ -28,10 +37,7 @@ export default memo(function SourceStatsPopover(): JSX.Element | null {
   }
 
   const { sourceCounts, sourceErrors } = state.data
-  const hasError = Object.values(sourceErrors).some((e) => Boolean(e))
-
-  const handleOpen = (): void => setOpen(true)
-  const handleClose = (): void => setOpen(false)
+  const hasError = hasAnyError(sourceErrors)
 
   return (
     <>
@@ -42,12 +48,7 @@ export default memo(function SourceStatsPopover(): JSX.Element | null {
           onClick={handleOpen}
           aria-label={LABELS.sourceStatsPopover.tooltip}
         >
-          <Badge
-            color="error"
-            variant="dot"
-            invisible={!hasError}
-            overlap="circular"
-          >
+          <Badge color="error" variant="dot" invisible={!hasError} overlap="circular">
             <DataUsageOutlined fontSize="small" />
           </Badge>
         </IconButton>
@@ -56,12 +57,12 @@ export default memo(function SourceStatsPopover(): JSX.Element | null {
         open={open}
         anchorEl={anchorRef.current}
         onClose={handleClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        slotProps={{ paper: { sx: { p: 3, maxWidth: 420 } } }}
+        anchorOrigin={POPOVER_ANCHOR}
+        transformOrigin={POPOVER_TRANSFORM}
+        slotProps={POPOVER_SLOT_PROPS}
       >
         <Stack spacing={2}>
-          <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+          <Typography variant="caption" className={styles.title}>
             {LABELS.sourceStatsPopover.title}
           </Typography>
           <SourceDebugRow sourceCounts={sourceCounts} sourceErrors={sourceErrors} />
@@ -70,3 +71,7 @@ export default memo(function SourceStatsPopover(): JSX.Element | null {
     </>
   )
 })
+
+function hasAnyError(errors: SourceErrors): boolean {
+  return Object.values(errors).some((e) => Boolean(e))
+}

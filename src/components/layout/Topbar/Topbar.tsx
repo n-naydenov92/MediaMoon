@@ -8,6 +8,8 @@ import Typography from '@mui/material/Typography'
 import ModuleIcon from '@/components/layout/ModuleIcon/ModuleIcon'
 import styles from './Topbar.module.css'
 
+const ICON_SIZE = 20
+
 interface Props {
   readonly title: string
   readonly iconName?: string
@@ -23,18 +25,23 @@ export default memo(function Topbar({
 }: Props): JSX.Element {
   return (
     <AppBar position="sticky" className={styles.bar}>
-      <Toolbar sx={{ minHeight: '56px !important', px: { xs: 4, md: 6 } }}>
-        <Stack direction="row" alignItems="center" spacing={2} sx={{ flex: 1 }}>
-          {iconName && <ModuleIcon name={iconName} size={20} color={iconColor} />}
-          <Typography variant="h2" sx={{ fontSize: 18 }}>
+      <Toolbar className={styles.toolbar}>
+        <Stack
+          direction="row"
+          alignItems="center"
+          spacing={2}
+          className={styles.titleRow}
+        >
+          {iconName && <ModuleIcon name={iconName} size={ICON_SIZE} color={iconColor} />}
+          <Typography variant="h2" className={styles.title}>
             {title}
           </Typography>
           {subtitle && (
             <>
-              <Typography variant="caption" sx={{ color: 'text.disabled' }}>
+              <Typography variant="caption" className={styles.dot}>
                 ·
               </Typography>
-              <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+              <Typography variant="caption" className={styles.subtitle}>
                 {subtitle}
               </Typography>
             </>

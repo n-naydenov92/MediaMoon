@@ -1,12 +1,12 @@
 'use client'
 
-import { memo, useState } from 'react'
-import Box from '@mui/material/Box'
+import { memo, useCallback, useState } from 'react'
 import Collapse from '@mui/material/Collapse'
 import Stack from '@mui/material/Stack'
 import type { HeatLevel, NewsCluster } from '@/types'
 import NewsBlockHeader from './NewsBlockHeader/NewsBlockHeader'
 import NewsItem from '../NewsItem/NewsItem'
+import styles from './NewsBlock.module.css'
 
 interface Props {
   readonly cluster: NewsCluster
@@ -27,31 +27,23 @@ export default memo(function NewsBlock({
 }: Props): JSX.Element {
   const [expanded, setExpanded] = useState(defaultExpanded)
 
-  const handleToggle = (): void => {
+  const handleToggle = useCallback((): void => {
     setExpanded((prev) => !prev)
-  }
+  }, [])
 
   return (
-    <Box
-      sx={{
-        borderLeft: 3,
-        borderLeftColor: HEAT_LINE_COLOR[cluster.heat],
-        pl: 4,
-        py: 2,
-      }}
+    <div
+      className={styles.block}
+      style={{ borderLeftColor: HEAT_LINE_COLOR[cluster.heat] }}
     >
-      <NewsBlockHeader
-        cluster={cluster}
-        expanded={expanded}
-        onToggle={handleToggle}
-      />
+      <NewsBlockHeader cluster={cluster} expanded={expanded} onToggle={handleToggle} />
       <Collapse in={expanded} timeout={COLLAPSE_DURATION_MS} unmountOnExit>
-        <Stack sx={{ mt: 3 }}>
+        <Stack className={styles.list}>
           {cluster.articles.map((article) => (
             <NewsItem key={article.url} article={article} />
           ))}
         </Stack>
       </Collapse>
-    </Box>
+    </div>
   )
 })

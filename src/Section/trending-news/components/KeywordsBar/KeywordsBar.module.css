@@ -1,0 +1,21 @@
+.popoverPaper {
+  padding: 16px;
+  max-width: 360px;
+}
+
+.title {
+  color: #4A4A58;
+  font-weight: 600;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .title {
+    color: #9A9AA8;
+  }
+}
