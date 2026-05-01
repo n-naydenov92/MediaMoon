@@ -11,6 +11,7 @@ const isPublicRoute = createRouteMatcher([
 ])
 
 const isModuleRoute = createRouteMatcher(['/modules/:moduleId(.*)'])
+const isBrandRoute = createRouteMatcher(['/brands/:brandId/:moduleId(.*)'])
 
 export default clerkMiddleware(async (auth, req) => {
   if (isPublicRoute(req)) {
@@ -24,6 +25,14 @@ export default clerkMiddleware(async (auth, req) => {
 
   if (isModuleRoute(req)) {
     const moduleId = extractModuleId(req.nextUrl.pathname)
+    const allowed = isRoleAllowed(session.sessionClaims, moduleId)
+    if (!allowed) {
+      return NextResponse.redirect(new URL('/unauthorized', req.url))
+    }
+  }
+
+  if (isBrandRoute(req)) {
+    const moduleId = req.nextUrl.pathname.match(/^\/brands\/[^/]+\/([^/]+)/)?.[1] ?? null
     const allowed = isRoleAllowed(session.sessionClaims, moduleId)
     if (!allowed) {
       return NextResponse.redirect(new URL('/unauthorized', req.url))

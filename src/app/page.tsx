@@ -11,5 +11,5 @@ export default async function HomePage(): Promise<never> {
   if (!first) {
     redirect('/unauthorized')
   }
-  redirect(first.path)
+  redirect('/brands')
 }
