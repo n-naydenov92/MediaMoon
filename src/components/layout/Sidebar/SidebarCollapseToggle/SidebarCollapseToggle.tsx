@@ -25,6 +25,7 @@ const SidebarCollapseToggle = memo(function SidebarCollapseToggle({
       <button
         type="button"
         className={styles.root}
+        data-collapsed={isCollapsed ? 'true' : 'false'}
         onClick={onToggle}
         aria-label={ariaLabel}
       >
