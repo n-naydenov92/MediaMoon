@@ -8,6 +8,6 @@
 
 @media (min-width: 900px) {
   .contentWrapper {
-    padding: 24px;
+    padding: 32px 40px;
   }
 }
