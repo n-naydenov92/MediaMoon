@@ -35,6 +35,16 @@ export interface ModuleConfig {
   readonly color: string
 }
 
+// ─── Brand Registry ──────────────────────────────────────────────────────────
+
+export interface BrandConfig {
+  readonly id: string           // URL-safe slug: 'stoitchkov'
+  readonly label: string        // 'Stoitchkov Nutrition'
+  readonly emoji: string        // '💪'
+  readonly color: string        // '#FF6B35'
+  readonly description: string
+}
+
 // ─── Async State (discriminated union) ───────────────────────────────────────
 
 export type AsyncState<T> =
