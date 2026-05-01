@@ -1,37 +1,27 @@
 'use client'
 
 import { memo, useCallback, useEffect, useMemo, useReducer, type ReactNode } from 'react'
-import type { AsyncState, Market, NewsResult, UserRole } from '@/types'
-import {
-  findTabById,
-  getTabsForRole,
-  getTopicTabs,
-  isTopicTab,
-  type TopicTabConfig,
-} from '@/Section/trending-news/config'
-import { TrendingNewsContext, cacheKey } from './trendingNewsCtx'
+import type { AsyncState, Market, NewsResult } from '@/types'
+import { findBrandTopic, type BrandTopicConfig } from '@/Section/trending-news/config'
+import { TrendingNewsContext, cacheKey, type ActiveView } from './trendingNewsCtx'
 
-// ─── State & Reducer (discriminated union actions) ───────────────────────────
+// ─── State & Reducer ────────────────────────────────────────────────────────
 
 interface State {
-  readonly activeTabId: string
-  readonly activeMarket: Market
+  readonly activeView: ActiveView
   readonly dataByKey: ReadonlyMap<string, AsyncState<NewsResult>>
 }
 
 type Action =
-  | { type: 'SET_ACTIVE_TAB'; tabId: string; fallbackMarket: Market }
-  | { type: 'SET_ACTIVE_MARKET'; market: Market }
+  | { type: 'SET_ACTIVE_VIEW'; view: ActiveView }
   | { type: 'FETCH_START'; key: string }
   | { type: 'FETCH_SUCCESS'; key: string; data: NewsResult }
   | { type: 'FETCH_ERROR'; key: string; message: string }
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
-    case 'SET_ACTIVE_TAB':
-      return { ...state, activeTabId: action.tabId, activeMarket: action.fallbackMarket }
-    case 'SET_ACTIVE_MARKET':
-      return { ...state, activeMarket: action.market }
+    case 'SET_ACTIVE_VIEW':
+      return { ...state, activeView: action.view }
     case 'FETCH_START':
       return { ...state, dataByKey: setKey(state.dataByKey, action.key, { status: 'loading' }) }
     case 'FETCH_SUCCESS':
@@ -63,99 +53,89 @@ function setKey(
 // ─── Provider ────────────────────────────────────────────────────────────────
 
 interface Props {
-  readonly role: UserRole
+  readonly brandId: string
   readonly children: ReactNode
 }
 
-/**
- * Provides trending-news async state, cache, and tab/market controls to the subtree.
- */
-export default memo(function TrendingNewsProvider({ role, children }: Props): JSX.Element {
-  const initial = useMemo(() => buildInitialState(role), [role])
-  const [state, dispatch] = useReducer(reducer, initial)
+export default memo(function TrendingNewsProvider({ brandId, children }: Props): JSX.Element {
+  const topic = useMemo(() => findBrandTopic(brandId), [brandId])
+  if (!topic) {
+    throw new Error(`No trending-news topic configured for brand: ${brandId}`)
+  }
 
-  const setActiveTab = useCallback(
-    (tabId: string) => {
-      const tab = findTabById(tabId)
-      const fallbackMarket = pickDefaultMarket(tab)
-      dispatch({ type: 'SET_ACTIVE_TAB', tabId, fallbackMarket })
-    },
-    [],
-  )
+  const [state, dispatch] = useReducer(reducer, undefined, () => buildInitialState(topic))
 
-  const setActiveMarket = useCallback((market: Market) => {
-    dispatch({ type: 'SET_ACTIVE_MARKET', market })
+  // Reset active view when brand changes
+  useEffect(() => {
+    dispatch({ type: 'SET_ACTIVE_VIEW', view: 'overview' })
+  }, [brandId])
+
+  const setActiveView = useCallback((view: ActiveView) => {
+    dispatch({ type: 'SET_ACTIVE_VIEW', view })
   }, [])
 
   const fetchFor = useCallback(
-    async (tabId: string, market: Market, force: boolean): Promise<void> => {
-      const key = cacheKey(tabId, market)
+    async (market: Market, force: boolean): Promise<void> => {
+      const key = cacheKey(topic.brandId, market)
       dispatch({ type: 'FETCH_START', key })
       try {
-        const data = await fetchNews({ tabId, market, force })
+        const data = await fetchNews({ brandId: topic.brandId, market, force })
         dispatch({ type: 'FETCH_SUCCESS', key, data })
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Unknown error'
         dispatch({ type: 'FETCH_ERROR', key, message })
       }
     },
-    [],
+    [topic.brandId],
   )
 
+  // Auto-fetch when a market view becomes active
   useEffect(() => {
-    const tab = findTabById(state.activeTabId)
-    if (!tab || !isTopicTab(tab)) {
+    if (state.activeView === 'overview') {
       return
     }
-    const key = cacheKey(state.activeTabId, state.activeMarket)
+    const key = cacheKey(topic.brandId, state.activeView)
     if (state.dataByKey.has(key)) {
       return
     }
-    void fetchFor(state.activeTabId, state.activeMarket, false)
-  }, [state.activeTabId, state.activeMarket, fetchFor, state.dataByKey])
+    void fetchFor(state.activeView, false)
+  }, [state.activeView, state.dataByKey, fetchFor, topic.brandId])
 
   const refresh = useCallback(async (): Promise<void> => {
-    const tab = findTabById(state.activeTabId)
-    if (!tab || !isTopicTab(tab)) {
+    if (state.activeView === 'overview') {
+      await Promise.all(topic.markets.map((m) => fetchFor(m, true)))
       return
     }
-    await fetchFor(state.activeTabId, state.activeMarket, true)
-  }, [state.activeTabId, state.activeMarket, fetchFor])
+    await fetchFor(state.activeView, true)
+  }, [state.activeView, topic.markets, fetchFor])
 
   const refreshAll = useCallback(async (): Promise<void> => {
-    const combinations: { tabId: string; market: Market }[] = []
-    for (const tab of getTopicTabs()) {
-      for (const market of tab.markets) {
-        combinations.push({ tabId: tab.id, market })
-      }
-    }
-    await Promise.all(combinations.map((c) => fetchFor(c.tabId, c.market, true)))
-  }, [fetchFor])
+    await Promise.all(topic.markets.map((m) => fetchFor(m, true)))
+  }, [topic.markets, fetchFor])
 
   const ensureLoaded = useCallback(
-    (tabId: string, market: Market): void => {
-      const key = cacheKey(tabId, market)
+    (market: Market): void => {
+      const key = cacheKey(topic.brandId, market)
       if (state.dataByKey.has(key)) {
         return
       }
-      void fetchFor(tabId, market, false)
+      void fetchFor(market, false)
     },
-    [state.dataByKey, fetchFor],
+    [state.dataByKey, fetchFor, topic.brandId],
   )
 
   const value = useMemo(
     () => ({
-      role,
-      activeTabId: state.activeTabId,
-      activeMarket: state.activeMarket,
+      brandId: topic.brandId,
+      topic,
+      activeView: state.activeView,
       dataByKey: state.dataByKey,
-      setActiveTab,
-      setActiveMarket,
+      setActiveView,
       refresh,
       refreshAll,
       ensureLoaded,
     }),
-    [role, state, setActiveTab, setActiveMarket, refresh, refreshAll, ensureLoaded],
+    [topic, state, setActiveView, refresh, refreshAll, ensureLoaded],
   )
 
   return <TrendingNewsContext.Provider value={value}>{children}</TrendingNewsContext.Provider>
@@ -163,36 +143,25 @@ export default memo(function TrendingNewsProvider({ role, children }: Props): JS
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function buildInitialState(role: UserRole): State {
-  const tabs = getTabsForRole(role)
-  const [firstTab] = tabs
-  const activeTabId = firstTab?.id ?? ''
-  const activeMarket = pickDefaultMarket(firstTab ?? null)
-  return { activeTabId, activeMarket, dataByKey: new Map() }
-}
-
-function pickDefaultMarket(tab: ReturnType<typeof findTabById> | null): Market {
-  if (tab && isTopicTab(tab)) {
-    return (tab as TopicTabConfig).markets[0] ?? 'BG'
-  }
-  return 'BG'
+function buildInitialState(_topic: BrandTopicConfig): State {
+  return { activeView: 'overview', dataByKey: new Map() }
 }
 
 async function fetchNews(params: {
-  readonly tabId: string
+  readonly brandId: string
   readonly market: Market
   readonly force: boolean
 }): Promise<NewsResult> {
-  const { tabId, market, force } = params
+  const { brandId, market, force } = params
   if (force) {
     const res = await fetch('/api/modules/trending-news/refresh', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ tabId, market }),
+      body: JSON.stringify({ brandId, market }),
     })
     return handleResponse(res)
   }
-  const url = `/api/modules/trending-news?tabId=${encodeURIComponent(tabId)}&market=${market}`
+  const url = `/api/modules/trending-news?brandId=${encodeURIComponent(brandId)}&market=${market}`
   const res = await fetch(url)
   return handleResponse(res)
 }

@@ -13,7 +13,7 @@ import { fetchFromSearchApi } from '@/lib/gateways/SearchApiGateway'
 import { cluster, type RawCluster } from '@/lib/gateways/ClusteringGateway'
 import { getScore } from '@/lib/gateways/TrendsGateway'
 import { CACHE_TTL_SECONDS, buildCacheKey, withCache } from '@/lib/cache'
-import { isTopicTab, type TabConfig, type TopicTabConfig } from '@/Section/trending-news/config'
+import type { BrandTopicConfig } from '@/Section/trending-news/config'
 
 /**
  * Pipeline orchestrator.
@@ -33,40 +33,37 @@ const MS_PER_SECOND = 1000
 
 // ─── Public API ─────────────────────────────────────────────────────────────
 
-export async function getNewsForTabMarket(params: {
-  readonly tab: TabConfig
+export async function getNewsForBrandMarket(params: {
+  readonly topic: BrandTopicConfig
   readonly market: Market
   readonly includeSearchApi?: boolean
 }): Promise<NewsResult> {
-  if (!isTopicTab(params.tab)) {
-    throw new Error(`Only topic tabs can be pipeline-fetched: ${params.tab.id}`)
-  }
-  const key = buildCacheKey(params.tab.id, params.market)
+  const key = buildCacheKey(params.topic.brandId, params.market)
   return withCache({
     key,
-    fetcher: () => runPipeline(params.tab as TopicTabConfig, params.market, params.includeSearchApi ?? false),
+    fetcher: () => runPipeline(params.topic, params.market, params.includeSearchApi ?? false),
   })
 }
 
 // ─── Pipeline steps ─────────────────────────────────────────────────────────
 
-async function runPipeline(tab: TopicTabConfig, market: Market, includeSearchApi: boolean): Promise<NewsResult> {
-  const { articles, sourceCounts, sourceErrors } = await fetchArticles(tab, market, includeSearchApi)
+async function runPipeline(topic: BrandTopicConfig, market: Market, includeSearchApi: boolean): Promise<NewsResult> {
+  const { articles, sourceCounts, sourceErrors } = await fetchArticles(topic, market, includeSearchApi)
   const unique = deduplicateByUrl(articles)
   const rawClusters = await safeCluster(unique)
-  const enriched = await enrichWithTrends(rawClusters, market, tab.id)
+  const enriched = await enrichWithTrends(rawClusters, market, topic.brandId)
   const sorted = sortByDate(enriched)
-  return assembleResult(tab.id, market, sorted, sourceCounts, sourceErrors)
+  return assembleResult(topic.brandId, market, sorted, sourceCounts, sourceErrors)
 }
 
 async function fetchArticles(
-  tab: TopicTabConfig,
+  topic: BrandTopicConfig,
   market: Market,
   includeSearchApi: boolean,
 ): Promise<{ articles: readonly RssArticle[]; sourceCounts: SourceCounts; sourceErrors: SourceErrors }> {
   const [googleNews, searchApi] = await Promise.allSettled([
-    fetchFromGoogleNews(tab, market),
-    includeSearchApi ? fetchFromSearchApiSource(tab, market) : Promise.resolve([] as readonly RssArticle[]),
+    fetchFromGoogleNews(topic, market),
+    includeSearchApi ? fetchFromSearchApiSource(topic, market) : Promise.resolve([] as readonly RssArticle[]),
   ])
 
   const resolve = (r: PromiseSettledResult<readonly RssArticle[]>) =>
@@ -91,11 +88,11 @@ async function fetchArticles(
 }
 
 async function fetchFromGoogleNews(
-  tab: TopicTabConfig,
+  topic: BrandTopicConfig,
   market: Market,
 ): Promise<readonly RssArticle[]> {
-  const query = tab.queries[market]
-  const language = tab.language[market]
+  const query = topic.queries[market]
+  const language = topic.language[market]
   if (!query) {
     return []
   }
@@ -103,10 +100,10 @@ async function fetchFromGoogleNews(
 }
 
 async function fetchFromSearchApiSource(
-  tab: TopicTabConfig,
+  topic: BrandTopicConfig,
   market: Market,
 ): Promise<readonly RssArticle[]> {
-  const query = tab.searchApiQuery?.[market]
+  const query = topic.searchApiQuery?.[market]
   if (!query) {
     return []
   }

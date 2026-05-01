@@ -1,33 +1,30 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import type { Market } from '@/types'
-import { findTabById, isTopicTab } from '@/Section/trending-news/config'
-import { getNewsForTabMarket } from '@/lib/pipeline'
+import { findBrandTopic } from '@/Section/trending-news/config'
+import { getNewsForBrandMarket } from '@/lib/pipeline'
 
 const VALID_MARKETS: readonly Market[] = ['BG', 'ES', 'WORLD']
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const { searchParams } = new URL(request.url)
-  const tabId = searchParams.get('tabId')
+  const brandId = searchParams.get('brandId')
   const marketRaw = searchParams.get('market')
 
-  const tab = tabId ? findTabById(tabId) : null
-  if (!tab) {
-    return NextResponse.json({ error: 'Unknown tab' }, { status: 400 })
-  }
-  if (!isTopicTab(tab)) {
-    return NextResponse.json({ error: 'Overview tab has no direct feed' }, { status: 400 })
+  const topic = brandId ? findBrandTopic(brandId) : null
+  if (!topic) {
+    return NextResponse.json({ error: 'Unknown brand' }, { status: 400 })
   }
 
   const market = parseMarket(marketRaw)
   if (!market) {
     return NextResponse.json({ error: 'Invalid market' }, { status: 400 })
   }
-  if (!tab.markets.includes(market)) {
-    return NextResponse.json({ error: 'Market not supported for this tab' }, { status: 400 })
+  if (!topic.markets.includes(market)) {
+    return NextResponse.json({ error: 'Market not supported for this brand' }, { status: 400 })
   }
 
   try {
-    const result = await getNewsForTabMarket({ tab, market })
+    const result = await getNewsForBrandMarket({ topic, market })
     return NextResponse.json(result)
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error'

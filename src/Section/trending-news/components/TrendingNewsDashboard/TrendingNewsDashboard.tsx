@@ -1,20 +1,19 @@
 'use client'
 
 import { memo } from 'react'
-import type { UserRole } from '@/types'
 import TrendingNewsProvider from '@/Section/trending-news/context/TrendingNewsProvider'
 import DashboardChrome from './DashboardChrome/DashboardChrome'
 
 interface Props {
-  readonly role: UserRole
+  readonly brandId: string
 }
 
 /**
- * Root entry point for the Trending News module — mounts the context provider and chrome.
+ * Root entry point for the Trending News module — mounts the brand-scoped provider and chrome.
  */
-export default memo(function TrendingNewsDashboard({ role }: Props): JSX.Element {
+export default memo(function TrendingNewsDashboard({ brandId }: Props): JSX.Element {
   return (
-    <TrendingNewsProvider role={role}>
+    <TrendingNewsProvider brandId={brandId}>
       <DashboardChrome />
     </TrendingNewsProvider>
   )
