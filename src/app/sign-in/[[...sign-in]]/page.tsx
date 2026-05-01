@@ -1,5 +1,5 @@
-import { SignIn } from '@clerk/nextjs'
+import AuthPage from '@/components/auth/AuthPage/AuthPage'
 
 export default function SignInPage(): React.JSX.Element {
-  return <SignIn />
+  return <AuthPage mode="sign-in" />
 }

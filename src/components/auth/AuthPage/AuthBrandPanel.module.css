@@ -1,0 +1,131 @@
+.panel {
+  position: relative;
+  display: none;
+  flex-direction: column;
+  height: 100%;
+  padding: 48px;
+  background-color: var(--auth-bg-elevated);
+  border-right: 1px solid var(--auth-border-subtle);
+  color: var(--auth-text-primary);
+  overflow: hidden;
+}
+
+@media (min-width: 1024px) {
+  .panel {
+    display: flex;
+  }
+}
+
+.pattern {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, var(--auth-text-muted) 1px, transparent 1px);
+  background-size: 24px 24px;
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+.wordmark {
+  position: relative;
+  font-family: var(--font-syne), system-ui, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--auth-text-primary);
+}
+
+.modules {
+  position: relative;
+  margin-top: 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 420px;
+}
+
+.modulesHeader {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--auth-text-muted);
+}
+
+.moduleList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.moduleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-block: 12px;
+  border-bottom: 1px solid var(--auth-border-subtle);
+}
+
+.moduleRow:last-child {
+  border-bottom: none;
+}
+
+.moduleName {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--auth-text-primary);
+}
+
+.status_live,
+.status_soon {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid;
+}
+
+.status_live {
+  color: #10b981;
+  border-color: rgba(16, 185, 129, 0.3);
+  background-color: rgba(16, 185, 129, 0.08);
+}
+
+.status_soon {
+  color: var(--auth-text-muted);
+  border-color: var(--auth-border-subtle);
+  background-color: transparent;
+}
+
+.quote {
+  position: relative;
+  margin: 0;
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 420px;
+}
+
+.quoteText {
+  margin: 0;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  font-weight: 400;
+  color: var(--auth-text-secondary);
+}
+
+.attribution {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--auth-text-muted);
+  letter-spacing: 0.02em;
+}

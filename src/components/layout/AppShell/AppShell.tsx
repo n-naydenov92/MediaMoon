@@ -2,6 +2,7 @@
 
 import { memo } from 'react'
 import type { ReactNode } from 'react'
+import { usePathname } from 'next/navigation'
 import Box from '@mui/material/Box'
 import Sidebar from '@/components/layout/Sidebar/Sidebar'
 import type { BrandConfig, ModuleConfig } from '@/types'
@@ -13,10 +14,22 @@ interface Props {
   readonly children: ReactNode
 }
 
-/**
- * Root application shell composing the persistent sidebar and main content area.
- */
+const AUTH_ROUTE_PREFIXES = ['/sign-in', '/sign-up', '/sso-callback'] as const
+
+function isAuthPathname(pathname: string | null): boolean {
+  if (pathname === null) {
+    return false
+  }
+  return AUTH_ROUTE_PREFIXES.some((prefix) => pathname.startsWith(prefix))
+}
+
 export default memo(function AppShell({ modules, brands, children }: Props): JSX.Element {
+  const pathname = usePathname()
+
+  if (isAuthPathname(pathname)) {
+    return <>{children}</>
+  }
+
   return (
     <Box className={styles.shell}>
       <Sidebar modules={modules} brands={brands} />

@@ -1,0 +1,29 @@
+.toggle {
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background-color: transparent;
+  color: var(--auth-text-secondary);
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  z-index: 10;
+  transition: background-color 80ms ease-out, color 80ms ease-out, border-color 80ms ease-out;
+}
+
+.toggle:hover {
+  background-color: var(--auth-bg-elevated);
+  color: var(--auth-text-primary);
+  border-color: var(--auth-border-subtle);
+}
+
+.toggle:focus-visible {
+  outline: 2px solid var(--auth-accent);
+  outline-offset: 2px;
+}

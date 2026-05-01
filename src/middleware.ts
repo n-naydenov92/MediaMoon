@@ -6,6 +6,7 @@ import { parseRole } from '@/lib/roles'
 const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
+  '/sso-callback(.*)',
   '/unauthorized',
   '/api/webhooks(.*)',
 ])
