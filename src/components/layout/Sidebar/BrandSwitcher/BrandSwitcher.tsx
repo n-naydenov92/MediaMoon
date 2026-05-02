@@ -1,11 +1,11 @@
 'use client'
 
 import { memo, useCallback, useId, useRef, useState } from 'react'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import type { BrandConfig, ModuleConfig } from '@/types'
 import { LABELS } from '@/components/layout/labels'
-import { resolveActiveBrand } from '@/lib/navigation'
-import { getFirstNavigableModule } from '@/config/modules'
+import { getActiveModuleId, resolveActiveBrand } from '@/lib/navigation'
+import { flattenModules, getFirstNavigableModule } from '@/config/modules'
 import BrandSwitcherTrigger from './BrandSwitcherTrigger'
 import BrandMenu from './BrandMenu'
 import { useDismissPopover } from '@/components/layout/hooks/useDismissPopover'
@@ -23,6 +23,7 @@ export default memo(function BrandSwitcher({
   isCollapsed,
 }: Props): JSX.Element {
   const pathname = usePathname()
+  const searchParams = useSearchParams()
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement | null>(null)
@@ -30,6 +31,8 @@ export default memo(function BrandSwitcher({
 
   const activeBrand = resolveActiveBrand(pathname, brands)
   const triggerLabel = activeBrand?.label ?? LABELS.sidebar.overview
+  const currentModuleId = getActiveModuleId(pathname)
+  const queryString = searchParams?.toString() ?? ''
 
   const dismiss = useCallback(() => {
     setIsOpen(false)
@@ -46,14 +49,18 @@ export default memo(function BrandSwitcher({
         router.push('/brands')
         return
       }
-      const firstModule = getFirstNavigableModule(modules)
-      if (firstModule) {
-        router.push(`/brands/${brandId}/${firstModule.id}`)
+      const preserved = flattenModules(modules).find(
+        (m) => m.id === currentModuleId && m.path,
+      )
+      const target = preserved ?? getFirstNavigableModule(modules)
+      const suffix = queryString ? `?${queryString}` : ''
+      if (target) {
+        router.push(`/brands/${brandId}/${target.id}${suffix}`)
         return
       }
       router.push(`/brands/${brandId}`)
     },
-    [modules, router],
+    [currentModuleId, modules, queryString, router],
   )
 
   useDismissPopover(rootRef, isOpen, dismiss)

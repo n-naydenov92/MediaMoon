@@ -2,10 +2,16 @@ import type { BrandConfig, ModuleConfig } from '@/types'
 
 export const BRAND_PATH_REGEX = /^\/brands\/([^/]+)/
 
+export const MODULE_PATH_REGEX = /^\/brands\/[^/]+\/([^/?#]+)/
+
 export const TOOLTIP_ENTER_DELAY_MS = 200
 
 export function getActiveBrandId(pathname: string | null): string | null {
   return pathname?.match(BRAND_PATH_REGEX)?.[1] ?? null
+}
+
+export function getActiveModuleId(pathname: string | null): string | null {
+  return pathname?.match(MODULE_PATH_REGEX)?.[1] ?? null
 }
 
 export function resolveActiveBrand(
