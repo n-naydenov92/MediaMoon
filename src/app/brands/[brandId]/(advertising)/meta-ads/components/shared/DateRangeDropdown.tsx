@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import {
   DATE_PRESETS,
   DATE_PRESET_LABELS,
@@ -15,14 +15,18 @@ interface Props {
 
 export default function DateRangeDropdown({ value, onChange }: Props): JSX.Element {
   const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
+  const [focusedIndex, setFocusedIndex] = useState<number>(() =>
+    Math.max(0, DATE_PRESETS.indexOf(value)),
+  )
+  const rootRef = useRef<HTMLDivElement>(null)
+  const optionRefs = useRef<(HTMLButtonElement | null)[]>([])
 
   useEffect(() => {
     if (!open) {
       return
     }
     function handleClick(event: MouseEvent): void {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
+      if (rootRef.current && !rootRef.current.contains(event.target as Node)) {
         setOpen(false)
       }
     }
@@ -32,19 +36,55 @@ export default function DateRangeDropdown({ value, onChange }: Props): JSX.Eleme
       }
     }
     document.addEventListener('mousedown', handleClick)
-    document.addEventListener('keydown', handleKey)
+    document.addEventListener('keydown', handleKey as unknown as EventListener)
     return () => {
       document.removeEventListener('mousedown', handleClick)
-      document.removeEventListener('keydown', handleKey)
+      document.removeEventListener('keydown', handleKey as unknown as EventListener)
     }
   }, [open])
 
+  useEffect(() => {
+    if (open) {
+      optionRefs.current[focusedIndex]?.focus()
+    }
+  }, [open, focusedIndex])
+
+  function handleMenuKeyDown(event: KeyboardEvent<HTMLUListElement>): void {
+    if (event.key === 'ArrowDown') {
+      event.preventDefault()
+      setFocusedIndex((i) => (i + 1) % DATE_PRESETS.length)
+      return
+    }
+    if (event.key === 'ArrowUp') {
+      event.preventDefault()
+      setFocusedIndex((i) => (i - 1 + DATE_PRESETS.length) % DATE_PRESETS.length)
+      return
+    }
+    if (event.key === 'Home') {
+      event.preventDefault()
+      setFocusedIndex(0)
+      return
+    }
+    if (event.key === 'End') {
+      event.preventDefault()
+      setFocusedIndex(DATE_PRESETS.length - 1)
+    }
+  }
+
+  function selectPreset(preset: DatePreset): void {
+    onChange(preset)
+    setOpen(false)
+  }
+
   return (
-    <div className={styles.root} ref={ref}>
+    <div className={styles.root} ref={rootRef}>
       <button
         type="button"
         className={styles.trigger}
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => {
+          setFocusedIndex(Math.max(0, DATE_PRESETS.indexOf(value)))
+          setOpen((o) => !o)
+        }}
         aria-haspopup="listbox"
         aria-expanded={open}
       >
@@ -52,17 +92,19 @@ export default function DateRangeDropdown({ value, onChange }: Props): JSX.Eleme
         <span className={styles.chevron} aria-hidden>▾</span>
       </button>
       {open && (
-        <ul className={styles.menu} role="listbox">
-          {DATE_PRESETS.map((preset) => (
+        <ul className={styles.menu} role="listbox" onKeyDown={handleMenuKeyDown}>
+          {DATE_PRESETS.map((preset, index) => (
             <li key={preset}>
               <button
+                ref={(node) => {
+                  optionRefs.current[index] = node
+                }}
                 type="button"
+                role="option"
+                aria-selected={preset === value}
                 className={styles.option}
                 data-active={preset === value ? 'true' : 'false'}
-                onClick={() => {
-                  onChange(preset)
-                  setOpen(false)
-                }}
+                onClick={() => selectPreset(preset)}
               >
                 {DATE_PRESET_LABELS[preset]}
               </button>
