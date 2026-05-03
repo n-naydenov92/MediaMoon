@@ -74,7 +74,10 @@ export function useLaunchJobs(brandId: BrandId): UseLaunchJobsResult {
 
   useEffect(() => {
     void refresh()
-    const hasActive = jobs.some((j) => ACTIVE_JOB_STATUSES.has(j.status))
+  }, [refresh])
+
+  const hasActive = jobs.some((j) => ACTIVE_JOB_STATUSES.has(j.status))
+  useEffect(() => {
     if (!hasActive) {
       return
     }
@@ -82,7 +85,7 @@ export function useLaunchJobs(brandId: BrandId): UseLaunchJobsResult {
       void refresh()
     }, POLL_INTERVAL_MS)
     return () => clearInterval(handle)
-  }, [jobs, refresh])
+  }, [hasActive, refresh])
 
   const createAndStartJob = useCallback(
     async (payload: CreateJobPayload): Promise<CreateJobResult> => {
