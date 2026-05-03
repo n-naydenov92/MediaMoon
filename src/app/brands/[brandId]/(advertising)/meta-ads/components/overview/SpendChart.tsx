@@ -12,16 +12,38 @@ import {
 } from 'recharts'
 import type { DailyPoint } from '@/lib/meta/aggregate'
 import { formatEur } from '@/lib/meta/fx'
+import { useThemeMode } from '@/styles/useThemeMode'
 import styles from './SpendChart.module.css'
 
 interface Props {
   readonly data: readonly DailyPoint[]
 }
 
-const COLOR_SPEND = 'rgba(154, 154, 168, 0.6)'
-const COLOR_REVENUE = '#6c63ff'
+interface ChartPalette {
+  readonly spend: string
+  readonly revenue: string
+  readonly grid: string
+  readonly axis: string
+}
+
+const PALETTE_DARK: ChartPalette = {
+  spend: 'rgba(154, 154, 168, 0.6)',
+  revenue: '#6c63ff',
+  grid: 'rgba(255, 255, 255, 0.06)',
+  axis: 'rgba(255, 255, 255, 0.45)',
+}
+
+const PALETTE_LIGHT: ChartPalette = {
+  spend: 'rgba(74, 74, 88, 0.55)',
+  revenue: '#5b52e5',
+  grid: 'rgba(10, 10, 15, 0.06)',
+  axis: 'rgba(10, 10, 15, 0.5)',
+}
 
 export default function SpendChart({ data }: Props): JSX.Element {
+  const { mode } = useThemeMode()
+  const palette = mode === 'light' ? PALETTE_LIGHT : PALETTE_DARK
+
   if (data.length === 0) {
     return <div className={styles.empty}>No spend recorded for the selected range.</div>
   }
@@ -31,27 +53,27 @@ export default function SpendChart({ data }: Props): JSX.Element {
         <AreaChart data={[...data]} margin={{ top: 8, right: 12, bottom: 8, left: 0 }}>
           <defs>
             <linearGradient id="revenueFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={COLOR_REVENUE} stopOpacity={0.35} />
-              <stop offset="100%" stopColor={COLOR_REVENUE} stopOpacity={0.02} />
+              <stop offset="0%" stopColor={palette.revenue} stopOpacity={0.35} />
+              <stop offset="100%" stopColor={palette.revenue} stopOpacity={0.02} />
             </linearGradient>
             <linearGradient id="spendFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={COLOR_SPEND} stopOpacity={0.25} />
-              <stop offset="100%" stopColor={COLOR_SPEND} stopOpacity={0.02} />
+              <stop offset="0%" stopColor={palette.spend} stopOpacity={0.25} />
+              <stop offset="100%" stopColor={palette.spend} stopOpacity={0.02} />
             </linearGradient>
           </defs>
-          <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
+          <CartesianGrid stroke={palette.grid} vertical={false} />
           <XAxis
             dataKey="date"
             tickLine={false}
             axisLine={false}
-            tick={{ fill: 'rgba(255,255,255,0.45)', fontSize: 11 }}
+            tick={{ fill: palette.axis, fontSize: 11 }}
             tickFormatter={shortDate}
             minTickGap={24}
           />
           <YAxis
             tickLine={false}
             axisLine={false}
-            tick={{ fill: 'rgba(255,255,255,0.45)', fontSize: 11 }}
+            tick={{ fill: palette.axis, fontSize: 11 }}
             tickFormatter={shortMoney}
             width={56}
           />
@@ -59,7 +81,7 @@ export default function SpendChart({ data }: Props): JSX.Element {
           <Area
             type="monotone"
             dataKey="spendEur"
-            stroke={COLOR_SPEND}
+            stroke={palette.spend}
             strokeWidth={1.5}
             fill="url(#spendFill)"
             name="Spend"
@@ -67,7 +89,7 @@ export default function SpendChart({ data }: Props): JSX.Element {
           <Area
             type="monotone"
             dataKey="revenueEur"
-            stroke={COLOR_REVENUE}
+            stroke={palette.revenue}
             strokeWidth={2}
             fill="url(#revenueFill)"
             name="Revenue"

@@ -4,8 +4,8 @@
   gap: 12px;
   padding: 16px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--hairline);
+  background: var(--surface-1);
   font-family: var(--font-dm-sans), system-ui, sans-serif;
 }
 
@@ -20,13 +20,13 @@
   font-family: var(--font-syne), system-ui, sans-serif;
   font-size: 14px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.95);
+  color: var(--text-primary);
 }
 
 .subtitle {
   font-size: 11px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-muted);
 }
 
 .list {
@@ -48,7 +48,7 @@
 }
 
 .row:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--surface-2);
 }
 
 .text {
@@ -61,7 +61,7 @@
 .name {
   font-size: 13px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.92);
+  color: var(--text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -70,14 +70,14 @@
 
 .meta {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--text-secondary);
   font-variant-numeric: tabular-nums;
 }
 
 .empty {
   margin: 0;
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.45);
+  color: var(--text-muted);
   padding: 12px 0;
   text-align: center;
 }

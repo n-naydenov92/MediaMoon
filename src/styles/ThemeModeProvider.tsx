@@ -28,6 +28,10 @@ export function ThemeModeProvider({ children }: ProviderProps): JSX.Element {
     }
   }, [])
 
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', mode)
+  }, [mode])
+
   const value = useMemo<ThemeModeContextValue>(
     () => ({
       mode,

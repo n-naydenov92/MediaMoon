@@ -46,6 +46,7 @@
   border-radius: 12px;
   border: 1px solid;
   font-family: var(--font-dm-sans), system-ui, sans-serif;
+  color: var(--text-primary);
 }
 
 .notice strong {
@@ -57,7 +58,7 @@
   margin: 0;
   font-size: 13px;
   line-height: 1.55;
-  opacity: 0.85;
+  color: var(--text-secondary);
 }
 
 .notice code {
@@ -65,19 +66,18 @@
   font-size: 12px;
   padding: 2px 6px;
   border-radius: 4px;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--surface-3);
+  color: var(--text-primary);
 }
 
 .notice[data-variant='info'] {
-  border-color: rgba(96, 165, 250, 0.4);
-  background: rgba(96, 165, 250, 0.08);
-  color: inherit;
+  border-color: var(--notice-info-border);
+  background: var(--notice-info-bg);
 }
 
 .notice[data-variant='error'] {
-  border-color: rgba(248, 113, 113, 0.4);
-  background: rgba(248, 113, 113, 0.08);
-  color: inherit;
+  border-color: var(--notice-error-border);
+  background: var(--notice-error-bg);
 }
 
 .marketBlock {

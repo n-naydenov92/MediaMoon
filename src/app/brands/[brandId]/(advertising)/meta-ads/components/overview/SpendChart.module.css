@@ -10,7 +10,7 @@
   justify-content: center;
   height: 240px;
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.45);
+  color: var(--text-muted);
 }
 
 .tooltip {
@@ -18,18 +18,18 @@
   flex-direction: column;
   gap: 6px;
   padding: 10px 12px;
-  background: #1a1a24;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
   border-radius: 8px;
   font-family: var(--font-dm-sans), system-ui, sans-serif;
   font-variant-numeric: tabular-nums;
-  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.35);
 }
 
 .tooltipDate {
   font-size: 11px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -49,19 +49,19 @@
 }
 
 .tooltipDot[data-key='spendEur'] {
-  background: rgba(154, 154, 168, 0.8);
+  background: var(--chart-spend);
 }
 
 .tooltipDot[data-key='revenueEur'] {
-  background: #6c63ff;
+  background: var(--chart-revenue);
 }
 
 .tooltipLabel {
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--text-secondary);
   flex: 1;
 }
 
 .tooltipValue {
-  color: rgba(255, 255, 255, 0.95);
+  color: var(--text-primary);
   font-weight: 500;
 }

@@ -24,8 +24,8 @@
   font-weight: 600;
   padding: 2px 8px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  opacity: 0.8;
+  background: var(--surface-3);
+  color: var(--text-secondary);
 }
 
 .list {
@@ -42,15 +42,16 @@
   flex-direction: column;
   gap: 4px;
   padding: 12px 16px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--hairline);
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--surface-1);
+  color: var(--text-primary);
   transition: border-color 0.15s ease, background 0.15s ease;
 }
 
 .item:hover {
-  border-color: rgba(255, 255, 255, 0.18);
-  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--hairline-strong);
+  background: var(--surface-2);
 }
 
 .titleRow {
@@ -69,7 +70,7 @@
 .id {
   font-family: var(--font-mono, ui-monospace), monospace;
   font-size: 11px;
-  opacity: 0.45;
+  color: var(--text-muted);
 }
 
 .status {
@@ -100,10 +101,10 @@
 
 .empty {
   padding: 24px;
-  border: 1px dashed rgba(255, 255, 255, 0.15);
+  border: 1px dashed var(--hairline-strong);
   border-radius: 10px;
   text-align: center;
   font-family: var(--font-dm-sans), system-ui, sans-serif;
   font-size: 13px;
-  opacity: 0.7;
+  color: var(--text-secondary);
 }
