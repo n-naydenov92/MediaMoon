@@ -91,6 +91,12 @@ export const DEFAULT_TOP_CRITERIA: TopCriteria = {
   underMaxRoas: 2,
 }
 
+export const CRITERIA_QUERY_KEYS = {
+  minSpend: 'minSpend',
+  topMinRoas: 'minRoas',
+  underMaxRoas: 'underMaxRoas',
+} as const
+
 export function pickTopAds(
   ads: readonly AdLeaderboardEntry[],
   criteria: TopCriteria,

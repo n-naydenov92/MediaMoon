@@ -28,6 +28,7 @@ import {
   pickUnderperformers,
   summarizeAccount,
   DEFAULT_TOP_CRITERIA,
+  CRITERIA_QUERY_KEYS,
   type AccountKpis,
   type AdLeaderboardEntry,
   type AccountSummary,
@@ -204,10 +205,11 @@ function toLeaderboardEntry(ad: AdWithInsights): AdLeaderboardEntry {
 }
 
 function parseCriteriaFromQuery(params: URLSearchParams): TopCriteria {
-  const minSpend = numericParam(params, 'minSpend', DEFAULT_TOP_CRITERIA.minSpend)
-  const topMinRoas = numericParam(params, 'minRoas', DEFAULT_TOP_CRITERIA.topMinRoas)
-  const underMaxRoas = numericParam(params, 'underMaxRoas', DEFAULT_TOP_CRITERIA.underMaxRoas)
-  return { minSpend, topMinRoas, underMaxRoas }
+  return {
+    minSpend: numericParam(params, CRITERIA_QUERY_KEYS.minSpend, DEFAULT_TOP_CRITERIA.minSpend),
+    topMinRoas: numericParam(params, CRITERIA_QUERY_KEYS.topMinRoas, DEFAULT_TOP_CRITERIA.topMinRoas),
+    underMaxRoas: numericParam(params, CRITERIA_QUERY_KEYS.underMaxRoas, DEFAULT_TOP_CRITERIA.underMaxRoas),
+  }
 }
 
 function numericParam(params: URLSearchParams, key: string, fallback: number): number {
