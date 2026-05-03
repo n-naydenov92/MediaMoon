@@ -1,5 +1,12 @@
 const GRAPH_API_BASE = 'https://graph.facebook.com/v21.0'
-const FETCH_TIMEOUT_MS = 10_000
+const FETCH_TIMEOUT_MS = 30_000
+
+const PURCHASE_ACTION_TYPES = new Set([
+  'purchase',
+  'omni_purchase',
+  'offsite_conversion.fb_pixel_purchase',
+  'web_in_store_purchase',
+])
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -260,6 +267,246 @@ export async function createAd(
   const json = await callGraphApiPost<GraphAdResponse>(`/${accountId}/ads`, body)
   if (json.error) throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
   return { id: json.id }
+}
+
+// ─── Insights ─────────────────────────────────────────────────────────────────
+
+export interface InsightsTotals {
+  readonly spend: number
+  readonly revenue: number
+  readonly purchases: number
+  readonly impressions: number
+  readonly clicks: number
+}
+
+export interface InsightsDailyPoint extends InsightsTotals {
+  readonly date: string
+}
+
+export interface AccountInsights {
+  readonly accountId: string
+  readonly currency: string
+  readonly totals: InsightsTotals
+  readonly daily: readonly InsightsDailyPoint[]
+}
+
+export interface AdWithInsights {
+  readonly id: string
+  readonly name: string
+  readonly status: string
+  readonly effectiveStatus: string
+  readonly creativeType: 'image' | 'video' | 'unknown'
+  readonly thumbnailUrl: string | null
+  readonly accountId: string
+  readonly currency: string
+  readonly insights: InsightsTotals
+}
+
+const INSIGHTS_FIELDS = 'spend,impressions,clicks,actions,action_values'
+
+interface GraphAction {
+  action_type: string
+  value: string
+}
+
+interface GraphInsightsRow {
+  date_start?: string
+  date_stop?: string
+  spend?: string
+  impressions?: string
+  clicks?: string
+  actions?: GraphAction[]
+  action_values?: GraphAction[]
+}
+
+interface GraphInsightsResponse {
+  data?: GraphInsightsRow[]
+  error?: { message: string; type: string; code: number }
+}
+
+interface GraphAdWithCreativeRaw {
+  id: string
+  name: string
+  status: string
+  effective_status: string
+  creative?: {
+    id?: string
+    thumbnail_url?: string
+    object_type?: string
+    video_id?: string
+  }
+  insights?: {
+    data?: GraphInsightsRow[]
+  }
+}
+
+interface GraphAdsListResponse {
+  data?: GraphAdWithCreativeRaw[]
+  error?: { message: string; type: string; code: number }
+  paging?: { next?: string }
+}
+
+export async function fetchAccountInsights(
+  token: string,
+  accountId: string,
+  currency: string,
+  dateParams: Record<string, string>,
+  options: { readonly daily: boolean } = { daily: true },
+): Promise<AccountInsights> {
+  const totalsParams = { fields: INSIGHTS_FIELDS, level: 'account', ...dateParams }
+  const totals = sumInsightsRows(await fetchInsightsRows(token, accountId, totalsParams))
+
+  let daily: readonly InsightsDailyPoint[] = []
+  if (options.daily) {
+    const dailyParams = { ...totalsParams, time_increment: '1' }
+    const dailyRows = await fetchInsightsRows(token, accountId, dailyParams)
+    daily = dailyRows.map(toDailyPoint)
+  }
+
+  return { accountId, currency, totals, daily }
+}
+
+export async function fetchAdsWithInsights(
+  token: string,
+  accountId: string,
+  currency: string,
+  dateParams: Record<string, string>,
+  options: { readonly limit?: number } = {},
+): Promise<readonly AdWithInsights[]> {
+  const limit = options.limit ?? 200
+  const insightsSubfield = buildInsightsSubfield(dateParams)
+  const fields = [
+    'id',
+    'name',
+    'status',
+    'effective_status',
+    'creative{id,thumbnail_url,object_type,video_id}',
+    insightsSubfield,
+  ].join(',')
+
+  const url = buildUrl(`/${accountId}/ads`, token, { fields, limit: String(limit) })
+  const json = await callGraphApi<GraphAdsListResponse>(url)
+  if (json.error) {
+    throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
+  }
+  return (json.data ?? []).map((raw) => toAdWithInsights(raw, accountId, currency))
+}
+
+function buildInsightsSubfield(dateParams: Record<string, string>): string {
+  const fragments: string[] = []
+  for (const [key, value] of Object.entries(dateParams)) {
+    fragments.push(`${key}(${encodeFieldArg(value)})`)
+  }
+  const args = fragments.length > 0 ? `.${fragments.join('.')}` : ''
+  return `insights${args}{${INSIGHTS_FIELDS}}`
+}
+
+function encodeFieldArg(value: string): string {
+  return value.replaceAll(' ', '_')
+}
+
+async function fetchInsightsRows(
+  token: string,
+  accountId: string,
+  params: Record<string, string>,
+): Promise<readonly GraphInsightsRow[]> {
+  const url = buildUrl(`/${accountId}/insights`, token, params)
+  const json = await callGraphApi<GraphInsightsResponse>(url)
+  if (json.error) {
+    throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
+  }
+  return json.data ?? []
+}
+
+function sumInsightsRows(rows: readonly GraphInsightsRow[]): InsightsTotals {
+  return rows.reduce<InsightsTotals>(
+    (acc, row) => {
+      const r = rowToTotals(row)
+      return {
+        spend: acc.spend + r.spend,
+        revenue: acc.revenue + r.revenue,
+        purchases: acc.purchases + r.purchases,
+        impressions: acc.impressions + r.impressions,
+        clicks: acc.clicks + r.clicks,
+      }
+    },
+    { spend: 0, revenue: 0, purchases: 0, impressions: 0, clicks: 0 },
+  )
+}
+
+function rowToTotals(row: GraphInsightsRow): InsightsTotals {
+  return {
+    spend: parseNumber(row.spend),
+    revenue: sumPurchaseActions(row.action_values),
+    purchases: sumPurchaseActions(row.actions),
+    impressions: parseNumber(row.impressions),
+    clicks: parseNumber(row.clicks),
+  }
+}
+
+function toDailyPoint(row: GraphInsightsRow): InsightsDailyPoint {
+  const totals = rowToTotals(row)
+  return { date: row.date_start ?? '', ...totals }
+}
+
+function sumPurchaseActions(actions: readonly GraphAction[] | undefined): number {
+  if (!actions) {
+    return 0
+  }
+  return actions.reduce((acc, a) => {
+    if (PURCHASE_ACTION_TYPES.has(a.action_type)) {
+      return acc + parseNumber(a.value)
+    }
+    return acc
+  }, 0)
+}
+
+function parseNumber(value: string | undefined): number {
+  if (!value) {
+    return 0
+  }
+  const n = Number(value)
+  return Number.isFinite(n) ? n : 0
+}
+
+function toAdWithInsights(
+  raw: GraphAdWithCreativeRaw,
+  accountId: string,
+  currency: string,
+): AdWithInsights {
+  const insightsRow = raw.insights?.data?.[0]
+  const insights = insightsRow
+    ? rowToTotals(insightsRow)
+    : { spend: 0, revenue: 0, purchases: 0, impressions: 0, clicks: 0 }
+  return {
+    id: raw.id,
+    name: raw.name,
+    status: raw.status,
+    effectiveStatus: raw.effective_status,
+    creativeType: classifyCreativeType(raw.creative),
+    thumbnailUrl: raw.creative?.thumbnail_url ?? null,
+    accountId,
+    currency,
+    insights,
+  }
+}
+
+function classifyCreativeType(
+  creative: GraphAdWithCreativeRaw['creative'],
+): 'image' | 'video' | 'unknown' {
+  if (!creative) {
+    return 'unknown'
+  }
+  if (creative.video_id) {
+    return 'video'
+  }
+  if (creative.object_type === 'VIDEO' || creative.object_type === 'SHARE') {
+    return creative.object_type === 'VIDEO' ? 'video' : 'image'
+  }
+  if (creative.object_type === 'IMAGE' || creative.object_type === 'PHOTO') {
+    return 'image'
+  }
+  return 'unknown'
 }
 
 // ─── Private helpers ──────────────────────────────────────────────────────────

@@ -1,0 +1,152 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.heading {
+  margin: 0;
+  font-family: var(--font-syne), system-ui, sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.midGrid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 1100px) {
+  .midGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.spendSection,
+.accountSection {
+  min-width: 0;
+}
+
+.notice {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px 20px;
+  border-radius: 12px;
+  border: 1px solid;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+}
+
+.notice strong {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.notice p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  opacity: 0.85;
+}
+
+.notice[data-variant='info'] {
+  border-color: rgba(96, 165, 250, 0.4);
+  background: rgba(96, 165, 250, 0.08);
+}
+
+.notice[data-variant='error'] {
+  border-color: rgba(248, 113, 113, 0.4);
+  background: rgba(248, 113, 113, 0.08);
+}
+
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.skeletonRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 1100px) {
+  .skeletonRow {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.skeletonTile {
+  height: 96px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+.skeletonChartRow {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 1100px) {
+  .skeletonChartRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+.skeletonChart {
+  height: 280px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+.skeletonAccount {
+  height: 280px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+.skeletonLeaderboard {
+  height: 240px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeletonTile,
+  .skeletonChart,
+  .skeletonAccount,
+  .skeletonLeaderboard {
+    animation: none;
+  }
+}

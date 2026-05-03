@@ -1,16 +1,10 @@
-import { findBrandById } from '@/config/brands'
-import ComingSoonPanel from '@/components/layout/ComingSoonPanel/ComingSoonPanel'
-import MetaAdsView from './components/MetaAdsView'
+import { redirect } from 'next/navigation'
 
 interface Props {
   readonly params: Promise<{ readonly brandId: string }>
 }
 
-export default async function MetaAdsPage({ params }: Props): Promise<JSX.Element> {
+export default async function MetaAdsRedirect({ params }: Props): Promise<never> {
   const { brandId } = await params
-  const brand = findBrandById(brandId)
-  if (!brand) {
-    return <ComingSoonPanel moduleLabel="Meta Ads" brandLabel={brandId} />
-  }
-  return <MetaAdsView brandId={brand.id} />
+  redirect(`/brands/${brandId}/meta-ads/overview`)
 }
