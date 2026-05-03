@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { cls } from '@/lib/css'
 import styles from './Section.module.css'
 
 interface Props {
@@ -10,7 +11,7 @@ interface Props {
 
 export default function Section({ title, action, children, className }: Props): JSX.Element {
   return (
-    <section className={`${styles.section}${className ? ` ${className}` : ''}`}>
+    <section className={cls(styles.section, className)}>
       {(title || action) && (
         <header className={styles.header}>
           {title && <h2 className={styles.title}>{title}</h2>}
