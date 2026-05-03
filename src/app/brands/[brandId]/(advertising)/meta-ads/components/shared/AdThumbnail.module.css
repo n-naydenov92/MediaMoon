@@ -46,6 +46,6 @@
   justify-content: center;
   font-size: 9px;
   color: #ffffff;
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--overlay-strong);
   border-radius: 4px;
 }

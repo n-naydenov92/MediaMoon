@@ -14,8 +14,12 @@
   --accent-hover: #7d75ff;
   --accent-soft: rgba(108, 99, 255, 0.18);
   --success: #10b981;
+  --success-soft: rgba(16, 185, 129, 0.15);
   --error: #ef4444;
+  --error-soft: rgba(239, 68, 68, 0.15);
   --warning: #eab308;
+  --warning-soft: rgba(234, 179, 8, 0.15);
+  --overlay-strong: rgba(0, 0, 0, 0.6);
 
   --surface-1: rgba(255, 255, 255, 0.02);
   --surface-2: rgba(255, 255, 255, 0.04);
@@ -27,11 +31,6 @@
   --notice-info-bg: rgba(96, 165, 250, 0.08);
   --notice-error-border: rgba(248, 113, 113, 0.4);
   --notice-error-bg: rgba(248, 113, 113, 0.08);
-
-  --chart-spend: rgba(154, 154, 168, 0.6);
-  --chart-revenue: #6c63ff;
-  --chart-grid: rgba(255, 255, 255, 0.06);
-  --chart-axis: rgba(255, 255, 255, 0.45);
 }
 
 :root[data-theme='light'] {
@@ -47,8 +46,12 @@
   --accent-hover: #6c63ff;
   --accent-soft: rgba(91, 82, 229, 0.12);
   --success: #059669;
+  --success-soft: rgba(5, 150, 105, 0.12);
   --error: #dc2626;
+  --error-soft: rgba(220, 38, 38, 0.1);
   --warning: #ca8a04;
+  --warning-soft: rgba(202, 138, 4, 0.12);
+  --overlay-strong: rgba(0, 0, 0, 0.6);
 
   --surface-1: rgba(10, 10, 15, 0.02);
   --surface-2: rgba(10, 10, 15, 0.04);
@@ -60,11 +63,6 @@
   --notice-info-bg: rgba(37, 99, 235, 0.08);
   --notice-error-border: rgba(220, 38, 38, 0.35);
   --notice-error-bg: rgba(220, 38, 38, 0.06);
-
-  --chart-spend: rgba(74, 74, 88, 0.55);
-  --chart-revenue: #5b52e5;
-  --chart-grid: rgba(10, 10, 15, 0.06);
-  --chart-axis: rgba(10, 10, 15, 0.5);
 }
 
 *,

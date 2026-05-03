@@ -49,11 +49,11 @@
 }
 
 .tooltipDot[data-key='spendEur'] {
-  background: var(--chart-spend);
+  background: var(--text-muted);
 }
 
 .tooltipDot[data-key='revenueEur'] {
-  background: var(--chart-revenue);
+  background: var(--accent);
 }
 
 .tooltipLabel {
