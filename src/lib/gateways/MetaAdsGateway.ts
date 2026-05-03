@@ -106,8 +106,7 @@ interface GraphAdResponse {
 
 // ─── Public functions ─────────────────────────────────────────────────────────
 
-export async function fetchAdAccounts(): Promise<readonly AdAccount[]> {
-  const token = requireToken()
+export async function fetchAdAccounts(token: string): Promise<readonly AdAccount[]> {
   const url = buildUrl('/me/adaccounts', token, {
     fields: 'id,name,account_status,currency,timezone_name',
     limit: '100',
@@ -117,8 +116,7 @@ export async function fetchAdAccounts(): Promise<readonly AdAccount[]> {
   return (json.data ?? []).map(toAdAccount)
 }
 
-export async function fetchCampaigns(accountId: string): Promise<readonly Campaign[]> {
-  const token = requireToken()
+export async function fetchCampaigns(token: string, accountId: string): Promise<readonly Campaign[]> {
   const url = buildUrl(`/${accountId}/campaigns`, token, {
     fields: 'id,name,status,effective_status',
     limit: '100',
@@ -128,8 +126,7 @@ export async function fetchCampaigns(accountId: string): Promise<readonly Campai
   return (json.data ?? []).map(toCampaign)
 }
 
-export async function fetchAdSets(campaignId: string): Promise<readonly AdSet[]> {
-  const token = requireToken()
+export async function fetchAdSets(token: string, campaignId: string): Promise<readonly AdSet[]> {
   const url = buildUrl(`/${campaignId}/adsets`, token, {
     fields: 'id,name,status,effective_status',
     limit: '100',
@@ -139,8 +136,7 @@ export async function fetchAdSets(campaignId: string): Promise<readonly AdSet[]>
   return (json.data ?? []).map(toAdSet)
 }
 
-export async function fetchPages(): Promise<readonly Page[]> {
-  const token = requireToken()
+export async function fetchPages(token: string): Promise<readonly Page[]> {
   const url = buildUrl('/me/accounts', token, { fields: 'id,name', limit: '100' })
   const json = await callGraphApi<GraphListResponse<GraphPageRaw>>(url)
   if (json.error) throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
@@ -148,12 +144,12 @@ export async function fetchPages(): Promise<readonly Page[]> {
 }
 
 export async function uploadImage(
+  token: string,
   accountId: string,
   bytes: ArrayBuffer,
   filename: string,
   mimeType: string,
 ): Promise<{ hash: string }> {
-  const token = requireToken()
   const form = new FormData()
   const blob = new Blob([bytes], { type: mimeType })
   form.append(filename, blob, filename)
@@ -169,12 +165,12 @@ export async function uploadImage(
 }
 
 export async function uploadVideo(
+  token: string,
   accountId: string,
   bytes: ArrayBuffer,
   filename: string,
   mimeType: string,
 ): Promise<{ id: string }> {
-  const token = requireToken()
   const form = new FormData()
   const blob = new Blob([bytes], { type: mimeType })
   form.append('source', blob, filename)
@@ -188,9 +184,7 @@ export async function uploadVideo(
   return { id: json.id }
 }
 
-export async function createAdCreative(params: AdCreativeParams): Promise<{ id: string }> {
-  const token = requireToken()
-
+export async function createAdCreative(token: string, params: AdCreativeParams): Promise<{ id: string }> {
   let storySpec: Record<string, unknown>
 
   if (params.imageHash) {
@@ -250,12 +244,12 @@ export async function createAdCreative(params: AdCreativeParams): Promise<{ id: 
 }
 
 export async function createAd(
+  token: string,
   accountId: string,
   adSetId: string,
   creativeId: string,
   name: string,
 ): Promise<{ id: string }> {
-  const token = requireToken()
   const body = new URLSearchParams({
     name,
     adset_id: adSetId,
@@ -269,12 +263,6 @@ export async function createAd(
 }
 
 // ─── Private helpers ──────────────────────────────────────────────────────────
-
-function requireToken(): string {
-  const token = process.env.META_ACCESS_TOKEN
-  if (!token) throw new Error('META_ACCESS_TOKEN is not configured')
-  return token
-}
 
 function buildUrl(path: string, token: string, params: Record<string, string>): string {
   const qs = new URLSearchParams({ ...params, access_token: token })

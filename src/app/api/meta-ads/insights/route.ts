@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { resolveBrandTokenFromRequest } from '@/lib/meta/resolveBrandToken'
 
 const BASE = 'https://graph.facebook.com/v21.0'
-const TOKEN = process.env.META_ACCESS_TOKEN ?? ''
 
 const FIELDS = [
   'impressions',
@@ -22,6 +22,10 @@ const FIELDS = [
 ].join(',')
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
+  const resolved = resolveBrandTokenFromRequest(request)
+  if (!resolved.ok) return resolved.response
+  const token = resolved.token
+
   const adId = request.nextUrl.searchParams.get('adId')
   if (!adId) {
     return NextResponse.json({ error: 'adId required' }, { status: 400 })
@@ -32,7 +36,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   const qs = new URLSearchParams({
     fields: FIELDS,
     date_preset: datePreset,
-    access_token: TOKEN,
+    access_token: token,
   })
 
   const creativeFields = [
@@ -42,7 +46,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
   const [insightsRes, adRes] = await Promise.all([
     fetch(`${BASE}/${adId}/insights?${qs}`),
-    fetch(`${BASE}/${adId}?fields=${encodeURIComponent(creativeFields)}&access_token=${TOKEN}`),
+    fetch(`${BASE}/${adId}?fields=${encodeURIComponent(creativeFields)}&access_token=${token}`),
   ])
 
   const insights = await insightsRes.json() as { data?: unknown[]; error?: unknown }
@@ -51,18 +55,17 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   const creative = ad['creative'] as Record<string, unknown> | undefined
   const storyId = creative?.['effective_object_story_id'] as string | undefined
 
-  // Extract video_id from object_story_spec if present
   const storySpec = creative?.['object_story_spec'] as Record<string, unknown> | undefined
   const videoData = storySpec?.['video_data'] as Record<string, unknown> | undefined
   const videoId = videoData?.['video_id'] as string | undefined
 
   const [postPreview, videoSource] = await Promise.all([
     storyId
-      ? fetch(`${BASE}/${storyId}?fields=message,story,attachments{media,title,description,url}&access_token=${TOKEN}`)
+      ? fetch(`${BASE}/${storyId}?fields=message,story,attachments{media,title,description,url}&access_token=${token}`)
           .then((r) => r.json())
       : Promise.resolve(null),
     videoId
-      ? fetch(`${BASE}/${videoId}?fields=source,thumbnails&access_token=${TOKEN}`)
+      ? fetch(`${BASE}/${videoId}?fields=source,thumbnails&access_token=${token}`)
           .then((r) => r.json() as Promise<{ source?: string; thumbnails?: { data?: { uri?: string }[] }; error?: unknown }>)
       : Promise.resolve(null),
   ])

@@ -1,6 +1,8 @@
 import type { BrandConfig } from '@/types'
 
-export const BRAND_REGISTRY: readonly BrandConfig[] = [
+export type BrandId = 'stoitchkov' | 'thegreenbear' | 'sapphire'
+
+export const BRAND_REGISTRY: readonly (BrandConfig & { readonly id: BrandId })[] = [
   {
     id: 'stoitchkov',
     label: 'Stoitchkov Nutrition',
@@ -27,6 +29,10 @@ export const BRAND_REGISTRY: readonly BrandConfig[] = [
   },
 ]
 
-export function findBrandById(id: string): BrandConfig | null {
+export function findBrandById(id: string): (BrandConfig & { readonly id: BrandId }) | null {
   return BRAND_REGISTRY.find((b) => b.id === id) ?? null
+}
+
+export function isBrandId(id: string): id is BrandId {
+  return BRAND_REGISTRY.some((b) => b.id === id)
 }

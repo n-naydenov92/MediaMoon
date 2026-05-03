@@ -8,6 +8,7 @@ import {
   type CtaType,
   type PublishAdResult,
 } from '@/lib/gateways/MetaAdsGateway'
+import { resolveBrandTokenFromRequest } from '@/lib/meta/resolveBrandToken'
 
 type PublishStep = 'upload' | 'creative' | 'ad'
 
@@ -18,6 +19,10 @@ function isCtaType(v: string): v is CtaType {
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  const resolved = resolveBrandTokenFromRequest(request)
+  if (!resolved.ok) return resolved.response
+  const token = resolved.token
+
   const form = await request.formData()
 
   const accountId = form.get('accountId')
@@ -51,10 +56,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const arrayBuffer = await attachmentFile.arrayBuffer()
     try {
       if (attachmentType === 'video') {
-        const result = await uploadVideo(accountId, arrayBuffer, attachmentFile.name, attachmentFile.type)
+        const result = await uploadVideo(token, accountId, arrayBuffer, attachmentFile.name, attachmentFile.type)
         mediaId = result.id
       } else {
-        const result = await uploadImage(accountId, arrayBuffer, attachmentFile.name, attachmentFile.type)
+        const result = await uploadImage(token, accountId, arrayBuffer, attachmentFile.name, attachmentFile.type)
         imageHash = result.hash
       }
     } catch (err) {
@@ -64,7 +69,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   let creativeId: string
   try {
-    const creative = await createAdCreative({
+    const creative = await createAdCreative(token, {
       accountId, headline, bodyText, destinationUrl, ctaType, pageId, imageHash, videoId: mediaId,
     })
     creativeId = creative.id
@@ -74,7 +79,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   let adId: string
   try {
-    const ad = await createAd(accountId, adSetId, creativeId, headline)
+    const ad = await createAd(token, accountId, adSetId, creativeId, headline)
     adId = ad.id
   } catch (err) {
     return errorResponse(err, 'ad')

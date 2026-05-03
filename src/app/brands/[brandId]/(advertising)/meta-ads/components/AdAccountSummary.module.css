@@ -1,0 +1,85 @@
+.card {
+  display: flex;
+  align-items: stretch;
+  gap: 16px;
+  padding: 18px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.accent {
+  width: 4px;
+  border-radius: 2px;
+  background: var(--brand-color);
+  flex-shrink: 0;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.name {
+  font-family: var(--font-syne), system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.status {
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.status[data-tone='active'] {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+
+.status[data-tone='inactive'] {
+  background: rgba(148, 163, 184, 0.15);
+  color: #94a3b8;
+}
+
+.status[data-tone='warn'] {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.id {
+  font-family: var(--font-mono, ui-monospace), monospace;
+}
+
+.currency {
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.dot {
+  opacity: 0.4;
+}
