@@ -1,5 +1,6 @@
 const GRAPH_API_BASE = 'https://graph.facebook.com/v21.0'
-const FETCH_TIMEOUT_MS = 30_000
+const LIST_FETCH_TIMEOUT_MS = 30_000
+const UPLOAD_FETCH_TIMEOUT_MS = 120_000
 
 const PURCHASE_ACTION_TYPES = new Set([
   'purchase',
@@ -401,6 +402,7 @@ function buildInsightsSubfield(dateParams: Record<string, string>): string {
   return `insights${args}{${INSIGHTS_FIELDS}}`
 }
 
+// Graph API nested field syntax `field.arg(value)` does not accept spaces.
 function encodeFieldArg(value: string): string {
   return value.replaceAll(' ', '_')
 }
@@ -461,6 +463,7 @@ function sumPurchaseActions(actions: readonly GraphAction[] | undefined): number
   }, 0)
 }
 
+// Meta convention: missing/non-numeric metric == 0.
 function parseNumber(value: string | undefined): number {
   if (!value) {
     return 0
@@ -491,22 +494,23 @@ function toAdWithInsights(
   }
 }
 
-function classifyCreativeType(
-  creative: GraphAdWithCreativeRaw['creative'],
-): 'image' | 'video' | 'unknown' {
+type CreativeType = 'image' | 'video' | 'unknown'
+
+const OBJECT_TYPE_TO_CREATIVE: Record<string, CreativeType> = {
+  VIDEO: 'video',
+  IMAGE: 'image',
+  PHOTO: 'image',
+  SHARE: 'image',
+}
+
+function classifyCreativeType(creative: GraphAdWithCreativeRaw['creative']): CreativeType {
   if (!creative) {
     return 'unknown'
   }
   if (creative.video_id) {
     return 'video'
   }
-  if (creative.object_type === 'VIDEO' || creative.object_type === 'SHARE') {
-    return creative.object_type === 'VIDEO' ? 'video' : 'image'
-  }
-  if (creative.object_type === 'IMAGE' || creative.object_type === 'PHOTO') {
-    return 'image'
-  }
-  return 'unknown'
+  return creative.object_type ? OBJECT_TYPE_TO_CREATIVE[creative.object_type] ?? 'unknown' : 'unknown'
 }
 
 // ─── Private helpers ──────────────────────────────────────────────────────────
@@ -518,7 +522,7 @@ function buildUrl(path: string, token: string, params: Record<string, string>): 
 
 async function callGraphApi<T>(url: string): Promise<T> {
   const controller = new AbortController()
-  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
+  const timer = setTimeout(() => controller.abort(), LIST_FETCH_TIMEOUT_MS)
   try {
     const response = await fetch(url, { signal: controller.signal })
     if (!response.ok) {
@@ -532,7 +536,7 @@ async function callGraphApi<T>(url: string): Promise<T> {
 
 async function callGraphApiPost<T>(path: string, body: URLSearchParams): Promise<T> {
   const controller = new AbortController()
-  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
+  const timer = setTimeout(() => controller.abort(), LIST_FETCH_TIMEOUT_MS)
   try {
     const response = await fetch(`${GRAPH_API_BASE}${path}`, {
       method: 'POST',
@@ -552,7 +556,7 @@ async function callGraphApiPost<T>(path: string, body: URLSearchParams): Promise
 
 async function callGraphApiMultipart<T>(path: string, form: FormData): Promise<T> {
   const controller = new AbortController()
-  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
+  const timer = setTimeout(() => controller.abort(), UPLOAD_FETCH_TIMEOUT_MS)
   try {
     const response = await fetch(`${GRAPH_API_BASE}${path}`, {
       method: 'POST',
