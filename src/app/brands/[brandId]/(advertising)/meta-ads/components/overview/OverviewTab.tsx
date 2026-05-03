@@ -58,13 +58,13 @@ export default function OverviewTab({ brandId }: Props): JSX.Element {
       {state.status === 'loading' && <OverviewSkeleton />}
 
       {state.status === 'no-token' && (
-        <Notice className={styles.notice} variant="info" title="Pending Meta token approval">
+        <Notice variant="info" title="Pending Meta token approval">
           Connection to this brand&apos;s Business Manager is not yet configured.
         </Notice>
       )}
 
       {state.status === 'error' && (
-        <Notice className={styles.notice} variant="error" title="Couldn't load overview">
+        <Notice variant="error" title="Couldn't load overview">
           {state.message}
         </Notice>
       )}
@@ -78,7 +78,7 @@ function OverviewContent({ summary }: { readonly summary: OverviewSummary }): JS
   const hasAnyData = summary.byAccount.length > 0 || summary.byDay.length > 0
   if (!hasAnyData) {
     return (
-      <Notice className={styles.notice} variant="info" title="No data yet">
+      <Notice variant="info" title="No data yet">
         No spend recorded for this brand in the selected range.
       </Notice>
     )

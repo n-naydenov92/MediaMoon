@@ -50,17 +50,13 @@ export default function MetaAdsView({ brandId }: Props): JSX.Element | null {
   return (
     <section className={styles.root}>
       {state.status === 'loading' && (
-        <Notice className={styles.notice} variant="info" title="Loading…">
+        <Notice variant="info" title="Loading…">
           Fetching ad accounts and campaigns from Meta.
         </Notice>
       )}
 
       {state.status === 'no-token' && (
-        <Notice
-          className={styles.notice}
-          variant="info"
-          title="Pending Meta token approval"
-        >
+        <Notice variant="info" title="Pending Meta token approval">
           Connection to {brand.label}&apos;s Business Manager
           {expectedEnvVars.length > 1 ? 's' : ''} is not yet configured. Add{' '}
           <InlineList items={expectedEnvVars} separator=" or " renderItem={(v) => <code>{v}</code>} />{' '}
@@ -69,7 +65,7 @@ export default function MetaAdsView({ brandId }: Props): JSX.Element | null {
       )}
 
       {state.status === 'error' && (
-        <Notice className={styles.notice} variant="error" title="Failed to load Meta data">
+        <Notice variant="error" title="Failed to load Meta data">
           {state.message}
         </Notice>
       )}
@@ -87,7 +83,6 @@ export default function MetaAdsView({ brandId }: Props): JSX.Element | null {
 
           {state.data.unmappedMarkets.length > 0 && (
             <Notice
-              className={styles.notice}
               variant="info"
               title={`No ad account mapped for ${state.data.unmappedMarkets
                 .map((m) => MARKET_LABELS[m])
@@ -121,7 +116,6 @@ function MarketSection({ block, brandColor, showHeading }: MarketSectionProps): 
       ))}
       {block.missingAccountIds.length > 0 && (
         <Notice
-          className={styles.notice}
           variant="error"
           title={`Account${block.missingAccountIds.length > 1 ? 's' : ''} not visible to configured token`}
         >
