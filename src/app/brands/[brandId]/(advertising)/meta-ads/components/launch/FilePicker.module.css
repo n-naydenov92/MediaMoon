@@ -1,0 +1,127 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dropZone {
+  border: 1px dashed var(--hairline-strong);
+  border-radius: 12px;
+  background: var(--surface-1);
+  transition: border-color 160ms ease-out, background 160ms ease-out;
+}
+
+.dropZone:hover,
+.dropZone[data-dragging='true'] {
+  border-color: var(--accent);
+  background: var(--surface-2);
+}
+
+.dropZone[data-disabled='true'] {
+  opacity: 0.5;
+}
+
+.dropLabel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 32px 16px;
+  cursor: pointer;
+}
+
+.dropZone[data-disabled='true'] .dropLabel {
+  cursor: not-allowed;
+}
+
+.input {
+  display: none;
+}
+
+.dropLabelMain {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.dropHint {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.preview {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--hairline);
+  background: var(--surface-2);
+}
+
+.badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: #ffffff;
+  background: var(--overlay-strong);
+  border-radius: 4px;
+}
+
+.remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  background: var(--overlay-strong);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 80ms ease-out;
+}
+
+.remove:hover:not(:disabled) {
+  background: var(--error);
+}
+
+.remove:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.name {
+  font-size: 11px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

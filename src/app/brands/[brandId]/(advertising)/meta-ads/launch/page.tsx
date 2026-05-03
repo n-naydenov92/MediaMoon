@@ -1,15 +1,15 @@
-import styles from '../page.module.css'
+import { findBrandById } from '@/config/brands'
+import LaunchAdsTab from '../components/launch/LaunchAdsTab'
 
-export default function LaunchPage(): JSX.Element {
-  return (
-    <section className={styles.root}>
-      <div className={styles.notice} data-variant="info">
-        <strong>Coming next</strong>
-        <p>
-          Bulk creative upload with server-side queue (Vercel Blob + Inngest) — pending external service
-          credentials.
-        </p>
-      </div>
-    </section>
-  )
+interface Props {
+  readonly params: Promise<{ readonly brandId: string }>
+}
+
+export default async function LaunchPage({ params }: Props): Promise<JSX.Element | null> {
+  const { brandId } = await params
+  const brand = findBrandById(brandId)
+  if (!brand) {
+    return null
+  }
+  return <LaunchAdsTab brandId={brand.id} />
 }
