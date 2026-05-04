@@ -102,10 +102,6 @@ export default function LaunchAdsTab({ brandId }: Props): JSX.Element {
 
   return (
     <section className={styles.root}>
-      <header className={styles.header}>
-        <h1 className={styles.heading}>Launch New Ads</h1>
-      </header>
-
       {launch.state.status === 'error' && (
         <Notice variant="error" title="Couldn't create the batch">
           {launch.state.message}

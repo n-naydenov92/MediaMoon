@@ -13,6 +13,7 @@ import {
 import Notice from '../Notice'
 import Section from '../shared/Section'
 import DateRangeDropdown from '../shared/DateRangeDropdown'
+import { useSetHeaderAction } from '../MetaAdsHeaderContext'
 import KpiGrid from './KpiGrid'
 import SpendChart from './SpendChart'
 import AccountBreakdown from './AccountBreakdown'
@@ -49,13 +50,14 @@ export default function OverviewTab({ brandId }: Props): JSX.Element {
     [router, pathname, searchParams],
   )
 
+  const headerAction = useMemo(
+    () => <DateRangeDropdown value={datePreset} onChange={handleDatePresetChange} />,
+    [datePreset, handleDatePresetChange],
+  )
+  useSetHeaderAction(headerAction)
+
   return (
     <div className={styles.root}>
-      <header className={styles.header}>
-        <h1 className={styles.heading}>Overview</h1>
-        <DateRangeDropdown value={datePreset} onChange={handleDatePresetChange} />
-      </header>
-
       {state.status === 'loading' && <OverviewSkeleton />}
 
       {state.status === 'no-token' && (

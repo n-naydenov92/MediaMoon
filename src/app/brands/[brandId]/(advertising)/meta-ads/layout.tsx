@@ -1,6 +1,7 @@
 import { findBrandById } from '@/config/brands'
 import ComingSoonPanel from '@/components/layout/ComingSoonPanel/ComingSoonPanel'
-import MetaAdsTabs from './components/MetaAdsTabs'
+import MetaAdsHeader from './components/MetaAdsHeader'
+import { MetaAdsHeaderProvider } from './components/MetaAdsHeaderContext'
 import styles from './layout.module.css'
 
 interface Props {
@@ -15,9 +16,11 @@ export default async function MetaAdsLayout({ params, children }: Props): Promis
     return <ComingSoonPanel moduleLabel="Meta Ads" brandLabel={brandId} />
   }
   return (
-    <div className={styles.layout}>
-      <MetaAdsTabs brandId={brand.id} />
-      <div className={styles.content}>{children}</div>
-    </div>
+    <MetaAdsHeaderProvider>
+      <div className={styles.layout}>
+        <MetaAdsHeader brandId={brand.id} />
+        <div className={styles.content}>{children}</div>
+      </div>
+    </MetaAdsHeaderProvider>
   )
 }
