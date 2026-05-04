@@ -93,6 +93,12 @@ interface GraphListResponse<T> {
   error?: { message: string; type: string; code: number }
 }
 
+interface GraphSummaryResponse {
+  data?: unknown[]
+  summary?: { total_count?: number }
+  error?: { message: string; type: string; code: number }
+}
+
 interface GraphImageUploadResponse {
   images: Record<string, { hash: string; url: string }>
   error?: { message: string; type: string; code: number }
@@ -143,6 +149,22 @@ export async function fetchAdSets(token: string, campaignId: string): Promise<re
   const json = await callGraphApi<GraphListResponse<GraphAdSetRaw>>(url)
   if (json.error) throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
   return (json.data ?? []).map(toAdSet)
+}
+
+export async function countActiveAdsInAccount(token: string, accountId: string): Promise<number> {
+  const url = buildUrl(`/${accountId}/ads`, token, {
+    filtering: JSON.stringify([
+      { field: 'effective_status', operator: 'IN', value: ['ACTIVE'] },
+    ]),
+    summary: 'total_count',
+    limit: '1',
+    fields: 'id',
+  })
+  const json = await callGraphApi<GraphSummaryResponse>(url)
+  if (json.error) {
+    throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
+  }
+  return json.summary?.total_count ?? 0
 }
 
 export async function fetchPages(token: string): Promise<readonly Page[]> {

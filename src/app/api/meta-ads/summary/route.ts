@@ -7,6 +7,7 @@ import {
   getMetaTokenForAccount,
 } from '@/config/metaTokens'
 import {
+  countActiveAdsInAccount,
   fetchAccountInsights,
   fetchAdsWithInsights,
   fetchAdAccounts,
@@ -101,15 +102,16 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         if (!token) {
           return null
         }
-        const [currentInsights, previousInsights, ads] = await Promise.all([
+        const [currentInsights, previousInsights, ads, activeAdsCount] = await Promise.all([
           fetchAccountInsights(token, account.id, account.currency, datePresent, { daily: true }),
           fetchAccountInsights(token, account.id, account.currency, datePast, { daily: false }),
           fetchAdsWithInsights(token, account.id, account.currency, datePresent, {
             limit: ADS_PER_ACCOUNT_LIMIT,
             filters: [{ field: 'spend', operator: 'GREATER_THAN', value: criteria.minSpend }],
           }),
+          countActiveAdsInAccount(token, account.id),
         ])
-        return { account, currentInsights, previousInsights, ads }
+        return { account, currentInsights, previousInsights, ads, activeAdsCount }
       }),
     )
     const usable = perAccount.filter((x): x is NonNullable<typeof x> => x !== null)
@@ -141,7 +143,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         u.account,
         u.currentInsights.totals.spend,
         u.currentInsights.totals.revenue,
-        u.ads.filter((a) => a.effectiveStatus === 'ACTIVE').length,
+        u.activeAdsCount,
       ),
     )
 
