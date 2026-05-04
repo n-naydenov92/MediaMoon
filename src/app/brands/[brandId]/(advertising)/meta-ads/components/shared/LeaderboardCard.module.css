@@ -55,11 +55,40 @@
   background: var(--surface-2);
 }
 
+.thumbnailWrap {
+  display: inline-flex;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
 .text {
   display: flex;
   flex-direction: column;
   gap: 2px;
   min-width: 0;
+}
+
+.nameRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.statusDot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-muted);
+}
+
+.statusDot[data-status='active'] {
+  background: var(--success);
+}
+
+.statusDot[data-status='paused'] {
+  background: var(--warning);
 }
 
 .name {
