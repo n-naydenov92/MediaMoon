@@ -9,6 +9,7 @@ const isPublicRoute = createRouteMatcher([
   '/sso-callback(.*)',
   '/unauthorized',
   '/api/webhooks(.*)',
+  '/api/inngest(.*)',
 ])
 
 const isModuleRoute = createRouteMatcher(['/modules/:moduleId(.*)'])
