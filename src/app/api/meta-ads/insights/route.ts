@@ -31,7 +31,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: 'adId required' }, { status: 400 })
   }
 
-  const datePreset = request.nextUrl.searchParams.get('datePreset') ?? 'last_30d'
+  const datePreset = request.nextUrl.searchParams.get('datePreset') ?? 'today'
 
   const qs = new URLSearchParams({
     fields: FIELDS,
