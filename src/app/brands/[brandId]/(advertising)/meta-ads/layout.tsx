@@ -1,6 +1,5 @@
 import { findBrandById } from '@/config/brands'
 import ComingSoonPanel from '@/components/layout/ComingSoonPanel/ComingSoonPanel'
-import MetaWindowProvider from '@/contexts/metaWindow/MetaWindowProvider'
 import MetaAdsHeader from './components/MetaAdsHeader'
 import { MetaAdsHeaderProvider } from './components/MetaAdsHeaderContext'
 import CreativePreviewProvider from './components/shared/CreativePreview/CreativePreviewProvider'
@@ -19,14 +18,12 @@ export default async function MetaAdsLayout({ params, children }: Props): Promis
   }
   return (
     <MetaAdsHeaderProvider>
-      <MetaWindowProvider>
-        <CreativePreviewProvider>
-          <div className={styles.layout}>
-            <MetaAdsHeader brandId={brand.id} />
-            <div className={styles.content}>{children}</div>
-          </div>
-        </CreativePreviewProvider>
-      </MetaWindowProvider>
+      <CreativePreviewProvider>
+        <div className={styles.layout}>
+          <MetaAdsHeader brandId={brand.id} />
+          <div className={styles.content}>{children}</div>
+        </div>
+      </CreativePreviewProvider>
     </MetaAdsHeaderProvider>
   )
 }

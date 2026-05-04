@@ -1,21 +1,29 @@
-'use client'
-
-import { useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import type { Market } from '@/types'
 import type { BrandId } from '@/config/brands'
-import { useMetaWindow } from '@/contexts/metaWindow/MetaWindowProvider'
-import {
-  DEFAULT_TOP_CRITERIA,
+import type {
+  AccountSummary,
+  AdLeaderboardEntry,
+  DailyPoint,
+  KpiDelta,
+  TopCriteria,
 } from '@/lib/meta/aggregate'
-import {
-  previousPeriod,
-  type DatePreset,
-  type DateRangeSelection,
-} from '@/lib/meta/dateRange'
-import { sliceWindow, type OverviewSummary } from '@/lib/meta/sliceWindow'
+import type { DatePreset } from '@/lib/meta/dateRange'
 import { ALL_MARKETS } from '@/lib/markets'
 
-export type { OverviewSummary } from '@/lib/meta/sliceWindow'
+const NO_TOKEN_STATUS = 503
+
+export interface OverviewSummary {
+  readonly kpis: KpiDelta
+  readonly byDay: readonly DailyPoint[]
+  readonly byAccount: readonly AccountSummary[]
+  readonly topAll: readonly AdLeaderboardEntry[]
+  readonly topVideos: readonly AdLeaderboardEntry[]
+  readonly topImages: readonly AdLeaderboardEntry[]
+  readonly underperformers: readonly AdLeaderboardEntry[]
+  readonly criteria: TopCriteria
+  readonly fetchedAt: number
+}
 
 export type OverviewState =
   | { readonly status: 'loading' }
@@ -34,33 +42,55 @@ interface OverviewQuery {
   readonly datePreset: DatePreset
 }
 
+interface ApiError {
+  error?: string
+}
+
 export function useOverviewData(query: OverviewQuery): OverviewControls {
-  const { state: windowState, refresh, setKey } = useMetaWindow()
+  const [state, setState] = useState<OverviewState>({ status: 'loading' })
+  const [refreshTick, setRefreshTick] = useState(0)
 
   useEffect(() => {
-    setKey({ brandId: query.brandId, market: query.market })
-  }, [query.brandId, query.market, setKey])
+    const controller = new AbortController()
+    setState({ status: 'loading' })
 
-  const state = useMemo<OverviewState>(() => {
-    if (windowState.status === 'idle' || windowState.status === 'loading') {
-      return { status: 'loading' }
+    const search = new URLSearchParams({ brandId: query.brandId, datePreset: query.datePreset })
+    if (query.market !== ALL_MARKETS) {
+      search.set('market', query.market)
     }
-    if (windowState.status === 'no-token') {
-      return { status: 'no-token' }
-    }
-    if (windowState.status === 'error') {
-      return { status: 'error', message: windowState.message }
-    }
-    const current: DateRangeSelection = { kind: 'preset', preset: query.datePreset }
-    const previous = previousPeriod(current)
-    const data = sliceWindow({
-      window: windowState.window,
-      criteria: DEFAULT_TOP_CRITERIA,
-      current,
-      previous,
-    })
-    return { status: 'success', data }
-  }, [windowState, query.datePreset])
+
+    void (async () => {
+      try {
+        const response = await fetch(`/api/meta-ads/summary?${search.toString()}`, {
+          signal: controller.signal,
+          cache: refreshTick > 0 ? 'reload' : 'default',
+        })
+        if (response.status === NO_TOKEN_STATUS) {
+          setState({ status: 'no-token' })
+          return
+        }
+        if (!response.ok) {
+          const body = (await response.json().catch(() => ({}))) as ApiError
+          setState({ status: 'error', message: body.error ?? `HTTP ${response.status}` })
+          return
+        }
+        const data = (await response.json()) as OverviewSummary
+        setState({ status: 'success', data })
+      } catch (err) {
+        if (err instanceof DOMException && err.name === 'AbortError') {
+          return
+        }
+        const message = err instanceof Error ? err.message : 'Unknown error'
+        setState({ status: 'error', message })
+      }
+    })()
+
+    return () => controller.abort()
+  }, [query.brandId, query.market, query.datePreset, refreshTick])
+
+  const refresh = useCallback((): void => {
+    setRefreshTick((n) => n + 1)
+  }, [])
 
   return { state, refresh }
 }
