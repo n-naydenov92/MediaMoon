@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Market } from '@/types'
 import type { BrandId } from '@/config/brands'
 import type {
@@ -49,10 +49,17 @@ interface ApiError {
 export function useOverviewData(query: OverviewQuery): OverviewControls {
   const [state, setState] = useState<OverviewState>({ status: 'loading' })
   const [refreshTick, setRefreshTick] = useState(0)
+  const cacheRef = useRef<Map<string, OverviewSummary>>(new Map())
 
   useEffect(() => {
     const controller = new AbortController()
-    setState({ status: 'loading' })
+    const cacheKey = `${query.brandId}|${query.market}|${query.datePreset}`
+    const cached = refreshTick === 0 ? cacheRef.current.get(cacheKey) : undefined
+    if (cached) {
+      setState({ status: 'success', data: cached })
+    } else {
+      setState({ status: 'loading' })
+    }
 
     const search = new URLSearchParams({ brandId: query.brandId, datePreset: query.datePreset })
     if (query.market !== ALL_MARKETS) {
@@ -75,6 +82,7 @@ export function useOverviewData(query: OverviewQuery): OverviewControls {
           return
         }
         const data = (await response.json()) as OverviewSummary
+        cacheRef.current.set(cacheKey, data)
         setState({ status: 'success', data })
       } catch (err) {
         if (err instanceof DOMException && err.name === 'AbortError') {

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import RefreshIcon from '@mui/icons-material/Refresh'
+import Tooltip from '@mui/material/Tooltip'
 import { useThemeMode } from '@/styles/useThemeMode'
 import styles from './UpdatedBadge.module.css'
 
@@ -26,21 +27,35 @@ export default function UpdatedBadge({ fetchedAt, onRefresh, disabled = false }:
   }, [])
 
   const label = fetchedAt === null ? 'Loading…' : `Updated ${formatAgo(now - fetchedAt)}`
+  const labelTooltip = fetchedAt === null ? '' : `Last fetched at ${formatTimestamp(fetchedAt)}`
 
   return (
     <div className={styles.root} data-theme={mode}>
-      <span className={styles.text}>{label}</span>
-      <button
-        type="button"
-        className={styles.refresh}
-        onClick={onRefresh}
-        disabled={disabled || fetchedAt === null}
-        aria-label="Refresh data"
-      >
-        <RefreshIcon fontSize="small" />
-      </button>
+      <Tooltip title={labelTooltip} arrow disableInteractive>
+        <span className={styles.text}>{label}</span>
+      </Tooltip>
+      <Tooltip title="Refresh data" arrow disableInteractive>
+        <span>
+          <button
+            type="button"
+            className={styles.refresh}
+            onClick={onRefresh}
+            disabled={disabled || fetchedAt === null}
+            aria-label="Refresh data"
+          >
+            <RefreshIcon fontSize="small" />
+          </button>
+        </span>
+      </Tooltip>
     </div>
   )
+}
+
+function formatTimestamp(ms: number): string {
+  const d = new Date(ms)
+  const hh = String(d.getHours()).padStart(2, '0')
+  const mm = String(d.getMinutes()).padStart(2, '0')
+  return `${hh}:${mm}`
 }
 
 function formatAgo(deltaMs: number): string {

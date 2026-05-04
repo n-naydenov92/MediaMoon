@@ -1,6 +1,8 @@
 const GRAPH_API_BASE = 'https://graph.facebook.com/v21.0'
 const LIST_FETCH_TIMEOUT_MS = 30_000
 const UPLOAD_FETCH_TIMEOUT_MS = 120_000
+const DEFAULT_ADS_LIMIT = 500
+const MAX_INSIGHTS_PAGES = 50
 
 // Meta returns the same purchase under multiple action_type rows (e.g. both
 // `purchase` and `omni_purchase` and `offsite_conversion.fb_pixel_purchase`).
@@ -346,6 +348,27 @@ interface GraphAdsListResponse {
   paging?: { next?: string }
 }
 
+interface GraphAdInsightsRow {
+  ad_id?: string
+  spend?: string
+  impressions?: string
+  clicks?: string
+  actions?: GraphAction[]
+  action_values?: GraphAction[]
+}
+
+interface GraphAdInsightsResponse {
+  data?: GraphAdInsightsRow[]
+  error?: { message: string; type: string; code: number }
+  paging?: { next?: string }
+}
+
+export interface AdInsightsFilter {
+  readonly field: string
+  readonly operator: 'GREATER_THAN' | 'LESS_THAN' | 'EQUAL' | 'IN'
+  readonly value: number | string | readonly string[]
+}
+
 export async function fetchAccountInsights(
   token: string,
   accountId: string,
@@ -371,39 +394,109 @@ export async function fetchAdsWithInsights(
   accountId: string,
   currency: string,
   dateParams: Record<string, string>,
-  options: { readonly limit?: number } = {},
+  options: {
+    readonly limit?: number
+    readonly filters?: readonly AdInsightsFilter[]
+  } = {},
 ): Promise<readonly AdWithInsights[]> {
-  const limit = options.limit ?? 200
-  const insightsSubfield = buildInsightsSubfield(dateParams)
-  const fields = [
-    'id',
-    'name',
-    'status',
-    'effective_status',
-    'creative{id,thumbnail_url,object_type,video_id}',
-    insightsSubfield,
-  ].join(',')
+  const limit = options.limit ?? DEFAULT_ADS_LIMIT
+  const filters = options.filters ?? [{ field: 'spend', operator: 'GREATER_THAN', value: 0 }]
 
-  const url = buildUrl(`/${accountId}/ads`, token, { fields, limit: String(limit) })
-  const json = await callGraphApi<GraphAdsListResponse>(url)
-  if (json.error) {
-    throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
+  const insightsRows = await fetchFilteredAdInsightsRows(
+    token,
+    accountId,
+    dateParams,
+    filters,
+    limit,
+  )
+  if (insightsRows.length === 0) {
+    return []
   }
-  return (json.data ?? []).map((raw) => toAdWithInsights(raw, accountId, currency))
+
+  const adIds = insightsRows.map((r) => r.ad_id).filter((id): id is string => Boolean(id))
+  const metadataById = await fetchAdsMetadataByIds(token, accountId, adIds)
+
+  return insightsRows
+    .map((row) => {
+      const meta = row.ad_id ? metadataById.get(row.ad_id) : undefined
+      return meta ? mergeAdInsightsWithMeta(row, meta, accountId, currency) : null
+    })
+    .filter((ad): ad is AdWithInsights => ad !== null)
 }
 
-function buildInsightsSubfield(dateParams: Record<string, string>): string {
-  const fragments: string[] = []
-  for (const [key, value] of Object.entries(dateParams)) {
-    fragments.push(`${key}(${encodeFieldArg(value)})`)
+const FILTERED_INSIGHTS_FIELDS = `ad_id,${INSIGHTS_FIELDS}`
+
+async function fetchFilteredAdInsightsRows(
+  token: string,
+  accountId: string,
+  dateParams: Record<string, string>,
+  filters: readonly AdInsightsFilter[],
+  limit: number,
+): Promise<readonly GraphAdInsightsRow[]> {
+  const params: Record<string, string> = {
+    level: 'ad',
+    fields: FILTERED_INSIGHTS_FIELDS,
+    filtering: JSON.stringify(filters),
+    limit: String(limit),
+    ...dateParams,
   }
-  const args = fragments.length > 0 ? `.${fragments.join('.')}` : ''
-  return `insights${args}{${INSIGHTS_FIELDS}}`
+  let url: string | null = buildUrl(`/${accountId}/insights`, token, params)
+  const all: GraphAdInsightsRow[] = []
+  for (let page = 0; page < MAX_INSIGHTS_PAGES && url; page += 1) {
+    const json: GraphAdInsightsResponse = await callGraphApi<GraphAdInsightsResponse>(url)
+    if (json.error) {
+      throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
+    }
+    all.push(...(json.data ?? []))
+    url = json.paging?.next ?? null
+  }
+  return all
 }
 
-// Graph API nested field syntax `field.arg(value)` does not accept spaces.
-function encodeFieldArg(value: string): string {
-  return value.replaceAll(' ', '_')
+const AD_METADATA_BATCH_SIZE = 50
+
+async function fetchAdsMetadataByIds(
+  token: string,
+  accountId: string,
+  adIds: readonly string[],
+): Promise<ReadonlyMap<string, GraphAdWithCreativeRaw>> {
+  const fields = 'id,name,status,effective_status,creative{id,thumbnail_url,object_type,video_id}'
+  const byId = new Map<string, GraphAdWithCreativeRaw>()
+  for (let i = 0; i < adIds.length; i += AD_METADATA_BATCH_SIZE) {
+    const chunk = adIds.slice(i, i + AD_METADATA_BATCH_SIZE)
+    const url = buildUrl(`/${accountId}/ads`, token, {
+      fields,
+      filtering: JSON.stringify([{ field: 'ad.id', operator: 'IN', value: chunk }]),
+      limit: String(chunk.length),
+    })
+    const json = await callGraphApi<GraphAdsListResponse>(url)
+    if (json.error) {
+      throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
+    }
+    for (const raw of json.data ?? []) {
+      byId.set(raw.id, raw)
+    }
+  }
+  return byId
+}
+
+function mergeAdInsightsWithMeta(
+  row: GraphAdInsightsRow,
+  meta: GraphAdWithCreativeRaw,
+  accountId: string,
+  currency: string,
+): AdWithInsights {
+  return {
+    id: meta.id,
+    name: meta.name,
+    status: meta.status,
+    effectiveStatus: meta.effective_status,
+    creativeType: classifyCreativeType(meta.creative),
+    thumbnailUrl: meta.creative?.thumbnail_url ?? null,
+    accountId,
+    currency,
+    insights: rowToTotals(row),
+  }
 }
 
 async function fetchInsightsRows(
@@ -469,28 +562,6 @@ function parseNumber(value: string | undefined): number {
   }
   const n = Number(value)
   return Number.isFinite(n) ? n : 0
-}
-
-function toAdWithInsights(
-  raw: GraphAdWithCreativeRaw,
-  accountId: string,
-  currency: string,
-): AdWithInsights {
-  const insightsRow = raw.insights?.data?.[0]
-  const insights = insightsRow
-    ? rowToTotals(insightsRow)
-    : { spend: 0, revenue: 0, purchases: 0, impressions: 0, clicks: 0 }
-  return {
-    id: raw.id,
-    name: raw.name,
-    status: raw.status,
-    effectiveStatus: raw.effective_status,
-    creativeType: classifyCreativeType(raw.creative),
-    thumbnailUrl: raw.creative?.thumbnail_url ?? null,
-    accountId,
-    currency,
-    insights,
-  }
 }
 
 type CreativeType = 'image' | 'video' | 'unknown'

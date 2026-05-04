@@ -39,8 +39,8 @@ import {
 import { convertToEur } from '@/lib/meta/fx'
 
 const ADS_PER_ACCOUNT_LIMIT = 200
-const CACHE_MAX_AGE_SECONDS = 300
-const CACHE_STALE_WHILE_REVALIDATE_SECONDS = 60
+const CACHE_MAX_AGE_SECONDS = 1800
+const CACHE_STALE_WHILE_REVALIDATE_SECONDS = 300
 const NO_TOKEN_STATUS = 503
 const UPSTREAM_ERROR_STATUS = 502
 
@@ -84,6 +84,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   const previousSelection = previousPeriod(dateSelection)
   const datePresent = toMetaInsightsParams(dateSelection)
   const datePast = toMetaInsightsParams(previousSelection)
+  const criteria = parseCriteriaFromQuery(params)
 
   try {
     const accountsList = await fetchAllAccounts(brandId)
@@ -102,7 +103,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         const [currentInsights, previousInsights, ads] = await Promise.all([
           fetchAccountInsights(token, account.id, account.currency, datePresent, { daily: true }),
           fetchAccountInsights(token, account.id, account.currency, datePast, { daily: false }),
-          fetchAdsWithInsights(token, account.id, account.currency, datePresent, { limit: ADS_PER_ACCOUNT_LIMIT }),
+          fetchAdsWithInsights(token, account.id, account.currency, datePresent, {
+            limit: ADS_PER_ACCOUNT_LIMIT,
+            filters: [{ field: 'spend', operator: 'GREATER_THAN', value: criteria.minSpend }],
+          }),
         ])
         return { account, currentInsights, previousInsights, ads }
       }),
@@ -141,7 +145,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     )
 
     const allAdEntries = usable.flatMap((u) => u.ads.map(toLeaderboardEntry))
-    const criteria = parseCriteriaFromQuery(params)
 
     const response: SummaryResponse = {
       kpis: computeKpiDelta(sumKpis(currentKpis), sumKpis(previousKpis)),
