@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { resolveBrandTokenFromRequest } from '@/lib/meta/resolveBrandToken'
+import {
+  resolveAccountTokenFromRequest,
+  resolveBrandTokenFromRequest,
+} from '@/lib/meta/resolveBrandToken'
 
 const BASE = 'https://graph.facebook.com/v21.0'
 
@@ -22,7 +25,10 @@ const FIELDS = [
 ].join(',')
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
-  const resolved = resolveBrandTokenFromRequest(request)
+  const accountIdParam = request.nextUrl.searchParams.get('accountId')
+  const resolved = accountIdParam
+    ? resolveAccountTokenFromRequest(request)
+    : resolveBrandTokenFromRequest(request)
   if (!resolved.ok) return resolved.response
   const token = resolved.token
 
@@ -61,7 +67,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
   const [postPreview, videoSource] = await Promise.all([
     storyId
-      ? fetch(`${BASE}/${storyId}?fields=message,story,attachments{media,title,description,url}&access_token=${token}`)
+      ? fetch(`${BASE}/${storyId}?fields=message,story,from{name,id},full_picture,attachments{media,title,description,url,subattachments}&access_token=${token}`)
           .then((r) => r.json())
       : Promise.resolve(null),
     videoId
