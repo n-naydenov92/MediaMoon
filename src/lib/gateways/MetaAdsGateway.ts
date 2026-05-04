@@ -525,11 +525,31 @@ async function callGraphApi<T>(url: string): Promise<T> {
   try {
     const response = await fetch(url, { signal: controller.signal })
     if (!response.ok) {
-      throw new Error(`Graph API HTTP ${response.status}: ${response.statusText}`)
+      const body = await response.text().catch(() => '')
+      const parsed = parseGraphApiError(body)
+      throw new Error(parsed ?? `Graph API HTTP ${response.status}: ${response.statusText}`)
     }
     return response.json() as Promise<T>
   } finally {
     clearTimeout(timer)
+  }
+}
+
+function parseGraphApiError(body: string): string | null {
+  if (!body) return null
+  try {
+    const json = JSON.parse(body) as { error?: { code?: number; message?: string } }
+    const err = json.error
+    if (!err) return null
+    if (err.code === 17) {
+      return 'Meta is rate-limiting this ad account. Wait ~1-2 minutes and try again.'
+    }
+    if (err.message) {
+      return err.code !== undefined ? `Meta API error ${err.code}: ${err.message}` : err.message
+    }
+    return null
+  } catch {
+    return null
   }
 }
 
