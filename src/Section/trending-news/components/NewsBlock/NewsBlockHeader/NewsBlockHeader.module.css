@@ -38,3 +38,20 @@
     color: #9A9AA8;
   }
 }
+
+@media (max-width: 767px) {
+  .header.header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .header.header > .titleColumn,
+  .header.header > .actions {
+    margin: 0;
+  }
+
+  .actions.actions {
+    align-self: flex-start;
+  }
+}

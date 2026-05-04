@@ -42,7 +42,7 @@ export default memo(function StatsRow({ stats, actions }: Props): JSX.Element {
       justifyContent="space-between"
       className={styles.row}
     >
-      <Stack direction="row" spacing={6} flexWrap="wrap" useFlexGap alignItems="center">
+      <Stack direction="row" spacing={6} flexWrap="wrap" useFlexGap alignItems="center" className={styles.items}>
         {ITEMS.map(({ key, label, Icon, accent }) => (
           <Stack
             key={key}

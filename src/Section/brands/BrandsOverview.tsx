@@ -19,15 +19,26 @@ interface Props {
 
 export default memo(function BrandsOverview({ brands, firstModuleId }: Props): JSX.Element {
   return (
-    <Box sx={{ p: { xs: 4, md: 6 } }}>
-      <Typography variant="h5" sx={{ mb: 1, fontWeight: 700 }}>
+    <Box sx={{ p: { xs: 2, md: 6 } }}>
+      <Typography
+        variant="h5"
+        sx={{
+          mb: 0.5,
+          fontWeight: 700,
+          fontSize: { xs: 20, md: 24 },
+        }}
+      >
         Brands
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 6 }}>
+      <Typography
+        variant="body2"
+        color="text.secondary"
+        sx={{ mb: { xs: 3, md: 6 }, fontSize: { xs: 13, md: 14 } }}
+      >
         Select a brand to manage its modules.
       </Typography>
 
-      <Grid container spacing={3}>
+      <Grid container spacing={{ xs: 2, md: 3 }}>
         {brands.map((brand) => (
           <Grid key={brand.id} item xs={12} sm={6} lg={4}>
             <BrandCard brand={brand} firstModuleId={firstModuleId} />
@@ -64,25 +75,49 @@ const BrandCard = memo(function BrandCard({ brand, firstModuleId }: BrandCardPro
         },
       })}
     >
-      <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: 5 }}>
+      <CardContent
+        sx={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          p: { xs: 2, md: 5 },
+          '&:last-child': { pb: { xs: 2, md: 5 } },
+        }}
+      >
         <Avatar
           sx={{
-            width: 56,
-            height: 56,
+            width: { xs: 40, md: 56 },
+            height: { xs: 40, md: 56 },
             bgcolor: alpha(brand.color, 0.12),
             color: brand.color,
-            fontSize: 28,
-            mb: 4,
+            fontSize: { xs: 20, md: 28 },
+            mb: { xs: 1.5, md: 4 },
           }}
         >
           {brand.emoji}
         </Avatar>
 
-        <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 700,
+            mb: 0.5,
+            fontSize: { xs: 16, md: 20 },
+            lineHeight: 1.3,
+          }}
+        >
           {brand.label}
         </Typography>
 
-        <Typography variant="body2" color="text.secondary" sx={{ flex: 1, mb: 5 }}>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{
+            flex: 1,
+            mb: { xs: 2, md: 5 },
+            fontSize: { xs: 13, md: 14 },
+          }}
+        >
           {brand.description}
         </Typography>
 
@@ -91,12 +126,16 @@ const BrandCard = memo(function BrandCard({ brand, firstModuleId }: BrandCardPro
           href={href}
           variant="contained"
           disableElevation
+          size="small"
           sx={(theme) => ({
             bgcolor: theme.palette.primary.main,
             '&:hover': { bgcolor: theme.palette.primary.dark },
             alignSelf: 'flex-start',
             textTransform: 'none',
             fontWeight: 600,
+            fontSize: { xs: 13, md: 14 },
+            px: { xs: 1.5, md: 2 },
+            py: { xs: 0.75, md: 1 },
           })}
         >
           Open Dashboard

@@ -1,8 +1,8 @@
 .bar {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 0 24px;
+  gap: 12px;
+  padding: 8px 12px;
   border-bottom: 1px solid var(--hairline);
   position: sticky;
   top: 0;
@@ -12,9 +12,22 @@
 }
 
 .tabs {
-  display: flex;
+  display: none;
   gap: 4px;
   flex: 1;
+  min-width: 0;
+}
+
+.pageSelector {
+  display: flex;
+  flex-shrink: 0;
+}
+
+.action {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  justify-content: flex-end;
   min-width: 0;
 }
 
@@ -40,8 +53,21 @@
   border-bottom-color: var(--accent);
 }
 
-.action {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
+@media (min-width: 1024px) {
+  .bar {
+    gap: 16px;
+    padding: 0 24px;
+  }
+
+  .tabs {
+    display: flex;
+  }
+
+  .pageSelector {
+    display: none;
+  }
+
+  .action {
+    flex: 0 0 auto;
+  }
 }

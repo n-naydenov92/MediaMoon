@@ -11,3 +11,9 @@
   flex-direction: column;
   overflow-y: auto;
 }
+
+.mobileDrawerPaper {
+  width: min(280px, 85vw);
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+}

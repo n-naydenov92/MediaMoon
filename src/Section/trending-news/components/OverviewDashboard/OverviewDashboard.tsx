@@ -3,6 +3,8 @@
 import { memo } from 'react'
 import Grid from '@mui/material/Grid'
 import Stack from '@mui/material/Stack'
+import Typography from '@mui/material/Typography'
+import NewspaperOutlined from '@mui/icons-material/NewspaperOutlined'
 import type { AsyncState, NewsResult } from '@/types'
 import { useBrandShellContext } from '@/contexts/brandShell/useBrandShellContext'
 import { cacheKey } from '@/Section/trending-news/context/trendingNewsCtx'
@@ -54,9 +56,18 @@ export default memo(function OverviewDashboard(): JSX.Element {
   return (
     <Stack spacing={6}>
       <StatsRow stats={stats} actions={actions} />
-      <Grid container spacing={6}>
+      <Grid container columnSpacing={{ xs: 0, md: 6 }} rowSpacing={{ xs: 3, md: 6 }}>
         <Grid item xs={12} md={8} className={styles.mainColumn}>
           <Stack spacing={3}>
+            <Stack
+              direction="row"
+              spacing={2}
+              alignItems="center"
+              className={styles.mainHeading}
+            >
+              <NewspaperOutlined fontSize="small" className={styles.mainHeadingIcon} />
+              <Typography variant="h3">All News</Typography>
+            </Stack>
             {allClusters.map((cluster, index) => (
               <NewsBlock
                 key={`${cluster.market}-${cluster.representativeTitle}`}

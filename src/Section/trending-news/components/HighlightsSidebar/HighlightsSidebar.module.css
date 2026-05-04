@@ -1,6 +1,5 @@
 .sidebar {
-  position: sticky;
-  top: 80px;
+  position: static;
 }
 
 .headerIcon {
@@ -15,4 +14,11 @@
 
 .empty {
   color: #4A4A58;
+}
+
+@media (min-width: 1024px) {
+  .sidebar {
+    position: sticky;
+    top: 80px;
+  }
 }

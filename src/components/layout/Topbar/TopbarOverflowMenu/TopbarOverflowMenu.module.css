@@ -3,6 +3,12 @@
   display: inline-flex;
 }
 
+@media (max-width: 1023px) {
+  .root {
+    display: none;
+  }
+}
+
 .root[data-theme='dark'] {
   --overflow-bg-surface: #12121a;
   --overflow-bg-elevated: #1a1a24;

@@ -33,3 +33,13 @@
     color: #9A9AA8;
   }
 }
+
+@media (max-width: 1023px) {
+  .meta {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

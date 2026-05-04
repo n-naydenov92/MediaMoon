@@ -24,6 +24,22 @@
   white-space: nowrap;
 }
 
+.prefix {
+  display: inline;
+}
+
+@media (max-width: 1023px) {
+  .prefix {
+    display: none;
+  }
+
+  .root {
+    height: 36px;
+    padding-left: 8px;
+    font-size: 12px;
+  }
+}
+
 .refresh {
   display: inline-flex;
   align-items: center;

@@ -42,3 +42,36 @@
     color: #F5F5F7;
   }
 }
+
+@media (max-width: 767px) {
+  .row.row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    grid-template-rows: auto auto;
+    align-items: center;
+    column-gap: 12px;
+    row-gap: 8px;
+  }
+
+  .items.items {
+    display: contents;
+  }
+
+  .row.row > .items > .item {
+    margin: 0;
+  }
+
+  .actions.actions {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    align-self: center;
+  }
+
+  .value {
+    font-size: 16px;
+  }
+
+  .label {
+    font-size: 11px;
+  }
+}

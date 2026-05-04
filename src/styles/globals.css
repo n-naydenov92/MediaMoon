@@ -31,6 +31,17 @@
   --notice-info-bg: rgba(96, 165, 250, 0.08);
   --notice-error-border: rgba(248, 113, 113, 0.4);
   --notice-error-bg: rgba(248, 113, 113, 0.08);
+
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --text-sm: 12px;
+  --text-md: 14px;
+  --text-lg: 16px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
 }
 
 :root[data-theme='light'] {

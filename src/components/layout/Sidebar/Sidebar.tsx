@@ -15,9 +15,10 @@ import styles from './Sidebar.module.css'
 interface Props {
   readonly modules: readonly ModuleConfig[]
   readonly brands: readonly BrandConfig[]
+  readonly variant?: 'fixed' | 'drawer'
 }
 
-export default memo(function Sidebar({ modules, brands }: Props): JSX.Element {
+export default memo(function Sidebar({ modules, brands, variant = 'fixed' }: Props): JSX.Element {
   const pathname = usePathname()
   const { mode } = useThemeMode()
   const [isCollapsed, setIsCollapsed] = useState(false)
@@ -33,6 +34,7 @@ export default memo(function Sidebar({ modules, brands }: Props): JSX.Element {
     <aside
       className={styles.root}
       data-collapsed={isCollapsed}
+      data-variant={variant}
       data-theme={mode}
       aria-label={LABELS.sidebar.primaryNavAriaLabel}
     >

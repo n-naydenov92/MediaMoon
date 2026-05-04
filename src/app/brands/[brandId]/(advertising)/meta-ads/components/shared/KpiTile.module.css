@@ -1,8 +1,8 @@
 .tile {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 16px;
+  gap: var(--space-sm);
+  padding: var(--space-md);
   border-radius: 8px;
   border: 1px solid var(--hairline);
   background: var(--surface-1);
@@ -11,7 +11,7 @@
 }
 
 .label {
-  font-size: 12px;
+  font-size: var(--text-sm);
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -20,7 +20,7 @@
 
 .value {
   font-family: var(--font-syne), system-ui, sans-serif;
-  font-size: 24px;
+  font-size: var(--text-xl);
   font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--text-primary);
@@ -28,7 +28,7 @@
 }
 
 .delta {
-  font-size: 12px;
+  font-size: var(--text-sm);
   font-weight: 500;
   letter-spacing: 0.02em;
 }
@@ -43,4 +43,14 @@
 
 .delta[data-trend='flat'] {
   color: var(--text-muted);
+}
+
+@media (min-width: 1024px) {
+  .tile {
+    padding: var(--space-lg);
+  }
+
+  .value {
+    font-size: var(--text-2xl);
+  }
 }

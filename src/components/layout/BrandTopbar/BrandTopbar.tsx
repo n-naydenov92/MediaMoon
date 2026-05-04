@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import Topbar from '@/components/layout/Topbar/Topbar'
 import MarketSwitcher from '@/components/layout/Topbar/MarketSwitcher/MarketSwitcher'
 import TopbarOverflowMenu from '@/components/layout/Topbar/TopbarOverflowMenu/TopbarOverflowMenu'
+import { useMobileNav } from '@/components/layout/AppShell/MobileNavContext'
 import { findModuleById } from '@/config/modules'
 import { extractModuleId } from './helpers'
 
@@ -13,12 +14,14 @@ const BrandTopbar = memo(function BrandTopbar(): JSX.Element {
   const moduleId = extractModuleId(pathname)
   const module = moduleId ? findModuleById(moduleId) : null
   const title = module?.label ?? ''
+  const { openMobileNav } = useMobileNav()
 
   return (
     <Topbar
       title={title}
-      leftSlot={<MarketSwitcher />}
+      marketSlot={<MarketSwitcher />}
       rightSlot={<TopbarOverflowMenu />}
+      onMenuClick={openMobileNav}
     />
   )
 })

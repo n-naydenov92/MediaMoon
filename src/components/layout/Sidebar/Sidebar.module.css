@@ -52,8 +52,14 @@
   margin: 8px 0;
 }
 
-@media (max-width: 899px) {
-  .root {
+.root[data-variant='drawer'] {
+  width: 100%;
+  height: 100%;
+  border-right: none;
+}
+
+@media (max-width: 1023px) {
+  .root[data-variant='fixed'] {
     display: none;
   }
 }

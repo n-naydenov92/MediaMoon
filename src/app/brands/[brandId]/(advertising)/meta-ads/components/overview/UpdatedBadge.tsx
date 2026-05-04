@@ -26,13 +26,16 @@ export default function UpdatedBadge({ fetchedAt, onRefresh, disabled = false }:
     return () => window.clearInterval(id)
   }, [])
 
-  const label = fetchedAt === null ? 'Loading…' : `Updated ${formatAgo(now - fetchedAt)}`
+  const ago = fetchedAt === null ? 'Loading…' : formatAgo(now - fetchedAt)
   const labelTooltip = fetchedAt === null ? '' : `Last fetched at ${formatTimestamp(fetchedAt)}`
 
   return (
     <div className={styles.root} data-theme={mode}>
       <Tooltip title={labelTooltip} arrow disableInteractive>
-        <span className={styles.text}>{label}</span>
+        <span className={styles.text}>
+          {fetchedAt !== null && <span className={styles.prefix}>Updated </span>}
+          {ago}
+        </span>
       </Tooltip>
       <Tooltip title="Refresh data" arrow disableInteractive>
         <span>

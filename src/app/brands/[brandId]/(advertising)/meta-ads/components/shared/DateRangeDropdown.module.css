@@ -170,3 +170,40 @@
   transform: translateX(12px);
   background: #ffffff;
 }
+
+@media (max-width: 1023px) {
+  .trigger {
+    height: 32px;
+    font-size: 13px;
+    padding: 0 8px;
+  }
+
+  .menu {
+    min-width: 180px;
+    max-width: calc(100vw - 24px);
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+  }
+
+  .list {
+    padding: 4px 4px;
+  }
+
+  .option {
+    height: 36px;
+    font-size: 13px;
+    padding: 0 10px;
+  }
+
+  .toggleRow {
+    height: 36px;
+    font-size: 13px;
+    margin: 2px 4px 4px;
+    padding: 0 10px;
+    width: calc(100% - 8px);
+  }
+
+  .divider {
+    margin: 2px 8px;
+  }
+}

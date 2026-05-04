@@ -2,11 +2,17 @@
   align-self: center;
   width: 100%;
   max-width: 1440px;
-  padding: 24px 16px;
+  padding: 16px 12px;
   box-sizing: border-box;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 768px) {
+  .contentWrapper {
+    padding: 24px 16px;
+  }
+}
+
+@media (min-width: 1024px) {
   .contentWrapper {
     padding: 32px 40px;
   }
