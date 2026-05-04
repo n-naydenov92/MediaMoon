@@ -53,6 +53,7 @@ interface SummaryResponse {
   readonly topImages: readonly AdLeaderboardEntry[]
   readonly underperformers: readonly AdLeaderboardEntry[]
   readonly criteria: TopCriteria
+  readonly fetchedAt: number
 }
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
@@ -151,6 +152,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       topImages: pickTopByType(allAdEntries, 'image', criteria),
       underperformers: pickUnderperformers(allAdEntries, criteria),
       criteria,
+      fetchedAt: Date.now(),
     }
 
     return NextResponse.json(response, { headers: edgeCacheHeaders() })
@@ -232,6 +234,7 @@ function emptyResponse(): SummaryResponse {
     topImages: [],
     underperformers: [],
     criteria: DEFAULT_TOP_CRITERIA,
+    fetchedAt: Date.now(),
   }
 }
 

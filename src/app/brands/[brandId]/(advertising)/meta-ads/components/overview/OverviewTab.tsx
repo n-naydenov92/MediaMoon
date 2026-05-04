@@ -18,6 +18,7 @@ import KpiGrid from './KpiGrid'
 import SpendChart from './SpendChart'
 import AccountBreakdown from './AccountBreakdown'
 import Leaderboards from './Leaderboards'
+import UpdatedBadge from './UpdatedBadge'
 import { useOverviewData, type OverviewSummary } from './useOverviewData'
 import styles from './OverviewTab.module.css'
 
@@ -40,7 +41,8 @@ export default function OverviewTab({ brandId }: Props): JSX.Element {
     () => ({ brandId, market: selectedMarket, datePreset }),
     [brandId, selectedMarket, datePreset],
   )
-  const state = useOverviewData(query)
+  const { state, refresh } = useOverviewData(query)
+  const fetchedAt = state.status === 'success' ? state.data.fetchedAt : null
 
   const handleDatePresetChange = useCallback(
     (next: DatePreset) => {
@@ -66,14 +68,29 @@ export default function OverviewTab({ brandId }: Props): JSX.Element {
 
   const headerAction = useMemo(
     () => (
-      <DateRangeDropdown
-        value={datePreset}
-        onChange={handleDatePresetChange}
-        comparisonEnabled={compareEnabled}
-        onComparisonChange={handleComparisonChange}
-      />
+      <div className={styles.headerActions}>
+        <UpdatedBadge
+          fetchedAt={fetchedAt}
+          onRefresh={refresh}
+          disabled={state.status === 'loading'}
+        />
+        <DateRangeDropdown
+          value={datePreset}
+          onChange={handleDatePresetChange}
+          comparisonEnabled={compareEnabled}
+          onComparisonChange={handleComparisonChange}
+        />
+      </div>
     ),
-    [datePreset, handleDatePresetChange, compareEnabled, handleComparisonChange],
+    [
+      fetchedAt,
+      refresh,
+      state.status,
+      datePreset,
+      handleDatePresetChange,
+      compareEnabled,
+      handleComparisonChange,
+    ],
   )
   useSetHeaderAction(headerAction)
 

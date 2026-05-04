@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import type { Market } from '@/types'
 import type { BrandId } from '@/config/brands'
 import type {
@@ -22,6 +22,7 @@ export interface OverviewSummary {
   readonly topImages: readonly AdLeaderboardEntry[]
   readonly underperformers: readonly AdLeaderboardEntry[]
   readonly criteria: TopCriteria
+  readonly fetchedAt: number
 }
 
 export type OverviewState =
@@ -29,6 +30,11 @@ export type OverviewState =
   | { readonly status: 'no-token' }
   | { readonly status: 'error'; readonly message: string }
   | { readonly status: 'success'; readonly data: OverviewSummary }
+
+export interface OverviewControls {
+  readonly state: OverviewState
+  readonly refresh: () => void
+}
 
 interface OverviewQuery {
   readonly brandId: BrandId
@@ -40,8 +46,9 @@ interface ApiError {
   error?: string
 }
 
-export function useOverviewData(query: OverviewQuery): OverviewState {
+export function useOverviewData(query: OverviewQuery): OverviewControls {
   const [state, setState] = useState<OverviewState>({ status: 'loading' })
+  const [refreshTick, setRefreshTick] = useState(0)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -56,7 +63,7 @@ export function useOverviewData(query: OverviewQuery): OverviewState {
       try {
         const response = await fetch(`/api/meta-ads/summary?${search.toString()}`, {
           signal: controller.signal,
-          cache: 'no-store',
+          cache: refreshTick > 0 ? 'reload' : 'default',
         })
         if (response.status === NO_TOKEN_STATUS) {
           setState({ status: 'no-token' })
@@ -79,7 +86,11 @@ export function useOverviewData(query: OverviewQuery): OverviewState {
     })()
 
     return () => controller.abort()
-  }, [query.brandId, query.market, query.datePreset])
+  }, [query.brandId, query.market, query.datePreset, refreshTick])
 
-  return state
+  const refresh = useCallback((): void => {
+    setRefreshTick((n) => n + 1)
+  }, [])
+
+  return { state, refresh }
 }
