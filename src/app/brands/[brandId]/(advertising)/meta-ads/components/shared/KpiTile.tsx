@@ -11,6 +11,7 @@ interface Props {
   readonly label: string
   readonly value: string
   readonly delta?: number
+  readonly deltaLabel?: string
   readonly direction?: KpiDirection
 }
 
@@ -18,6 +19,7 @@ export default function KpiTile({
   label,
   value,
   delta,
+  deltaLabel = 'wow',
   direction = 'higher-better',
 }: Props): JSX.Element {
   const trend = computeTrend(delta, direction)
@@ -27,7 +29,7 @@ export default function KpiTile({
       <span className={styles.value}>{value}</span>
       {delta !== undefined && (
         <span className={styles.delta} data-trend={trend}>
-          {arrowFor(delta)} {formatPercentage(Math.abs(delta), 0)} wow
+          {arrowFor(delta)} {formatPercentage(Math.abs(delta), 0)} {deltaLabel}
         </span>
       )}
     </div>

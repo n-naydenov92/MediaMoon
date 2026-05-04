@@ -5,6 +5,7 @@ import styles from './KpiGrid.module.css'
 
 interface Props {
   readonly kpis: KpiDelta
+  readonly deltaLabel: string
 }
 
 interface KpiTileSpec {
@@ -26,7 +27,7 @@ const TILE_SPECS: readonly KpiTileSpec[] = [
   { key: 'cpm', label: 'CPM', format: (k) => formatEur(k.cpmEur), read: (k) => k.cpmEur, direction: 'lower-better' },
 ]
 
-export default function KpiGrid({ kpis }: Props): JSX.Element {
+export default function KpiGrid({ kpis, deltaLabel }: Props): JSX.Element {
   const { current, previous } = kpis
   return (
     <div className={styles.grid}>
@@ -36,6 +37,7 @@ export default function KpiGrid({ kpis }: Props): JSX.Element {
           label={spec.label}
           value={spec.format(current)}
           delta={relativeDelta(spec.read(current), spec.read(previous))}
+          deltaLabel={deltaLabel}
           direction={spec.direction}
         />
       ))}

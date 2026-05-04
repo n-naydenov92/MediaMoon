@@ -20,6 +20,16 @@ export const DATE_PRESET_LABELS: Record<DatePreset, string> = {
   last_month: 'Last month',
 }
 
+export const COMPARISON_LABELS: Record<DatePreset, string> = {
+  today: 'dod',
+  yesterday: 'dod',
+  last_7d: 'wow',
+  last_30d: 'mom',
+  last_90d: 'qoq',
+  this_month: 'mom',
+  last_month: 'mom',
+}
+
 export const DEFAULT_DATE_PRESET: DatePreset = 'last_30d'
 
 const MS_PER_DAY = 86_400_000

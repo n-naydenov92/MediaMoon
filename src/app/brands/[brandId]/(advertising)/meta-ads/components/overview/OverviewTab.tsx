@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import type { BrandId } from '@/config/brands'
 import { useBrandShellContext } from '@/contexts/brandShell/useBrandShellContext'
 import {
+  COMPARISON_LABELS,
   DEFAULT_DATE_PRESET,
   isDatePreset,
   type DatePreset,
@@ -69,12 +70,20 @@ export default function OverviewTab({ brandId }: Props): JSX.Element {
         </Notice>
       )}
 
-      {state.status === 'success' && <OverviewContent summary={state.data} />}
+      {state.status === 'success' && (
+        <OverviewContent summary={state.data} deltaLabel={COMPARISON_LABELS[datePreset]} />
+      )}
     </div>
   )
 }
 
-function OverviewContent({ summary }: { readonly summary: OverviewSummary }): JSX.Element {
+function OverviewContent({
+  summary,
+  deltaLabel,
+}: {
+  readonly summary: OverviewSummary
+  readonly deltaLabel: string
+}): JSX.Element {
   const hasAnyData = summary.byAccount.length > 0 || summary.byDay.length > 0
   if (!hasAnyData) {
     return (
@@ -85,7 +94,7 @@ function OverviewContent({ summary }: { readonly summary: OverviewSummary }): JS
   }
   return (
     <>
-      <KpiGrid kpis={summary.kpis} />
+      <KpiGrid kpis={summary.kpis} deltaLabel={deltaLabel} />
 
       <div className={styles.midGrid}>
         <Section title="Spend vs Revenue" className={styles.spendSection}>
