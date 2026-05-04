@@ -302,6 +302,18 @@ export interface AdWithInsights {
   readonly insights: InsightsTotals
 }
 
+export interface AdWithDailyInsights {
+  readonly id: string
+  readonly name: string
+  readonly status: string
+  readonly effectiveStatus: string
+  readonly creativeType: 'image' | 'video' | 'unknown'
+  readonly thumbnailUrl: string | null
+  readonly accountId: string
+  readonly currency: string
+  readonly daily: readonly InsightsDailyPoint[]
+}
+
 const INSIGHTS_FIELDS = 'spend,impressions,clicks,actions,action_values'
 
 interface GraphAction {
@@ -339,6 +351,7 @@ interface GraphAdWithCreativeRaw {
     data?: GraphInsightsRow[]
   }
 }
+
 
 interface GraphAdsListResponse {
   data?: GraphAdWithCreativeRaw[]
@@ -390,6 +403,33 @@ export async function fetchAdsWithInsights(
     throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
   }
   return (json.data ?? []).map((raw) => toAdWithInsights(raw, accountId, currency))
+}
+
+export async function fetchAdsWithDailyInsights(
+  token: string,
+  accountId: string,
+  currency: string,
+  dateParams: Record<string, string>,
+  options: { readonly limit?: number } = {},
+): Promise<readonly AdWithDailyInsights[]> {
+  const limit = options.limit ?? 200
+  const dailyDateParams = { ...dateParams, time_increment: '1' }
+  const insightsSubfield = buildInsightsSubfield(dailyDateParams)
+  const fields = [
+    'id',
+    'name',
+    'status',
+    'effective_status',
+    'creative{id,thumbnail_url,object_type,video_id}',
+    insightsSubfield,
+  ].join(',')
+
+  const url = buildUrl(`/${accountId}/ads`, token, { fields, limit: String(limit) })
+  const json = await callGraphApi<GraphAdsListResponse>(url)
+  if (json.error) {
+    throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
+  }
+  return (json.data ?? []).map((raw) => toAdWithDailyInsights(raw, accountId, currency))
 }
 
 function buildInsightsSubfield(dateParams: Record<string, string>): string {
@@ -490,6 +530,25 @@ function toAdWithInsights(
     accountId,
     currency,
     insights,
+  }
+}
+
+function toAdWithDailyInsights(
+  raw: GraphAdWithCreativeRaw,
+  accountId: string,
+  currency: string,
+): AdWithDailyInsights {
+  const rows = raw.insights?.data ?? []
+  return {
+    id: raw.id,
+    name: raw.name,
+    status: raw.status,
+    effectiveStatus: raw.effective_status,
+    creativeType: classifyCreativeType(raw.creative),
+    thumbnailUrl: raw.creative?.thumbnail_url ?? null,
+    accountId,
+    currency,
+    daily: rows.map(toDailyPoint),
   }
 }
 
