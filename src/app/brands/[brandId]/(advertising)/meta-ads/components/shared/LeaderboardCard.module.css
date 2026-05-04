@@ -7,6 +7,7 @@
   border: 1px solid var(--hairline);
   background: var(--surface-1);
   font-family: var(--font-dm-sans), system-ui, sans-serif;
+  min-width: 0;
 }
 
 .header {
@@ -65,7 +66,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 220px;
 }
 
 .meta {
