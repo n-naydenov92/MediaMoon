@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, type ComponentType } from 'react'
+import { memo, type ComponentType, type ReactNode } from 'react'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import type { SvgIconProps } from '@mui/material/SvgIcon'
@@ -14,6 +14,7 @@ import styles from './StatsRow.module.css'
 
 interface Props {
   readonly stats: NewsStats
+  readonly actions?: ReactNode
 }
 
 interface Item {
@@ -33,39 +34,45 @@ const ITEMS: readonly Item[] = [
   { key: 'hotCount', label: LABELS.statsRow.hot, Icon: LocalFireDepartmentOutlined, accent: HOT_COLOR },
 ]
 
-export default memo(function StatsRow({ stats }: Props): JSX.Element {
+export default memo(function StatsRow({ stats, actions }: Props): JSX.Element {
   return (
     <Stack
       direction="row"
-      spacing={6}
-      flexWrap="wrap"
-      useFlexGap
+      alignItems="center"
+      justifyContent="space-between"
       className={styles.row}
     >
-      {ITEMS.map(({ key, label, Icon, accent }) => (
-        <Stack
-          key={key}
-          direction="row"
-          spacing={2}
-          alignItems="center"
-          className={styles.item}
-        >
-          <Icon
-            fontSize="small"
-            className={styles.icon}
-            style={accent ? { color: accent } : undefined}
-          />
-          <span
-            className={styles.value}
-            style={accent ? { color: accent } : undefined}
+      <Stack direction="row" spacing={6} flexWrap="wrap" useFlexGap alignItems="center">
+        {ITEMS.map(({ key, label, Icon, accent }) => (
+          <Stack
+            key={key}
+            direction="row"
+            spacing={2}
+            alignItems="center"
+            className={styles.item}
           >
-            {stats[key]}
-          </span>
-          <Typography variant="caption" className={styles.label}>
-            {label}
-          </Typography>
+            <Icon
+              fontSize="small"
+              className={styles.icon}
+              style={accent ? { color: accent } : undefined}
+            />
+            <span
+              className={styles.value}
+              style={accent ? { color: accent } : undefined}
+            >
+              {stats[key]}
+            </span>
+            <Typography variant="caption" className={styles.label}>
+              {label}
+            </Typography>
+          </Stack>
+        ))}
+      </Stack>
+      {actions ? (
+        <Stack direction="row" spacing={1} alignItems="center" className={styles.actions}>
+          {actions}
         </Stack>
-      ))}
+      ) : null}
     </Stack>
   )
 })

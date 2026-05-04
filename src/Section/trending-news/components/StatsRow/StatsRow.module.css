@@ -26,6 +26,10 @@
   letter-spacing: 0.06em;
 }
 
+.actions {
+  flex-shrink: 0;
+}
+
 @media (prefers-color-scheme: dark) {
   .row {
     border-bottom-color: #22222E;

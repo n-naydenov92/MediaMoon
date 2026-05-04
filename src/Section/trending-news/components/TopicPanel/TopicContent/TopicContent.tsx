@@ -9,6 +9,8 @@ import type { AsyncState, NewsResult } from '@/types'
 import { LABELS } from '@/Section/trending-news/labels'
 import NewsBlock from '../../NewsBlock/NewsBlock'
 import StatsRow from '../../StatsRow/StatsRow'
+import RefreshButton from '../../RefreshButton/RefreshButton'
+import SourceStatsPopover from '../../SourceStatsPopover/SourceStatsPopover'
 import LoadingSkeleton from '../LoadingSkeleton/LoadingSkeleton'
 
 interface Props {
@@ -36,17 +38,26 @@ export default memo(function TopicContent({ state, onRetry }: Props): JSX.Elemen
         />
       )
     case 'success': {
+      const actions = (
+        <>
+          <SourceStatsPopover />
+          <RefreshButton />
+        </>
+      )
       if (state.data.clusters.length === 0) {
         return (
-          <EmptyState
-            title={LABELS.topicDashboard.emptyLast30d}
-            description={LABELS.emptyState.retry}
-          />
+          <Stack spacing={6}>
+            <StatsRow stats={state.data.stats} actions={actions} />
+            <EmptyState
+              title={LABELS.topicDashboard.emptyLast30d}
+              description={LABELS.emptyState.retry}
+            />
+          </Stack>
         )
       }
       return (
         <Stack spacing={6}>
-          <StatsRow stats={state.data.stats} />
+          <StatsRow stats={state.data.stats} actions={actions} />
           <Stack spacing={3}>
             {state.data.clusters.map((cluster, index) => (
               <NewsBlock
