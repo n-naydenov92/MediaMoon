@@ -2,12 +2,11 @@ const GRAPH_API_BASE = 'https://graph.facebook.com/v21.0'
 const LIST_FETCH_TIMEOUT_MS = 30_000
 const UPLOAD_FETCH_TIMEOUT_MS = 120_000
 
-const PURCHASE_ACTION_TYPES = new Set([
-  'purchase',
-  'omni_purchase',
-  'offsite_conversion.fb_pixel_purchase',
-  'web_in_store_purchase',
-])
+// Meta returns the same purchase under multiple action_type rows (e.g. both
+// `purchase` and `omni_purchase` and `offsite_conversion.fb_pixel_purchase`).
+// Summing all of them double-counts. `omni_purchase` is what Ads Manager UI
+// shows as the canonical "Purchases" / "Purchase Conversion Value".
+const PURCHASE_ACTION_TYPE = 'omni_purchase'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -456,7 +455,7 @@ function sumPurchaseActions(actions: readonly GraphAction[] | undefined): number
     return 0
   }
   return actions.reduce((acc, a) => {
-    if (PURCHASE_ACTION_TYPES.has(a.action_type)) {
+    if (a.action_type === PURCHASE_ACTION_TYPE) {
       return acc + parseNumber(a.value)
     }
     return acc
