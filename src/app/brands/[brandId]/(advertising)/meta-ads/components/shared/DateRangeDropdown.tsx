@@ -1,25 +1,34 @@
 'use client'
 
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import { Fragment, useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import {
   DATE_PRESETS,
   DATE_PRESET_LABELS,
   type DatePreset,
 } from '@/lib/meta/dateRange'
+import { useThemeMode } from '@/styles/useThemeMode'
 import styles from './DateRangeDropdown.module.css'
 
 interface Props {
   readonly value: DatePreset
   readonly onChange: (next: DatePreset) => void
+  readonly comparisonEnabled: boolean
+  readonly onComparisonChange: (next: boolean) => void
 }
 
-export default function DateRangeDropdown({ value, onChange }: Props): JSX.Element {
+export default function DateRangeDropdown({
+  value,
+  onChange,
+  comparisonEnabled,
+  onComparisonChange,
+}: Props): JSX.Element {
   const [open, setOpen] = useState(false)
   const [focusedIndex, setFocusedIndex] = useState<number>(() =>
     Math.max(0, DATE_PRESETS.indexOf(value)),
   )
   const rootRef = useRef<HTMLDivElement>(null)
   const optionRefs = useRef<(HTMLButtonElement | null)[]>([])
+  const { mode } = useThemeMode()
 
   useEffect(() => {
     if (!open) {
@@ -49,7 +58,7 @@ export default function DateRangeDropdown({ value, onChange }: Props): JSX.Eleme
     }
   }, [open, focusedIndex])
 
-  function handleMenuKeyDown(event: KeyboardEvent<HTMLUListElement>): void {
+  function handleMenuKeyDown(event: KeyboardEvent<HTMLDivElement>): void {
     if (event.key === 'ArrowDown') {
       event.preventDefault()
       setFocusedIndex((i) => (i + 1) % DATE_PRESETS.length)
@@ -77,7 +86,7 @@ export default function DateRangeDropdown({ value, onChange }: Props): JSX.Eleme
   }
 
   return (
-    <div className={styles.root} ref={rootRef}>
+    <div className={styles.root} ref={rootRef} data-theme={mode}>
       <button
         type="button"
         className={styles.trigger}
@@ -92,25 +101,48 @@ export default function DateRangeDropdown({ value, onChange }: Props): JSX.Eleme
         <span className={styles.chevron} aria-hidden>▾</span>
       </button>
       {open && (
-        <ul className={styles.menu} role="listbox" onKeyDown={handleMenuKeyDown}>
-          {DATE_PRESETS.map((preset, index) => (
-            <li key={preset}>
-              <button
-                ref={(node) => {
-                  optionRefs.current[index] = node
-                }}
-                type="button"
-                role="option"
-                aria-selected={preset === value}
-                className={styles.option}
-                data-active={preset === value ? 'true' : 'false'}
-                onClick={() => selectPreset(preset)}
-              >
-                {DATE_PRESET_LABELS[preset]}
-              </button>
-            </li>
-          ))}
-        </ul>
+        <div className={styles.menu} onKeyDown={handleMenuKeyDown}>
+          <ul className={styles.list} role="listbox">
+            {DATE_PRESETS.map((preset, index) => (
+              <Fragment key={preset}>
+                <li>
+                  <button
+                    ref={(node) => {
+                      optionRefs.current[index] = node
+                    }}
+                    type="button"
+                    role="option"
+                    aria-selected={preset === value}
+                    className={styles.option}
+                    data-active={preset === value ? 'true' : 'false'}
+                    onClick={() => selectPreset(preset)}
+                  >
+                    {DATE_PRESET_LABELS[preset]}
+                  </button>
+                </li>
+                {preset === 'last_7d' && (
+                  <li className={styles.divider} role="separator" />
+                )}
+              </Fragment>
+            ))}
+          </ul>
+          <div className={styles.divider} role="separator" />
+          <button
+            type="button"
+            className={styles.toggleRow}
+            onClick={() => onComparisonChange(!comparisonEnabled)}
+            aria-pressed={comparisonEnabled}
+          >
+            <span className={styles.toggleLabel}>Compare to previous period</span>
+            <span
+              className={styles.toggleSwitch}
+              data-on={comparisonEnabled ? 'true' : 'false'}
+              aria-hidden
+            >
+              <span className={styles.toggleKnob} />
+            </span>
+          </button>
+        </div>
       )}
     </div>
   )

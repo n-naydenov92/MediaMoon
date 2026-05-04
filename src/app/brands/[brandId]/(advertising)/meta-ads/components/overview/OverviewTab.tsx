@@ -34,6 +34,7 @@ export default function OverviewTab({ brandId }: Props): JSX.Element {
   const datePresetRaw = searchParams.get('datePreset')
   const datePreset: DatePreset =
     datePresetRaw && isDatePreset(datePresetRaw) ? datePresetRaw : DEFAULT_DATE_PRESET
+  const compareEnabled = searchParams.get('compare') !== 'off'
 
   const query = useMemo(
     () => ({ brandId, market: selectedMarket, datePreset }),
@@ -50,9 +51,29 @@ export default function OverviewTab({ brandId }: Props): JSX.Element {
     [router, pathname, searchParams],
   )
 
+  const handleComparisonChange = useCallback(
+    (next: boolean) => {
+      const params = new URLSearchParams(searchParams.toString())
+      if (next) {
+        params.delete('compare')
+      } else {
+        params.set('compare', 'off')
+      }
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false })
+    },
+    [router, pathname, searchParams],
+  )
+
   const headerAction = useMemo(
-    () => <DateRangeDropdown value={datePreset} onChange={handleDatePresetChange} />,
-    [datePreset, handleDatePresetChange],
+    () => (
+      <DateRangeDropdown
+        value={datePreset}
+        onChange={handleDatePresetChange}
+        comparisonEnabled={compareEnabled}
+        onComparisonChange={handleComparisonChange}
+      />
+    ),
+    [datePreset, handleDatePresetChange, compareEnabled, handleComparisonChange],
   )
   useSetHeaderAction(headerAction)
 
@@ -73,7 +94,11 @@ export default function OverviewTab({ brandId }: Props): JSX.Element {
       )}
 
       {state.status === 'success' && (
-        <OverviewContent summary={state.data} deltaLabel={COMPARISON_LABELS[datePreset]} />
+        <OverviewContent
+          summary={state.data}
+          deltaLabel={COMPARISON_LABELS[datePreset]}
+          compareEnabled={compareEnabled}
+        />
       )}
     </div>
   )
@@ -82,9 +107,11 @@ export default function OverviewTab({ brandId }: Props): JSX.Element {
 function OverviewContent({
   summary,
   deltaLabel,
+  compareEnabled,
 }: {
   readonly summary: OverviewSummary
   readonly deltaLabel: string
+  readonly compareEnabled: boolean
 }): JSX.Element {
   const hasAnyData = summary.byAccount.length > 0 || summary.byDay.length > 0
   if (!hasAnyData) {
@@ -96,7 +123,7 @@ function OverviewContent({
   }
   return (
     <>
-      <KpiGrid kpis={summary.kpis} deltaLabel={deltaLabel} />
+      <KpiGrid kpis={summary.kpis} deltaLabel={deltaLabel} compareEnabled={compareEnabled} />
 
       <div className={styles.midGrid}>
         <Section title="Spend vs Revenue" className={styles.spendSection}>

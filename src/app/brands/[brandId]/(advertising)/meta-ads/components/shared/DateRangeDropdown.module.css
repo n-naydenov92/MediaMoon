@@ -1,68 +1,172 @@
 .root {
   position: relative;
+  display: inline-flex;
   font-family: var(--font-dm-sans), system-ui, sans-serif;
+}
+
+.root[data-theme='dark'] {
+  --dr-bg-surface: #12121a;
+  --dr-bg-elevated: #1a1a24;
+  --dr-border-subtle: #22222e;
+  --dr-text-primary: #f5f5f7;
+  --dr-text-secondary: #9a9aa8;
+  --dr-text-muted: #5a5a6a;
+}
+
+.root[data-theme='light'] {
+  --dr-bg-surface: #ffffff;
+  --dr-bg-elevated: #f4f4f6;
+  --dr-border-subtle: #e4e4ea;
+  --dr-text-primary: #0a0a0f;
+  --dr-text-secondary: #4a4a58;
+  --dr-text-muted: #8a8a98;
 }
 
 .trigger {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  height: 36px;
-  padding: 0 12px;
+  gap: 6px;
+  height: 32px;
+  padding: 0 10px;
+  background: transparent;
+  border: 1px solid var(--dr-border-subtle);
+  border-radius: 6px;
+  color: var(--dr-text-primary);
   font-size: 13px;
   font-weight: 500;
-  color: var(--text-primary);
-  background: var(--surface-2);
-  border: 1px solid var(--hairline);
-  border-radius: 8px;
   cursor: pointer;
-  transition: border-color 160ms ease-out, background 160ms ease-out;
+  transition: background-color 80ms ease-out, border-color 80ms ease-out;
 }
 
-.trigger:hover {
-  border-color: var(--hairline-strong);
-  background: var(--surface-3);
+.trigger:hover,
+.trigger:focus-visible {
+  background-color: var(--dr-bg-elevated);
 }
 
 .chevron {
-  font-size: 10px;
-  color: var(--text-muted);
+  flex-shrink: 0;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--dr-text-muted);
 }
 
 .menu {
   position: absolute;
-  top: calc(100% + 4px);
+  top: calc(100% + 6px);
   right: 0;
-  min-width: 180px;
+  z-index: 30;
+  min-width: 260px;
   margin: 0;
-  padding: 4px;
-  list-style: none;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-subtle);
+  padding: 0;
+  background-color: var(--dr-bg-surface);
+  border: 1px solid var(--dr-border-subtle);
   border-radius: 8px;
-  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.35);
-  z-index: 20;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 6px 4px;
+  list-style: none;
 }
 
 .option {
-  display: block;
+  display: flex;
+  align-items: center;
   width: 100%;
-  padding: 8px 12px;
-  text-align: left;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-primary);
+  height: 32px;
+  padding: 0 8px;
   background: transparent;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
+  color: var(--dr-text-secondary);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
   cursor: pointer;
-  transition: background 80ms ease-out;
+  transition: background-color 80ms ease-out, color 80ms ease-out;
 }
 
-.option:hover {
-  background: var(--surface-3);
+.option:hover,
+.option:focus-visible {
+  background-color: var(--dr-bg-elevated);
+  color: var(--dr-text-primary);
 }
 
 .option[data-active='true'] {
-  background: var(--accent-soft);
+  background-color: var(--dr-bg-elevated);
+  color: var(--dr-text-primary);
+  font-weight: 600;
+}
+
+.divider {
+  height: 1px;
+  margin: 4px 8px;
+  background-color: var(--dr-border-subtle);
+}
+
+.toggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: calc(100% - 8px);
+  margin: 2px 4px 6px;
+  height: 32px;
+  padding: 0 8px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--dr-text-secondary);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 80ms ease-out, color 80ms ease-out;
+}
+
+.toggleRow:hover,
+.toggleRow:focus-visible {
+  background-color: var(--dr-bg-elevated);
+  color: var(--dr-text-primary);
+}
+
+.toggleLabel {
+  white-space: nowrap;
+}
+
+.toggleSwitch {
+  position: relative;
+  flex-shrink: 0;
+  width: 28px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--dr-bg-elevated);
+  border: 1px solid var(--dr-border-subtle);
+  transition: background 160ms ease-out, border-color 160ms ease-out;
+}
+
+.toggleSwitch[data-on='true'] {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.toggleKnob {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--dr-bg-surface);
+  transition: transform 160ms ease-out;
+}
+
+.toggleSwitch[data-on='true'] .toggleKnob {
+  transform: translateX(12px);
+  background: #ffffff;
 }

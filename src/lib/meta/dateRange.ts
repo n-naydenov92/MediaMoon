@@ -21,13 +21,13 @@ export const DATE_PRESET_LABELS: Record<DatePreset, string> = {
 }
 
 export const COMPARISON_LABELS: Record<DatePreset, string> = {
-  today: 'dod',
-  yesterday: 'dod',
-  last_7d: 'wow',
-  last_30d: 'mom',
-  last_90d: 'qoq',
-  this_month: 'mom',
-  last_month: 'mom',
+  today: 'vs yesterday',
+  yesterday: 'vs prev. day',
+  last_7d: 'vs prev. week',
+  last_30d: 'vs prev. month',
+  last_90d: 'vs prev. quarter',
+  this_month: 'vs last month',
+  last_month: 'vs prev. month',
 }
 
 export const DEFAULT_DATE_PRESET: DatePreset = 'last_30d'
