@@ -8,19 +8,14 @@ interface Props {
 }
 
 export default function Leaderboards({ summary }: Props): JSX.Element {
-  const topSubtitle = `spend ≥ ${formatEur(summary.criteria.minSpend)}, ROAS ≥ ${formatRoas(summary.criteria.topMinRoas)}`
-  const underSubtitle = `spend ≥ ${formatEur(summary.criteria.minSpend)}, ROAS ≤ ${formatRoas(summary.criteria.underMaxRoas)}`
+  const topSubtitle = `spend over ${formatEur(summary.criteria.minSpend)}, ROAS over ${formatRoas(summary.criteria.topMinRoas)}`
+  const underSubtitle = `spend over ${formatEur(summary.criteria.minSpend)}, ROAS under ${formatRoas(summary.criteria.underMaxRoas)}`
   return (
     <div className={styles.grid}>
-      <LeaderboardCard title="Top all" subtitle={topSubtitle} entries={summary.topAll} />
+      <LeaderboardCard title="Top creatives" subtitle={topSubtitle} entries={summary.topAll} />
       <LeaderboardCard title="Top videos" subtitle={topSubtitle} entries={summary.topVideos} />
       <LeaderboardCard title="Top statics" subtitle={topSubtitle} entries={summary.topImages} />
-      <LeaderboardCard
-        title="Underperformers"
-        subtitle={underSubtitle}
-        entries={summary.underperformers}
-        emptyLabel="No underperformers — nice."
-      />
+      <LeaderboardCard title="Underperformers" subtitle={underSubtitle} entries={summary.underperformers} emptyLabel="No underperformers." />
     </div>
   )
 }
