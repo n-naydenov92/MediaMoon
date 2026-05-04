@@ -27,7 +27,7 @@ import {
   pickTopByType,
   pickUnderperformers,
   summarizeAccount,
-  DEFAULT_TOP_CRITERIA,
+  defaultCriteriaForPreset,
   CRITERIA_QUERY_KEYS,
   type AccountKpis,
   type AdLeaderboardEntry,
@@ -68,9 +68,16 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   }
   const brandId: BrandId = brandIdRaw
 
+  const dateSelection = parseDateRangeFromQuery(params)
+  const previousSelection = previousPeriod(dateSelection)
+  const datePresent = toMetaInsightsParams(dateSelection)
+  const datePast = toMetaInsightsParams(previousSelection)
+  const presetForCriteria = dateSelection.kind === 'preset' ? dateSelection.preset : ''
+  const criteria = parseCriteriaFromQuery(params, presetForCriteria)
+
   const accountIds = resolveTargetAccounts(brandId, params.get('market'), params.get('account'))
   if (accountIds.length === 0) {
-    return NextResponse.json(emptyResponse(), { headers: edgeCacheHeaders() })
+    return NextResponse.json(emptyResponse(criteria), { headers: edgeCacheHeaders() })
   }
 
   if (getConfiguredBusinessManagersForBrand(brandId).length === 0) {
@@ -79,12 +86,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       { status: NO_TOKEN_STATUS },
     )
   }
-
-  const dateSelection = parseDateRangeFromQuery(params)
-  const previousSelection = previousPeriod(dateSelection)
-  const datePresent = toMetaInsightsParams(dateSelection)
-  const datePast = toMetaInsightsParams(previousSelection)
-  const criteria = parseCriteriaFromQuery(params)
 
   try {
     const accountsList = await fetchAllAccounts(brandId)
@@ -209,11 +210,12 @@ function toLeaderboardEntry(ad: AdWithInsights): AdLeaderboardEntry {
   }
 }
 
-function parseCriteriaFromQuery(params: URLSearchParams): TopCriteria {
+function parseCriteriaFromQuery(params: URLSearchParams, preset: string): TopCriteria {
+  const defaults = defaultCriteriaForPreset(preset)
   return {
-    minSpend: numericParam(params, CRITERIA_QUERY_KEYS.minSpend, DEFAULT_TOP_CRITERIA.minSpend),
-    topMinRoas: numericParam(params, CRITERIA_QUERY_KEYS.topMinRoas, DEFAULT_TOP_CRITERIA.topMinRoas),
-    underMaxRoas: numericParam(params, CRITERIA_QUERY_KEYS.underMaxRoas, DEFAULT_TOP_CRITERIA.underMaxRoas),
+    minSpend: numericParam(params, CRITERIA_QUERY_KEYS.minSpend, defaults.minSpend),
+    topMinRoas: numericParam(params, CRITERIA_QUERY_KEYS.topMinRoas, defaults.topMinRoas),
+    underMaxRoas: numericParam(params, CRITERIA_QUERY_KEYS.underMaxRoas, defaults.underMaxRoas),
   }
 }
 
@@ -226,7 +228,7 @@ function numericParam(params: URLSearchParams, key: string, fallback: number): n
   return Number.isFinite(n) && n >= 0 ? n : fallback
 }
 
-function emptyResponse(): SummaryResponse {
+function emptyResponse(criteria: TopCriteria): SummaryResponse {
   const empty = sumKpis([])
   return {
     kpis: computeKpiDelta(empty, empty),
@@ -236,7 +238,7 @@ function emptyResponse(): SummaryResponse {
     topVideos: [],
     topImages: [],
     underperformers: [],
-    criteria: DEFAULT_TOP_CRITERIA,
+    criteria,
     fetchedAt: Date.now(),
   }
 }
