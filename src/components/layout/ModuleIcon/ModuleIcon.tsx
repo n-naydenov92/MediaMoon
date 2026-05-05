@@ -9,6 +9,10 @@ import CampaignIcon from '@mui/icons-material/Campaign'
 import FacebookIcon from '@mui/icons-material/Facebook'
 import GoogleIcon from '@mui/icons-material/Google'
 import MusicNoteIcon from '@mui/icons-material/MusicNote'
+import SpaceDashboardIcon from '@mui/icons-material/SpaceDashboard'
+import BarChartIcon from '@mui/icons-material/BarChart'
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
+import LightbulbIcon from '@mui/icons-material/LightbulbOutlined'
 import { cssVars } from '@/lib/css'
 import styles from './ModuleIcon.module.css'
 
@@ -20,6 +24,10 @@ const ICON_MAP = {
   Facebook: FacebookIcon,
   Google: GoogleIcon,
   MusicNote: MusicNoteIcon,
+  SpaceDashboard: SpaceDashboardIcon,
+  BarChart: BarChartIcon,
+  AddCircleOutline: AddCircleOutlineIcon,
+  Lightbulb: LightbulbIcon,
 } as const satisfies Record<string, React.ComponentType<SvgIconProps>>
 
 const DEFAULT_ICON_SIZE_PX = 20

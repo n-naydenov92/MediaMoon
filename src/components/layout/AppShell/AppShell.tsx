@@ -6,13 +6,14 @@ import { usePathname } from 'next/navigation'
 import Box from '@mui/material/Box'
 import Drawer from '@mui/material/Drawer'
 import Sidebar from '@/components/layout/Sidebar/Sidebar'
-import type { BrandConfig, ModuleConfig } from '@/types'
+import type { BrandConfig, ModuleConfig, UserRole } from '@/types'
 import { MobileNavProvider } from './MobileNavContext'
 import styles from './AppShell.module.css'
 
 interface Props {
   readonly modules: readonly ModuleConfig[]
   readonly brands: readonly BrandConfig[]
+  readonly role: UserRole | null
   readonly children: ReactNode
 }
 
@@ -25,18 +26,29 @@ function isAuthPathname(pathname: string | null): boolean {
   return AUTH_ROUTE_PREFIXES.some((prefix) => pathname.startsWith(prefix))
 }
 
-export default memo(function AppShell({ modules, brands, children }: Props): JSX.Element {
+export default memo(function AppShell({ modules, brands, role, children }: Props): JSX.Element {
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [desktopHidden, setDesktopHidden] = useState(false)
 
   const openMobileNav = useCallback(() => setMobileOpen(true), [])
   const closeMobileNav = useCallback(() => setMobileOpen(false), [])
+  const hideDesktopSidebar = useCallback(() => setDesktopHidden(true), [])
+  const showDesktopSidebar = useCallback(() => setDesktopHidden(false), [])
 
   useEffect(() => {
     setMobileOpen(false)
   }, [pathname])
 
-  const navContextValue = useMemo(() => ({ openMobileNav }), [openMobileNav])
+  const navContextValue = useMemo(
+    () => ({
+      openMobileNav,
+      desktopSidebarHidden: desktopHidden,
+      hideDesktopSidebar,
+      showDesktopSidebar,
+    }),
+    [openMobileNav, desktopHidden, hideDesktopSidebar, showDesktopSidebar],
+  )
 
   if (isAuthPathname(pathname)) {
     return <>{children}</>
@@ -45,14 +57,20 @@ export default memo(function AppShell({ modules, brands, children }: Props): JSX
   return (
     <MobileNavProvider value={navContextValue}>
       <Box className={styles.shell}>
-        <Sidebar modules={modules} brands={brands} variant="fixed" />
+        <Sidebar
+          modules={modules}
+          brands={brands}
+          role={role}
+          variant="fixed"
+          hidden={desktopHidden}
+        />
         <Drawer
           anchor="left"
           open={mobileOpen}
           onClose={closeMobileNav}
           classes={{ paper: styles.mobileDrawerPaper }}
         >
-          <Sidebar modules={modules} brands={brands} variant="drawer" />
+          <Sidebar modules={modules} brands={brands} role={role} variant="drawer" />
         </Drawer>
         <Box component="main" className={styles.main}>
           {children}

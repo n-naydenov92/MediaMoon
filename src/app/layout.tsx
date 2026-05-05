@@ -39,7 +39,7 @@ export default async function RootLayout({ children }: Props): Promise<JSX.Eleme
       <html lang="en" className={`${syne.variable} ${dmSans.variable}`}>
         <body>
           <ThemeModeProvider>
-            <AppShell modules={modules} brands={BRAND_REGISTRY}>{children}</AppShell>
+            <AppShell modules={modules} brands={BRAND_REGISTRY} role={role}>{children}</AppShell>
           </ThemeModeProvider>
         </body>
       </html>

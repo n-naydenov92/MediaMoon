@@ -14,7 +14,11 @@ const BrandTopbar = memo(function BrandTopbar(): JSX.Element {
   const moduleId = extractModuleId(pathname)
   const module = moduleId ? findModuleById(moduleId) : null
   const title = module?.label ?? ''
-  const { openMobileNav } = useMobileNav()
+  const {
+    openMobileNav,
+    desktopSidebarHidden,
+    showDesktopSidebar,
+  } = useMobileNav()
 
   return (
     <Topbar
@@ -22,6 +26,7 @@ const BrandTopbar = memo(function BrandTopbar(): JSX.Element {
       marketSlot={<MarketSwitcher />}
       rightSlot={<TopbarOverflowMenu />}
       onMenuClick={openMobileNav}
+      onShowSidebar={desktopSidebarHidden ? showDesktopSidebar : undefined}
     />
   )
 })

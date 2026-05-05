@@ -17,6 +17,17 @@
   color: var(--text-primary, inherit);
 }
 
+.bar .showSidebarButton {
+  flex-shrink: 0;
+  color: var(--text-primary, inherit);
+}
+
+@media (max-width: 1023px) {
+  .bar .showSidebarButton {
+    display: none;
+  }
+}
+
 .leftSlot {
   display: flex;
   align-items: center;
@@ -60,6 +71,23 @@
 
   .bar .menuButton {
     display: none;
+  }
+
+  .bar .showSidebarButton {
+    order: -2;
+    position: relative;
+    margin-right: 8px;
+  }
+
+  .bar .showSidebarButton::after {
+    content: '';
+    position: absolute;
+    right: -8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1px;
+    height: 16px;
+    background-color: var(--border-subtle);
   }
 
   .marketSlot {

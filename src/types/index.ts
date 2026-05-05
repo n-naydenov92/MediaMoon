@@ -37,6 +37,40 @@ export interface ModuleConfig {
   readonly global?: boolean
 }
 
+// ─── Sidebar Navigation Tree ─────────────────────────────────────────────────
+
+export interface NavLink {
+  readonly kind: 'link'
+  readonly id: string
+  readonly label: string
+  readonly icon: string
+  readonly pathSuffix: string
+  readonly roles: readonly UserRole[]
+}
+
+export interface NavDrilldown {
+  readonly kind: 'drilldown'
+  readonly id: string
+  readonly label: string
+  readonly icon: string
+  readonly roles: readonly UserRole[]
+  readonly panel: NavPanel
+}
+
+export type NavItem = NavLink | NavDrilldown
+
+export interface NavSection {
+  readonly id: string
+  readonly label: string
+  readonly items: readonly NavItem[]
+}
+
+export interface NavPanel {
+  readonly id: string
+  readonly title: string
+  readonly sections: readonly NavSection[]
+}
+
 // ─── Brand Registry ──────────────────────────────────────────────────────────
 
 export interface BrandConfig {

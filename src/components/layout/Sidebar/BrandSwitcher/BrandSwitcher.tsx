@@ -14,13 +14,11 @@ import styles from './BrandSwitcher.module.css'
 interface Props {
   readonly brands: readonly BrandConfig[]
   readonly modules: readonly ModuleConfig[]
-  readonly isCollapsed: boolean
 }
 
 export default memo(function BrandSwitcher({
   brands,
   modules,
-  isCollapsed,
 }: Props): JSX.Element {
   const pathname = usePathname()
   const router = useRouter()
@@ -73,7 +71,6 @@ export default memo(function BrandSwitcher({
         activeBrand={activeBrand}
         triggerLabel={triggerLabel}
         menuId={menuId}
-        isCollapsed={isCollapsed}
         isOpen={isOpen}
         onToggle={toggleOpen}
       />

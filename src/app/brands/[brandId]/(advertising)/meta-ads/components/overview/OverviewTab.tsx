@@ -13,7 +13,6 @@ import {
 import Notice from '../Notice'
 import Section from '../shared/Section'
 import DateRangeDropdown from '../shared/DateRangeDropdown'
-import { useSetHeaderAction } from '../MetaAdsHeaderContext'
 import KpiGrid from './KpiGrid'
 import SpendChart from './SpendChart'
 import AccountBreakdown from './AccountBreakdown'
@@ -66,8 +65,8 @@ export default function OverviewTab({ brandId }: Props): JSX.Element {
     [router, pathname, searchParams],
   )
 
-  const headerAction = useMemo(
-    () => (
+  return (
+    <div className={styles.root}>
       <div className={styles.headerActions}>
         <UpdatedBadge
           fetchedAt={fetchedAt}
@@ -81,21 +80,7 @@ export default function OverviewTab({ brandId }: Props): JSX.Element {
           onComparisonChange={handleComparisonChange}
         />
       </div>
-    ),
-    [
-      fetchedAt,
-      refresh,
-      state.status,
-      datePreset,
-      handleDatePresetChange,
-      compareEnabled,
-      handleComparisonChange,
-    ],
-  )
-  useSetHeaderAction(headerAction)
 
-  return (
-    <div className={styles.root}>
       {state.status === 'loading' && <OverviewSkeleton />}
 
       {state.status === 'no-token' && (

@@ -4,6 +4,9 @@ import { createContext, useContext } from 'react'
 
 interface MobileNavContextValue {
   readonly openMobileNav: () => void
+  readonly desktopSidebarHidden: boolean
+  readonly hideDesktopSidebar: () => void
+  readonly showDesktopSidebar: () => void
 }
 
 const MobileNavContext = createContext<MobileNavContextValue | null>(null)

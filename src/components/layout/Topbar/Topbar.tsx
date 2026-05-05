@@ -5,6 +5,7 @@ import AppBar from '@mui/material/AppBar'
 import Toolbar from '@mui/material/Toolbar'
 import IconButton from '@mui/material/IconButton'
 import MenuIcon from '@mui/icons-material/Menu'
+import ViewSidebarOutlinedIcon from '@mui/icons-material/ViewSidebarOutlined'
 import styles from './Topbar.module.css'
 
 interface Props {
@@ -13,6 +14,7 @@ interface Props {
   readonly marketSlot?: ReactNode
   readonly rightSlot?: ReactNode
   readonly onMenuClick?: () => void
+  readonly onShowSidebar?: () => void
 }
 
 export default memo(function Topbar({
@@ -21,6 +23,7 @@ export default memo(function Topbar({
   marketSlot,
   rightSlot,
   onMenuClick,
+  onShowSidebar,
 }: Props): JSX.Element {
   return (
     <AppBar position="sticky" className={styles.bar}>
@@ -33,6 +36,16 @@ export default memo(function Topbar({
             size="small"
           >
             <MenuIcon fontSize="small" />
+          </IconButton>
+        )}
+        {onShowSidebar && (
+          <IconButton
+            aria-label="Show sidebar"
+            onClick={onShowSidebar}
+            className={styles.showSidebarButton}
+            size="small"
+          >
+            <ViewSidebarOutlinedIcon fontSize="small" />
           </IconButton>
         )}
         {leftSlot && <div className={styles.leftSlot}>{leftSlot}</div>}

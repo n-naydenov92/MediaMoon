@@ -1,18 +1,16 @@
 import { redirect } from 'next/navigation'
-import { getCurrentUserRole } from '@/lib/currentUserRole'
-import { getFirstAccessibleModule } from '@/config/modules'
 import { findBrandById } from '@/config/brands'
+import BrandDashboard from '@/Section/dashboard/BrandDashboard'
 
 interface Props {
   readonly params: Promise<{ readonly brandId: string }>
 }
 
-export default async function BrandIndexPage({ params }: Props): Promise<never> {
+export default async function BrandIndexPage({ params }: Props): Promise<JSX.Element> {
   const { brandId } = await params
-  if (!findBrandById(brandId)) redirect('/brands')
-  const role = await getCurrentUserRole()
-  if (!role) redirect('/unauthorized')
-  const first = getFirstAccessibleModule(role)
-  if (!first) redirect('/unauthorized')
-  redirect(`/brands/${brandId}/${first.id}`)
+  const brand = findBrandById(brandId)
+  if (!brand) {
+    redirect('/brands')
+  }
+  return <BrandDashboard brand={brand} />
 }
