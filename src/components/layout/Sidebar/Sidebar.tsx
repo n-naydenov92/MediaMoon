@@ -62,6 +62,7 @@ export default memo(function Sidebar({ modules, brands, variant = 'fixed' }: Pro
       <SidebarUserCard
         isCollapsed={isCollapsed}
         onToggleCollapse={toggleCollapse}
+        showCollapseToggle={variant === 'fixed'}
       />
     </aside>
   )

@@ -9,11 +9,13 @@ import styles from './SidebarUserCard.module.css'
 interface Props {
   readonly isCollapsed: boolean
   readonly onToggleCollapse: () => void
+  readonly showCollapseToggle?: boolean
 }
 
 export default memo(function SidebarUserCard({
   isCollapsed,
   onToggleCollapse,
+  showCollapseToggle = true,
 }: Props): JSX.Element {
   const { user } = useUser()
   const displayName =
@@ -22,7 +24,9 @@ export default memo(function SidebarUserCard({
   if (isCollapsed) {
     return (
       <div className={styles.root} data-collapsed="true">
-        <SidebarCollapseToggle isCollapsed onToggle={onToggleCollapse} />
+        {showCollapseToggle && (
+          <SidebarCollapseToggle isCollapsed onToggle={onToggleCollapse} />
+        )}
         <div className={styles.avatar}>
           <UserButton afterSignOutUrl="/sign-in" />
         </div>
@@ -39,10 +43,12 @@ export default memo(function SidebarUserCard({
         {displayName}
       </span>
       <ThemeToggleButton />
-      <SidebarCollapseToggle
-        isCollapsed={false}
-        onToggle={onToggleCollapse}
-      />
+      {showCollapseToggle && (
+        <SidebarCollapseToggle
+          isCollapsed={false}
+          onToggle={onToggleCollapse}
+        />
+      )}
     </div>
   )
 })
