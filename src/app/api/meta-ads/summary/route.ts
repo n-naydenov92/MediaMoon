@@ -1,73 +1,49 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { isBrandId, type BrandId } from '@/config/brands'
-import { getAdAccountIds, BRAND_MARKET_AD_ACCOUNTS } from '@/config/adAccounts'
-import {
-  getConfiguredBusinessManagersForBrand,
-  getMetaTokenForAccount,
-} from '@/config/metaTokens'
+import { getConfiguredBusinessManagersForBrand, getMetaTokenForAccount } from '@/config/metaTokens'
 import {
   countActiveAdsInAccount,
   fetchAccountInsights,
   fetchAdsWithInsights,
-  fetchAdAccounts,
   type AdAccount,
-  type AdWithInsights,
 } from '@/lib/gateways/MetaAdsGateway'
-import { isValidMarket } from '@/lib/markets'
 import {
   parseDateRangeFromQuery,
   toMetaInsightsParams,
   previousPeriod,
 } from '@/lib/meta/dateRange'
 import {
-  sumKpis,
-  sumDailySeries,
   computeKpiDelta,
   pickTopAds,
   pickTopByType,
   pickUnderperformers,
   summarizeAccount,
-  defaultCriteriaForPreset,
-  CRITERIA_QUERY_KEYS,
+  sumDailySeries,
+  sumKpis,
   type AccountKpis,
-  type AdLeaderboardEntry,
-  type AccountSummary,
-  type KpiDelta,
-  type DailyPoint,
-  type TopCriteria,
 } from '@/lib/meta/aggregate'
-import { convertToEur } from '@/lib/meta/fx'
+import { fetchAllAccounts, toLeaderboardEntry } from './accountFetching'
+import { parseBrandId, parseCriteriaFromQuery, resolveTargetAccounts } from './queryParsing'
+import {
+  edgeCacheHeaders,
+  emptyResponse,
+  type SummaryResponse,
+} from './summaryResponse'
 
 const ADS_PER_ACCOUNT_LIMIT = 200
-const CACHE_MAX_AGE_SECONDS = 3600
-const CACHE_STALE_WHILE_REVALIDATE_SECONDS = 600
 const NO_TOKEN_STATUS = 503
 const UPSTREAM_ERROR_STATUS = 502
-
-interface SummaryResponse {
-  readonly kpis: KpiDelta
-  readonly byDay: readonly DailyPoint[]
-  readonly byAccount: readonly AccountSummary[]
-  readonly topAll: readonly AdLeaderboardEntry[]
-  readonly topVideos: readonly AdLeaderboardEntry[]
-  readonly topImages: readonly AdLeaderboardEntry[]
-  readonly underperformers: readonly AdLeaderboardEntry[]
-  readonly criteria: TopCriteria
-  readonly fetchedAt: number
-}
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const params = request.nextUrl.searchParams
 
-  const brandIdRaw = params.get('brandId')
-  if (!brandIdRaw) {
-    return NextResponse.json({ error: 'brandId query param is required' }, { status: 400 })
+  const brandId = parseBrandId(params.get('brandId'))
+  if (!brandId) {
+    return NextResponse.json(
+      { error: 'brandId query param is required or unknown' },
+      { status: 400 },
+    )
   }
-  if (!isBrandId(brandIdRaw)) {
-    return NextResponse.json({ error: `unknown brandId: ${brandIdRaw}` }, { status: 400 })
-  }
-  const brandId: BrandId = brandIdRaw
 
   const dateSelection = parseDateRangeFromQuery(params)
   const previousSelection = previousPeriod(dateSelection)
@@ -168,88 +144,5 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error'
     return NextResponse.json({ error: message }, { status: UPSTREAM_ERROR_STATUS })
-  }
-}
-
-function resolveTargetAccounts(
-  brandId: BrandId,
-  marketRaw: string | null,
-  accountRaw: string | null,
-): readonly string[] {
-  if (accountRaw) {
-    return [accountRaw]
-  }
-  if (marketRaw && isValidMarket(marketRaw)) {
-    return getAdAccountIds(brandId, marketRaw)
-  }
-  return Object.values(BRAND_MARKET_AD_ACCOUNTS[brandId] ?? {})
-    .flat()
-    .filter((id): id is string => Boolean(id))
-}
-
-async function fetchAllAccounts(brandId: BrandId): Promise<readonly AdAccount[]> {
-  const configured = getConfiguredBusinessManagersForBrand(brandId)
-  const lists = await Promise.all(configured.map(({ token }) => fetchAdAccounts(token)))
-  const dedupe = new Map<string, AdAccount>()
-  for (const account of lists.flat()) {
-    if (!dedupe.has(account.id)) {
-      dedupe.set(account.id, account)
-    }
-  }
-  return Array.from(dedupe.values())
-}
-
-function toLeaderboardEntry(ad: AdWithInsights): AdLeaderboardEntry {
-  const spendEur = convertToEur(ad.insights.spend, ad.currency)
-  const revenueEur = convertToEur(ad.insights.revenue, ad.currency)
-  return {
-    adId: ad.id,
-    name: ad.name,
-    creativeType: ad.creativeType,
-    thumbnailUrl: ad.thumbnailUrl,
-    accountId: ad.accountId,
-    spendEur,
-    revenueEur,
-    roas: spendEur > 0 ? revenueEur / spendEur : 0,
-    status: ad.effectiveStatus,
-  }
-}
-
-function parseCriteriaFromQuery(params: URLSearchParams, preset: string): TopCriteria {
-  const defaults = defaultCriteriaForPreset(preset)
-  return {
-    minSpend: numericParam(params, CRITERIA_QUERY_KEYS.minSpend, defaults.minSpend),
-    topMinRoas: numericParam(params, CRITERIA_QUERY_KEYS.topMinRoas, defaults.topMinRoas),
-    underMaxRoas: numericParam(params, CRITERIA_QUERY_KEYS.underMaxRoas, defaults.underMaxRoas),
-  }
-}
-
-function numericParam(params: URLSearchParams, key: string, fallback: number): number {
-  const raw = params.get(key)
-  if (!raw) {
-    return fallback
-  }
-  const n = Number(raw)
-  return Number.isFinite(n) && n >= 0 ? n : fallback
-}
-
-function emptyResponse(criteria: TopCriteria): SummaryResponse {
-  const empty = sumKpis([])
-  return {
-    kpis: computeKpiDelta(empty, empty),
-    byDay: [],
-    byAccount: [],
-    topAll: [],
-    topVideos: [],
-    topImages: [],
-    underperformers: [],
-    criteria,
-    fetchedAt: Date.now(),
-  }
-}
-
-function edgeCacheHeaders(): Record<string, string> {
-  return {
-    'Cache-Control': `s-maxage=${CACHE_MAX_AGE_SECONDS}, stale-while-revalidate=${CACHE_STALE_WHILE_REVALIDATE_SECONDS}`,
   }
 }
