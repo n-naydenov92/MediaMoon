@@ -59,8 +59,28 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-secondary);
+}
+
+.roas {
+  font-weight: 500;
+}
+
+.roas[data-tier='good'] {
+  color: var(--success);
+}
+
+.roas[data-tier='warning'] {
+  color: var(--warning);
+}
+
+.roas[data-tier='bad'] {
+  color: var(--error);
+}
+
+.roas[data-tier='idle'] {
+  color: var(--text-muted);
 }
 
 .dot {

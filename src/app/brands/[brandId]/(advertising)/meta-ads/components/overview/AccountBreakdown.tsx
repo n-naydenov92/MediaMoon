@@ -3,6 +3,24 @@ import { formatEur, formatRoas } from '@/lib/meta/fx'
 import { cssVars } from '@/lib/css'
 import styles from './AccountBreakdown.module.css'
 
+type RoasTier = 'good' | 'warning' | 'bad' | 'idle'
+
+const ROAS_GOOD_THRESHOLD = 3.5
+const ROAS_WARNING_THRESHOLD = 3.0
+
+function classifyRoas(roas: number): RoasTier {
+  if (roas <= 0) {
+    return 'idle'
+  }
+  if (roas >= ROAS_GOOD_THRESHOLD) {
+    return 'good'
+  }
+  if (roas >= ROAS_WARNING_THRESHOLD) {
+    return 'warning'
+  }
+  return 'bad'
+}
+
 interface Props {
   readonly accounts: readonly AccountSummary[]
 }
@@ -27,7 +45,9 @@ export default function AccountBreakdown({ accounts }: Props): JSX.Element {
               <span className={styles.barFill} />
             </div>
             <div className={styles.meta}>
-              <span>ROAS {formatRoas(account.roas)}</span>
+              <span className={styles.roas} data-tier={classifyRoas(account.roas)}>
+                ROAS {formatRoas(account.roas)}
+              </span>
               <span className={styles.dot}>·</span>
               <span>{account.activeAdsCount} {adsLabel}</span>
             </div>

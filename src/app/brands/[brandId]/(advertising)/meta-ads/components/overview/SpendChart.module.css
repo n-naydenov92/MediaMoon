@@ -4,6 +4,51 @@
   font-variant-numeric: tabular-nums;
 }
 
+.chart :focus {
+  outline: none;
+}
+
+.chart :focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.legend {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legendDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.legendDot[data-key='spendEur'] {
+  background: var(--text-muted);
+}
+
+.legendDot[data-key='revenueEur'] {
+  background: var(--accent);
+}
+
+.legendDot[data-key='roas'] {
+  background: var(--success);
+}
+
 .empty {
   display: flex;
   align-items: center;
@@ -54,6 +99,10 @@
 
 .tooltipDot[data-key='revenueEur'] {
   background: var(--accent);
+}
+
+.tooltipDot[data-key='roas'] {
+  background: var(--success);
 }
 
 .tooltipLabel {
