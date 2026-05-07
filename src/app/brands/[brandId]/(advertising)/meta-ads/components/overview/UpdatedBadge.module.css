@@ -5,7 +5,7 @@
   height: 32px;
   padding: 0 4px 0 12px;
   font-family: var(--font-dm-sans), system-ui, sans-serif;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
 }
 
@@ -36,7 +36,7 @@
   .root {
     height: 36px;
     padding-left: 8px;
-    font-size: 12px;
+    font-size: 13px;
   }
 }
 

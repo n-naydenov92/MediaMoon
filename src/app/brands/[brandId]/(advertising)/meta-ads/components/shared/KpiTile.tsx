@@ -1,7 +1,9 @@
 import { formatPercentage } from '@/lib/meta/fx'
+import KpiSparkline, {
+  type SparklineTone,
+  type SparkPoint,
+} from '../overview/KpiSparkline'
 import styles from './KpiTile.module.css'
-
-export type KpiDirection = 'higher-better' | 'lower-better'
 
 type KpiTrend = 'up' | 'down' | 'flat'
 
@@ -12,7 +14,8 @@ interface Props {
   readonly value: string
   readonly delta?: number
   readonly deltaLabel?: string
-  readonly direction?: KpiDirection
+  readonly points?: readonly SparkPoint[]
+  readonly formatValue?: (value: number) => string
 }
 
 export default function KpiTile({
@@ -20,13 +23,17 @@ export default function KpiTile({
   value,
   delta,
   deltaLabel = 'wow',
-  direction = 'higher-better',
+  points,
+  formatValue,
 }: Props): JSX.Element {
-  const trend = computeTrend(delta, direction)
+  const trend = computeTrend(delta)
   return (
     <div className={styles.tile}>
       <span className={styles.label}>{label}</span>
       <span className={styles.value}>{value}</span>
+      {points && formatValue && (
+        <KpiSparkline points={points} tone={trend as SparklineTone} formatValue={formatValue} />
+      )}
       {delta !== undefined && (
         <span className={styles.delta} data-trend={trend}>
           {arrowFor(delta)} {formatPercentage(Math.abs(delta), 0)} {deltaLabel}
@@ -36,15 +43,11 @@ export default function KpiTile({
   )
 }
 
-function computeTrend(delta: number | undefined, direction: KpiDirection): KpiTrend {
+function computeTrend(delta: number | undefined): KpiTrend {
   if (delta === undefined || Math.abs(delta) < FLAT_THRESHOLD) {
     return 'flat'
   }
-  const positive = delta > 0
-  if (direction === 'higher-better') {
-    return positive ? 'up' : 'down'
-  }
-  return positive ? 'down' : 'up'
+  return delta > 0 ? 'up' : 'down'
 }
 
 function arrowFor(delta: number): string {
