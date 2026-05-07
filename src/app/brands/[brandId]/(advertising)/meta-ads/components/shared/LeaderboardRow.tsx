@@ -1,10 +1,13 @@
 'use client'
 
+import OpenInNewIcon from '@mui/icons-material/OpenInNew'
+import Tooltip from '@mui/material/Tooltip'
 import type { AdLeaderboardEntry } from '@/lib/meta/aggregate'
 import { formatEur, formatRoas } from '@/lib/meta/fx'
 import AdThumbnail from './AdThumbnail'
 import { useCreativePreviewTrigger } from './CreativePreview/useCreativePreviewTrigger'
 import StatusDot from './StatusDot'
+import { buildAdsManagerHref } from './adsManagerHref'
 import styles from './LeaderboardCard.module.css'
 
 interface Props {
@@ -13,6 +16,7 @@ interface Props {
 
 export default function LeaderboardRow({ entry }: Props): JSX.Element {
   const trigger = useCreativePreviewTrigger<HTMLDivElement>(entry.adId, entry.accountId)
+  const adsManagerHref = buildAdsManagerHref(entry.accountId, entry.adId)
   return (
     <li
       className={styles.row}
@@ -37,6 +41,18 @@ export default function LeaderboardRow({ entry }: Props): JSX.Element {
           {formatEur(entry.spendEur)} · ROAS {formatRoas(entry.roas)}
         </span>
       </div>
+      <Tooltip title="Open in Meta Ads Manager" arrow disableInteractive>
+        <a
+          className={styles.openLink}
+          href={adsManagerHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Open in Meta Ads Manager"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <OpenInNewIcon fontSize="small" />
+        </a>
+      </Tooltip>
     </li>
   )
 }

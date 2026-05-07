@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import type { AdLeaderboardEntry } from '@/lib/meta/aggregate'
 import LeaderboardRow from './LeaderboardRow'
 import styles from './LeaderboardCard.module.css'
@@ -11,6 +12,7 @@ interface Props {
   readonly subtitle?: string
   readonly entries: readonly AdLeaderboardEntry[]
   readonly emptyLabel?: string
+  readonly seeMoreHref?: string
 }
 
 export default function LeaderboardCard({
@@ -18,6 +20,7 @@ export default function LeaderboardCard({
   subtitle,
   entries,
   emptyLabel = DEFAULT_EMPTY_LABEL,
+  seeMoreHref,
 }: Props): JSX.Element {
   return (
     <div className={styles.card}>
@@ -33,6 +36,11 @@ export default function LeaderboardCard({
             <LeaderboardRow key={entry.adId} entry={entry} />
           ))}
         </ul>
+      )}
+      {seeMoreHref && (
+        <Link href={seeMoreHref} className={styles.seeMore}>
+          See more →
+        </Link>
       )}
     </div>
   )

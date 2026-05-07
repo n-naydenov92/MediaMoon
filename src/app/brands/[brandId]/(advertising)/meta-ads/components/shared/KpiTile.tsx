@@ -1,13 +1,8 @@
 import { formatPercentage } from '@/lib/meta/fx'
-import KpiSparkline, {
-  type SparklineTone,
-  type SparkPoint,
-} from '../overview/KpiSparkline'
+import KpiSparkline from '../overview/KpiSparkline'
+import { arrowFor, computeTrend } from './kpiTrend'
+import type { SparkPoint } from '../overview/KpiSparkline'
 import styles from './KpiTile.module.css'
-
-type KpiTrend = 'up' | 'down' | 'flat'
-
-const FLAT_THRESHOLD = 0.005
 
 interface Props {
   readonly label: string
@@ -32,7 +27,7 @@ export default function KpiTile({
       <span className={styles.label}>{label}</span>
       <span className={styles.value}>{value}</span>
       {points && formatValue && (
-        <KpiSparkline points={points} tone={trend as SparklineTone} formatValue={formatValue} />
+        <KpiSparkline points={points} tone={trend} formatValue={formatValue} />
       )}
       {delta !== undefined && (
         <span className={styles.delta} data-trend={trend}>
@@ -41,18 +36,4 @@ export default function KpiTile({
       )}
     </div>
   )
-}
-
-function computeTrend(delta: number | undefined): KpiTrend {
-  if (delta === undefined || Math.abs(delta) < FLAT_THRESHOLD) {
-    return 'flat'
-  }
-  return delta > 0 ? 'up' : 'down'
-}
-
-function arrowFor(delta: number): string {
-  if (Math.abs(delta) < FLAT_THRESHOLD) {
-    return '–'
-  }
-  return delta > 0 ? '▲' : '▼'
 }

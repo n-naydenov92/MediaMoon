@@ -3,19 +3,17 @@
 import { useEffect, useState } from 'react'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import Tooltip from '@mui/material/Tooltip'
+import { formatAgo, formatTimestamp } from '@/lib/relativeTime'
 import { useThemeMode } from '@/styles/useThemeMode'
 import styles from './UpdatedBadge.module.css'
+
+const TICK_INTERVAL_MS = 30_000
 
 interface Props {
   readonly fetchedAt: number | null
   readonly onRefresh: () => void
   readonly disabled?: boolean
 }
-
-const TICK_INTERVAL_MS = 30_000
-const MS_PER_MINUTE = 60_000
-const MINUTES_PER_HOUR = 60
-const HOURS_PER_DAY = 24
 
 export default function UpdatedBadge({ fetchedAt, onRefresh, disabled = false }: Props): JSX.Element {
   const { mode } = useThemeMode()
@@ -44,6 +42,7 @@ export default function UpdatedBadge({ fetchedAt, onRefresh, disabled = false }:
             className={styles.refresh}
             onClick={onRefresh}
             disabled={disabled || fetchedAt === null}
+            data-spinning={disabled ? 'true' : undefined}
             aria-label="Refresh data"
           >
             <RefreshIcon fontSize="small" />
@@ -52,27 +51,4 @@ export default function UpdatedBadge({ fetchedAt, onRefresh, disabled = false }:
       </Tooltip>
     </div>
   )
-}
-
-function formatTimestamp(ms: number): string {
-  const d = new Date(ms)
-  const hh = String(d.getHours()).padStart(2, '0')
-  const mm = String(d.getMinutes()).padStart(2, '0')
-  return `${hh}:${mm}`
-}
-
-function formatAgo(deltaMs: number): string {
-  if (deltaMs < MS_PER_MINUTE) {
-    return 'just now'
-  }
-  const minutes = Math.floor(deltaMs / MS_PER_MINUTE)
-  if (minutes < MINUTES_PER_HOUR) {
-    return `${minutes}m ago`
-  }
-  const hours = Math.floor(minutes / MINUTES_PER_HOUR)
-  if (hours < HOURS_PER_DAY) {
-    return `${hours}h ago`
-  }
-  const days = Math.floor(hours / HOURS_PER_DAY)
-  return `${days}d ago`
 }
