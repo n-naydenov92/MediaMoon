@@ -18,6 +18,7 @@ import SpendChart from './SpendChart'
 import AccountBreakdown from './AccountBreakdown'
 import Leaderboards from './Leaderboards'
 import UpdatedBadge from './UpdatedBadge'
+import PageHeader, { type Crumb } from './PageHeader'
 import { useOverviewData, type OverviewSummary } from './useOverviewData'
 import styles from './OverviewTab.module.css'
 
@@ -65,56 +66,59 @@ export default function OverviewTab({ brandId }: Props): JSX.Element {
     [router, pathname, searchParams],
   )
 
+  const crumbs: readonly Crumb[] = [
+    { label: 'Meta Ads' },
+    { label: 'Overview' },
+  ]
+
+  const actions = (
+    <>
+      <UpdatedBadge
+        fetchedAt={fetchedAt}
+        onRefresh={refresh}
+        disabled={state.status === 'loading'}
+      />
+      <DateRangeDropdown
+        value={datePreset}
+        onChange={handleDatePresetChange}
+        comparisonEnabled={compareEnabled}
+        onComparisonChange={handleComparisonChange}
+      />
+    </>
+  )
+
   return (
     <div className={styles.root}>
-      <div className={styles.headerActions}>
-        <UpdatedBadge
-          fetchedAt={fetchedAt}
-          onRefresh={refresh}
-          disabled={state.status === 'loading'}
-        />
-        <DateRangeDropdown
-          value={datePreset}
-          onChange={handleDatePresetChange}
-          comparisonEnabled={compareEnabled}
-          onComparisonChange={handleComparisonChange}
-        />
-      </div>
+      <PageHeader crumbs={crumbs} actions={actions} />
 
-      {state.status === 'loading' && <OverviewSkeleton />}
-
+      {state.status === 'loading' && <KpiSkeletonRows />}
       {state.status === 'no-token' && (
         <Notice variant="info" title="Pending Meta token approval">
           Connection to this brand&apos;s Business Manager is not yet configured.
         </Notice>
       )}
-
       {state.status === 'error' && (
         <Notice variant="error" title="Couldn't load overview">
           {state.message}
         </Notice>
       )}
-
       {state.status === 'success' && (
-        <OverviewContent
-          summary={state.data}
+        <KpiGrid
+          kpis={state.data.kpis}
+          byDay={state.data.byDay}
           deltaLabel={COMPARISON_LABELS[datePreset]}
           compareEnabled={compareEnabled}
         />
+      )}
+
+      {state.status === 'success' && (
+        <OverviewContent summary={state.data} />
       )}
     </div>
   )
 }
 
-function OverviewContent({
-  summary,
-  deltaLabel,
-  compareEnabled,
-}: {
-  readonly summary: OverviewSummary
-  readonly deltaLabel: string
-  readonly compareEnabled: boolean
-}): JSX.Element {
+function OverviewContent({ summary }: { readonly summary: OverviewSummary }): JSX.Element | null {
   const hasAnyData = summary.byAccount.length > 0 || summary.byDay.length > 0
   if (!hasAnyData) {
     return (
@@ -125,46 +129,31 @@ function OverviewContent({
   }
   return (
     <>
-      <KpiGrid kpis={summary.kpis} deltaLabel={deltaLabel} compareEnabled={compareEnabled} />
-
-      <div className={styles.midGrid}>
-        <Section title="Spend vs Revenue" className={styles.spendSection}>
-          <SpendChart data={summary.byDay} />
-        </Section>
-        <Section title="Performance by ad account" className={styles.accountSection}>
-          <AccountBreakdown accounts={summary.byAccount} />
-        </Section>
-      </div>
-
-      <Leaderboards summary={summary} />
+      <Section title="Accounts Highlights" bare>
+        <div className={styles.midGrid}>
+          <Section title="Performance" className={styles.spendSection}>
+            <SpendChart data={summary.byDay} />
+          </Section>
+          <Section title="Accounts Breakdown" className={styles.accountSection}>
+            <AccountBreakdown accounts={summary.byAccount} />
+          </Section>
+        </div>
+      </Section>
+      <Section title="Ads Highlights" bare>
+        <Leaderboards summary={summary} />
+      </Section>
     </>
   )
 }
 
-const SKELETON_TILE_KEYS = ['a', 'b', 'c', 'd'] as const
+const KPI_SKELETON_KEYS = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] as const
 
-function OverviewSkeleton(): JSX.Element {
+function KpiSkeletonRows(): JSX.Element {
   return (
-    <div className={styles.skeleton}>
-      <div className={styles.skeletonRow}>
-        {SKELETON_TILE_KEYS.map((k) => (
-          <div key={`top-${k}`} className={styles.skeletonTile} />
-        ))}
-      </div>
-      <div className={styles.skeletonRow}>
-        {SKELETON_TILE_KEYS.map((k) => (
-          <div key={`bot-${k}`} className={styles.skeletonTile} />
-        ))}
-      </div>
-      <div className={styles.skeletonChartRow}>
-        <div className={styles.skeletonChart} />
-        <div className={styles.skeletonAccount} />
-      </div>
-      <div className={styles.skeletonRow}>
-        {SKELETON_TILE_KEYS.map((k) => (
-          <div key={`lb-${k}`} className={styles.skeletonLeaderboard} />
-        ))}
-      </div>
+    <div className={styles.skeletonGrid}>
+      {KPI_SKELETON_KEYS.map((k) => (
+        <div key={k} className={styles.skeletonTile} />
+      ))}
     </div>
   )
 }

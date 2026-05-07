@@ -7,11 +7,12 @@ interface Props {
   readonly action?: ReactNode
   readonly children: ReactNode
   readonly className?: string
+  readonly bare?: boolean
 }
 
-export default function Section({ title, action, children, className }: Props): JSX.Element {
+export default function Section({ title, action, children, className, bare = false }: Props): JSX.Element {
   return (
-    <section className={cls(styles.section, className)}>
+    <section className={cls(styles.section, className)} data-bare={bare ? 'true' : undefined}>
       {(title || action) && (
         <header className={styles.header}>
           {title && <h2 className={styles.title}>{title}</h2>}

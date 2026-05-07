@@ -10,6 +10,12 @@
   color: var(--text-primary);
 }
 
+.section[data-bare='true'] {
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
 .header {
   display: flex;
   align-items: center;
