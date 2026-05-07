@@ -60,6 +60,25 @@
 }
 
 .refresh:disabled {
-  opacity: 0.4;
+  opacity: 0.6;
   cursor: not-allowed;
+}
+
+.refresh[data-spinning='true'] svg {
+  animation: refreshSpin 900ms linear infinite;
+}
+
+@keyframes refreshSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .refresh[data-spinning='true'] svg {
+    animation: none;
+  }
 }

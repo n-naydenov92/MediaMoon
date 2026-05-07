@@ -82,6 +82,11 @@
   box-sizing: border-box;
 }
 
+html {
+  overflow-x: clip;
+  scrollbar-gutter: stable;
+}
+
 html,
 body {
   margin: 0;

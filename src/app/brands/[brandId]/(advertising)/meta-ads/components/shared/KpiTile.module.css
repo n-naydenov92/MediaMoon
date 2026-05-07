@@ -8,6 +8,12 @@
   background: var(--surface-1);
   font-family: var(--font-dm-sans), system-ui, sans-serif;
   font-variant-numeric: tabular-nums;
+  transition: box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.tile:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: var(--hairline-strong);
 }
 
 .label {

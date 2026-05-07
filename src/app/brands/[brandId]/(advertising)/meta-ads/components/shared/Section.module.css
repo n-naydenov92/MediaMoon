@@ -8,12 +8,23 @@
   background: var(--surface-1);
   font-family: var(--font-dm-sans), system-ui, sans-serif;
   color: var(--text-primary);
+  transition: box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.section:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border-color: var(--hairline-strong);
 }
 
 .section[data-bare='true'] {
   padding: 0;
   border: none;
   background: transparent;
+}
+
+.section[data-bare='true']:hover {
+  box-shadow: none;
+  border-color: transparent;
 }
 
 .header {
