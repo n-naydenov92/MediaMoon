@@ -8,6 +8,10 @@ export interface AccountKpis {
   readonly purchases: number
   readonly impressions: number
   readonly clicks: number
+  readonly linkClicks: number
+  readonly landingPageViews: number
+  readonly addsToCart: number
+  readonly checkoutsInitiated: number
 }
 
 export interface AggregatedKpis {
@@ -17,9 +21,15 @@ export interface AggregatedKpis {
   readonly purchases: number
   readonly impressions: number
   readonly clicks: number
+  readonly linkClicks: number
+  readonly landingPageViews: number
+  readonly addsToCart: number
+  readonly checkoutsInitiated: number
   readonly ctr: number
+  readonly linkCtr: number
   readonly cpmEur: number
   readonly cpcEur: number
+  readonly costPerLpvEur: number
 }
 
 export interface KpiDelta {
@@ -39,14 +49,30 @@ export function sumKpis(perAccount: readonly AccountKpis[]): AggregatedKpis {
       purchases: acc.purchases + a.purchases,
       impressions: acc.impressions + a.impressions,
       clicks: acc.clicks + a.clicks,
+      linkClicks: acc.linkClicks + a.linkClicks,
+      landingPageViews: acc.landingPageViews + a.landingPageViews,
+      addsToCart: acc.addsToCart + a.addsToCart,
+      checkoutsInitiated: acc.checkoutsInitiated + a.checkoutsInitiated,
     }),
-    { spendEur: 0, revenueEur: 0, purchases: 0, impressions: 0, clicks: 0 },
+    {
+      spendEur: 0,
+      revenueEur: 0,
+      purchases: 0,
+      impressions: 0,
+      clicks: 0,
+      linkClicks: 0,
+      landingPageViews: 0,
+      addsToCart: 0,
+      checkoutsInitiated: 0,
+    },
   )
   const roas = totals.spendEur > 0 ? totals.revenueEur / totals.spendEur : 0
   const ctr = totals.impressions > 0 ? totals.clicks / totals.impressions : 0
+  const linkCtr = totals.impressions > 0 ? totals.linkClicks / totals.impressions : 0
   const cpmEur = totals.impressions > 0 ? (totals.spendEur / totals.impressions) * 1000 : 0
   const cpcEur = totals.clicks > 0 ? totals.spendEur / totals.clicks : 0
-  return { ...totals, roas, ctr, cpmEur, cpcEur }
+  const costPerLpvEur = totals.landingPageViews > 0 ? totals.spendEur / totals.landingPageViews : 0
+  return { ...totals, roas, ctr, linkCtr, cpmEur, cpcEur, costPerLpvEur }
 }
 
 export function computeKpiDelta(current: AggregatedKpis, previous: AggregatedKpis): KpiDelta {
@@ -169,18 +195,49 @@ export interface DailyPoint {
   readonly date: string
   readonly spendEur: number
   readonly revenueEur: number
+  readonly purchases: number
+  readonly impressions: number
+  readonly clicks: number
+}
+
+interface DailyInputPoint {
+  readonly date: string
+  readonly spend: number
+  readonly revenue: number
+  readonly purchases: number
+  readonly impressions: number
+  readonly clicks: number
+}
+
+interface DailyAccumulator {
+  spendEur: number
+  revenueEur: number
+  purchases: number
+  impressions: number
+  clicks: number
+}
+
+const EMPTY_DAILY_ACCUMULATOR: DailyAccumulator = {
+  spendEur: 0,
+  revenueEur: 0,
+  purchases: 0,
+  impressions: 0,
+  clicks: 0,
 }
 
 export function sumDailySeries(
-  perAccount: readonly { readonly currency: string; readonly daily: readonly { readonly date: string; readonly spend: number; readonly revenue: number }[] }[],
+  perAccount: readonly { readonly currency: string; readonly daily: readonly DailyInputPoint[] }[],
 ): readonly DailyPoint[] {
-  const byDate = new Map<string, { spendEur: number; revenueEur: number }>()
+  const byDate = new Map<string, DailyAccumulator>()
   for (const acct of perAccount) {
     for (const point of acct.daily) {
-      const existing = byDate.get(point.date) ?? { spendEur: 0, revenueEur: 0 }
+      const existing = byDate.get(point.date) ?? { ...EMPTY_DAILY_ACCUMULATOR }
       byDate.set(point.date, {
         spendEur: existing.spendEur + convertToEur(point.spend, acct.currency),
         revenueEur: existing.revenueEur + convertToEur(point.revenue, acct.currency),
+        purchases: existing.purchases + point.purchases,
+        impressions: existing.impressions + point.impressions,
+        clicks: existing.clicks + point.clicks,
       })
     }
   }

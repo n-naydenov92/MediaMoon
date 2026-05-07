@@ -134,6 +134,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           date: d.date,
           spend: d.spend,
           revenue: d.revenue,
+          purchases: d.purchases,
+          impressions: d.impressions,
+          clicks: d.clicks,
         })),
       })),
     )

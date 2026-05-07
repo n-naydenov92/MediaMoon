@@ -301,6 +301,10 @@ export interface InsightsTotals {
   readonly purchases: number
   readonly impressions: number
   readonly clicks: number
+  readonly linkClicks: number
+  readonly landingPageViews: number
+  readonly addsToCart: number
+  readonly checkoutsInitiated: number
 }
 
 export interface InsightsDailyPoint extends InsightsTotals {
@@ -326,7 +330,11 @@ export interface AdWithInsights {
   readonly insights: InsightsTotals
 }
 
-const INSIGHTS_FIELDS = 'spend,impressions,clicks,actions,action_values'
+const INSIGHTS_FIELDS = 'spend,impressions,clicks,inline_link_clicks,actions,action_values'
+
+const ADD_TO_CART_ACTION_TYPE = 'omni_add_to_cart'
+const INITIATE_CHECKOUT_ACTION_TYPE = 'omni_initiated_checkout'
+const LANDING_PAGE_VIEW_ACTION_TYPE = 'landing_page_view'
 
 interface GraphAction {
   action_type: string
@@ -339,6 +347,7 @@ interface GraphInsightsRow {
   spend?: string
   impressions?: string
   clicks?: string
+  inline_link_clicks?: string
   actions?: GraphAction[]
   action_values?: GraphAction[]
 }
@@ -544,19 +553,37 @@ function sumInsightsRows(rows: readonly GraphInsightsRow[]): InsightsTotals {
         purchases: acc.purchases + r.purchases,
         impressions: acc.impressions + r.impressions,
         clicks: acc.clicks + r.clicks,
+        linkClicks: acc.linkClicks + r.linkClicks,
+        landingPageViews: acc.landingPageViews + r.landingPageViews,
+        addsToCart: acc.addsToCart + r.addsToCart,
+        checkoutsInitiated: acc.checkoutsInitiated + r.checkoutsInitiated,
       }
     },
-    { spend: 0, revenue: 0, purchases: 0, impressions: 0, clicks: 0 },
+    {
+      spend: 0,
+      revenue: 0,
+      purchases: 0,
+      impressions: 0,
+      clicks: 0,
+      linkClicks: 0,
+      landingPageViews: 0,
+      addsToCart: 0,
+      checkoutsInitiated: 0,
+    },
   )
 }
 
 function rowToTotals(row: GraphInsightsRow): InsightsTotals {
   return {
     spend: parseNumber(row.spend),
-    revenue: sumPurchaseActions(row.action_values),
-    purchases: sumPurchaseActions(row.actions),
+    revenue: sumActionsByType(row.action_values, PURCHASE_ACTION_TYPE),
+    purchases: sumActionsByType(row.actions, PURCHASE_ACTION_TYPE),
     impressions: parseNumber(row.impressions),
     clicks: parseNumber(row.clicks),
+    linkClicks: parseNumber(row.inline_link_clicks),
+    landingPageViews: sumActionsByType(row.actions, LANDING_PAGE_VIEW_ACTION_TYPE),
+    addsToCart: sumActionsByType(row.actions, ADD_TO_CART_ACTION_TYPE),
+    checkoutsInitiated: sumActionsByType(row.actions, INITIATE_CHECKOUT_ACTION_TYPE),
   }
 }
 
@@ -565,12 +592,15 @@ function toDailyPoint(row: GraphInsightsRow): InsightsDailyPoint {
   return { date: row.date_start ?? '', ...totals }
 }
 
-function sumPurchaseActions(actions: readonly GraphAction[] | undefined): number {
+function sumActionsByType(
+  actions: readonly GraphAction[] | undefined,
+  actionType: string,
+): number {
   if (!actions) {
     return 0
   }
   return actions.reduce((acc, a) => {
-    if (a.action_type === PURCHASE_ACTION_TYPE) {
+    if (a.action_type === actionType) {
       return acc + parseNumber(a.value)
     }
     return acc
