@@ -36,7 +36,7 @@ export default async function RootLayout({ children }: Props): Promise<JSX.Eleme
 
   return (
     <ClerkProvider>
-      <html lang="en" className={`${syne.variable} ${dmSans.variable}`}>
+      <html lang="en" className={`${syne.variable} ${dmSans.variable}`} suppressHydrationWarning>
         <body>
           <ThemeModeProvider>
             <AppShell modules={modules} brands={BRAND_REGISTRY} role={role}>{children}</AppShell>
