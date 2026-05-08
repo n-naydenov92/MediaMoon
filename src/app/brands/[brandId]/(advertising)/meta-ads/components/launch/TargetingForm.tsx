@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import MenuItem from '@mui/material/MenuItem'
+import TextField from '@mui/material/TextField'
 import type { BrandId } from '@/config/brands'
 import type { AdAccount, AdSet, Campaign, Page } from '@/lib/gateways/MetaAdsGateway'
 import FormField from './FormField'
@@ -19,6 +21,14 @@ interface Props {
   readonly value: TargetingValue
   readonly onChange: (next: TargetingValue) => void
 }
+
+const SELECT_PROPS = {
+  displayEmpty: true,
+  MenuProps: {
+    slotProps: { paper: { className: styles.menuPaper } },
+    MenuListProps: { className: styles.menuList },
+  },
+} as const
 
 export default function TargetingForm({
   brandId,
@@ -122,60 +132,79 @@ export default function TargetingForm({
   return (
     <div className={styles.grid}>
       <FormField label="Ad account">
-        <select
+        <TextField
+          select
+          size="small"
+          variant="outlined"
+          fullWidth
           className={styles.select}
           value={value.accountId}
+          SelectProps={SELECT_PROPS}
           onChange={(e) => onChange({ ...value, accountId: e.target.value, campaignId: '', adSetId: '' })}
         >
-          <option value="">Select account…</option>
+          <MenuItem value="">Select account…</MenuItem>
           {accounts.map((a) => (
-            <option key={a.id} value={a.id}>{a.name}</option>
+            <MenuItem key={a.id} value={a.id}>{a.name}</MenuItem>
           ))}
-        </select>
+        </TextField>
       </FormField>
 
       <FormField label="Campaign">
-        <select
+        <TextField
+          select
+          size="small"
+          variant="outlined"
+          fullWidth
           className={styles.select}
           value={value.campaignId}
-          onChange={(e) => onChange({ ...value, campaignId: e.target.value, adSetId: '' })}
+          SelectProps={SELECT_PROPS}
           disabled={!value.accountId || campaigns.length === 0}
+          onChange={(e) => onChange({ ...value, campaignId: e.target.value, adSetId: '' })}
         >
-          <option value="">Select campaign…</option>
+          <MenuItem value="">Select campaign…</MenuItem>
           {campaigns.map((c) => (
-            <option key={c.id} value={c.id}>{c.name}</option>
+            <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
           ))}
-        </select>
+        </TextField>
       </FormField>
 
       <FormField label="Ad set">
-        <select
+        <TextField
+          select
+          size="small"
+          variant="outlined"
+          fullWidth
           className={styles.select}
           value={value.adSetId}
-          onChange={(e) => onChange({ ...value, adSetId: e.target.value })}
+          SelectProps={SELECT_PROPS}
           disabled={!value.campaignId || adSets.length === 0}
+          onChange={(e) => onChange({ ...value, adSetId: e.target.value })}
         >
-          <option value="">Select ad set…</option>
+          <MenuItem value="">Select ad set…</MenuItem>
           {adSets.map((a) => (
-            <option key={a.id} value={a.id}>{a.name}</option>
+            <MenuItem key={a.id} value={a.id}>{a.name}</MenuItem>
           ))}
-        </select>
+        </TextField>
       </FormField>
 
       <FormField label="Facebook page">
-        <select
+        <TextField
+          select
+          size="small"
+          variant="outlined"
+          fullWidth
           className={styles.select}
           value={value.pageId}
-          onChange={(e) => onChange({ ...value, pageId: e.target.value })}
+          SelectProps={SELECT_PROPS}
           disabled={pages.length === 0}
+          onChange={(e) => onChange({ ...value, pageId: e.target.value })}
         >
-          <option value="">Select page…</option>
+          <MenuItem value="">Select page…</MenuItem>
           {pages.map((p) => (
-            <option key={p.id} value={p.id}>{p.name}</option>
+            <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>
           ))}
-        </select>
+        </TextField>
       </FormField>
     </div>
   )
 }
-

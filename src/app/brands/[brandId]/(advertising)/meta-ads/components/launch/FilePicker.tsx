@@ -1,6 +1,9 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState, type DragEvent, type ChangeEvent } from 'react'
+import ButtonBase from '@mui/material/ButtonBase'
+import IconButton from '@mui/material/IconButton'
+import CloseIcon from '@mui/icons-material/Close'
 import styles from './FilePicker.module.css'
 
 interface Props {
@@ -92,7 +95,12 @@ export default function FilePicker({ files, onChange, disabled = false }: Props)
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
       >
-        <label className={styles.dropLabel}>
+        <ButtonBase
+          component="label"
+          className={styles.dropLabel}
+          disabled={disabled}
+          focusRipple
+        >
           <input
             ref={inputRef}
             type="file"
@@ -104,7 +112,7 @@ export default function FilePicker({ files, onChange, disabled = false }: Props)
           />
           <span className={styles.dropLabelMain}>Drop files here or click to browse</span>
           <span className={styles.dropHint}>Images and videos. Up to 200 MB each.</span>
-        </label>
+        </ButtonBase>
       </div>
 
       {previews.length > 0 && (
@@ -118,15 +126,15 @@ export default function FilePicker({ files, onChange, disabled = false }: Props)
                 <img src={url} alt={file.name} className={styles.preview} />
               )}
               <span className={styles.badge}>{isVideo ? '▶' : '▣'}</span>
-              <button
-                type="button"
+              <IconButton
+                size="small"
                 className={styles.remove}
                 onClick={() => handleRemove(index)}
                 aria-label={`Remove ${file.name}`}
                 disabled={disabled}
               >
-                ×
-              </button>
+                <CloseIcon fontSize="inherit" />
+              </IconButton>
               <span className={styles.name}>{file.name}</span>
             </li>
           ))}

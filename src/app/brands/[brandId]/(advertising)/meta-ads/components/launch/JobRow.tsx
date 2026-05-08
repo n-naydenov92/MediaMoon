@@ -1,5 +1,6 @@
 'use client'
 
+import Button from '@mui/material/Button'
 import { FileStatus, JobStatus } from '@prisma/client'
 import { cssVars } from '@/lib/css'
 import type { JobFile, JobWithFiles } from './useLaunchJobs'
@@ -79,9 +80,16 @@ export default function JobRow({ job, clientProgress, onCancel }: Props): JSX.El
 
       <footer className={styles.footer}>
         {isActive && (
-          <button type="button" className={styles.cancel} onClick={() => void onCancel(job.id)}>
+          <Button
+            type="button"
+            size="small"
+            variant="outlined"
+            color="inherit"
+            className={styles.cancel}
+            onClick={() => void onCancel(job.id)}
+          >
             Cancel
-          </button>
+          </Button>
         )}
         {job.status === JobStatus.DONE && (
           <a

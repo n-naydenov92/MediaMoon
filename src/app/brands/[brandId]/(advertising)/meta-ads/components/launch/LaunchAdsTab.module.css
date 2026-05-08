@@ -15,7 +15,7 @@
   justify-content: flex-end;
 }
 
-.publish {
+.actions .publish {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -28,17 +28,15 @@
   background: var(--accent);
   border: none;
   border-radius: 8px;
-  cursor: pointer;
+  text-transform: none;
   transition: background 80ms ease-out;
 }
 
-.publish:hover:not(:disabled) {
+.actions .publish:hover:not(:disabled) {
   background: var(--accent-hover);
 }
 
-.publish:disabled {
+.actions .publish:disabled {
   background: var(--surface-3);
   color: var(--text-muted);
-  cursor: not-allowed;
 }
-

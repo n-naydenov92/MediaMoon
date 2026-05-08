@@ -161,21 +161,24 @@
   gap: 12px;
 }
 
-.cancel {
+.footer .cancel {
+  min-width: 0;
   padding: 6px 12px;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
   font-size: 12px;
   font-weight: 500;
   color: var(--text-secondary);
   background: transparent;
   border: 1px solid var(--hairline);
   border-radius: 6px;
-  cursor: pointer;
+  text-transform: none;
   transition: border-color 80ms ease-out, color 80ms ease-out;
 }
 
-.cancel:hover {
+.footer .cancel:hover {
   border-color: var(--error);
   color: var(--error);
+  background: transparent;
 }
 
 .link {

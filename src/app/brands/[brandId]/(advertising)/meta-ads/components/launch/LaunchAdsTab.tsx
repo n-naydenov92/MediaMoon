@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useMemo, useState } from 'react'
+import Button from '@mui/material/Button'
 import { CtaType } from '@prisma/client'
 import type { BrandId } from '@/config/brands'
 import type { Market } from '@/types'
@@ -126,8 +127,10 @@ export default function LaunchAdsTab({ brandId }: Props): JSX.Element {
       </Section>
 
       <div className={styles.actions}>
-        <button
+        <Button
           type="button"
+          variant="contained"
+          disableElevation
           className={styles.publish}
           disabled={!canSubmit}
           onClick={handleSubmit}
@@ -135,7 +138,7 @@ export default function LaunchAdsTab({ brandId }: Props): JSX.Element {
           {launch.state.status === 'creating'
             ? 'Uploading…'
             : `▶ Publish ${files.length || ''} ${files.length === 1 ? 'ad' : 'ads'}`.trim()}
-        </button>
+        </Button>
       </div>
 
       <Section title="Active jobs">
