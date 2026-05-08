@@ -12,7 +12,7 @@ import {
 } from '@/styles/themeModeCtx'
 
 const STORAGE_KEY = 'tm.mode'
-const DEFAULT_MODE: ThemeMode = 'dark'
+const DEFAULT_MODE: ThemeMode = 'light'
 
 interface ProviderProps {
   readonly children: ReactNode
