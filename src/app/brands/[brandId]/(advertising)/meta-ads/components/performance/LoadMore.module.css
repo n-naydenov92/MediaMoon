@@ -1,0 +1,23 @@
+.root {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0 4px;
+}
+
+.btn {
+  text-transform: none !important;
+  font-family: var(--font-dm-sans), system-ui, sans-serif !important;
+  font-size: var(--text-sm) !important;
+  font-weight: 500 !important;
+  border-radius: 999px !important;
+  border-color: var(--hairline) !important;
+  color: var(--text-primary) !important;
+  font-variant-numeric: tabular-nums !important;
+  padding: 0 20px !important;
+  height: 36px !important;
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--surface-2) !important;
+  border-color: var(--hairline-strong) !important;
+}

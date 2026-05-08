@@ -1,0 +1,18 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  color: var(--text-primary);
+}
+
+@media (min-width: 1024px) {
+  .root {
+    gap: 16px;
+    padding: 24px;
+  }
+}

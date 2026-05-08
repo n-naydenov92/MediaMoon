@@ -1,0 +1,135 @@
+.trigger {
+  text-transform: none;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-muted);
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+.trigger:hover {
+  background: var(--surface-2);
+  color: var(--text-primary);
+}
+
+.triggerLabel {
+  display: inline;
+}
+
+@media (max-width: 480px) {
+  .trigger {
+    padding: 0 8px;
+    min-width: 0;
+  }
+
+  .trigger :global(.MuiButton-startIcon) {
+    margin-right: 0;
+    margin-left: 0;
+  }
+
+  .triggerLabel {
+    display: none;
+  }
+}
+
+.paper {
+  margin-top: 4px;
+  background: var(--bg-surface);
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  color: var(--text-primary);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px;
+  min-width: 320px;
+}
+
+.title {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  column-gap: 12px;
+  row-gap: 6px;
+  align-items: center;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.colHeader {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 0 6px;
+}
+
+.colHeader[data-tier='good'] {
+  color: var(--success);
+}
+
+.colHeader[data-tier='warning'] {
+  color: var(--warning);
+}
+
+.colHeader[data-tier='bad'] {
+  color: var(--error);
+}
+
+.metricName {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.cell {
+  text-align: right;
+  font-weight: 500;
+  padding: 0 6px;
+  border-radius: 4px;
+}
+
+.cell[data-tier='good'] {
+  color: var(--success);
+  background: var(--success-soft);
+}
+
+.cell[data-tier='warning'] {
+  color: var(--warning);
+  background: var(--warning-soft);
+}
+
+.cell[data-tier='bad'] {
+  color: var(--error);
+  background: var(--error-soft);
+}
+
+.winnerNote {
+  padding-top: 8px;
+  border-top: 1px solid var(--hairline);
+  font-size: 12px;
+}
+
+.underperformNote {
+  font-size: 12px;
+}
+
+.winnerText {
+  color: var(--text-secondary);
+  line-height: 1.4;
+}

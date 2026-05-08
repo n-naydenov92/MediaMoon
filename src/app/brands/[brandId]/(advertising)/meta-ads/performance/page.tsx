@@ -1,5 +1,5 @@
 import { findBrandById } from '@/config/brands'
-import MetaAdsView from '../components/MetaAdsView'
+import PerformanceTab from '../components/performance/PerformanceTab'
 
 interface Props {
   readonly params: Promise<{ readonly brandId: string }>
@@ -11,5 +11,5 @@ export default async function AdsPerformancePage({ params }: Props): Promise<JSX
   if (!brand) {
     return null
   }
-  return <MetaAdsView brandId={brand.id} />
+  return <PerformanceTab brandId={brand.id} />
 }

@@ -1,0 +1,359 @@
+.root {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  color: var(--text-primary);
+}
+
+.empty {
+  margin: 0;
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+/* ===========================================================================
+ * Mobile (default) — card list
+ * =========================================================================*/
+
+.tableContainer {
+  display: none !important;
+}
+
+.mobileList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+}
+
+.mobileCard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  background: var(--bg-surface);
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  outline: none;
+  transition: background 80ms ease, border-color 80ms ease;
+}
+
+.mobileCard:hover {
+  background: var(--surface-2);
+}
+
+.mobileCard[data-winner='true'] {
+  border-color: var(--success);
+  box-shadow: 0 0 0 1px var(--success);
+}
+
+.mobileCard[data-underperformer='true'] {
+  border-color: var(--error);
+  box-shadow: 0 0 0 1px var(--error);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+.thumbnailWrap {
+  display: inline-flex;
+  flex: 0 0 auto;
+  width: 48px;
+  height: 48px;
+  cursor: pointer;
+  outline: none;
+}
+
+.cardText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 0;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.nameRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+.name {
+  display: block;
+  flex: 1 1 0;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cardMeta {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mobileMetricGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--hairline);
+}
+
+.metricMobileCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.metricLabel {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.metricValue {
+  font-size: 15px;
+  line-height: 1.15;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.metricValue[data-tier='good'] {
+  color: var(--success);
+}
+
+.metricValue[data-tier='warning'] {
+  color: var(--warning);
+}
+
+.metricValue[data-tier='bad'] {
+  color: var(--error);
+}
+
+/* ===========================================================================
+ * Desktop — MUI Table (≥1024px)
+ * =========================================================================*/
+
+@media (min-width: 1024px) {
+  .tableContainer {
+    display: block !important;
+    background: var(--bg-surface);
+    border: 1px solid var(--hairline);
+    border-radius: 12px;
+  }
+
+  .mobileList {
+    display: none;
+  }
+
+  .table {
+    background: transparent !important;
+  }
+
+  .tableHead {
+    background: var(--surface-2);
+  }
+
+  .tableHead :global(.MuiTableCell-root) {
+    background: var(--surface-2);
+    color: var(--text-muted) !important;
+    font-family: var(--font-dm-sans), system-ui, sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--hairline) !important;
+    padding: 10px 12px !important;
+    white-space: nowrap;
+  }
+
+  .tableHead :global(.MuiTableSortLabel-root) {
+    color: var(--text-muted) !important;
+    font: inherit !important;
+  }
+
+  .tableHead :global(.MuiTableSortLabel-root:hover),
+  .tableHead :global(.MuiTableSortLabel-root.Mui-active) {
+    color: var(--text-primary) !important;
+  }
+
+  .tableHead :global(.MuiTableSortLabel-root.Mui-active .MuiTableSortLabel-icon) {
+    color: var(--accent) !important;
+    opacity: 1;
+  }
+
+  .bodyRow :global(.MuiTableCell-root) {
+    color: var(--text-primary);
+    font-family: var(--font-dm-sans), system-ui, sans-serif !important;
+    font-size: var(--text-sm) !important;
+    font-weight: 500 !important;
+    font-variant-numeric: tabular-nums;
+    border-bottom: 1px solid var(--hairline) !important;
+    padding: 8px 12px !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 0;
+  }
+
+  .bodyRow:last-child :global(.MuiTableCell-root) {
+    border-bottom: 0 !important;
+  }
+
+  .bodyRow:hover {
+    background: var(--surface-2) !important;
+  }
+
+  .thumbCell {
+    width: 64px !important;
+    min-width: 64px !important;
+    max-width: 64px !important;
+    padding: 6px 8px 6px 12px !important;
+    overflow: visible !important;
+  }
+
+  .nameCell {
+    min-width: 180px;
+    max-width: 220px !important;
+    font-weight: 500 !important;
+  }
+
+  .nameRow {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .name {
+    display: block;
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .accountCell {
+    min-width: 100px;
+    max-width: 140px !important;
+    color: var(--text-secondary) !important;
+    font-weight: 400 !important;
+  }
+
+  .account {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .metricCell {
+    min-width: 88px;
+    font-variant-numeric: tabular-nums !important;
+    font-weight: 500 !important;
+    position: relative;
+  }
+
+  .bodyRow .metricCell[data-tier='good'] {
+    color: var(--success);
+  }
+
+  .bodyRow .metricCell[data-tier='warning'] {
+    color: var(--warning);
+  }
+
+  .bodyRow .metricCell[data-tier='bad'] {
+    color: var(--error);
+  }
+
+  .bodyRow[data-winner='true'] :global(.MuiTableCell-root) {
+    box-shadow: inset 0 1px 0 var(--success), inset 0 -1px 0 var(--success);
+  }
+
+  .bodyRow[data-winner='true'] :global(.MuiTableCell-root):first-child {
+    box-shadow: inset 3px 0 0 var(--success), inset 0 1px 0 var(--success), inset 0 -1px 0 var(--success);
+  }
+
+  .bodyRow[data-winner='true'] :global(.MuiTableCell-root):last-child {
+    box-shadow: inset -1px 0 0 var(--success), inset 0 1px 0 var(--success), inset 0 -1px 0 var(--success);
+  }
+
+  .bodyRow[data-underperformer='true'] :global(.MuiTableCell-root) {
+    box-shadow: inset 0 1px 0 var(--error), inset 0 -1px 0 var(--error);
+  }
+
+  .bodyRow[data-underperformer='true'] :global(.MuiTableCell-root):first-child {
+    box-shadow: inset 3px 0 0 var(--error), inset 0 1px 0 var(--error), inset 0 -1px 0 var(--error);
+  }
+
+  .bodyRow[data-underperformer='true'] :global(.MuiTableCell-root):last-child {
+    box-shadow: inset -1px 0 0 var(--error), inset 0 1px 0 var(--error), inset 0 -1px 0 var(--error);
+  }
+
+  .openLinkCell {
+    width: 48px !important;
+    max-width: 48px !important;
+    padding: 8px 12px !important;
+    text-align: right !important;
+    overflow: visible !important;
+  }
+
+  .openLink {
+    color: var(--text-muted) !important;
+    opacity: 0;
+    transition: opacity 120ms ease, color 80ms ease, background 80ms ease;
+  }
+
+  .bodyRow:hover .openLink,
+  .bodyRow:focus-within .openLink {
+    opacity: 1;
+  }
+
+  .openLink:hover,
+  .openLink:focus-visible {
+    color: var(--text-primary) !important;
+    background: var(--surface-3) !important;
+  }
+}
