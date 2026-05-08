@@ -8,7 +8,7 @@ import type {
   KpiDelta,
   TopCriteria,
 } from '@/lib/meta/aggregate'
-import type { DatePreset } from '@/lib/meta/dateRange'
+import type { DateRangeSelection } from '@/lib/meta/dateRange'
 import { ALL_MARKETS } from '@/lib/markets'
 
 const NO_TOKEN_STATUS = 503
@@ -39,7 +39,7 @@ export interface OverviewControls {
 interface OverviewQuery {
   readonly brandId: BrandId
   readonly market: Market | typeof ALL_MARKETS
-  readonly datePreset: DatePreset
+  readonly dateSelection: DateRangeSelection
 }
 
 interface ApiError {
@@ -51,9 +51,14 @@ export function useOverviewData(query: OverviewQuery): OverviewControls {
   const [refreshTick, setRefreshTick] = useState(0)
   const cacheRef = useRef<Map<string, OverviewSummary>>(new Map())
 
+  const dateKey =
+    query.dateSelection.kind === 'preset'
+      ? `p:${query.dateSelection.preset}`
+      : `c:${query.dateSelection.range.from}:${query.dateSelection.range.to}`
+
   useEffect(() => {
     const controller = new AbortController()
-    const cacheKey = `${query.brandId}|${query.market}|${query.datePreset}`
+    const cacheKey = `${query.brandId}|${query.market}|${dateKey}`
     const cached = refreshTick === 0 ? cacheRef.current.get(cacheKey) : undefined
     if (cached) {
       setState({ status: 'success', data: cached })
@@ -61,7 +66,13 @@ export function useOverviewData(query: OverviewQuery): OverviewControls {
       setState({ status: 'loading' })
     }
 
-    const search = new URLSearchParams({ brandId: query.brandId, datePreset: query.datePreset })
+    const search = new URLSearchParams({ brandId: query.brandId })
+    if (query.dateSelection.kind === 'preset') {
+      search.set('datePreset', query.dateSelection.preset)
+    } else {
+      search.set('from', query.dateSelection.range.from)
+      search.set('to', query.dateSelection.range.to)
+    }
     if (query.market !== ALL_MARKETS) {
       search.set('market', query.market)
     }
@@ -94,7 +105,7 @@ export function useOverviewData(query: OverviewQuery): OverviewControls {
     })()
 
     return () => controller.abort()
-  }, [query.brandId, query.market, query.datePreset, refreshTick])
+  }, [query.brandId, query.market, query.dateSelection, dateKey, refreshTick])
 
   const refresh = useCallback((): void => {
     setRefreshTick((n) => n + 1)

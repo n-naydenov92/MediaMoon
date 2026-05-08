@@ -1,6 +1,6 @@
 import type { BrandId } from '@/config/brands'
 import type { Market } from '@/types'
-import type { DatePreset } from '@/lib/meta/dateRange'
+import type { DateRangeSelection } from '@/lib/meta/dateRange'
 import { ALL_MARKETS } from '@/lib/markets'
 import { formatEur, formatRoas } from '@/lib/meta/fx'
 import LeaderboardCard from '../shared/LeaderboardCard'
@@ -11,18 +11,18 @@ import styles from './Leaderboards.module.css'
 interface Props {
   readonly summary: OverviewSummary
   readonly brandId: BrandId
-  readonly datePreset: DatePreset
+  readonly dateSelection: DateRangeSelection
   readonly market: Market | typeof ALL_MARKETS
 }
 
 export default function Leaderboards({
   summary,
   brandId,
-  datePreset,
+  dateSelection,
   market,
 }: Props): JSX.Element {
   const hrefFor = (slice: LeaderboardSlice): string =>
-    buildPerformanceHref(brandId, datePreset, market, slice)
+    buildPerformanceHref(brandId, dateSelection, market, slice)
   const topSubtitle = `spend over ${formatEur(summary.criteria.minSpend)}, ROAS over ${formatRoas(summary.criteria.topMinRoas)}`
   const underSubtitle = `spend over ${formatEur(summary.criteria.minSpend)}, ROAS under ${formatRoas(summary.criteria.underMaxRoas)}`
 

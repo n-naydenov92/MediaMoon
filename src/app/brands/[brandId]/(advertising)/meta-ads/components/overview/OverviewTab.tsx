@@ -6,8 +6,8 @@ import type { BrandId } from '@/config/brands'
 import { useBrandShellContext } from '@/contexts/brandShell/useBrandShellContext'
 import {
   COMPARISON_LABELS,
-  DEFAULT_DATE_PRESET,
-  isDatePreset,
+  parseDateRangeFromQuery,
+  type CustomRange,
   type DatePreset,
 } from '@/lib/meta/dateRange'
 import Notice from '../Notice'
@@ -29,28 +29,44 @@ const CRUMBS: readonly Crumb[] = [
   { label: 'Overview' },
 ]
 
+const CUSTOM_COMPARISON_LABEL = 'vs prev. period'
+
 export default function OverviewTab({ brandId }: Props): JSX.Element {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const { selectedMarket } = useBrandShellContext()
 
-  const datePresetRaw = searchParams.get('datePreset')
-  const datePreset: DatePreset =
-    datePresetRaw && isDatePreset(datePresetRaw) ? datePresetRaw : DEFAULT_DATE_PRESET
+  const dateSelection = useMemo(
+    () => parseDateRangeFromQuery(searchParams),
+    [searchParams],
+  )
   const compareEnabled = searchParams.get('compare') !== 'off'
 
   const query = useMemo(
-    () => ({ brandId, market: selectedMarket, datePreset }),
-    [brandId, selectedMarket, datePreset],
+    () => ({ brandId, market: selectedMarket, dateSelection }),
+    [brandId, selectedMarket, dateSelection],
   )
   const { state, refresh } = useOverviewData(query)
   const fetchedAt = state.status === 'success' ? state.data.fetchedAt : null
 
-  const handleDatePresetChange = useCallback(
+  const handlePresetChange = useCallback(
     (next: DatePreset) => {
       const params = new URLSearchParams(searchParams.toString())
       params.set('datePreset', next)
+      params.delete('from')
+      params.delete('to')
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false })
+    },
+    [router, pathname, searchParams],
+  )
+
+  const handleCustomRangeChange = useCallback(
+    (range: CustomRange) => {
+      const params = new URLSearchParams(searchParams.toString())
+      params.delete('datePreset')
+      params.set('from', range.from)
+      params.set('to', range.to)
       router.replace(`${pathname}?${params.toString()}`, { scroll: false })
     },
     [router, pathname, searchParams],
@@ -69,6 +85,11 @@ export default function OverviewTab({ brandId }: Props): JSX.Element {
     [router, pathname, searchParams],
   )
 
+  const deltaLabel =
+    dateSelection.kind === 'preset'
+      ? COMPARISON_LABELS[dateSelection.preset]
+      : CUSTOM_COMPARISON_LABEL
+
   const actions = (
     <>
       <UpdatedBadge
@@ -77,8 +98,9 @@ export default function OverviewTab({ brandId }: Props): JSX.Element {
         disabled={state.status === 'loading'}
       />
       <DateRangeDropdown
-        value={datePreset}
-        onChange={handleDatePresetChange}
+        value={dateSelection}
+        onPresetChange={handlePresetChange}
+        onCustomRangeChange={handleCustomRangeChange}
         comparisonEnabled={compareEnabled}
         onComparisonChange={handleComparisonChange}
       />
@@ -104,7 +126,7 @@ export default function OverviewTab({ brandId }: Props): JSX.Element {
         <KpiGrid
           kpis={state.data.kpis}
           byDay={state.data.byDay}
-          deltaLabel={COMPARISON_LABELS[datePreset]}
+          deltaLabel={deltaLabel}
           compareEnabled={compareEnabled}
         />
       )}
@@ -113,7 +135,7 @@ export default function OverviewTab({ brandId }: Props): JSX.Element {
         <OverviewContent
           summary={state.data}
           brandId={brandId}
-          datePreset={datePreset}
+          dateSelection={dateSelection}
           market={selectedMarket}
         />
       )}

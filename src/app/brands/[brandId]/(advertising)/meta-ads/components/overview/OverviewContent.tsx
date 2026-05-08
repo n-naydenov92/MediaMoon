@@ -1,6 +1,6 @@
 import type { BrandId } from '@/config/brands'
 import type { Market } from '@/types'
-import type { DatePreset } from '@/lib/meta/dateRange'
+import type { DateRangeSelection } from '@/lib/meta/dateRange'
 import type { ALL_MARKETS } from '@/lib/markets'
 import Notice from '../Notice'
 import Section from '../shared/Section'
@@ -13,14 +13,14 @@ import styles from './OverviewTab.module.css'
 interface Props {
   readonly summary: OverviewSummary
   readonly brandId: BrandId
-  readonly datePreset: DatePreset
+  readonly dateSelection: DateRangeSelection
   readonly market: Market | typeof ALL_MARKETS
 }
 
 export default function OverviewContent({
   summary,
   brandId,
-  datePreset,
+  dateSelection,
   market,
 }: Props): JSX.Element | null {
   const hasAnyData = summary.byAccount.length > 0 || summary.byDay.length > 0
@@ -47,7 +47,7 @@ export default function OverviewContent({
         <Leaderboards
           summary={summary}
           brandId={brandId}
-          datePreset={datePreset}
+          dateSelection={dateSelection}
           market={market}
         />
       </Section>
