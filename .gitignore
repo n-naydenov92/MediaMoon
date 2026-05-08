@@ -11,3 +11,4 @@ dist
 tsconfig.tsbuildinfo
 next-env.d.ts
 .claude/settings.local.json
+.claude/scheduled_tasks.lock
