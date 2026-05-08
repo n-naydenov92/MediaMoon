@@ -74,7 +74,7 @@ export default function FilterChips({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const activePreset = CHIPS.find((c) => c.key === activeChip)
-  const mobileLabel = activePreset?.label ?? 'Predefined'
+  const mobileLabel = activePreset?.label ?? 'Choose preset'
 
   function handleMobilePick(key: ChipKey): void {
     onChipSelect(key)
