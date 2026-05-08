@@ -42,6 +42,7 @@ export default function AdsTableDesktopRow({ row, visibleColumns }: Props): JSX.
           onPointerLeave={trigger.onPointerLeave}
           onFocus={trigger.onFocus}
           onBlur={trigger.onBlur}
+          onClick={trigger.onClick}
           tabIndex={0}
         >
           <AdThumbnail src={row.thumbnailUrl} alt={row.name} type={row.creativeType} />

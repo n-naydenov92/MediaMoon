@@ -42,6 +42,7 @@ export default function AdsMobileCard({ row, visibleColumns }: Props): JSX.Eleme
           onPointerLeave={trigger.onPointerLeave}
           onFocus={trigger.onFocus}
           onBlur={trigger.onBlur}
+          onClick={trigger.onClick}
           tabIndex={0}
         >
           <AdThumbnail src={row.thumbnailUrl} alt={row.name} type={row.creativeType} />

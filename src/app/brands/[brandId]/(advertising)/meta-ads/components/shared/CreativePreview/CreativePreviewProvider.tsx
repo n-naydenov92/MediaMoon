@@ -21,6 +21,8 @@ interface ContextValue {
   readonly requestOpen: (adId: string, accountId: string, anchor: HTMLElement) => void
   readonly requestClose: () => void
   readonly cancelClose: () => void
+  readonly requestOpenImmediate: (adId: string, accountId: string, anchor: HTMLElement) => void
+  readonly requestCloseImmediate: () => void
 }
 
 const CreativePreviewControlContext = createContext<ContextValue | null>(null)
@@ -170,6 +172,29 @@ export default function CreativePreviewProvider({ children }: Props): JSX.Elemen
     }
   }, [])
 
+  const requestOpenImmediate = useCallback(
+    (adId: string, accountId: string, nextAnchor: HTMLElement): void => {
+      clearTimers()
+      setOpenAdId(adId)
+      setAnchor(nextAnchor)
+      const cached = cacheRef.current.get(adId)
+      if (cached) {
+        setState(cached)
+        return
+      }
+      setState({ status: 'loading' })
+      void fetchCreative(adId, accountId)
+    },
+    [clearTimers, fetchCreative],
+  )
+
+  const requestCloseImmediate = useCallback((): void => {
+    clearTimers()
+    setOpenAdId(null)
+    setAnchor(null)
+    setState({ status: 'idle' })
+  }, [clearTimers])
+
   useEffect(() => {
     return () => {
       clearTimers()
@@ -179,8 +204,8 @@ export default function CreativePreviewProvider({ children }: Props): JSX.Elemen
   }, [clearTimers])
 
   const value = useMemo<ContextValue>(
-    () => ({ requestOpen, requestClose, cancelClose }),
-    [requestOpen, requestClose, cancelClose],
+    () => ({ requestOpen, requestClose, cancelClose, requestOpenImmediate, requestCloseImmediate }),
+    [requestOpen, requestClose, cancelClose, requestOpenImmediate, requestCloseImmediate],
   )
 
   return (
@@ -191,6 +216,7 @@ export default function CreativePreviewProvider({ children }: Props): JSX.Elemen
         state={state}
         onPointerEnter={cancelClose}
         onPointerLeave={requestClose}
+        onClose={requestCloseImmediate}
       />
     </CreativePreviewControlContext.Provider>
   )

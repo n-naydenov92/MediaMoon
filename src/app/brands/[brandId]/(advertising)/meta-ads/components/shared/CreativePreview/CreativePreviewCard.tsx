@@ -1,7 +1,11 @@
 'use client'
 
 import { memo } from 'react'
+import Dialog from '@mui/material/Dialog'
+import IconButton from '@mui/material/IconButton'
 import Popper from '@mui/material/Popper'
+import useMediaQuery from '@mui/material/useMediaQuery'
+import CloseIcon from '@mui/icons-material/Close'
 import { useThemeMode } from '@/styles/useThemeMode'
 import CardContent from './CardContent'
 import CardEmpty from './CardEmpty'
@@ -11,6 +15,7 @@ import type { CreativePreviewState } from './creativePreviewTypes'
 import styles from './CreativePreviewCard.module.css'
 
 const POPPER_Z_INDEX = 1300
+const MOBILE_QUERY = '(max-width: 1023px)'
 
 const POPPER_MODIFIERS = [
   { name: 'offset', options: { offset: [0, 12] } },
@@ -23,6 +28,7 @@ interface Props {
   readonly state: CreativePreviewState
   readonly onPointerEnter: () => void
   readonly onPointerLeave: () => void
+  readonly onClose: () => void
 }
 
 const CreativePreviewCard = memo(function CreativePreviewCard({
@@ -30,11 +36,41 @@ const CreativePreviewCard = memo(function CreativePreviewCard({
   state,
   onPointerEnter,
   onPointerLeave,
+  onClose,
 }: Props): JSX.Element | null {
   const { mode } = useThemeMode()
-  if (!anchor || state.status === 'idle') {
+  const isMobile = useMediaQuery(MOBILE_QUERY)
+  const isOpen = anchor !== null && state.status !== 'idle'
+
+  if (isMobile) {
+    return (
+      <Dialog
+        fullScreen
+        open={isOpen}
+        onClose={onClose}
+        PaperProps={{ className: styles.sheet, 'data-theme': mode }}
+      >
+        <div className={styles.sheetHeader}>
+          <IconButton
+            size="small"
+            aria-label="Close preview"
+            onClick={onClose}
+            className={styles.sheetClose}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </div>
+        <div className={styles.sheetContent} role="dialog">
+          {renderState(state)}
+        </div>
+      </Dialog>
+    )
+  }
+
+  if (!isOpen) {
     return null
   }
+
   return (
     <Popper
       open

@@ -173,7 +173,7 @@
     max-width: calc(100vw - 24px);
     right: 0;
     left: auto;
-    max-height: calc(100vh - 120px);
+    max-height: calc(100dvh - 120px);
     overflow-y: auto;
   }
 

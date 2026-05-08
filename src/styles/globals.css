@@ -85,6 +85,7 @@
 html {
   overflow-x: clip;
   scrollbar-gutter: stable;
+  height: 100%;
 }
 
 html,
@@ -95,6 +96,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  overscroll-behavior-y: none;
 }
 
 a {

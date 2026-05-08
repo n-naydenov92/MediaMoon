@@ -29,6 +29,7 @@ export default function LeaderboardRow({ entry }: Props): JSX.Element {
         className={styles.thumbnailWrap}
         onPointerEnter={trigger.onPointerEnter}
         onPointerLeave={trigger.onPointerLeave}
+        onClick={trigger.onClick}
       >
         <AdThumbnail src={entry.thumbnailUrl} alt={entry.name} type={entry.creativeType} />
       </div>

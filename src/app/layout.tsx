@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import type { ReactNode } from 'react'
 import { ClerkProvider } from '@clerk/nextjs'
 import { DM_Sans, Syne } from 'next/font/google'
@@ -24,6 +24,12 @@ const dmSans = DM_Sans({
 export const metadata: Metadata = {
   title: 'MediaMon',
   description: 'Internal media monitoring platform',
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
 }
 
 interface Props {

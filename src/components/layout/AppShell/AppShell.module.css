@@ -1,14 +1,21 @@
 .shell {
   display: flex;
   height: 100vh;
+  height: 100dvh;
 }
 
 .main {
   flex: 1;
   min-width: 0;
-  display: flex;
-  flex-direction: column;
   overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.main::after {
+  content: '';
+  display: block;
+  height: env(safe-area-inset-bottom);
 }
 
 .mobileDrawerPaper {

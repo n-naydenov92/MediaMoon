@@ -1,7 +1,10 @@
 'use client'
 
 import { useCallback, useEffect, useRef, type RefObject } from 'react'
+import useMediaQuery from '@mui/material/useMediaQuery'
 import { useCreativePreviewControl } from './CreativePreviewProvider'
+
+const MOBILE_QUERY = '(max-width: 1023px)'
 
 interface TriggerHandlers<T extends HTMLElement> {
   readonly ref: RefObject<T | null>
@@ -9,24 +12,34 @@ interface TriggerHandlers<T extends HTMLElement> {
   readonly onPointerLeave: () => void
   readonly onFocus: () => void
   readonly onBlur: () => void
+  readonly onClick: () => void
 }
+
+const noop = (): void => {}
 
 export function useCreativePreviewTrigger<T extends HTMLElement>(
   adId: string,
   accountId: string,
 ): TriggerHandlers<T> {
-  const { requestOpen, requestClose } = useCreativePreviewControl()
+  const { requestOpen, requestClose, requestOpenImmediate } = useCreativePreviewControl()
   const ref = useRef<T | null>(null)
+  const isMobile = useMediaQuery(MOBILE_QUERY)
 
-  const handleEnter = useCallback((): void => {
+  const handleHoverOpen = useCallback((): void => {
     if (ref.current) {
       requestOpen(adId, accountId, ref.current)
     }
   }, [adId, accountId, requestOpen])
 
-  const handleLeave = useCallback((): void => {
+  const handleHoverClose = useCallback((): void => {
     requestClose()
   }, [requestClose])
+
+  const handleClickOpen = useCallback((): void => {
+    if (ref.current) {
+      requestOpenImmediate(adId, accountId, ref.current)
+    }
+  }, [adId, accountId, requestOpenImmediate])
 
   useEffect(() => {
     return () => {
@@ -34,11 +47,23 @@ export function useCreativePreviewTrigger<T extends HTMLElement>(
     }
   }, [requestClose])
 
+  if (isMobile) {
+    return {
+      ref,
+      onPointerEnter: noop,
+      onPointerLeave: noop,
+      onFocus: noop,
+      onBlur: noop,
+      onClick: handleClickOpen,
+    }
+  }
+
   return {
     ref,
-    onPointerEnter: handleEnter,
-    onPointerLeave: handleLeave,
-    onFocus: handleEnter,
-    onBlur: handleLeave,
+    onPointerEnter: handleHoverOpen,
+    onPointerLeave: handleHoverClose,
+    onFocus: handleHoverOpen,
+    onBlur: handleHoverClose,
+    onClick: noop,
   }
 }
