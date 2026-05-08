@@ -11,6 +11,7 @@ import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import SearchIcon from '@mui/icons-material/Search'
+import DebouncedSearchInput from '@/components/ui/DebouncedSearchInput/DebouncedSearchInput'
 import BenchmarkLegend from './BenchmarkLegend'
 import { COLUMN_IDS, getColumnSpec, isColumnId, type ColumnId } from './columnSpecs'
 import ColumnPicker from './ColumnPicker'
@@ -24,6 +25,7 @@ interface Props {
   readonly onSortChange: (sort: SortSpec) => void
   readonly visibleColumns: readonly ColumnId[]
   readonly onColumnsChange: (next: readonly ColumnId[]) => void
+  readonly onNameSearchChange: (value: string) => void
 }
 
 export default function Toolbar({
@@ -33,6 +35,7 @@ export default function Toolbar({
   onSortChange,
   visibleColumns,
   onColumnsChange,
+  onNameSearchChange,
 }: Props): JSX.Element {
   const triggerRef = useRef<HTMLButtonElement | null>(null)
   const [open, setOpen] = useState(false)
@@ -71,13 +74,18 @@ export default function Toolbar({
   }
 
   return (
-    <Stack direction="row" alignItems="center" justifyContent="space-between" className={styles.root}>
-      <Stack direction="row" alignItems="center" spacing={1} className={styles.left}>
+    <Box className={styles.root}>
+      <Stack direction="row" alignItems="center" spacing={1} className={styles.meta}>
         <Box component="span" className={styles.count}>
           {shown.toLocaleString('en-GB')} of {total.toLocaleString('en-GB')} ads
         </Box>
         <BenchmarkLegend />
       </Stack>
+      <DebouncedSearchInput
+        placeholder="Search ad name…"
+        onDebouncedChange={onNameSearchChange}
+        className={styles.adNameSearch}
+      />
       <Stack direction="row" alignItems="center" spacing={1} className={styles.right}>
         <Button
           ref={triggerRef}
@@ -150,6 +158,6 @@ export default function Toolbar({
         </Menu>
         <ColumnPicker visible={visibleColumns} onChange={onColumnsChange} />
       </Stack>
-    </Stack>
+    </Box>
   )
 }

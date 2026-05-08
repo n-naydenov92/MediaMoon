@@ -1,0 +1,9 @@
+.root :global(.MuiOutlinedInput-input) {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+}
+
+.root :global(.MuiInputAdornment-root) {
+  color: var(--text-muted);
+}

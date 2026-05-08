@@ -41,6 +41,7 @@ export default function PerformanceTab({ brandId }: Props): JSX.Element {
     useUrlSyncedQueryState()
   const { visibleColumns, setVisibleColumns } = useColumnVisibility(brandId)
   const [addFilterOpen, setAddFilterOpen] = useState(false)
+  const [debouncedNameQuery, setDebouncedNameQuery] = useState('')
 
   const presetForCriteria = dateSelection.kind === 'preset' ? dateSelection.preset : null
   const criteria = useMemo(() => defaultCriteriaFor(presetForCriteria), [presetForCriteria])
@@ -147,6 +148,17 @@ export default function PerformanceTab({ brandId }: Props): JSX.Element {
   const successData = state.status === 'success' ? state.data : null
   const loadingMore = state.status === 'success' ? state.loadingMore : false
 
+  const visibleRows = useMemo(() => {
+    if (!successData) {
+      return []
+    }
+    const q = debouncedNameQuery.trim().toLowerCase()
+    if (!q) {
+      return successData.items
+    }
+    return successData.items.filter((row) => row.name.toLowerCase().includes(q))
+  }, [successData, debouncedNameQuery])
+
   return (
     <Stack className={styles.root} spacing={2}>
       <PageHeader crumbs={CRUMBS} actions={actions} />
@@ -163,11 +175,12 @@ export default function PerformanceTab({ brandId }: Props): JSX.Element {
       {state.status === 'success' && (
         <Toolbar
           total={successData?.total ?? 0}
-          shown={successData?.items.length ?? 0}
+          shown={visibleRows.length}
           sort={sort}
           onSortChange={handleSortChange}
           visibleColumns={visibleColumns}
           onColumnsChange={handleColumnsChange}
+          onNameSearchChange={setDebouncedNameQuery}
         />
       )}
 
@@ -188,7 +201,7 @@ export default function PerformanceTab({ brandId }: Props): JSX.Element {
       {state.status === 'success' && successData && (
         <>
           <AdsTable
-            rows={successData.items}
+            rows={visibleRows}
             visibleColumns={visibleColumns}
             sort={sort}
             onSortChange={handleSortChange}
