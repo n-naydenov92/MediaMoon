@@ -36,10 +36,6 @@ export const LABELS = {
     tooltip: 'Source stats',
     title: 'Articles per source',
   },
-  refreshButton: {
-    aria: 'Refresh data',
-    action: 'Refresh now',
-  },
   overviewDashboard: {
     emptyLast24h: 'No stories in the last 24 hours',
   },

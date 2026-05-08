@@ -16,7 +16,6 @@ import EmptyState from '@/components/ui/EmptyState/EmptyState'
 import NewsBlock from '../NewsBlock/NewsBlock'
 import StatsRow from '../StatsRow/StatsRow'
 import HighlightsSidebar from '../HighlightsSidebar/HighlightsSidebar'
-import RefreshButton from '../RefreshButton/RefreshButton'
 import SourceStatsPopover from '../SourceStatsPopover/SourceStatsPopover'
 import LoadingOverview from './LoadingOverview/LoadingOverview'
 import styles from './OverviewDashboard.module.css'
@@ -37,12 +36,8 @@ export default memo(function OverviewDashboard(): JSX.Element {
 
   const allClusters = results.flatMap((r) => r.data.clusters)
   const stats = mergeStats(results.map((r) => r.data.stats))
-  const actions = (
-    <>
-      <SourceStatsPopover />
-      <RefreshButton />
-    </>
-  )
+  const actions = <SourceStatsPopover />
+
 
   if (allClusters.length === 0) {
     return (

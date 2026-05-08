@@ -1,0 +1,41 @@
+.container {
+  border: 1px dashed var(--border-subtle);
+  border-radius: 4px;
+  padding: 12px 16px;
+}
+
+.summary {
+  color: var(--text-secondary);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.label[data-state='error'],
+.count[data-state='error'] {
+  color: var(--error);
+}
+
+.label[data-state='ok'],
+.count[data-state='ok'] {
+  color: var(--success);
+}
+
+.label[data-state='empty'],
+.count[data-state='empty'] {
+  color: var(--text-muted);
+}
+
+.count {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.errorText {
+  color: var(--error);
+  font-size: 0.65rem;
+  max-width: 200px;
+}
+
+.helpCursor {
+  cursor: help;
+}

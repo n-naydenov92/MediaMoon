@@ -30,6 +30,16 @@
   flex-shrink: 0;
 }
 
+.item[data-accent='viral'] .icon,
+.item[data-accent='viral'] .value {
+  color: #F59E0B;
+}
+
+.item[data-accent='hot'] .icon,
+.item[data-accent='hot'] .value {
+  color: #F97316;
+}
+
 @media (prefers-color-scheme: dark) {
   .row {
     border-bottom-color: #22222E;

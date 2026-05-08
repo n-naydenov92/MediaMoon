@@ -1,11 +1,24 @@
 .item {
   border-left-width: 3px;
   border-left-style: solid;
+  border-left-color: #64748B;
   padding-left: 12px;
   padding-top: 8px;
   padding-bottom: 8px;
   border-radius: 4px;
   transition: background-color 80ms ease-out;
+}
+
+.item[data-heat='viral'] {
+  border-left-color: #F59E0B;
+}
+
+.item[data-heat='hot'] {
+  border-left-color: #F97316;
+}
+
+.item[data-heat='normal'] {
+  border-left-color: #64748B;
 }
 
 .item:hover {

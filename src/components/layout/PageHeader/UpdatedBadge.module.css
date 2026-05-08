@@ -46,6 +46,7 @@
   justify-content: center;
   width: 28px;
   height: 28px;
+  padding: 0;
   background: transparent;
   border: none;
   border-radius: 6px;
@@ -54,14 +55,16 @@
   transition: background-color 80ms ease-out, color 80ms ease-out;
 }
 
-.refresh:hover:not(:disabled),
-.refresh:focus-visible:not(:disabled) {
+.refresh:hover:not(.Mui-disabled),
+.refresh:focus-visible:not(.Mui-disabled) {
   background-color: var(--ub-bg-elevated);
+  color: var(--ub-text-secondary);
 }
 
-.refresh:disabled {
+.refresh.Mui-disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  color: var(--ub-text-secondary);
 }
 
 .refresh[data-spinning='true'] svg {

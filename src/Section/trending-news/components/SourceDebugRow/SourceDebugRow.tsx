@@ -7,11 +7,14 @@ import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import type { SourceCounts, SourceErrors } from '@/types'
 import { LABELS } from '@/Section/trending-news/labels'
+import styles from './SourceDebugRow.module.css'
 
 interface Props {
   readonly sourceCounts: SourceCounts
   readonly sourceErrors: SourceErrors
 }
+
+type SourceState = 'error' | 'ok' | 'empty'
 
 const ERROR_TRUNCATE_LENGTH = 60
 
@@ -20,9 +23,13 @@ const SOURCES: ReadonlyArray<{ key: keyof SourceCounts; label: string }> = [
   { key: 'searchApi', label: LABELS.sourceDebug.searchApi },
 ]
 
-/**
- * Debug row showing raw article counts and errors per source before deduplication.
- */
+function resolveState(hasError: boolean, count: number): SourceState {
+  if (hasError) {
+    return 'error'
+  }
+  return count > 0 ? 'ok' : 'empty'
+}
+
 export default memo(function SourceDebugRow({ sourceCounts, sourceErrors }: Props): JSX.Element {
   if (!sourceCounts) {
     return <></>
@@ -30,16 +37,8 @@ export default memo(function SourceDebugRow({ sourceCounts, sourceErrors }: Prop
   const total = Object.values(sourceCounts).reduce((s, n) => s + n, 0)
 
   return (
-    <Box
-      sx={{
-        border: '1px dashed',
-        borderColor: 'divider',
-        borderRadius: 1,
-        px: 2,
-        py: 1.5,
-      }}
-    >
-      <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 1 }}>
+    <Box className={styles.container}>
+      <Typography variant="caption" className={styles.summary}>
         {LABELS.sourceDebug.label(total)}
       </Typography>
       <Stack direction="row" flexWrap="wrap" gap={3}>
@@ -47,27 +46,20 @@ export default memo(function SourceDebugRow({ sourceCounts, sourceErrors }: Prop
           const count = sourceCounts[key]
           const error = sourceErrors?.[key]
           const hasError = !!error
-          const color = hasError ? 'error.main' : count > 0 ? 'success.main' : 'text.disabled'
+          const state = resolveState(hasError, count)
 
           const content = (
             <Stack key={key} spacing={0} alignItems="flex-start">
               <Stack direction="row" spacing={1} alignItems="baseline">
-                <Typography variant="caption" sx={{ color }}>
+                <Typography variant="caption" className={styles.label} data-state={state}>
                   {label}
                 </Typography>
-                <Typography
-                  variant="caption"
-                  sx={{ fontWeight: 700, fontVariantNumeric: 'tabular-nums', color }}
-                >
+                <Typography variant="caption" className={styles.count} data-state={state}>
                   {hasError ? '!' : count}
                 </Typography>
               </Stack>
               {hasError && (
-                <Typography
-                  variant="caption"
-                  sx={{ color: 'error.main', fontSize: '0.65rem', maxWidth: 200 }}
-                  noWrap
-                >
+                <Typography variant="caption" className={styles.errorText} noWrap>
                   {error.length > ERROR_TRUNCATE_LENGTH
                     ? error.slice(0, ERROR_TRUNCATE_LENGTH) + '…'
                     : error}
@@ -78,7 +70,7 @@ export default memo(function SourceDebugRow({ sourceCounts, sourceErrors }: Prop
 
           return hasError ? (
             <Tooltip key={key} title={error} placement="top">
-              <Box sx={{ cursor: 'help' }}>{content}</Box>
+              <Box className={styles.helpCursor}>{content}</Box>
             </Tooltip>
           ) : (
             <Box key={key}>{content}</Box>

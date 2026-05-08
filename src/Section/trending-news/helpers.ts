@@ -78,6 +78,31 @@ export function pickActiveExpiry(
   return state?.status === 'success' ? state.data.cacheExpiresAt : null
 }
 
+export function pickLatestFetchedAt(
+  states: ReadonlyMap<string, AsyncState<NewsResult>>,
+): number | null {
+  let latest: number | null = null
+  for (const state of states.values()) {
+    if (state.status !== 'success') {
+      continue
+    }
+    const ts = Date.parse(state.data.fetchedAt)
+    if (latest === null || ts > latest) {
+      latest = ts
+    }
+  }
+  return latest
+}
+
+export function pickActiveFetchedAt(
+  states: ReadonlyMap<string, AsyncState<NewsResult>>,
+  brandId: string,
+  market: Market,
+): number | null {
+  const state = states.get(cacheKey(brandId, market))
+  return state?.status === 'success' ? Date.parse(state.data.fetchedAt) : null
+}
+
 export function isAnyLoading(states: ReadonlyMap<string, AsyncState<NewsResult>>): boolean {
   for (const state of states.values()) {
     if (state.status === 'loading') {

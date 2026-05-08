@@ -9,7 +9,6 @@ import type { AsyncState, NewsResult } from '@/types'
 import { LABELS } from '@/Section/trending-news/labels'
 import NewsBlock from '../../NewsBlock/NewsBlock'
 import StatsRow from '../../StatsRow/StatsRow'
-import RefreshButton from '../../RefreshButton/RefreshButton'
 import SourceStatsPopover from '../../SourceStatsPopover/SourceStatsPopover'
 import LoadingSkeleton from '../LoadingSkeleton/LoadingSkeleton'
 
@@ -38,12 +37,8 @@ export default memo(function TopicContent({ state, onRetry }: Props): JSX.Elemen
         />
       )
     case 'success': {
-      const actions = (
-        <>
-          <SourceStatsPopover />
-          <RefreshButton />
-        </>
-      )
+      const actions = <SourceStatsPopover />
+
       if (state.data.clusters.length === 0) {
         return (
           <Stack spacing={6}>

@@ -4,7 +4,7 @@ import { memo } from 'react'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import HeatBadge from '@/components/ui/HeatBadge/HeatBadge'
-import type { HeatLevel, NewsCluster } from '@/types'
+import type { NewsCluster } from '@/types'
 import { LABELS } from '@/Section/trending-news/labels'
 import {
   formatRelative,
@@ -16,21 +16,11 @@ interface Props {
   readonly cluster: NewsCluster
 }
 
-const HEAT_LINE_COLOR: Record<HeatLevel, string> = {
-  viral: '#F59E0B',
-  hot: '#F97316',
-  normal: '#64748B',
-}
-
 export default memo(function HighlightItem({ cluster }: Props): JSX.Element {
   const meta = buildMeta(cluster)
 
   return (
-    <Stack
-      spacing={1}
-      className={styles.item}
-      style={{ borderLeftColor: HEAT_LINE_COLOR[cluster.heat] }}
-    >
+    <Stack spacing={1} className={styles.item} data-heat={cluster.heat}>
       <Typography variant="body2" className={styles.title}>
         {cluster.representativeTitle}
       </Typography>
