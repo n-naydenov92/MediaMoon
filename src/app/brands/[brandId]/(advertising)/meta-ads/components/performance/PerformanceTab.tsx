@@ -77,11 +77,12 @@ export default function PerformanceTab({ brandId }: Props): JSX.Element {
 
   const handleChipSelect = useCallback(
     (chip: ChipKey) => {
-      const preset = sliceToFilters(chip === 'all' ? null : chip, criteria)
+      const target: ChipKey = chip === activeChip ? 'all' : chip
+      const preset = sliceToFilters(target === 'all' ? null : target, criteria)
       setRules(preset.filters)
       setSort(preset.sort)
     },
-    [criteria, setRules, setSort],
+    [activeChip, criteria, setRules, setSort],
   )
 
   const handleAddRule = useCallback(
