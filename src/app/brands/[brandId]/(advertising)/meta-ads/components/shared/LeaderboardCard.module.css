@@ -98,19 +98,25 @@
 }
 
 .statusDot {
+  display: inline-block;
   flex-shrink: 0;
   width: 8px;
   height: 8px;
   border-radius: 50%;
   background: var(--text-muted);
+  box-shadow: 0 0 0 3px rgba(125, 125, 125, 0.16);
+  cursor: help;
+  transition: box-shadow 120ms ease;
 }
 
 .statusDot[data-status='active'] {
   background: var(--success);
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18);
 }
 
 .statusDot[data-status='paused'] {
   background: var(--warning);
+  box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.18);
 }
 
 .name {

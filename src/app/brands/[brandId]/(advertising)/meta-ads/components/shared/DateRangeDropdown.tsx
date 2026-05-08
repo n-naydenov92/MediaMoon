@@ -1,149 +1,159 @@
 'use client'
 
-import { Fragment, useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import { useRef, useState } from 'react'
+import Button from '@mui/material/Button'
+import Divider from '@mui/material/Divider'
+import ListItemText from '@mui/material/ListItemText'
+import Menu from '@mui/material/Menu'
+import MenuItem from '@mui/material/MenuItem'
+import Popover from '@mui/material/Popover'
+import Switch from '@mui/material/Switch'
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import {
   DATE_PRESETS,
   DATE_PRESET_LABELS,
+  type CustomRange,
   type DatePreset,
+  type DateRangeSelection,
 } from '@/lib/meta/dateRange'
-import { useThemeMode } from '@/styles/useThemeMode'
+import CalendarPicker from './CalendarPicker'
 import styles from './DateRangeDropdown.module.css'
 
 interface Props {
-  readonly value: DatePreset
-  readonly onChange: (next: DatePreset) => void
+  readonly value: DateRangeSelection
+  readonly onPresetChange: (next: DatePreset) => void
+  readonly onCustomRangeChange: (range: CustomRange) => void
   readonly comparisonEnabled: boolean
   readonly onComparisonChange: (next: boolean) => void
+  readonly comparisonDisabled?: boolean
 }
 
 export default function DateRangeDropdown({
   value,
-  onChange,
+  onPresetChange,
+  onCustomRangeChange,
   comparisonEnabled,
   onComparisonChange,
+  comparisonDisabled = false,
 }: Props): JSX.Element {
-  const [open, setOpen] = useState(false)
-  const [focusedIndex, setFocusedIndex] = useState<number>(() =>
-    Math.max(0, DATE_PRESETS.indexOf(value)),
-  )
-  const rootRef = useRef<HTMLDivElement>(null)
-  const optionRefs = useRef<(HTMLButtonElement | null)[]>([])
-  const { mode } = useThemeMode()
+  const triggerRef = useRef<HTMLButtonElement | null>(null)
+  const calendarAnchorRef = useRef<HTMLLIElement | null>(null)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [calendarOpen, setCalendarOpen] = useState(false)
 
-  useEffect(() => {
-    if (!open) {
-      return
-    }
-    function handleClick(event: MouseEvent): void {
-      if (rootRef.current && !rootRef.current.contains(event.target as Node)) {
-        setOpen(false)
-      }
-    }
-    function handleKey(event: KeyboardEvent): void {
-      if (event.key === 'Escape') {
-        setOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClick)
-    document.addEventListener('keydown', handleKey as unknown as EventListener)
-    return () => {
-      document.removeEventListener('mousedown', handleClick)
-      document.removeEventListener('keydown', handleKey as unknown as EventListener)
-    }
-  }, [open])
+  const triggerLabel =
+    value.kind === 'preset'
+      ? DATE_PRESET_LABELS[value.preset]
+      : `${formatHuman(value.range.from)} – ${formatHuman(value.range.to)}`
 
-  useEffect(() => {
-    if (open) {
-      optionRefs.current[focusedIndex]?.focus()
-    }
-  }, [open, focusedIndex])
-
-  function handleMenuKeyDown(event: KeyboardEvent<HTMLDivElement>): void {
-    if (event.key === 'ArrowDown') {
-      event.preventDefault()
-      setFocusedIndex((i) => (i + 1) % DATE_PRESETS.length)
-      return
-    }
-    if (event.key === 'ArrowUp') {
-      event.preventDefault()
-      setFocusedIndex((i) => (i - 1 + DATE_PRESETS.length) % DATE_PRESETS.length)
-      return
-    }
-    if (event.key === 'Home') {
-      event.preventDefault()
-      setFocusedIndex(0)
-      return
-    }
-    if (event.key === 'End') {
-      event.preventDefault()
-      setFocusedIndex(DATE_PRESETS.length - 1)
-    }
+  function handlePresetClick(preset: DatePreset): void {
+    onPresetChange(preset)
+    setMenuOpen(false)
   }
 
-  function selectPreset(preset: DatePreset): void {
-    onChange(preset)
-    setOpen(false)
+  function handleApplyCustom(range: CustomRange): void {
+    onCustomRangeChange(range)
+    setCalendarOpen(false)
+    setMenuOpen(false)
   }
 
   return (
-    <div className={styles.root} ref={rootRef} data-theme={mode}>
-      <button
-        type="button"
+    <>
+      <Button
+        ref={triggerRef}
+        variant="outlined"
+        color="inherit"
+        size="small"
+        endIcon={<KeyboardArrowDownIcon />}
+        onClick={() => setMenuOpen(true)}
         className={styles.trigger}
-        onClick={() => {
-          setFocusedIndex(Math.max(0, DATE_PRESETS.indexOf(value)))
-          setOpen((o) => !o)
-        }}
-        aria-haspopup="listbox"
-        aria-expanded={open}
       >
-        <span>{DATE_PRESET_LABELS[value]}</span>
-        <span className={styles.chevron} aria-hidden>▾</span>
-      </button>
-      {open && (
-        <div className={styles.menu} onKeyDown={handleMenuKeyDown}>
-          <ul className={styles.list} role="listbox">
-            {DATE_PRESETS.map((preset, index) => (
-              <Fragment key={preset}>
-                <li>
-                  <button
-                    ref={(node) => {
-                      optionRefs.current[index] = node
-                    }}
-                    type="button"
-                    role="option"
-                    aria-selected={preset === value}
-                    className={styles.option}
-                    data-active={preset === value ? 'true' : 'false'}
-                    onClick={() => selectPreset(preset)}
-                  >
-                    {DATE_PRESET_LABELS[preset]}
-                  </button>
-                </li>
-                {preset === 'last_7d' && (
-                  <li className={styles.divider} role="separator" />
-                )}
-              </Fragment>
-            ))}
-          </ul>
-          <div className={styles.divider} role="separator" />
-          <button
-            type="button"
-            className={styles.toggleRow}
-            onClick={() => onComparisonChange(!comparisonEnabled)}
-            aria-pressed={comparisonEnabled}
-          >
-            <span className={styles.toggleLabel}>Compare to previous period</span>
-            <span
-              className={styles.toggleSwitch}
-              data-on={comparisonEnabled ? 'true' : 'false'}
-              aria-hidden
+        {triggerLabel}
+      </Button>
+      <Menu
+        anchorEl={triggerRef.current}
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        slotProps={{ paper: { className: styles.menuPaper } }}
+      >
+        {DATE_PRESETS.map((preset, index) => {
+          const items = [
+            <MenuItem
+              key={preset}
+              dense
+              selected={value.kind === 'preset' && preset === value.preset}
+              onClick={() => handlePresetClick(preset)}
             >
-              <span className={styles.toggleKnob} />
-            </span>
-          </button>
-        </div>
-      )}
-    </div>
+              <ListItemText primary={DATE_PRESET_LABELS[preset]} />
+            </MenuItem>,
+          ]
+          if (preset === 'last_7d') {
+            items.push(<Divider key={`${preset}-divider`} className={styles.divider} />)
+          }
+          if (index === DATE_PRESETS.length - 1) {
+            items.push(<Divider key="last-divider" className={styles.divider} />)
+            items.push(
+              <MenuItem
+                key="custom"
+                dense
+                ref={calendarAnchorRef}
+                selected={value.kind === 'custom'}
+                onClick={() => setCalendarOpen(true)}
+              >
+                <ListItemText primary="Custom range…" />
+              </MenuItem>,
+            )
+          }
+          return items
+        })}
+        <Divider className={styles.divider} />
+        <MenuItem
+          dense
+          disabled={comparisonDisabled}
+          onClick={(event) => {
+            event.preventDefault()
+            if (comparisonDisabled) {
+              return
+            }
+            onComparisonChange(!comparisonEnabled)
+          }}
+          className={styles.toggleItem}
+        >
+          <ListItemText primary="Compare to previous period" />
+          <Switch
+            edge="end"
+            size="small"
+            checked={comparisonEnabled}
+            disabled={comparisonDisabled}
+            onClick={(event) => event.stopPropagation()}
+            onChange={(_event, checked) => onComparisonChange(checked)}
+          />
+        </MenuItem>
+      </Menu>
+      <Popover
+        anchorEl={calendarAnchorRef.current}
+        open={calendarOpen}
+        onClose={() => setCalendarOpen(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+        slotProps={{ paper: { className: styles.calendarPaper } }}
+      >
+        <CalendarPicker
+          value={value.kind === 'custom' ? value.range : null}
+          onApply={handleApplyCustom}
+          onCancel={() => setCalendarOpen(false)}
+        />
+      </Popover>
+    </>
   )
+}
+
+function formatHuman(iso: string): string {
+  const parts = iso.split('-').map(Number)
+  const [y, m, d] = [parts[0] ?? 1970, parts[1] ?? 1, parts[2] ?? 1]
+  const date = new Date(Date.UTC(y, m - 1, d))
+  const month = date.toLocaleString('en-GB', { month: 'short', timeZone: 'UTC' })
+  return `${date.getUTCDate()} ${month}`
 }
