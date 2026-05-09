@@ -14,10 +14,9 @@ import type { BrandConfig } from '@/types'
 
 interface Props {
   readonly brands: readonly BrandConfig[]
-  readonly firstModuleId: string
 }
 
-export default memo(function BrandsOverview({ brands, firstModuleId }: Props): JSX.Element {
+export default memo(function BrandsOverview({ brands }: Props): JSX.Element {
   return (
     <Box sx={{ p: { xs: 2, md: 6 } }}>
       <Typography
@@ -41,7 +40,7 @@ export default memo(function BrandsOverview({ brands, firstModuleId }: Props): J
       <Grid container spacing={{ xs: 2, md: 3 }}>
         {brands.map((brand) => (
           <Grid key={brand.id} item xs={12} sm={6} lg={4}>
-            <BrandCard brand={brand} firstModuleId={firstModuleId} />
+            <BrandCard brand={brand} />
           </Grid>
         ))}
       </Grid>
@@ -51,11 +50,10 @@ export default memo(function BrandsOverview({ brands, firstModuleId }: Props): J
 
 interface BrandCardProps {
   readonly brand: BrandConfig
-  readonly firstModuleId: string
 }
 
-const BrandCard = memo(function BrandCard({ brand, firstModuleId }: BrandCardProps): JSX.Element {
-  const href = `/brands/${brand.id}/${firstModuleId}`
+const BrandCard = memo(function BrandCard({ brand }: BrandCardProps): JSX.Element {
+  const href = `/brands/${brand.id}`
 
   return (
     <Card

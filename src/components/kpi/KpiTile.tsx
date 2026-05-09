@@ -1,12 +1,16 @@
+'use client'
+
+import Box from '@mui/material/Box'
+import Tooltip from '@mui/material/Tooltip'
 import { formatPercentage } from '@/lib/meta/fx'
-import KpiSparkline from '../overview/KpiSparkline'
+import KpiSparkline, { type SparkPoint } from './KpiSparkline'
 import { arrowFor, computeTrend } from './kpiTrend'
-import type { SparkPoint } from '../overview/KpiSparkline'
 import styles from './KpiTile.module.css'
 
 interface Props {
   readonly label: string
   readonly value: string
+  readonly title?: string
   readonly delta?: number
   readonly deltaLabel?: string
   readonly points?: readonly SparkPoint[]
@@ -16,24 +20,38 @@ interface Props {
 export default function KpiTile({
   label,
   value,
+  title,
   delta,
   deltaLabel = 'wow',
   points,
   formatValue,
 }: Props): JSX.Element {
   const trend = computeTrend(delta)
+  const labelEl = (
+    <Box component="span" className={styles.label}>
+      {label}
+    </Box>
+  )
   return (
-    <div className={styles.tile}>
-      <span className={styles.label}>{label}</span>
-      <span className={styles.value}>{value}</span>
+    <Box className={styles.tile}>
+      {title ? (
+        <Tooltip title={title} placement="top" arrow disableInteractive>
+          {labelEl}
+        </Tooltip>
+      ) : (
+        labelEl
+      )}
+      <Box component="span" className={styles.value}>
+        {value}
+      </Box>
       {points && formatValue && (
         <KpiSparkline points={points} tone={trend} formatValue={formatValue} />
       )}
       {delta !== undefined && (
-        <span className={styles.delta} data-trend={trend}>
+        <Box component="span" className={styles.delta} data-trend={trend}>
           {arrowFor(delta)} {formatPercentage(Math.abs(delta), 0)} {deltaLabel}
-        </span>
+        </Box>
       )}
-    </div>
+    </Box>
   )
 }

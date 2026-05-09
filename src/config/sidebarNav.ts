@@ -34,6 +34,7 @@ const ADVERTISING_PANEL: NavPanel = {
           icon: 'AddCircleOutline',
           pathSuffix: 'meta-ads/launch',
           roles: ROLES_TEAM,
+          disabled: true,
         },
         {
           kind: 'link',
@@ -42,6 +43,7 @@ const ADVERTISING_PANEL: NavPanel = {
           icon: 'Lightbulb',
           pathSuffix: 'meta-ads/insights',
           roles: ROLES_TEAM,
+          disabled: true,
         },
       ],
     },
@@ -56,20 +58,7 @@ const ADVERTISING_PANEL: NavPanel = {
           icon: 'Dashboard',
           pathSuffix: 'google-ads',
           roles: ROLES_TEAM,
-        },
-      ],
-    },
-    {
-      id: 'tiktok-ads',
-      label: 'TikTok Ads',
-      items: [
-        {
-          kind: 'link',
-          id: 'tiktok-ads-overview',
-          label: 'Overview',
-          icon: 'Dashboard',
-          pathSuffix: 'tiktok-ads',
-          roles: ROLES_TEAM,
+          disabled: true,
         },
       ],
     },
@@ -92,14 +81,6 @@ export const MAIN_PANEL: NavPanel = {
           pathSuffix: '',
           roles: ROLES_ALL,
         },
-        {
-          kind: 'link',
-          id: 'trending-news',
-          label: 'Trending News',
-          icon: 'TrendingUp',
-          pathSuffix: 'trending-news',
-          roles: ROLES_ALL,
-        },
       ],
     },
     {
@@ -113,6 +94,20 @@ export const MAIN_PANEL: NavPanel = {
           icon: 'Campaign',
           roles: ROLES_TEAM,
           panel: ADVERTISING_PANEL,
+        },
+      ],
+    },
+    {
+      id: 'news',
+      label: '',
+      items: [
+        {
+          kind: 'link',
+          id: 'trending-news',
+          label: 'Trending News',
+          icon: 'TrendingUp',
+          pathSuffix: 'trending-news',
+          roles: ROLES_ALL,
         },
       ],
     },

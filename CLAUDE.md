@@ -1,5 +1,15 @@
 # MediaMon — Project Intelligence File
 
+## Hard rules (non-negotiable)
+
+These rules are mechanical (ESLint enforces them) AND behavioural (must be followed before lint runs):
+
+- **MUI primitives only.** No raw `<div>` / `<span>` / `<p>` / `<ul>` / `<ol>` / `<li>` / `<h1-h6>` / `<button>` / `<input>` / `<select>` in JSX. Use `Box` / `Typography` / `List` / `ListItem` / `Button` / `IconButton` / `TextField` / `Select` from `@mui/material`.
+- **No `sx` prop, no inline `style={{}}`.** Styling lives exclusively in CSS modules. The only inline-style exception is CSS variables (e.g. `style={{ '--dot-color': value }}`).
+- **No `!important` in CSS.** Use higher specificity, swap component (Stack→Box), or theme overrides.
+- **Apply `/skills/*` on every code change, no matter how small.** A 1-line edit still triggers the full skills checklist (frontend-design / react-best-practices / clean-code / senior-architect). There is no "small" change. Skipping skills = CRITICAL violation.
+- Project ESLint config (`eslint.config.mjs`) extends `airbnb` + `airbnb-typescript` + `next/*` and adds `no-restricted-syntax` to fail the build on the bans above.
+
 ## What Is This?
 
 **MediaMon** is an internal business control hub — a single login, single dashboard from which a team manages all recurring business operations. The long-term ambition is to productize it: make it generic enough to spin up for other businesses that follow proven operational playbooks.

@@ -1,0 +1,32 @@
+.root {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 24px;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  color: var(--text-primary);
+}
+
+.skeletonGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.chartSkeleton {
+  border-radius: 8px;
+}
+
+.error {
+  border-radius: 8px;
+}
+
+@media (max-width: 600px) {
+  .root {
+    padding: 16px 12px;
+  }
+
+  .skeletonGrid {
+    gap: 12px;
+  }
+}

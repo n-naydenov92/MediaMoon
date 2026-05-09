@@ -1,5 +1,6 @@
 'use client'
 
+import Box from '@mui/material/Box'
 import type { TooltipContentProps } from 'recharts'
 import { shortDate } from '@/lib/dateFormat'
 import styles from './KpiSparkline.module.css'
@@ -20,9 +21,13 @@ export default function KpiSparklineTooltip({
   const value = typeof point.value === 'number' ? point.value : 0
   const date = typeof point.payload?.date === 'string' ? point.payload.date : ''
   return (
-    <div className={styles.tooltip}>
-      <span className={styles.tooltipDate}>{shortDate(date)}</span>
-      <span className={styles.tooltipValue}>{formatValue(value)}</span>
-    </div>
+    <Box className={styles.tooltip}>
+      <Box component="span" className={styles.tooltipDate}>
+        {shortDate(date)}
+      </Box>
+      <Box component="span" className={styles.tooltipValue}>
+        {formatValue(value)}
+      </Box>
+    </Box>
   )
 }

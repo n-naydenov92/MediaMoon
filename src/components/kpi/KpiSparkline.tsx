@@ -1,8 +1,9 @@
 'use client'
 
 import { useId } from 'react'
+import Box from '@mui/material/Box'
 import { Area, AreaChart, ResponsiveContainer, Tooltip } from 'recharts'
-import type { KpiTrend } from '../shared/kpiTrend'
+import type { KpiTrend } from './kpiTrend'
 import KpiSparklineTooltip from './KpiSparklineTooltip'
 import styles from './KpiSparkline.module.css'
 
@@ -34,7 +35,7 @@ export default function KpiSparkline({ points, tone, formatValue }: Props): JSX.
   const data = points.map((point, index) => ({ index, ...point }))
   const color = TONE_TO_VAR[tone]
   return (
-    <div className={styles.root} aria-hidden="true">
+    <Box className={styles.root} aria-hidden="true">
       <ResponsiveContainer width="100%" height={36}>
         <AreaChart data={data} margin={{ top: 4, right: 4, bottom: 2, left: 4 }}>
           <defs>
@@ -59,6 +60,6 @@ export default function KpiSparkline({ points, tone, formatValue }: Props): JSX.
           />
         </AreaChart>
       </ResponsiveContainer>
-    </div>
+    </Box>
   )
 }

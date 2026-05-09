@@ -1,7 +1,6 @@
 import { relativeDelta, type DailyPoint, type KpiDelta } from '@/lib/meta/aggregate'
-import KpiTile from '../shared/KpiTile'
+import { KpiTile, type SparkPoint } from '@/components/kpi'
 import { KPI_TILE_SPECS } from './kpiTileSpecs'
-import type { SparkPoint } from './KpiSparkline'
 import styles from './KpiGrid.module.css'
 
 interface Props {

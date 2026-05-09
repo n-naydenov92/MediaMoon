@@ -2,10 +2,9 @@
 
 import { memo, useCallback, useId, useRef, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import type { BrandConfig, ModuleConfig } from '@/types'
+import type { BrandConfig } from '@/types'
 import { LABELS } from '@/components/layout/labels'
 import { resolveActiveBrand } from '@/lib/navigation'
-import { getFirstNavigableModule } from '@/config/modules'
 import BrandSwitcherTrigger from './BrandSwitcherTrigger'
 import BrandMenu from './BrandMenu'
 import { useDismissPopover } from '@/components/layout/hooks/useDismissPopover'
@@ -13,12 +12,10 @@ import styles from './BrandSwitcher.module.css'
 
 interface Props {
   readonly brands: readonly BrandConfig[]
-  readonly modules: readonly ModuleConfig[]
 }
 
 export default memo(function BrandSwitcher({
   brands,
-  modules,
 }: Props): JSX.Element {
   const pathname = usePathname()
   const router = useRouter()
@@ -53,14 +50,9 @@ export default memo(function BrandSwitcher({
         router.push(`/brands/${brandId}${tail}${suffix}`)
         return
       }
-      const fallback = getFirstNavigableModule(modules)
-      if (fallback) {
-        router.push(`/brands/${brandId}/${fallback.id}${suffix}`)
-        return
-      }
       router.push(`/brands/${brandId}${suffix}`)
     },
-    [pathname, modules, router],
+    [pathname, router],
   )
 
   useDismissPopover(rootRef, isOpen, dismiss)

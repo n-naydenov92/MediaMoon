@@ -3,6 +3,7 @@
 import { memo } from 'react'
 import Link from 'next/link'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import Tooltip from '@mui/material/Tooltip'
 import type { NavItem } from '@/types'
 import { buildHref, isHrefActive } from '@/config/sidebarNav'
 import ModuleIcon from '@/components/layout/ModuleIcon/ModuleIcon'
@@ -30,6 +31,16 @@ export default memo(function NavItemView({
           <ModuleIcon name={item.icon} size={ITEM_ICON_SIZE_PX} />
           <span className={styles.label}>{item.label}</span>
         </span>
+      )
+    }
+    if (item.disabled) {
+      return (
+        <Tooltip title="Coming soon" placement="right" arrow disableInteractive>
+          <span className={styles.row} data-disabled="true" aria-disabled="true">
+            <ModuleIcon name={item.icon} size={ITEM_ICON_SIZE_PX} />
+            <span className={styles.label}>{item.label}</span>
+          </span>
+        </Tooltip>
       )
     }
     const href = buildHref(brandId, item.pathSuffix)

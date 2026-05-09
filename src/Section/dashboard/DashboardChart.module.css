@@ -1,0 +1,91 @@
+.card {
+  border-radius: 8px;
+  border-color: var(--hairline);
+  background-color: var(--surface-1);
+}
+
+.header {
+  padding: 16px 20px 8px 20px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.title {
+  font-family: var(--font-syne), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--text-primary);
+}
+
+.content {
+  padding: 16px 20px 20px 20px;
+}
+
+.content:last-child {
+  padding-bottom: 20px;
+}
+
+.empty {
+  color: var(--text-muted);
+  padding: 24px 0;
+  text-align: center;
+}
+
+.legend {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legendDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--dot-color);
+  flex-shrink: 0;
+}
+
+.tooltip {
+  border-color: var(--hairline-strong);
+  background-color: var(--surface-1);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+  min-width: 160px;
+}
+
+.tooltipContent {
+  padding: 10px 12px;
+}
+
+.tooltipDate {
+  display: block;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.tooltipRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 2px 0;
+}
+
+.tooltipLabel {
+  color: var(--text-secondary);
+}
+
+.tooltipValue {
+  font-family: var(--font-syne), system-ui, sans-serif;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}

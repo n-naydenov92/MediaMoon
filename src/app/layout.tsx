@@ -5,7 +5,6 @@ import { DM_Sans, Syne } from 'next/font/google'
 import { ThemeModeProvider } from '@/styles/ThemeModeProvider'
 import AppShell from '@/components/layout/AppShell/AppShell'
 import { getCurrentUserRole } from '@/lib/currentUserRole'
-import { getModulesForRole } from '@/config/modules'
 import { BRAND_REGISTRY } from '@/config/brands'
 import '@/styles/globals.css'
 
@@ -38,14 +37,13 @@ interface Props {
 
 export default async function RootLayout({ children }: Props): Promise<JSX.Element> {
   const role = await getCurrentUserRole()
-  const modules = role ? getModulesForRole(role) : []
 
   return (
     <ClerkProvider>
       <html lang="en" className={`${syne.variable} ${dmSans.variable}`} suppressHydrationWarning>
         <body>
           <ThemeModeProvider>
-            <AppShell modules={modules} brands={BRAND_REGISTRY} role={role}>{children}</AppShell>
+            <AppShell brands={BRAND_REGISTRY} role={role}>{children}</AppShell>
           </ThemeModeProvider>
         </body>
       </html>

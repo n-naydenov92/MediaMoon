@@ -2,7 +2,7 @@
 
 import { memo, useState } from 'react'
 import { usePathname } from 'next/navigation'
-import type { BrandConfig, ModuleConfig, UserRole } from '@/types'
+import type { BrandConfig, UserRole } from '@/types'
 import { LABELS } from '@/components/layout/labels'
 import { getActiveBrandId } from '@/lib/navigation'
 import { useThemeMode } from '@/styles/useThemeMode'
@@ -17,7 +17,6 @@ import { useSidebarResize } from '@/components/layout/Sidebar/SidebarResizeHandl
 import styles from './Sidebar.module.css'
 
 interface Props {
-  readonly modules: readonly ModuleConfig[]
   readonly brands: readonly BrandConfig[]
   readonly role: UserRole | null
   readonly variant?: 'fixed' | 'drawer'
@@ -25,7 +24,6 @@ interface Props {
 }
 
 export default memo(function Sidebar({
-  modules,
   brands,
   role,
   variant = 'fixed',
@@ -54,7 +52,7 @@ export default memo(function Sidebar({
       aria-hidden={hidden}
     >
       <div className={styles.brandSection}>
-        <BrandSwitcher brands={brands} modules={modules} />
+        <BrandSwitcher brands={brands} />
       </div>
 
       <div className={styles.searchSlot}>

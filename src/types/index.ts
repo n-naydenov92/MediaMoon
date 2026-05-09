@@ -46,6 +46,7 @@ export interface NavLink {
   readonly icon: string
   readonly pathSuffix: string
   readonly roles: readonly UserRole[]
+  readonly disabled?: boolean
 }
 
 export interface NavDrilldown {

@@ -16,14 +16,6 @@ import type { ModuleConfig, UserRole } from '@/types'
  */
 export const MODULE_REGISTRY: readonly ModuleConfig[] = [
   {
-    id: 'trending-news',
-    label: 'Trending News',
-    icon: 'TrendingUp',
-    path: '/modules/trending-news',
-    roles: ['admin', 'team', 'stoichkov_only', 'shtonova_only'],
-    color: '#6C63FF',
-  },
-  {
     id: 'advertising',
     label: 'Advertising',
     icon: 'Campaign',
@@ -47,15 +39,15 @@ export const MODULE_REGISTRY: readonly ModuleConfig[] = [
         roles: ['admin', 'team'],
         color: '#4285F4',
       },
-      {
-        id: 'tiktok-ads',
-        label: 'TikTok Ads',
-        icon: 'MusicNote',
-        path: '/modules/tiktok-ads',
-        roles: ['admin', 'team'],
-        color: '#FE2C55',
-      },
     ],
+  },
+  {
+    id: 'trending-news',
+    label: 'Trending News',
+    icon: 'TrendingUp',
+    path: '/modules/trending-news',
+    roles: ['admin', 'team', 'stoichkov_only', 'shtonova_only'],
+    color: '#6C63FF',
   },
 ] as const
 

@@ -6,12 +6,11 @@ import { usePathname } from 'next/navigation'
 import Box from '@mui/material/Box'
 import Drawer from '@mui/material/Drawer'
 import Sidebar from '@/components/layout/Sidebar/Sidebar'
-import type { BrandConfig, ModuleConfig, UserRole } from '@/types'
+import type { BrandConfig, UserRole } from '@/types'
 import { MobileNavProvider } from './MobileNavContext'
 import styles from './AppShell.module.css'
 
 interface Props {
-  readonly modules: readonly ModuleConfig[]
   readonly brands: readonly BrandConfig[]
   readonly role: UserRole | null
   readonly children: ReactNode
@@ -26,7 +25,7 @@ function isAuthPathname(pathname: string | null): boolean {
   return AUTH_ROUTE_PREFIXES.some((prefix) => pathname.startsWith(prefix))
 }
 
-export default memo(function AppShell({ modules, brands, role, children }: Props): JSX.Element {
+export default memo(function AppShell({ brands, role, children }: Props): JSX.Element {
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [desktopHidden, setDesktopHidden] = useState(false)
@@ -58,7 +57,6 @@ export default memo(function AppShell({ modules, brands, role, children }: Props
     <MobileNavProvider value={navContextValue}>
       <Box className={styles.shell}>
         <Sidebar
-          modules={modules}
           brands={brands}
           role={role}
           variant="fixed"
@@ -70,7 +68,7 @@ export default memo(function AppShell({ modules, brands, role, children }: Props
           onClose={closeMobileNav}
           classes={{ paper: styles.mobileDrawerPaper }}
         >
-          <Sidebar modules={modules} brands={brands} role={role} variant="drawer" />
+          <Sidebar brands={brands} role={role} variant="drawer" />
         </Drawer>
         <Box component="main" className={styles.main}>
           {children}
