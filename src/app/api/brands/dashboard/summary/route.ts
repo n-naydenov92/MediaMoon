@@ -1,7 +1,13 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { isBrandId, type BrandId } from '@/config/brands'
-import { combineKpis, computeDeltas, mergeDailyPoints } from '@/lib/dashboard/aggregate'
+import {
+  combineKpis,
+  computeDeltas,
+  mergeDailyPoints,
+  type AnalyticsTotalsForAggregate,
+} from '@/lib/dashboard/aggregate'
+import { fetchAnalyticsForBrand } from '@/lib/dashboard/fetchAnalytics'
 import {
   fetchCommerceForBrand,
   fetchTopProductsForBrand,
@@ -26,7 +32,10 @@ const globalForCache = globalThis as unknown as {
   __dashboardCache?: Map<string, CacheEntry>
 }
 
-const cache = (globalForCache.__dashboardCache ??= new Map<string, CacheEntry>())
+if (!globalForCache.__dashboardCache) {
+  globalForCache.__dashboardCache = new Map<string, CacheEntry>()
+}
+const cache = globalForCache.__dashboardCache
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const params = request.nextUrl.searchParams
@@ -40,12 +49,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
   const tag = buildCacheTag(brandIdRaw, params)
   const isRefresh = params.get('refresh') === 'true'
-
-  if (!isRefresh) {
-    const entry = cache.get(tag)
-    if (entry && Date.now() < entry.expiresAt) {
-      return NextResponse.json(entry.data)
-    }
+  const cached = isRefresh ? null : readCache(tag)
+  if (cached) {
+    return NextResponse.json(cached)
   }
 
   const dateSelection = parseDateRangeFromQuery(params)
@@ -56,9 +62,18 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     cache.set(tag, { data: summary, expiresAt: Date.now() + CACHE_TTL_MS })
     return NextResponse.json(summary)
   } catch (err) {
+    console.error('[dashboard/summary] failed', err)
     const message = err instanceof Error ? err.message : 'Unknown error'
     return NextResponse.json({ error: message }, { status: UPSTREAM_ERROR_STATUS })
   }
+}
+
+function readCache(tag: string): DashboardSummary | null {
+  const entry = cache.get(tag)
+  if (!entry || Date.now() >= entry.expiresAt) {
+    return null
+  }
+  return entry.data
 }
 
 async function buildSummary(
@@ -66,16 +81,26 @@ async function buildSummary(
   current: DateRangeSelection,
   previous: DateRangeSelection,
 ): Promise<DashboardSummary> {
-  const [spend, commerceCurrent, commercePrevious, topProducts] = await Promise.all([
-    fetchSpendBothPeriods(brandId, current, previous),
-    fetchCommerceForBrand(brandId, current),
-    fetchCommerceForBrand(brandId, previous),
-    fetchTopProductsForBrand(brandId, current),
-  ])
+  const [spend, commerceCurrent, commercePrevious, topProducts, analyticsCurrent, analyticsPrevious] =
+    await Promise.all([
+      fetchSpendBothPeriods(brandId, current, previous),
+      fetchCommerceForBrand(brandId, current),
+      fetchCommerceForBrand(brandId, previous),
+      fetchTopProductsForBrand(brandId, current),
+      fetchAnalyticsForBrand(brandId, current),
+      fetchAnalyticsForBrand(brandId, previous),
+    ])
 
-  const kpis = combineKpis(spend.current, commerceCurrent)
-  const previousKpis = combineKpis(spend.previous, commercePrevious)
-  const byDay = mergeDailyPoints(spend.current.byDay, commerceCurrent?.byDay ?? null)
+  const analyticsCurrentForAgg = toAggregateAnalytics(analyticsCurrent)
+  const analyticsPreviousForAgg = toAggregateAnalytics(analyticsPrevious)
+
+  const kpis = combineKpis(spend.current, commerceCurrent, analyticsCurrentForAgg)
+  const previousKpis = combineKpis(spend.previous, commercePrevious, analyticsPreviousForAgg)
+  const byDay = mergeDailyPoints(
+    spend.current.byDay,
+    commerceCurrent?.byDay ?? null,
+    analyticsCurrentForAgg?.byDay ?? null,
+  )
 
   return {
     currency: 'EUR',
@@ -86,6 +111,20 @@ async function buildSummary(
     topProducts,
     fetchedAt: Date.now(),
     hasCommerce: commerceCurrent !== null,
+    hasAnalytics: analyticsCurrent !== null,
+  }
+}
+
+function toAggregateAnalytics(
+  result: Awaited<ReturnType<typeof fetchAnalyticsForBrand>>,
+): AnalyticsTotalsForAggregate | null {
+  if (!result) {
+    return null
+  }
+  return {
+    sessions: result.totals.sessions,
+    activeUsers: result.totals.activeUsers,
+    byDay: result.byDay,
   }
 }
 

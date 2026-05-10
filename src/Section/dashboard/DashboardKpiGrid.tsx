@@ -1,6 +1,6 @@
 import Box from '@mui/material/Box'
 import { KpiTile, type SparkPoint } from '@/components/kpi'
-import { formatEur } from '@/lib/meta/fx'
+import { formatEur, formatPercentage } from '@/lib/meta/fx'
 import type {
   DashboardDailyPoint,
   DashboardKpiDeltas,
@@ -84,6 +84,20 @@ export default function DashboardKpiGrid({
         delta={passDelta(deltas.cpo)}
         deltaLabel={deltaLabel}
       />
+      <KpiTile
+        label="Conversion Rate"
+        title="Orders ÷ sessions (Google Analytics)"
+        value={formatRate(kpis.conversionRate)}
+        delta={passDelta(deltas.conversionRate)}
+        deltaLabel={deltaLabel}
+      />
+      <KpiTile
+        label="Cost per User"
+        title="Spend ÷ active users (Google Analytics)"
+        value={formatMoney(kpis.costPerUser)}
+        delta={passDelta(deltas.costPerUser)}
+        deltaLabel={deltaLabel}
+      />
     </Box>
   )
 }
@@ -127,4 +141,8 @@ function formatRoas(value: number | null): string {
 
 function formatRoasValue(value: number): string {
   return `${value.toFixed(2)}x`
+}
+
+function formatRate(value: number | null): string {
+  return value === null ? PLACEHOLDER : formatPercentage(value, 2)
 }

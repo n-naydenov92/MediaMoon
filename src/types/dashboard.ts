@@ -5,6 +5,8 @@ export interface DashboardKpis {
   readonly orders: number | null
   readonly aov: number | null
   readonly cpo: number | null
+  readonly conversionRate: number | null
+  readonly costPerUser: number | null
 }
 
 export interface DashboardKpiDeltas {
@@ -14,6 +16,8 @@ export interface DashboardKpiDeltas {
   readonly orders: number | null
   readonly aov: number | null
   readonly cpo: number | null
+  readonly conversionRate: number | null
+  readonly costPerUser: number | null
 }
 
 export interface DashboardDailyPoint {
@@ -21,6 +25,8 @@ export interface DashboardDailyPoint {
   readonly spend: number | null
   readonly revenue: number | null
   readonly orders: number | null
+  readonly sessions: number | null
+  readonly activeUsers: number | null
 }
 
 export interface DashboardTopProduct {
@@ -39,4 +45,5 @@ export interface DashboardSummary {
   readonly topProducts: readonly DashboardTopProduct[]
   readonly fetchedAt: number
   readonly hasCommerce: boolean
+  readonly hasAnalytics: boolean
 }

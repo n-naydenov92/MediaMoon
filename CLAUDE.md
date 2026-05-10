@@ -98,6 +98,8 @@ This means 10 concurrent users = 1 API call per cache window, not 10.
 - `src/lib/gateways/RssGateway.ts`
 - `src/lib/gateways/ClusteringGateway.ts`
 - `src/lib/gateways/TrendsGateway.ts`
+- `src/lib/gateways/WooGateway.ts` — WooCommerce REST per brand (revenue / orders / top products)
+- `src/lib/gateways/GoogleAnalyticsGateway.ts` — GA4 Data API (sessions / active users) via `@google-analytics/data` + service-account JSON; per-brand property IDs in `src/config/analyticsProviders.ts`
 - `src/lib/pipeline.ts` — orchestrates the above
 
 **Module Registry** — `src/config/modules.ts` drives sidebar, root redirect, and Clerk role checks. Adding a module = one entry here + one folder + one API route.
