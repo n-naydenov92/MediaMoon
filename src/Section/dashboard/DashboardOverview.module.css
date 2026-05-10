@@ -21,6 +21,53 @@
   border-radius: 8px;
 }
 
+.sectionHeading {
+  font-family: var(--font-syne), system-ui, sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+  margin: 8px 0 -8px 0;
+}
+
+.chartRow {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.chartCol {
+  min-width: 0;
+}
+
+.breakdownCol {
+  min-width: 0;
+}
+
+@media (min-width: 900px) {
+  .chartRow {
+    flex-direction: row;
+  }
+
+  .chartCol {
+    flex: 3;
+  }
+
+  .breakdownCol {
+    flex: 2;
+  }
+}
+
+@media (min-width: 1200px) {
+  .chartCol {
+    flex: 2;
+  }
+
+  .breakdownCol {
+    flex: 1;
+  }
+}
+
 @media (max-width: 600px) {
   .root {
     padding: 16px 12px;

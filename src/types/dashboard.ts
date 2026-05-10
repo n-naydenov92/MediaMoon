@@ -36,6 +36,14 @@ export interface DashboardTopProduct {
   readonly revenue: number
 }
 
+export type SpendChannel = 'meta' | 'googleAds' | 'tiktok'
+
+export interface SpendBreakdownPoint {
+  readonly channel: SpendChannel
+  readonly label: string
+  readonly spend: number
+}
+
 export interface DashboardSummary {
   readonly currency: 'EUR'
   readonly kpis: DashboardKpis
@@ -43,6 +51,7 @@ export interface DashboardSummary {
   readonly deltas: DashboardKpiDeltas
   readonly byDay: readonly DashboardDailyPoint[]
   readonly topProducts: readonly DashboardTopProduct[]
+  readonly spendBreakdown: readonly SpendBreakdownPoint[]
   readonly fetchedAt: number
   readonly hasCommerce: boolean
   readonly hasAnalytics: boolean

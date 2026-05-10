@@ -2,16 +2,14 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { isBrandId, type BrandId } from '@/config/brands'
 import {
+  buildSpendBreakdown,
   combineKpis,
   computeDeltas,
   mergeDailyPoints,
   type AnalyticsTotalsForAggregate,
 } from '@/lib/dashboard/aggregate'
 import { fetchAnalyticsForBrand } from '@/lib/dashboard/fetchAnalytics'
-import {
-  fetchCommerceForBrand,
-  fetchTopProductsForBrand,
-} from '@/lib/dashboard/fetchCommerce'
+import { fetchCommerceForBrand } from '@/lib/dashboard/fetchCommerce'
 import { fetchSpendBothPeriods } from '@/lib/dashboard/fetchSpend'
 import {
   parseDateRangeFromQuery,
@@ -20,7 +18,7 @@ import {
 } from '@/lib/meta/dateRange'
 import type { DashboardSummary } from '@/types/dashboard'
 
-const CACHE_TTL_MS = 300_000
+const CACHE_TTL_MS = 3_600_000
 const UPSTREAM_ERROR_STATUS = 502
 
 interface CacheEntry {
@@ -81,24 +79,25 @@ async function buildSummary(
   current: DateRangeSelection,
   previous: DateRangeSelection,
 ): Promise<DashboardSummary> {
-  const [spend, commerceCurrent, commercePrevious, topProducts, analyticsCurrent, analyticsPrevious] =
-    await Promise.all([
-      fetchSpendBothPeriods(brandId, current, previous),
-      fetchCommerceForBrand(brandId, current),
-      fetchCommerceForBrand(brandId, previous),
-      fetchTopProductsForBrand(brandId, current),
-      fetchAnalyticsForBrand(brandId, current),
-      fetchAnalyticsForBrand(brandId, previous),
-    ])
+  const [spend, commercePeriods, analyticsCurrent, analyticsPrevious] = await Promise.all([
+    fetchSpendBothPeriods(brandId, current, previous),
+    fetchCommerceBothPeriods(brandId, current, previous),
+    fetchAnalyticsForBrand(brandId, current),
+    fetchAnalyticsForBrand(brandId, previous),
+  ])
+  const commerceCurrent = commercePeriods.current
+  const commercePrevious = commercePeriods.previous
 
+  const commerceCurrentTotals = commerceCurrent?.totals ?? null
+  const commercePreviousTotals = commercePrevious?.totals ?? null
   const analyticsCurrentForAgg = toAggregateAnalytics(analyticsCurrent)
   const analyticsPreviousForAgg = toAggregateAnalytics(analyticsPrevious)
 
-  const kpis = combineKpis(spend.current, commerceCurrent, analyticsCurrentForAgg)
-  const previousKpis = combineKpis(spend.previous, commercePrevious, analyticsPreviousForAgg)
+  const kpis = combineKpis(spend.current, commerceCurrentTotals, analyticsCurrentForAgg)
+  const previousKpis = combineKpis(spend.previous, commercePreviousTotals, analyticsPreviousForAgg)
   const byDay = mergeDailyPoints(
     spend.current.byDay,
-    commerceCurrent?.byDay ?? null,
+    commerceCurrentTotals?.byDay ?? null,
     analyticsCurrentForAgg?.byDay ?? null,
   )
 
@@ -108,11 +107,25 @@ async function buildSummary(
     previous: previousKpis,
     deltas: computeDeltas(kpis, previousKpis),
     byDay,
-    topProducts,
+    topProducts: commerceCurrent?.topProducts ?? [],
+    spendBreakdown: buildSpendBreakdown(spend.current),
     fetchedAt: Date.now(),
     hasCommerce: commerceCurrent !== null,
     hasAnalytics: analyticsCurrent !== null,
   }
+}
+
+async function fetchCommerceBothPeriods(
+  brandId: BrandId,
+  current: DateRangeSelection,
+  previous: DateRangeSelection,
+): Promise<{
+  current: Awaited<ReturnType<typeof fetchCommerceForBrand>>
+  previous: Awaited<ReturnType<typeof fetchCommerceForBrand>>
+}> {
+  const currentResult = await fetchCommerceForBrand(brandId, current)
+  const previousResult = await fetchCommerceForBrand(brandId, previous)
+  return { current: currentResult, previous: previousResult }
 }
 
 function toAggregateAnalytics(

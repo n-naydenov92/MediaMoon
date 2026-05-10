@@ -110,7 +110,7 @@ export default function SpendChart({ data }: Props): JSX.Element {
             yAxisId="ratio"
             type="monotone"
             dataKey="roas"
-            stroke={palette.roas}
+            stroke={palette.metric}
             strokeWidth={2}
             dot={false}
             name="ROAS"

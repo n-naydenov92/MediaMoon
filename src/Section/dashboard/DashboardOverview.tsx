@@ -6,6 +6,7 @@ import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Skeleton from '@mui/material/Skeleton'
 import Stack from '@mui/material/Stack'
+import Typography from '@mui/material/Typography'
 import DateRangeDropdown from '@/app/brands/[brandId]/(advertising)/meta-ads/components/shared/DateRangeDropdown'
 import { PageHeader, UpdatedBadge } from '@/components/layout/PageHeader'
 import type { BrandId } from '@/config/brands'
@@ -19,6 +20,7 @@ import type { BrandConfig } from '@/types'
 import type { DashboardSummary } from '@/types/dashboard'
 import DashboardChart from './DashboardChart'
 import DashboardKpiGrid from './DashboardKpiGrid'
+import DashboardSpendBreakdown from './DashboardSpendBreakdown'
 import DashboardTopProducts from './DashboardTopProducts'
 import { buildDashboardCrumbs } from './dashboardCrumbs'
 import styles from './DashboardOverview.module.css'
@@ -188,12 +190,30 @@ export default function DashboardOverview({ brand }: Props): JSX.Element {
         />
       )}
 
-      {!isSingleDayRange(dateSelection) &&
-        (state.status === 'success' ? (
-          <DashboardChart data={state.data.byDay} hasCommerce={state.data.hasCommerce} />
-        ) : (
-          <Skeleton variant="rounded" height={320} className={styles.chartSkeleton} />
-        ))}
+      <Typography component="h2" variant="h2" className={styles.sectionHeading}>
+        Brand Overview
+      </Typography>
+
+      <Box className={styles.chartRow}>
+        <Box className={styles.chartCol}>
+          {state.status === 'success' ? (
+            <DashboardChart
+              data={state.data.byDay}
+              hasCommerce={state.data.hasCommerce}
+              hasAnalytics={state.data.hasAnalytics}
+            />
+          ) : (
+            <Skeleton variant="rounded" height={320} className={styles.chartSkeleton} />
+          )}
+        </Box>
+        <Box className={styles.breakdownCol}>
+          {state.status === 'success' ? (
+            <DashboardSpendBreakdown breakdown={state.data.spendBreakdown} />
+          ) : (
+            <Skeleton variant="rounded" height={320} className={styles.chartSkeleton} />
+          )}
+        </Box>
+      </Box>
 
       <DashboardTopProducts
         products={state.status === 'success' ? state.data.topProducts : []}

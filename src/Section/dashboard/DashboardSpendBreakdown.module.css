@@ -1,0 +1,146 @@
+.card {
+  border-radius: 8px;
+  border-color: var(--hairline);
+  background-color: var(--surface-1);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  padding: 16px 20px 8px 20px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.title {
+  font-family: var(--font-syne), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--text-primary);
+}
+
+.content {
+  padding: 16px 20px 20px 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.content:last-child {
+  padding-bottom: 20px;
+}
+
+.empty {
+  color: var(--text-muted);
+  padding: 24px 0;
+  text-align: center;
+}
+
+.donutWrap {
+  position: relative;
+  width: 100%;
+}
+
+.centerLabel {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.centerValue {
+  font-family: var(--font-syne), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 22px;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.centerCaption {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.legendRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0;
+}
+
+.legendIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: color-mix(in oklab, var(--channel-color) 18%, transparent);
+  flex-shrink: 0;
+}
+
+.brandIcon {
+  color: var(--channel-color);
+  font-size: 16px;
+}
+
+.brandDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--channel-color);
+}
+
+.legendLabel {
+  flex: 1;
+  color: var(--text-secondary);
+}
+
+.legendAmount {
+  font-family: var(--font-syne), system-ui, sans-serif;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.tooltip {
+  border-color: var(--hairline-strong);
+  background-color: var(--surface-1);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+  min-width: 160px;
+}
+
+.tooltipContent {
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tooltipLabel {
+  color: var(--text-secondary);
+}
+
+.tooltipValue {
+  font-family: var(--font-syne), system-ui, sans-serif;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}

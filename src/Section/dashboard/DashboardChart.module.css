@@ -16,6 +16,37 @@
   color: var(--text-primary);
 }
 
+.metricSelect {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 12px;
+  color: var(--text-secondary);
+  min-width: 110px;
+  font-variant-numeric: tabular-nums;
+}
+
+.metricSelect :global(.MuiOutlinedInput-input) {
+  padding: 4px 26px 4px 10px;
+}
+
+.metricSelect :global(.MuiSelect-icon) {
+  font-size: 18px;
+  right: 4px;
+}
+
+.metricSelect :global(.MuiOutlinedInput-notchedOutline) {
+  border-color: var(--hairline);
+  border-width: 1px;
+}
+
+.metricSelect:hover :global(.MuiOutlinedInput-notchedOutline) {
+  border-color: var(--hairline-strong);
+}
+
+.metricSelect:global(.Mui-focused) :global(.MuiOutlinedInput-notchedOutline) {
+  border-color: var(--hairline-strong);
+  border-width: 1px;
+}
+
 .content {
   padding: 16px 20px 20px 20px;
 }

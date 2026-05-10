@@ -18,7 +18,7 @@ export const COMMERCE_PROVIDERS: readonly CommerceProviderEntry[] = [
     urlEnvVar: 'WOO_URL_SAPPHIRE',
     keyEnvVar: 'WOO_KEY_SAPPHIRE',
     secretEnvVar: 'WOO_SECRET_SAPPHIRE',
-    currency: 'BGN',
+    currency: 'EUR',
     timezone: 'Europe/Sofia',
   },
   {

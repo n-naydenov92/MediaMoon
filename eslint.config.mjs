@@ -69,6 +69,7 @@ export default [
       'react/jsx-filename-extension': ['error', { extensions: ['.tsx'] }],
       'react/jsx-props-no-spreading': 'off',
       'react/require-default-props': 'off',
+      'react/prop-types': 'off',
       'react/jsx-no-useless-fragment': ['error', { allowExpressions: true }],
       'react/jsx-one-expression-per-line': 'off',
       'react/no-unstable-nested-components': ['error', { allowAsProps: true }],
@@ -99,7 +100,7 @@ export default [
     },
   },
   {
-    files: ['src/app/brands/[brandId]/(advertising)/meta-ads/**/*.{ts,tsx}'],
+    files: ['**/meta-ads/**/*.{ts,tsx}'],
     rules: {
       'no-restricted-syntax': 'off',
     },

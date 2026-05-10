@@ -3,6 +3,7 @@ import type {
   DashboardDailyPoint,
   DashboardKpiDeltas,
   DashboardKpis,
+  SpendBreakdownPoint,
 } from '@/types/dashboard'
 
 export interface CommerceTotals {
@@ -85,6 +86,13 @@ export function mergeDailyPoints(
       sessions: analyticsByDay === null ? null : sessionsMap.get(date) ?? 0,
       activeUsers: analyticsByDay === null ? null : usersMap.get(date) ?? 0,
     }))
+}
+
+export function buildSpendBreakdown(meta: SpendTotals): readonly SpendBreakdownPoint[] {
+  if (meta.spendEur <= 0) {
+    return []
+  }
+  return [{ channel: 'meta', label: 'Meta', spend: meta.spendEur }]
 }
 
 function deltaOrNull(current: number | null, previous: number | null): number | null {

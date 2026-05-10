@@ -38,7 +38,8 @@ export default function DashboardKpiGrid({
   return (
     <Box className={styles.grid}>
       <KpiTile
-        label="Spend"
+        label="Total Spend"
+        title="Combined Meta + Google Ads. Google Ads pending integration."
         value={formatMoney(kpis.spend)}
         delta={passDelta(deltas.spend)}
         deltaLabel={deltaLabel}
@@ -71,20 +72,6 @@ export default function DashboardKpiGrid({
         formatValue={formatIntegerValue}
       />
       <KpiTile
-        label="Average Order Value"
-        title="Average Order Value"
-        value={formatMoney(kpis.aov)}
-        delta={passDelta(deltas.aov)}
-        deltaLabel={deltaLabel}
-      />
-      <KpiTile
-        label="Cost per Order"
-        title="Cost per Order"
-        value={formatMoney(kpis.cpo)}
-        delta={passDelta(deltas.cpo)}
-        deltaLabel={deltaLabel}
-      />
-      <KpiTile
         label="Conversion Rate"
         title="Orders ÷ sessions (Google Analytics)"
         value={formatRate(kpis.conversionRate)}
@@ -96,6 +83,20 @@ export default function DashboardKpiGrid({
         title="Spend ÷ active users (Google Analytics)"
         value={formatMoney(kpis.costPerUser)}
         delta={passDelta(deltas.costPerUser)}
+        deltaLabel={deltaLabel}
+      />
+      <KpiTile
+        label="Average Order Value"
+        title="Average Order Value"
+        value={formatMoney(kpis.aov)}
+        delta={passDelta(deltas.aov)}
+        deltaLabel={deltaLabel}
+      />
+      <KpiTile
+        label="Cost per Order"
+        title="Cost per Order"
+        value={formatMoney(kpis.cpo)}
+        delta={passDelta(deltas.cpo)}
         deltaLabel={deltaLabel}
       />
     </Box>
