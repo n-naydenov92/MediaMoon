@@ -130,6 +130,7 @@ function LegendRow({ channel, color, label, amount }: LegendRowProps): JSX.Eleme
       <Box component="span" className={styles.legendIcon} aria-hidden="true">
         <ChannelGlyph channel={channel} />
       </Box>
+      <Box component="span" className={styles.legendDot} aria-hidden="true" />
       <Typography component="span" variant="body2" className={styles.legendLabel}>
         {label}
       </Typography>
@@ -147,7 +148,7 @@ function ChannelGlyph({ channel }: { channel: SpendChannel }): JSX.Element {
   if (channel === 'googleAds') {
     return <GoogleIcon className={styles.brandIcon} fontSize="small" />
   }
-  return <Box component="span" className={styles.brandDot} />
+  return <Box component="span" className={styles.brandFallback} />
 }
 
 function renderTooltip(total: number): (props: TooltipContentProps) => JSX.Element | null {

@@ -89,10 +89,12 @@ export function mergeDailyPoints(
 }
 
 export function buildSpendBreakdown(meta: SpendTotals): readonly SpendBreakdownPoint[] {
-  if (meta.spendEur <= 0) {
-    return []
-  }
-  return [{ channel: 'meta', label: 'Meta', spend: meta.spendEur }]
+  // Google Ads is a Phase 3 placeholder — replace `spend: 0` with real totals
+  // once GoogleAdsGateway is wired into fetchSpendBothPeriods.
+  return [
+    { channel: 'meta', label: 'Meta', spend: meta.spendEur },
+    { channel: 'googleAds', label: 'Google Ads', spend: 0 },
+  ]
 }
 
 function deltaOrNull(current: number | null, previous: number | null): number | null {

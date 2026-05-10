@@ -91,21 +91,27 @@
   justify-content: center;
   width: 22px;
   height: 22px;
-  border-radius: 6px;
-  background: color-mix(in oklab, var(--channel-color) 18%, transparent);
   flex-shrink: 0;
 }
 
 .brandIcon {
-  color: var(--channel-color);
-  font-size: 16px;
+  color: var(--text-secondary);
+  font-size: 18px;
 }
 
-.brandDot {
+.legendDot {
   width: 10px;
   height: 10px;
-  border-radius: 2px;
+  border-radius: 50%;
   background: var(--channel-color);
+  flex-shrink: 0;
+}
+
+.brandFallback {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  background: var(--text-secondary);
 }
 
 .legendLabel {
