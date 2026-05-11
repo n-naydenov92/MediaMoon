@@ -1,0 +1,163 @@
+.card {
+  border-radius: 12px;
+  border-color: var(--hairline);
+  background-color: var(--surface-1);
+  overflow: hidden;
+}
+
+.header {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.title {
+  font-family: var(--font-syne), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.content {
+  padding: 0;
+}
+
+.content:last-child {
+  padding-bottom: 0;
+}
+
+.empty {
+  border-radius: 8px;
+  margin: 20px;
+}
+
+.skeletons {
+  gap: 6px;
+  padding: 16px 24px;
+}
+
+.tableWrap {
+  width: 100%;
+}
+
+.table {
+  width: 100%;
+}
+
+.table :global(.MuiTableCell-root) {
+  border-bottom-color: var(--hairline);
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  color: var(--text-primary);
+}
+
+.table :global(.MuiTableHead-root .MuiTableCell-root) {
+  background-color: color-mix(in srgb, var(--text-primary) 2%, transparent);
+  border-bottom-color: var(--hairline);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 10px 20px;
+}
+
+.table :global(.MuiTableBody-root .MuiTableCell-root) {
+  padding: 14px 20px;
+  font-size: 14px;
+  border-bottom: 1px solid transparent;
+}
+
+.table :global(.MuiTableBody-root .MuiTableRow-root) {
+  transition: background-color 120ms ease;
+}
+
+.table :global(.MuiTableBody-root .MuiTableRow-root:hover) {
+  background-color: color-mix(in srgb, var(--text-primary) 4%, transparent);
+}
+
+.table :global(.MuiTableBody-root .MuiTableRow-root:not(:last-child) .MuiTableCell-root) {
+  border-bottom: 1px solid color-mix(in srgb, var(--hairline) 60%, transparent);
+}
+
+.table :global(.MuiTableSortLabel-root) {
+  color: var(--text-muted);
+}
+
+.table :global(.MuiTableSortLabel-root:hover) {
+  color: var(--text-primary);
+}
+
+.table :global(.MuiTableSortLabel-root.Mui-active),
+.table :global(.MuiTableSortLabel-root.Mui-active .MuiTableSortLabel-icon) {
+  color: var(--text-primary);
+}
+
+.rankCell {
+  width: 56px;
+}
+
+.nameCell {
+  width: auto;
+}
+
+.qtyCell {
+  width: 96px;
+}
+
+.revenueCell {
+  width: 120px;
+}
+
+.rank {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 0;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.qty {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.revenue {
+  font-family: var(--font-syne), system-ui, sans-serif;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--text-primary);
+}
+
+@media (max-width: 600px) {
+  .header {
+    padding: 14px 16px;
+  }
+
+  .table :global(.MuiTableHead-root .MuiTableCell-root),
+  .table :global(.MuiTableBody-root .MuiTableCell-root) {
+    padding: 10px 12px;
+  }
+
+  .rankCell {
+    width: 40px;
+  }
+
+  .qtyCell {
+    width: 64px;
+  }
+
+  .revenueCell {
+    width: 92px;
+  }
+}

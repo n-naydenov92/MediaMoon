@@ -1,0 +1,31 @@
+.card {
+  border-radius: 8px;
+  border-color: var(--hairline);
+  background-color: var(--surface-1);
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  padding: 14px 18px 8px 18px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.title {
+  font-family: var(--font-syne), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text-primary);
+}
+
+.content {
+  padding: 14px 18px 18px 18px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.content:last-child {
+  padding-bottom: 18px;
+}

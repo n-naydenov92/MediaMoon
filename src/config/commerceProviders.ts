@@ -1,15 +1,24 @@
 import type { BrandId } from './brands'
-import type { CommerceProviderKind } from '@/types/commerce'
 
-interface CommerceProviderEntry {
+interface CommerceProviderEntryBase {
   readonly brandId: BrandId
-  readonly kind: CommerceProviderKind
   readonly urlEnvVar: string
-  readonly keyEnvVar: string
-  readonly secretEnvVar: string
   readonly currency: string
   readonly timezone: string
 }
+
+interface WooCommerceProviderEntry extends CommerceProviderEntryBase {
+  readonly kind: 'woocommerce'
+  readonly keyEnvVar: string
+  readonly secretEnvVar: string
+}
+
+interface ShopifyProviderEntry extends CommerceProviderEntryBase {
+  readonly kind: 'shopify'
+  readonly tokenEnvVar: string
+}
+
+export type CommerceProviderEntry = WooCommerceProviderEntry | ShopifyProviderEntry
 
 export const COMMERCE_PROVIDERS: readonly CommerceProviderEntry[] = [
   {
@@ -27,6 +36,14 @@ export const COMMERCE_PROVIDERS: readonly CommerceProviderEntry[] = [
     urlEnvVar: 'WOO_URL_THEGREENBEAR',
     keyEnvVar: 'WOO_KEY_THEGREENBEAR',
     secretEnvVar: 'WOO_SECRET_THEGREENBEAR',
+    currency: 'EUR',
+    timezone: 'Europe/Sofia',
+  },
+  {
+    brandId: 'stoitchkov',
+    kind: 'shopify',
+    urlEnvVar: 'SHOPIFY_URL_STOITCHKOV',
+    tokenEnvVar: 'SHOPIFY_TOKEN_STOITCHKOV',
     currency: 'EUR',
     timezone: 'Europe/Sofia',
   },

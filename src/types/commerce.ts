@@ -22,4 +22,12 @@ export interface WooProviderConfig {
   readonly timezone: string
 }
 
-export type CommerceProviderConfig = WooProviderConfig
+export interface ShopifyProviderConfig {
+  readonly kind: 'shopify'
+  readonly storeUrl: string
+  readonly accessToken: string
+  readonly currency: string
+  readonly timezone: string
+}
+
+export type CommerceProviderConfig = WooProviderConfig | ShopifyProviderConfig

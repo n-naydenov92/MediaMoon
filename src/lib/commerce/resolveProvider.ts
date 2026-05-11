@@ -12,21 +12,42 @@ export function resolveCommerceProvider(brandId: BrandId): CommerceProviderConfi
   if (!entry) {
     return null
   }
-  const storeUrl = readEnv(entry.urlEnvVar)
-  const consumerKey = readEnv(entry.keyEnvVar)
-  const consumerSecret = readEnv(entry.secretEnvVar)
-  if (!storeUrl || !consumerKey || !consumerSecret) {
+  const storeUrlRaw = readEnv(entry.urlEnvVar)
+  if (!storeUrlRaw) {
     return null
   }
+  const storeUrl = storeUrlRaw.replace(/\/+$/, '')
+
   if (entry.kind === 'woocommerce') {
+    const consumerKey = readEnv(entry.keyEnvVar)
+    const consumerSecret = readEnv(entry.secretEnvVar)
+    if (!consumerKey || !consumerSecret) {
+      return null
+    }
     return {
       kind: 'woocommerce',
-      storeUrl: storeUrl.replace(/\/+$/, ''),
+      storeUrl,
       consumerKey,
       consumerSecret,
       currency: entry.currency,
       timezone: entry.timezone,
     }
   }
-  return null
+
+  if (entry.kind === 'shopify') {
+    const accessToken = readEnv(entry.tokenEnvVar)
+    if (!accessToken) {
+      return null
+    }
+    return {
+      kind: 'shopify',
+      storeUrl,
+      accessToken,
+      currency: entry.currency,
+      timezone: entry.timezone,
+    }
+  }
+
+  const exhaustive: never = entry
+  return exhaustive
 }

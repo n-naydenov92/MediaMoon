@@ -9,7 +9,7 @@ export const BRAND_REGISTRY: readonly (BrandConfig & { readonly id: BrandId })[]
     emoji: '💪',
     color: '#FF6B35',
     description: 'Performance nutrition brand',
-    markets: ['BG', 'ES', 'WORLD'],
+    markets: ['BG', 'ES'],
   },
   {
     id: 'thegreenbear',

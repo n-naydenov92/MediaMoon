@@ -1,0 +1,31 @@
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.col {
+  min-width: 0;
+}
+
+.rightStack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  min-width: 0;
+}
+
+@media (min-width: 900px) {
+  .row {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .productsCol {
+    flex: 3;
+  }
+
+  .categoryCol {
+    flex: 2;
+  }
+}

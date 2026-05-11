@@ -1,0 +1,110 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.header {
+  display: grid;
+  grid-template-columns: 12px 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0 8px 0;
+  border-bottom: 1px solid var(--hairline-strong);
+}
+
+.headerCell {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.headerUsers,
+.headerRevenue {
+  text-align: right;
+  min-width: 64px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 12px 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--source-color);
+}
+
+.label {
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.users {
+  font-family: var(--font-syne), system-ui, sans-serif;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  text-align: right;
+  min-width: 64px;
+}
+
+.revenue {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-weight: 500;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+  text-align: right;
+  min-width: 72px;
+}
+
+.donutWrap {
+  position: relative;
+  width: 100%;
+}
+
+.tooltip {
+  border-color: var(--hairline-strong);
+  background-color: var(--surface-1);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+  min-width: 160px;
+}
+
+.tooltipContent {
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tooltipLabel {
+  color: var(--text-secondary);
+}
+
+.tooltipValue {
+  font-family: var(--font-syne), system-ui, sans-serif;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+.tooltipSecondary {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-weight: 500;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}

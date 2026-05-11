@@ -1,0 +1,11 @@
+.brandIcon {
+  color: var(--text-secondary);
+  font-size: 18px;
+}
+
+.brandFallback {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  background: var(--text-secondary);
+}
