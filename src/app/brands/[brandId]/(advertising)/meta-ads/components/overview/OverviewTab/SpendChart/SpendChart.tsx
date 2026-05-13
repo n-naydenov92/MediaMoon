@@ -15,14 +15,11 @@ import { shortDate } from '@/lib/dateFormat'
 import { useThemeMode } from '@/styles/useThemeMode'
 import SpendChartTooltip from '../SpendChartTooltip/SpendChartTooltip'
 import { PALETTE_DARK, PALETTE_LIGHT } from '../../spendChartPalette'
+import { enrichWithRoas, shortMoney, shortRoas } from './helpers'
 import styles from './SpendChart.module.css'
 
 interface Props {
   readonly data: readonly DailyPoint[]
-}
-
-interface ChartRow extends DailyPoint {
-  readonly roas: number
 }
 
 export default function SpendChart({ data }: Props): JSX.Element {
@@ -119,22 +116,4 @@ export default function SpendChart({ data }: Props): JSX.Element {
       </ResponsiveContainer>
     </div>
   )
-}
-
-function enrichWithRoas(data: readonly DailyPoint[]): readonly ChartRow[] {
-  return data.map((d) => ({
-    ...d,
-    roas: d.spendEur > 0 ? d.revenueEur / d.spendEur : 0,
-  }))
-}
-
-function shortMoney(value: number): string {
-  if (value >= 1000) {
-    return `€${(value / 1000).toFixed(1)}k`
-  }
-  return `€${value.toFixed(0)}`
-}
-
-function shortRoas(value: number): string {
-  return `${value.toFixed(1)}x`
 }

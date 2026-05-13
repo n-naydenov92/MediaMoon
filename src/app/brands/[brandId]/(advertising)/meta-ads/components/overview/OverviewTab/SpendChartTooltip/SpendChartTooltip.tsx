@@ -1,10 +1,8 @@
 'use client'
 
 import type { TooltipContentProps } from 'recharts'
-import { formatEur, formatRoas } from '@/lib/meta/fx'
+import { formatTooltipValue } from './helpers'
 import styles from '../SpendChart/SpendChart.module.css'
-
-const ROAS_KEY = 'roas'
 
 export default function SpendChartTooltip({
   active,
@@ -33,11 +31,4 @@ export default function SpendChartTooltip({
       })}
     </div>
   )
-}
-
-function formatTooltipValue(key: string, value: number): string {
-  if (key === ROAS_KEY) {
-    return formatRoas(value)
-  }
-  return formatEur(value)
 }
