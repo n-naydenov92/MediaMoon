@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { getCurrentUserRole } from '@/lib/currentUserRole'
 import { BRAND_REGISTRY } from '@/config/brands'
-import BrandsOverview from '@/Section/brands/BrandsOverview'
+import BrandsOverview from '@/Section/brands/BrandsOverview/BrandsOverview'
 
 export default async function BrandsPage(): Promise<JSX.Element> {
   const role = await getCurrentUserRole()

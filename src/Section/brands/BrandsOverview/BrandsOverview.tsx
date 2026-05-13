@@ -5,7 +5,7 @@ import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
 import type { BrandConfig } from '@/types'
-import BrandCard from './BrandCard'
+import BrandCard from './BrandCard/BrandCard'
 import styles from './BrandsOverview.module.css'
 
 interface Props {
