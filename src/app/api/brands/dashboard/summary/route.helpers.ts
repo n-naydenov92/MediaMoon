@@ -30,23 +30,18 @@ export async function buildSummary(
   previous: DateRangeSelection,
   market: MarketSelection,
 ): Promise<DashboardSummary> {
-  const [
-    spend,
-    commercePeriods,
-    analyticsCurrent,
-    analyticsPrevious,
-    klaviyoCurrent,
-    klaviyoPrevious,
-  ] = await Promise.all([
-    fetchSpendBothPeriods(brandId, current, previous, market),
-    fetchCommerceBothPeriods(brandId, current, previous, market),
-    fetchAnalyticsForBrand(brandId, current, market),
-    fetchAnalyticsForBrand(brandId, previous, market),
-    fetchKlaviyoForBrand(brandId, current),
-    fetchKlaviyoForBrand(brandId, previous),
-  ])
+  const [spend, commercePeriods, analyticsPeriods, klaviyoCurrent, klaviyoPrevious] =
+    await Promise.all([
+      fetchSpendBothPeriods(brandId, current, previous, market),
+      fetchCommerceBothPeriods(brandId, current, previous, market),
+      fetchAnalyticsBothPeriods(brandId, current, previous, market),
+      fetchKlaviyoForBrand(brandId, current),
+      fetchKlaviyoForBrand(brandId, previous),
+    ])
   const commerceCurrent = commercePeriods.current
   const commercePrevious = commercePeriods.previous
+  const analyticsCurrent = analyticsPeriods.current
+  const analyticsPrevious = analyticsPeriods.previous
 
   const commerceCurrentTotals = commerceCurrent?.totals ?? null
   const commercePreviousTotals = commercePrevious?.totals ?? null
@@ -155,6 +150,20 @@ async function fetchCommerceBothPeriods(
 }> {
   const currentResult = await fetchCommerceForBrand(brandId, current, market)
   const previousResult = await fetchCommerceForBrand(brandId, previous, market)
+  return { current: currentResult, previous: previousResult }
+}
+
+async function fetchAnalyticsBothPeriods(
+  brandId: BrandId,
+  current: DateRangeSelection,
+  previous: DateRangeSelection,
+  market: MarketSelection,
+): Promise<{
+  current: Awaited<ReturnType<typeof fetchAnalyticsForBrand>>
+  previous: Awaited<ReturnType<typeof fetchAnalyticsForBrand>>
+}> {
+  const currentResult = await fetchAnalyticsForBrand(brandId, current, market)
+  const previousResult = await fetchAnalyticsForBrand(brandId, previous, market)
   return { current: currentResult, previous: previousResult }
 }
 
