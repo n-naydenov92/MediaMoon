@@ -31,7 +31,7 @@ export function formatCompactNumber(value: number): string {
   return value.toLocaleString('en-GB', { maximumFractionDigits: 2 })
 }
 
-export function formatPercentage(ratio: number, fractionDigits: number = 2): string {
+export function formatPercentage(ratio: number, fractionDigits = 2): string {
   return `${(ratio * 100).toFixed(fractionDigits)}%`
 }
 

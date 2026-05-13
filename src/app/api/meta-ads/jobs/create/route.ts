@@ -48,7 +48,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   if (!validation.ok) {
     return NextResponse.json({ error: validation.error }, { status: 400 })
   }
-  const input = validation.input
+  const { input } = validation
 
   const bm = getBusinessManagerForAccount(input.accountId)
   if (!bm) {
@@ -93,7 +93,7 @@ function validate(raw: CreateRequestBody): ValidationResult {
   if (typeof raw.pageId !== 'string' || !raw.pageId) {
     return { ok: false, error: 'pageId is required' }
   }
-  const copy = raw.copy
+  const { copy } = raw
   if (
     !copy ||
     typeof copy.headline !== 'string' || !copy.headline ||

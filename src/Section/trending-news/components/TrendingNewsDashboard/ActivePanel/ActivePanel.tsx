@@ -9,7 +9,7 @@ interface Props {
   readonly selectedMarket: MarketSelection
 }
 
-export default memo(function ActivePanel({ selectedMarket }: Props): JSX.Element {
+export default memo(({ selectedMarket }: Props): JSX.Element => {
   if (selectedMarket === ALL_MARKETS) {
     return <OverviewDashboard />
   }

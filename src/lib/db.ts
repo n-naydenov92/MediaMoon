@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 
 declare global {
-  // eslint-disable-next-line no-var
+  // eslint-disable-next-line vars-on-top, @typescript-eslint/naming-convention -- standard Prisma global singleton pattern for dev hot-reload
   var __prismaClient: PrismaClient | undefined
 }
 

@@ -60,7 +60,7 @@ function isRoleAllowed(
   if (!moduleConfig) {
     return false
   }
-  const role = parseRole(claims?.['role'] ?? (claims?.['publicMetadata'] as { role?: unknown } | undefined)?.role)
+  const role = parseRole(claims?.role ?? (claims?.publicMetadata as { role?: unknown } | undefined)?.role)
   if (!role) {
     return false
   }

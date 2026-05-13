@@ -1,6 +1,7 @@
 'use client'
 
 import { memo } from 'react'
+import Box from '@mui/material/Box'
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore'
 import styles from './MarketSwitcher.module.css'
 
@@ -11,14 +12,15 @@ interface Props {
   readonly onToggle: () => void
 }
 
-const MarketSwitcherTrigger = memo(function MarketSwitcherTrigger({
+function MarketSwitcherTrigger({
   label,
   menuId,
   isOpen,
   onToggle,
 }: Props): JSX.Element {
   return (
-    <button
+    <Box
+      component="button"
       type="button"
       className={styles.trigger}
       onClick={onToggle}
@@ -27,10 +29,10 @@ const MarketSwitcherTrigger = memo(function MarketSwitcherTrigger({
       aria-controls={menuId}
       aria-label={label}
     >
-      <span className={styles.label}>{label}</span>
+      <Box component="span" className={styles.label}>{label}</Box>
       <UnfoldMoreIcon className={styles.chevron} fontSize="small" />
-    </button>
+    </Box>
   )
-})
+}
 
-export default MarketSwitcherTrigger
+export default memo(MarketSwitcherTrigger)

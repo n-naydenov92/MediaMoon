@@ -31,6 +31,7 @@ export default function FilePicker({ files, onChange, disabled = false }: Props)
       url: URL.createObjectURL(file),
       isVideo: file.type.startsWith('video/'),
     }))
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- data fetching / external sync effect
     setPreviews(next)
     return () => {
       for (const p of next) {
@@ -43,6 +44,7 @@ export default function FilePicker({ files, onChange, disabled = false }: Props)
     (event: ChangeEvent<HTMLInputElement>) => {
       const selected = event.target.files ? Array.from(event.target.files) : []
       onChange([...files, ...selected])
+      // eslint-disable-next-line no-param-reassign -- param is a mutable state container
       event.target.value = ''
     },
     [files, onChange],

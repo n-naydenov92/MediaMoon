@@ -22,7 +22,7 @@ export async function callGraphApi<T>(url: string): Promise<T> {
       const parsed = parseGraphApiError(body)
       throw new Error(parsed ?? `Graph API HTTP ${response.status}: ${response.statusText}`)
     }
-    return response.json() as Promise<T>
+    return await (response.json() as Promise<T>)
   } finally {
     clearTimeout(timer)
   }
@@ -42,7 +42,7 @@ export async function callGraphApiPost<T>(path: string, body: URLSearchParams): 
       const text = await response.text()
       throw new Error(`Graph API HTTP ${response.status}: ${text}`)
     }
-    return response.json() as Promise<T>
+    return await (response.json() as Promise<T>)
   } finally {
     clearTimeout(timer)
   }
@@ -61,7 +61,7 @@ export async function callGraphApiMultipart<T>(path: string, form: FormData): Pr
       const text = await response.text()
       throw new Error(`Graph API HTTP ${response.status}: ${text}`)
     }
-    return response.json() as Promise<T>
+    return await (response.json() as Promise<T>)
   } finally {
     clearTimeout(timer)
   }

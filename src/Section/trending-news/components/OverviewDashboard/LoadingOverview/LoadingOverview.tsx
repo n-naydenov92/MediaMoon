@@ -7,12 +7,10 @@ import Stack from '@mui/material/Stack'
 /**
  * Skeleton placeholder shown while overview data is being loaded for the first time.
  */
-export default memo(function LoadingOverview(): JSX.Element {
-  return (
-    <Stack spacing={4}>
-      <Skeleton variant="rounded" height={100} />
-      <Skeleton variant="rounded" height={160} />
-      <Skeleton variant="rounded" height={160} />
-    </Stack>
-  )
-})
+export default memo((): JSX.Element => (
+  <Stack spacing={4}>
+    <Skeleton variant="rounded" height={100} />
+    <Skeleton variant="rounded" height={160} />
+    <Skeleton variant="rounded" height={160} />
+  </Stack>
+))

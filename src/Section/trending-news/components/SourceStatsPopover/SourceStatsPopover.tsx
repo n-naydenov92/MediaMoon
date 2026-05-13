@@ -20,7 +20,7 @@ import styles from './SourceStatsPopover.module.css'
 
 const POPOVER_SLOT_PROPS = { paper: { className: styles.popoverPaper } } as const
 
-export default memo(function SourceStatsPopover(): JSX.Element | null {
+export default memo((): JSX.Element | null => {
   const { brandId, dataByKey } = useTrendingNewsContext()
   const { selectedMarket } = useBrandShellContext()
   const anchorRef = useRef<HTMLButtonElement>(null)
@@ -73,4 +73,3 @@ export default memo(function SourceStatsPopover(): JSX.Element | null {
     </>
   )
 })
-

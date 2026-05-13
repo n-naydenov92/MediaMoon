@@ -48,6 +48,7 @@ export function useAdsList(query: AdsListQuery): AdsListControls {
   const [state, setState] = useState<AdsListState>({ status: 'loading' })
   const [refreshTick, setRefreshTick] = useState(0)
   const stateRef = useRef<AdsListState>(state)
+  // eslint-disable-next-line react-hooks/refs -- MUI Popover/Menu anchorEl pattern needs ref.current after first render
   stateRef.current = state
 
   const queryKey = buildQueryKey(query)
@@ -105,11 +106,11 @@ export function useAdsList(query: AdsListQuery): AdsListControls {
   }, [])
 
   const loadMore = useCallback((): void => {
-    const current = stateRef.current
+    const { current } = stateRef
     if (current.status !== 'success' || current.loadingMore || current.data.nextOffset === null) {
       return
     }
-    const nextOffset = current.data.nextOffset
+    const { nextOffset } = current.data
     setState({ ...current, loadingMore: true })
 
     const search = new URLSearchParams(baseSearch)

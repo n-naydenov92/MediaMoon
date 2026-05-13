@@ -20,7 +20,7 @@ import SourceStatsPopover from '../SourceStatsPopover/SourceStatsPopover'
 import LoadingOverview from './LoadingOverview/LoadingOverview'
 import styles from './OverviewDashboard.module.css'
 
-export default memo(function OverviewDashboard(): JSX.Element {
+export default memo((): JSX.Element => {
   const { brandId, dataByKey, ensureLoaded } = useTrendingNewsContext()
   const { markets } = useBrandShellContext()
 
@@ -37,7 +37,6 @@ export default memo(function OverviewDashboard(): JSX.Element {
   const allClusters = results.flatMap((r) => r.data.clusters)
   const stats = mergeStats(results.map((r) => r.data.stats))
   const actions = <SourceStatsPopover />
-
 
   if (allClusters.length === 0) {
     return (

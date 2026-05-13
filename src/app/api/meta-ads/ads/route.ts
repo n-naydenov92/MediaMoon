@@ -193,10 +193,10 @@ function buildMetaSideFilters(rules: readonly FilterRule[]): readonly AdInsights
 function toAdRow(ad: AdWithInsights, accountName: string): AdRow {
   const spend = convertToEur(ad.insights.spend, ad.currency)
   const revenue = convertToEur(ad.insights.revenue, ad.currency)
-  const purchases = ad.insights.purchases
-  const impressions = ad.insights.impressions
-  const clicks = ad.insights.clicks
-  const linkClicks = ad.insights.linkClicks
+  const { purchases } = ad.insights
+  const { impressions } = ad.insights
+  const { clicks } = ad.insights
+  const { linkClicks } = ad.insights
   const lpv = ad.insights.landingPageViews
   const atc = ad.insights.addsToCart
   const ic = ad.insights.checkoutsInitiated
@@ -241,6 +241,7 @@ function matchesRule(row: AdRow, rule: FilterRule): boolean {
   if (typeof value !== 'number' || typeof rule.value !== 'number') {
     return true
   }
+  // eslint-disable-next-line default-case -- exhaustive enum
   switch (rule.operator) {
     case 'gt':
       return value > rule.value

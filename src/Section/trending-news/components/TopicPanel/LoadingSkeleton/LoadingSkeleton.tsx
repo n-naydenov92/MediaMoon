@@ -7,12 +7,10 @@ import Stack from '@mui/material/Stack'
 /**
  * Skeleton placeholder shown while a topic tab's news data is loading.
  */
-export default memo(function LoadingSkeleton(): JSX.Element {
-  return (
-    <Stack spacing={4}>
-      <Skeleton variant="rounded" height={100} />
-      <Skeleton variant="rounded" height={160} />
-      <Skeleton variant="rounded" height={160} />
-    </Stack>
-  )
-})
+export default memo((): JSX.Element => (
+  <Stack spacing={4}>
+    <Skeleton variant="rounded" height={100} />
+    <Skeleton variant="rounded" height={160} />
+    <Skeleton variant="rounded" height={160} />
+  </Stack>
+))

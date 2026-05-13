@@ -11,11 +11,11 @@ interface Props {
   readonly children: ReactNode
 }
 
-export default memo(function BrandShellProvider({
+export default memo(({
   brandId,
   markets,
   children,
-}: Props): JSX.Element {
+}: Props): JSX.Element => {
   const [selectedMarket, setSelectedMarket] = useMarketUrlSync(markets)
 
   const value = useMemo<BrandShellContextValue>(

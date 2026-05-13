@@ -2,6 +2,7 @@
 
 import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
+import Box from '@mui/material/Box'
 import { MAIN_PANEL, findActivePanelPath, findPanelByTrail } from '@/config/sidebarNav'
 import type { UserRole } from '@/types'
 import NavPanelView from './NavPanelView'
@@ -12,7 +13,7 @@ interface Props {
   readonly role: UserRole
 }
 
-export default memo(function SidebarNav({ brandId, role }: Props): JSX.Element {
+function SidebarNav({ brandId, role }: Props): JSX.Element {
   const pathname = usePathname()
   const [drillTrail, setDrillTrail] = useState<readonly string[]>([])
 
@@ -23,6 +24,7 @@ export default memo(function SidebarNav({ brandId, role }: Props): JSX.Element {
 
   useEffect(() => {
     if (routeTrail.length > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sync drill state to route changes
       setDrillTrail(routeTrail)
     }
   }, [routeTrail])
@@ -43,7 +45,7 @@ export default memo(function SidebarNav({ brandId, role }: Props): JSX.Element {
   const isMainPanel = drillTrail.length === 0
 
   return (
-    <div className={styles.root}>
+    <Box className={styles.root}>
       <NavPanelView
         panel={activePanel}
         brandId={brandId}
@@ -53,6 +55,8 @@ export default memo(function SidebarNav({ brandId, role }: Props): JSX.Element {
         onBack={handleBack}
         onDrillInto={handleDrillInto}
       />
-    </div>
+    </Box>
   )
-})
+}
+
+export default memo(SidebarNav)

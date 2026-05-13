@@ -1,6 +1,7 @@
 'use client'
 
 import { memo, useCallback, useEffect, useRef } from 'react'
+import Box from '@mui/material/Box'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import styles from './SidebarResizeHandle.module.css'
 
@@ -37,6 +38,7 @@ function computeResizeStep(
   bounds: ResizeBounds,
 ): ResizeStep {
   const raw = drag.startWidth + (clientX - drag.startX)
+  // eslint-disable-next-line no-param-reassign -- drag is a ref-held mutable state container
   drag.latestWidth = raw
   if (raw < bounds.closeThreshold) {
     return { width: bounds.minWidth, collapsing: true }
@@ -57,7 +59,7 @@ function unlockGlobalCursor(): void {
   document.body.style.userSelect = ''
 }
 
-const SidebarResizeHandle = memo(function SidebarResizeHandle({
+function SidebarResizeHandle({
   currentWidth,
   minWidth,
   maxWidth,
@@ -130,23 +132,24 @@ const SidebarResizeHandle = memo(function SidebarResizeHandle({
 
   return (
     <>
-      <div
+      <Box
         className={styles.dragHandle}
         role="separator"
         aria-orientation="vertical"
         aria-label="Resize sidebar"
         onPointerDown={handlePointerDown}
       />
-      <button
+      <Box
+        component="button"
         type="button"
         className={styles.hideButton}
         onClick={onClose}
         aria-label="Hide sidebar"
       >
         <ChevronLeftIcon fontSize="small" />
-      </button>
+      </Box>
     </>
   )
-})
+}
 
-export default SidebarResizeHandle
+export default memo(SidebarResizeHandle)

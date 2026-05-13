@@ -10,7 +10,7 @@ interface Props {
   readonly children: ReactNode
 }
 
-export default memo(function TrendingNewsProvider({ brandId, children }: Props): JSX.Element {
+export default memo(({ brandId, children }: Props): JSX.Element => {
   const topic = useMemo(() => findBrandTopic(brandId), [brandId])
   if (!topic) {
     throw new Error(`No trending-news topic configured for brand: ${brandId}`)

@@ -1,6 +1,7 @@
 'use client'
 
 import { memo } from 'react'
+import Box from '@mui/material/Box'
 import ArrowBackIcon from '@mui/icons-material/ArrowBackIos'
 import type { NavPanel, UserRole } from '@/types'
 import NavSectionView from './NavSectionView'
@@ -16,7 +17,7 @@ interface Props {
   readonly onDrillInto: (itemId: string) => void
 }
 
-export default memo(function NavPanelView({
+function NavPanelView({
   panel,
   brandId,
   role,
@@ -26,19 +27,20 @@ export default memo(function NavPanelView({
   onDrillInto,
 }: Props): JSX.Element {
   return (
-    <nav className={styles.panel} aria-label={panel.title || 'Navigation'}>
+    <Box component="nav" className={styles.panel} aria-label={panel.title || 'Navigation'}>
       {showBackButton && (
-        <button
+        <Box
+          component="button"
           type="button"
           className={styles.backButton}
           onClick={onBack}
           aria-label={`Back from ${panel.title}`}
         >
           <ArrowBackIcon className={styles.backIcon} fontSize="inherit" />
-          <span className={styles.backTitle}>{panel.title}</span>
-        </button>
+          <Box component="span" className={styles.backTitle}>{panel.title}</Box>
+        </Box>
       )}
-      <div className={styles.sections}>
+      <Box className={styles.sections}>
         {panel.sections.map((section) => (
           <NavSectionView
             key={section.id}
@@ -49,7 +51,9 @@ export default memo(function NavPanelView({
             onDrillInto={onDrillInto}
           />
         ))}
-      </div>
-    </nav>
+      </Box>
+    </Box>
   )
-})
+}
+
+export default memo(NavPanelView)

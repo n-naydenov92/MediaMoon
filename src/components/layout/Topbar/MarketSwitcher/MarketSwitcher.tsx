@@ -1,6 +1,7 @@
 'use client'
 
 import { memo, useCallback, useId, useMemo, useRef, useState } from 'react'
+import Box from '@mui/material/Box'
 import { ALL_MARKETS, type MarketSelection } from '@/lib/markets'
 import { MARKET_LABELS } from '@/lib/marketLabels'
 import { useDismissPopover } from '@/components/layout/hooks/useDismissPopover'
@@ -10,7 +11,7 @@ import MarketSwitcherTrigger from './MarketSwitcherTrigger'
 import MarketMenu from './MarketMenu'
 import styles from './MarketSwitcher.module.css'
 
-const MarketSwitcher = memo(function MarketSwitcher(): JSX.Element {
+function MarketSwitcher(): JSX.Element {
   const { markets, selectedMarket, setSelectedMarket } = useBrandShellContext()
   const { mode } = useThemeMode()
   const [isOpen, setIsOpen] = useState(false)
@@ -43,7 +44,7 @@ const MarketSwitcher = memo(function MarketSwitcher(): JSX.Element {
   useDismissPopover(rootRef, isOpen, dismiss)
 
   return (
-    <div className={styles.root} ref={rootRef} data-theme={mode}>
+    <Box className={styles.root} ref={rootRef} data-theme={mode}>
       <MarketSwitcherTrigger
         label={triggerLabel}
         menuId={menuId}
@@ -59,8 +60,8 @@ const MarketSwitcher = memo(function MarketSwitcher(): JSX.Element {
           ariaLabel={MARKET_LABELS.ALL}
         />
       )}
-    </div>
+    </Box>
   )
-})
+}
 
-export default MarketSwitcher
+export default memo(MarketSwitcher)

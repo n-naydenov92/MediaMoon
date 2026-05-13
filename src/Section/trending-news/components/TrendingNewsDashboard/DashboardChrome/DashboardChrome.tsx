@@ -11,7 +11,7 @@ import TrendingNewsUpdatedBadge from '../../TrendingNewsUpdatedBadge/TrendingNew
 import ActivePanel from '../ActivePanel/ActivePanel'
 import styles from './DashboardChrome.module.css'
 
-export default memo(function DashboardChrome(): JSX.Element {
+export default memo((): JSX.Element => {
   const { selectedMarket } = useBrandShellContext()
 
   const crumbs = useMemo<readonly Crumb[]>(() => {

@@ -22,7 +22,7 @@ function statusFor(code: number): { readonly label: string; readonly tone: 'acti
   return STATUS_LABELS[code] ?? { label: `Status ${code}`, tone: 'warn' }
 }
 
-export default memo(function AdAccountSummary({ account, brandColor }: Props): JSX.Element {
+export default memo(({ account, brandColor }: Props): JSX.Element => {
   const status = statusFor(account.accountStatus)
   return (
     <div

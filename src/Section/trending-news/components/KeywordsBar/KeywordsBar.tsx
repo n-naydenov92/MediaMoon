@@ -1,6 +1,7 @@
 'use client'
 
 import { memo, useCallback, useMemo, useRef, useState } from 'react'
+import Box from '@mui/material/Box'
 import Chip from '@mui/material/Chip'
 import IconButton from '@mui/material/IconButton'
 import Popover from '@mui/material/Popover'
@@ -18,7 +19,7 @@ import styles from './KeywordsBar.module.css'
 
 const POPOVER_SLOT_PROPS = { paper: { className: styles.popoverPaper } } as const
 
-export default memo(function KeywordsPopover(): JSX.Element | null {
+function KeywordsBar(): JSX.Element | null {
   const { topic } = useTrendingNewsContext()
   const { selectedMarket } = useBrandShellContext()
   const anchorRef = useRef<HTMLButtonElement>(null)
@@ -49,6 +50,7 @@ export default memo(function KeywordsPopover(): JSX.Element | null {
       </Tooltip>
       <Popover
         open={open}
+        // eslint-disable-next-line react-hooks/refs -- MUI Popover/Menu anchorEl pattern needs ref.current after first render
         anchorEl={anchorRef.current}
         onClose={handleClose}
         anchorOrigin={POPOVER_ANCHOR}
@@ -59,13 +61,15 @@ export default memo(function KeywordsPopover(): JSX.Element | null {
           <Typography variant="caption" className={styles.title}>
             {LABELS.keywordsPopover.title}
           </Typography>
-          <div className={styles.chips}>
+          <Box className={styles.chips}>
             {terms.map((term) => (
               <Chip key={term} label={term} size="small" variant="outlined" />
             ))}
-          </div>
+          </Box>
         </Stack>
       </Popover>
     </>
   )
-})
+}
+
+export default memo(KeywordsBar)

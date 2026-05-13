@@ -1,6 +1,7 @@
 'use client'
 
 import { memo } from 'react'
+import Box from '@mui/material/Box'
 import CheckIcon from '@mui/icons-material/Check'
 import type { MarketSelection } from '@/lib/markets'
 import { MARKET_LABELS } from '@/lib/marketLabels'
@@ -12,27 +13,24 @@ interface Props {
   readonly onSelect: (value: MarketSelection) => void
 }
 
-const MarketMenuItem = memo(function MarketMenuItem({
-  value,
-  isSelected,
-  onSelect,
-}: Props): JSX.Element {
+function MarketMenuItem({ value, isSelected, onSelect }: Props): JSX.Element {
   const label = MARKET_LABELS[value]
 
   return (
-    <li>
-      <button
+    <Box component="li">
+      <Box
+        component="button"
         type="button"
         role="option"
         aria-selected={isSelected}
         className={styles.option}
         onClick={() => onSelect(value)}
       >
-        <span className={styles.optionLabel}>{label}</span>
+        <Box component="span" className={styles.optionLabel}>{label}</Box>
         {isSelected && <CheckIcon className={styles.optionCheck} fontSize="small" />}
-      </button>
-    </li>
+      </Box>
+    </Box>
   )
-})
+}
 
-export default MarketMenuItem
+export default memo(MarketMenuItem)

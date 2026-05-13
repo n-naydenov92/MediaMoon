@@ -73,6 +73,7 @@ export function useLaunchJobs(brandId: BrandId): UseLaunchJobsResult {
   }, [brandId])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- data fetching / external sync effect
     void refresh()
   }, [refresh])
 

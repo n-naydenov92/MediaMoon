@@ -24,6 +24,7 @@ export function ThemeModeProvider({ children }: ProviderProps): JSX.Element {
   useEffect(() => {
     const stored = window.localStorage.getItem(STORAGE_KEY)
     if (stored === 'dark' || stored === 'light') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- hydrating theme from localStorage
       setMode(stored)
     }
   }, [])

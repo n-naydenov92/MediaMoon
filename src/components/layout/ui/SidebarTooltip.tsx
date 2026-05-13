@@ -14,11 +14,11 @@ interface Props {
  * Shared sidebar tooltip configuration. Renders the child untouched when
  * `enabled === false` so the tooltip never wraps anything visible-by-default.
  */
-const SidebarTooltip = memo(function SidebarTooltip({
+const SidebarTooltip = memo(({
   label,
   enabled,
   children,
-}: Props): ReactElement {
+}: Props): ReactElement => {
   if (!enabled) {
     return children
   }

@@ -1,4 +1,5 @@
 import { memo } from 'react'
+import Box from '@mui/material/Box'
 import styles from './ComingSoonPanel.module.css'
 
 interface Props {
@@ -6,21 +7,20 @@ interface Props {
   readonly brandLabel?: string
 }
 
-export default memo(function ComingSoonPanel({
-  moduleLabel,
-  brandLabel,
-}: Props): JSX.Element {
+function ComingSoonPanel({ moduleLabel, brandLabel }: Props): JSX.Element {
   return (
-    <section className={styles.root}>
-      <div className={styles.card}>
-        <span className={styles.eyebrow}>Coming soon</span>
-        <h1 className={styles.heading}>{moduleLabel}</h1>
-        <p className={styles.body}>
+    <Box component="section" className={styles.root}>
+      <Box className={styles.card}>
+        <Box component="span" className={styles.eyebrow}>Coming soon</Box>
+        <Box component="h1" className={styles.heading}>{moduleLabel}</Box>
+        <Box component="p" className={styles.body}>
           {brandLabel
             ? `The ${moduleLabel} dashboard for ${brandLabel} is being built.`
             : `The ${moduleLabel} dashboard is being built.`}
-        </p>
-      </div>
-    </section>
+        </Box>
+      </Box>
+    </Box>
   )
-})
+}
+
+export default memo(ComingSoonPanel)
