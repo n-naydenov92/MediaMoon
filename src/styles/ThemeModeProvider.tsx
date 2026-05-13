@@ -14,11 +14,11 @@ import {
 const STORAGE_KEY = 'tm.mode'
 const DEFAULT_MODE: ThemeMode = 'light'
 
-interface ProviderProps {
+interface Props {
   readonly children: ReactNode
 }
 
-export function ThemeModeProvider({ children }: ProviderProps): JSX.Element {
+export function ThemeModeProvider({ children }: Props): JSX.Element {
   const [mode, setMode] = useState<ThemeMode>(DEFAULT_MODE)
 
   useEffect(() => {

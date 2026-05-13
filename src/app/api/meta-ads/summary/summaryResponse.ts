@@ -1,8 +1,12 @@
-import { computeKpiDelta, sumKpis, type KpiDelta,
-  AccountSummary,
-  AdLeaderboardEntry,
-  DailyPoint,
-  TopCriteria } from '@/lib/meta/aggregate'
+import {
+  computeKpiDelta,
+  sumKpis,
+  type KpiDelta,
+  type AccountSummary,
+  type AdLeaderboardEntry,
+  type DailyPoint,
+  type TopCriteria,
+} from '@/lib/meta/aggregate'
 
 const CACHE_MAX_AGE_SECONDS = 3600
 const CACHE_STALE_WHILE_REVALIDATE_SECONDS = 600

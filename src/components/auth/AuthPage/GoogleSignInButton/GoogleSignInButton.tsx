@@ -1,21 +1,21 @@
 'use client'
 
-import type { MouseEvent } from 'react'
+import { memo, type MouseEvent } from 'react'
 import Box from '@mui/material/Box'
 import GoogleIcon from '../icons/GoogleIcon'
 import styles from './GoogleSignInButton.module.css'
 
-interface GoogleSignInButtonProps {
+interface Props {
   readonly label: string
   readonly disabled: boolean
   readonly onClick: () => void
 }
 
-export default function GoogleSignInButton({
+export default memo(function GoogleSignInButton({
   label,
   disabled,
   onClick,
-}: GoogleSignInButtonProps): JSX.Element {
+}: Props): JSX.Element {
   const handleClick = (_event: MouseEvent<HTMLButtonElement>): void => {
     onClick()
   }
@@ -32,4 +32,4 @@ export default function GoogleSignInButton({
       <Box component="span" className={styles.label}>{label}</Box>
     </Box>
   )
-}
+})

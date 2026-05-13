@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import Box from '@mui/material/Box'
 import { LABELS } from '@/components/layout/labels'
 import styles from './AuthBrandPanel.module.css'
@@ -26,7 +27,7 @@ const STATUS_LABEL: Record<ModuleStatus, string> = {
   soon: 'SOON',
 }
 
-export default function AuthBrandPanel(): JSX.Element {
+export default memo(function AuthBrandPanel(): JSX.Element {
   return (
     <Box component="aside" className={styles.panel} aria-label="MediaMon">
       <Box className={styles.pattern} aria-hidden="true" />
@@ -54,4 +55,4 @@ export default function AuthBrandPanel(): JSX.Element {
       </Box>
     </Box>
   )
-}
+})

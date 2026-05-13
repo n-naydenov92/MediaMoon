@@ -8,11 +8,11 @@ import AuthThemeToggle from './AuthThemeToggle/AuthThemeToggle'
 import type { AuthMode } from './useGoogleAuth'
 import styles from './AuthPage.module.css'
 
-interface AuthPageProps {
+interface Props {
   readonly mode: AuthMode
 }
 
-export default function AuthPage({ mode }: AuthPageProps): JSX.Element {
+export default function AuthPage({ mode }: Props): JSX.Element {
   const { mode: themeMode } = useThemeMode()
 
   return (

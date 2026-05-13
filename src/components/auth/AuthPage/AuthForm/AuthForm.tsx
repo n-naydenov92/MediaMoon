@@ -1,11 +1,12 @@
 'use client'
 
+import { memo } from 'react'
 import Box from '@mui/material/Box'
 import GoogleSignInButton from '../GoogleSignInButton/GoogleSignInButton'
 import { useGoogleAuth, type AuthMode } from '../useGoogleAuth'
 import styles from './AuthForm.module.css'
 
-interface AuthFormProps {
+interface Props {
   readonly mode: AuthMode
 }
 
@@ -28,7 +29,7 @@ const COPY = {
   },
 } as const
 
-export default function AuthForm({ mode }: AuthFormProps): JSX.Element {
+export default memo(function AuthForm({ mode }: Props): JSX.Element {
   const copy = COPY[mode]
   const { state, trigger } = useGoogleAuth({ mode })
 
@@ -82,4 +83,4 @@ export default function AuthForm({ mode }: AuthFormProps): JSX.Element {
       </Box>
     </Box>
   )
-}
+})
