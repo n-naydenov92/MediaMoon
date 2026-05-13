@@ -6,9 +6,110 @@ These rules are mechanical (ESLint enforces them) AND behavioural (must be follo
 
 - **MUI primitives only.** No raw `<div>` / `<span>` / `<p>` / `<ul>` / `<ol>` / `<li>` / `<h1-h6>` / `<button>` / `<input>` / `<select>` in JSX. Use `Box` / `Typography` / `List` / `ListItem` / `Button` / `IconButton` / `TextField` / `Select` from `@mui/material`.
 - **No `sx` prop, no inline `style={{}}`.** Styling lives exclusively in CSS modules. The only inline-style exception is CSS variables (e.g. `style={{ '--dot-color': value }}`).
-- **No `!important` in CSS.** Use higher specificity, swap component (Stack→Box), or theme overrides.
+- **No `!important` in CSS.** Use higher specificity (double class `.foo.foo`, chained `:global()` selectors, parent context `.parent .child`), swap component (Stack→Box), or theme overrides. The only documented exception is the `prefers-reduced-motion` a11y block in `src/styles/globals.css` — that's the canonical WCAG pattern where lower-specificity `*` selectors must override every component's animation/transition.
 - **Apply `/skills/*` on every code change, no matter how small.** A 1-line edit still triggers the full skills checklist (frontend-design / react-best-practices / clean-code / senior-architect). There is no "small" change. Skipping skills = CRITICAL violation.
 - Project ESLint config (`eslint.config.mjs`) extends `airbnb` + `airbnb-typescript` + `next/*` and adds `no-restricted-syntax` to fail the build on the bans above.
+
+## Folder & file structure (non-negotiable)
+
+The folder tree mirrors the import graph. Reading the tree tells you which components depend on which.
+
+### Casing
+
+| Casing | Meaning |
+|---|---|
+| **PascalCase folder** | The folder IS a component. Must contain `<FolderName>.tsx`. |
+| **lowercase folder** | Namespace / grouping. No edge-of-folder `.tsx`. Examples: `launch/`, `overview/`, `shared/`, `hooks/`, `components/`. |
+| **camelCase file** | Hook (`useFoo.ts`), helper (`helpers.ts`), utility, type module. |
+| **kebab-case folder** | Top-level module namespace (`src/Section/trending-news/`, `src/app/api/meta-ads/`). Allowed only at module-root level. |
+
+### Per-component folder rule
+
+Every component lives in its own folder named after itself:
+
+```
+NewsBlock/
+  NewsBlock.tsx                ← the component (matches folder name)
+  NewsBlock.module.css         ← optional CSS module (matches .tsx)
+  helpers.ts                   ← optional pure helpers (always `helpers.ts`, never `<Component>.helpers.ts`)
+  NewsBlockHeader/             ← optional child component (its own folder)
+    NewsBlockHeader.tsx
+    NewsBlockHeader.module.css
+```
+
+**Exceptions** — Next.js routing conventions that must match Next.js names: `page.tsx`, `layout.tsx`, `route.ts`, `not-found.tsx`, `loading.tsx`, `error.tsx`, `template.tsx`, `default.tsx`. These live at the routing folder level, not inside per-component folders.
+
+### Nesting rule
+
+A component used by **exactly one** other component lives **inside that parent's folder**. Components used by 2+ siblings stay at the area-root level.
+
+**Max 2 levels of component-folder nesting** below an area root. If a chain would create a depth-3 grand-child, flatten the deepest child to a sibling at depth 2.
+
+```
+launch/                          ← area root (namespace)
+  LaunchAdsTab/                  ← depth 1: tab orchestrator
+    LaunchAdsTab.tsx
+    FilePicker/                  ← depth 2: child of LaunchAdsTab
+      FilePicker.tsx
+      FilePicker.module.css
+    JobsPanel/                   ← depth 2
+      JobsPanel.tsx
+    JobRow/                      ← depth 2 (flat — would be depth 3 inside JobsPanel)
+      JobRow.tsx
+```
+
+### One component per `.tsx` file
+
+Never put two top-level React components in the same file. Each component → own file → own folder.
+
+### Helpers
+
+Module-scope **pure** (non-JSX) functions that aren't the component itself live in a sibling `helpers.ts`:
+
+- File name is always `helpers.ts` (not `<Component>.helpers.ts`).
+- Helper depends on a type/constant only used by it? → move the type/constant into `helpers.ts` too.
+- Helper returns JSX (e.g., a Recharts tooltip render-prop factory)? → keep in `.tsx`. JSX-returning module-scope functions are mini-components.
+- Side-effect utilities (e.g., DOM manipulation helpers like `lockGlobalCursor`) also go in `helpers.ts` — they're non-component module-scope functions.
+
+### Hooks
+
+- File name: camelCase, starts with `use` (`useTrendingFetcher.ts`).
+- Placement: either alongside its sole consumer (`MyComponent/useMyComponentData.ts`) or in a `hooks/` namespace folder when shared across multiple consumers (`src/Section/trending-news/hooks/useEnsureMarketsLoaded.ts`).
+
+### No `index.ts` barrels
+
+Direct imports only. `import X from './Folder/X'` — never `import X from './Folder'`. The only acceptable barrels are in `src/lib/`, `src/types/`, `src/config/` (utility/data namespaces, not component trees).
+
+### Component export pattern
+
+```tsx
+import { memo } from 'react'
+
+interface Props {
+  readonly someProp: string
+}
+
+export default memo(function ComponentName({ someProp }: Props): JSX.Element {
+  return (/* ... */)
+})
+```
+
+Acceptable variant for stateful root-of-page orchestrators that don't benefit from memoization:
+
+```tsx
+export default function PageOrchestrator(): JSX.Element { ... }
+```
+
+**Banned forms:**
+
+- `export default memo((props) => ...)` — anonymous arrow inside memo.
+- `const X = () => ...; export default X` — separate const + default.
+- `React.FC<Props>` / `React.FunctionComponent<Props>` — use explicit `(props: Props): JSX.Element`.
+
+### Props interfaces
+
+- Always `readonly` on every prop.
+- Local interface: `interface Props`. Exported interface (other files import it): `<ComponentName>Props`.
 
 ## What Is This?
 
