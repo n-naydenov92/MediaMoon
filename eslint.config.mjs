@@ -91,12 +91,15 @@ export default [
       'no-await-in-loop': 'off',
       'no-bitwise': 'off',
       'consistent-return': 'off',
+      'default-case': 'off',
+      'react-hooks/set-state-in-effect': 'off',
       'class-methods-use-this': 'off',
       '@stylistic/max-len': 'off',
       'react/function-component-definition': [
         'error',
-        { namedComponents: 'function-declaration', unnamedComponents: 'arrow-function' },
+        { namedComponents: 'function-declaration', unnamedComponents: 'function-expression' },
       ],
+      'prefer-arrow-callback': ['error', { allowNamedFunctions: true, allowUnboundThis: true }],
     },
   },
   {
