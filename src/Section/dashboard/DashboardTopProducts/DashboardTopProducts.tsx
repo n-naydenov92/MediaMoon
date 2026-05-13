@@ -16,7 +16,7 @@ import Tooltip from '@mui/material/Tooltip'
 import { formatEur } from '@/lib/meta/fx'
 import type { DashboardTopProduct } from '@/types/dashboard'
 import { decodeProductTitle } from '../shared/productTitle'
-import SkeletonRows from '../shared/SkeletonRows'
+import SkeletonRows from '../shared/SkeletonRows/SkeletonRows'
 import styles from './DashboardTopProducts.module.css'
 
 interface Props {

@@ -21,8 +21,8 @@ import {
 import { formatEur, formatPercentage } from '@/lib/meta/fx'
 import { useThemeMode } from '@/styles/useThemeMode'
 import type { SpendBreakdownPoint, SpendChannel } from '@/types/dashboard'
-import RechartsTooltipShell from '../shared/RechartsTooltipShell'
-import SpendBreakdownLegendRow from './SpendBreakdownLegendRow'
+import RechartsTooltipShell from '../shared/RechartsTooltipShell/RechartsTooltipShell'
+import SpendBreakdownLegendRow from './SpendBreakdownLegendRow/SpendBreakdownLegendRow'
 import styles from './DashboardSpendBreakdown.module.css'
 
 interface Props {

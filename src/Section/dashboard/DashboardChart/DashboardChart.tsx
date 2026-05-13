@@ -27,8 +27,8 @@ import {
   THIRD_METRICS,
   type ThirdMetric,
 } from './DashboardChart.helpers'
-import { renderChartTooltip } from './DashboardChartTooltip'
-import DashboardChartLegend from '../DashboardChartLegend'
+import { renderChartTooltip } from './DashboardChartTooltip/DashboardChartTooltip'
+import DashboardChartLegend from '../DashboardChartLegend/DashboardChartLegend'
 import styles from './DashboardChart.module.css'
 
 interface Props {

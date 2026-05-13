@@ -1,6 +1,6 @@
 import type { BrandId } from '@/config/brands'
 import type { BrandConfig } from '@/types'
-import DashboardOverview from '../DashboardOverview'
+import DashboardOverview from '../DashboardOverview/DashboardOverview'
 
 interface Props {
   readonly brand: BrandConfig & { readonly id: BrandId }

@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { findBrandById } from '@/config/brands'
-import BrandDashboard from '@/Section/dashboard/BrandDashboard'
+import BrandDashboard from '@/Section/dashboard/BrandDashboard/BrandDashboard'
 
 interface Props {
   readonly params: Promise<{ readonly brandId: string }>

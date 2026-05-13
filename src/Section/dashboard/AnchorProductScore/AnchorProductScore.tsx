@@ -10,7 +10,7 @@ import Typography from '@mui/material/Typography'
 import { formatEur, formatPercentage } from '@/lib/meta/fx'
 import type { DashboardTopProduct } from '@/types/dashboard'
 import { decodeProductTitle } from '../shared/productTitle'
-import SkeletonRows from '../shared/SkeletonRows'
+import SkeletonRows from '../shared/SkeletonRows/SkeletonRows'
 import styles from './AnchorProductScore.module.css'
 
 interface Props {
