@@ -16,7 +16,7 @@ import {
   type DatePreset,
   type DateRangeSelection,
 } from '@/lib/meta/dateRange'
-import CalendarPicker from '../CalendarPicker/CalendarPicker'
+import CalendarPicker from './CalendarPicker/CalendarPicker'
 import styles from './DateRangeDropdown.module.css'
 
 interface Props {

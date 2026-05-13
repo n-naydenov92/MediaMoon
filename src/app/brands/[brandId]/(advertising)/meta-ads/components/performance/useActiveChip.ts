@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 import type { TopCriteria } from '@/lib/meta/aggregate'
 import { stringifyFilterRules, type FilterRule } from './filterRules'
 import { sliceToFilters, stringifySort, type SortSpec } from './sliceToFilters'
-import type { ChipKey } from './FilterChips/FilterChips'
+import type { ChipKey } from './PerformanceTab/FilterChips/FilterChips'
 
 const ALL_CHIPS: readonly ChipKey[] = [
   'all',
