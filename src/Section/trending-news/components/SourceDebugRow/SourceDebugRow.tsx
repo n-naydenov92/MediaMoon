@@ -7,6 +7,7 @@ import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import type { SourceCounts, SourceErrors } from '@/types'
 import { LABELS } from '@/Section/trending-news/labels'
+import { resolveState } from './helpers'
 import styles from './SourceDebugRow.module.css'
 
 interface Props {
@@ -14,21 +15,12 @@ interface Props {
   readonly sourceErrors: SourceErrors
 }
 
-type SourceState = 'error' | 'ok' | 'empty'
-
 const ERROR_TRUNCATE_LENGTH = 60
 
 const SOURCES: readonly { key: keyof SourceCounts; label: string }[] = [
   { key: 'googleNewsRss', label: LABELS.sourceDebug.googleNewsRss },
   { key: 'searchApi', label: LABELS.sourceDebug.searchApi },
 ]
-
-function resolveState(hasError: boolean, count: number): SourceState {
-  if (hasError) {
-    return 'error'
-  }
-  return count > 0 ? 'ok' : 'empty'
-}
 
 export default memo(function SourceDebugRow({ sourceCounts, sourceErrors }: Props): JSX.Element {
   if (!sourceCounts) {
