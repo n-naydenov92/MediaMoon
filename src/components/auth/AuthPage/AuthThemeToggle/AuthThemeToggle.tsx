@@ -3,7 +3,8 @@
 import Box from '@mui/material/Box'
 import { useThemeMode } from '@/styles/useThemeMode'
 import { LABELS } from '@/components/layout/labels'
-import { MoonIcon, SunIcon } from '../icons'
+import MoonIcon from '../icons/MoonIcon'
+import SunIcon from '../icons/SunIcon'
 import styles from './AuthThemeToggle.module.css'
 
 export default function AuthThemeToggle(): JSX.Element {

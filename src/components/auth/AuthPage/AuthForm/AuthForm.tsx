@@ -1,7 +1,7 @@
 'use client'
 
 import Box from '@mui/material/Box'
-import GoogleSignInButton from '../GoogleSignInButton'
+import GoogleSignInButton from '../GoogleSignInButton/GoogleSignInButton'
 import { useGoogleAuth, type AuthMode } from '../useGoogleAuth'
 import styles from './AuthForm.module.css'
 

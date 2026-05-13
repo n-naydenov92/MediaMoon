@@ -2,7 +2,7 @@
 
 import type { MouseEvent } from 'react'
 import Box from '@mui/material/Box'
-import { GoogleIcon } from '../icons'
+import GoogleIcon from '../icons/GoogleIcon'
 import styles from './GoogleSignInButton.module.css'
 
 interface GoogleSignInButtonProps {

@@ -2,9 +2,9 @@
 
 import Box from '@mui/material/Box'
 import { useThemeMode } from '@/styles/useThemeMode'
-import AuthBrandPanel from './AuthBrandPanel'
-import AuthForm from './AuthForm'
-import AuthThemeToggle from './AuthThemeToggle'
+import AuthBrandPanel from './AuthBrandPanel/AuthBrandPanel'
+import AuthForm from './AuthForm/AuthForm'
+import AuthThemeToggle from './AuthThemeToggle/AuthThemeToggle'
 import type { AuthMode } from './useGoogleAuth'
 import styles from './AuthPage.module.css'
 

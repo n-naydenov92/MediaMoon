@@ -1,7 +1,7 @@
 'use client'
 
 import { memo, useCallback } from 'react'
-import { UpdatedBadge } from '@/components/layout/PageHeader'
+import UpdatedBadge from '@/components/layout/PageHeader/UpdatedBadge/UpdatedBadge'
 import { useBrandShellContext } from '@/contexts/brandShell/useBrandShellContext'
 import { ALL_MARKETS } from '@/lib/markets'
 import { cacheKey } from '@/Section/trending-news/context/trendingNewsCtx'

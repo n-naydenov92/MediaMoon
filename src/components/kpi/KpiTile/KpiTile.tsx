@@ -3,7 +3,7 @@
 import Box from '@mui/material/Box'
 import Tooltip from '@mui/material/Tooltip'
 import { formatPercentage } from '@/lib/meta/fx'
-import KpiSparkline, { type SparkPoint } from '../KpiSparkline'
+import KpiSparkline, { type SparkPoint } from '../KpiSparkline/KpiSparkline'
 import { arrowFor, computeTrend } from '../kpiTrend'
 import styles from './KpiTile.module.css'
 

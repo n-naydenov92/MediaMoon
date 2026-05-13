@@ -1,6 +1,6 @@
 import { memo } from 'react'
 import GoogleIcon from '@mui/icons-material/Google'
-import { KpiTile } from '@/components/kpi'
+import KpiTile from '@/components/kpi/KpiTile/KpiTile'
 import type { AdChannelStats } from '@/types/dashboard'
 import ChannelSection from '../../ChannelSection/ChannelSection'
 import { formatInteger, formatMoney, formatRoas } from '../../shared/dashboardFormatters'

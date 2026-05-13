@@ -1,6 +1,7 @@
 import Box from '@mui/material/Box'
 import { relativeDelta, type DailyPoint, type KpiDelta } from '@/lib/meta/aggregate'
-import { KpiTile, type SparkPoint } from '@/components/kpi'
+import KpiTile from '@/components/kpi/KpiTile/KpiTile'
+import type { SparkPoint } from '@/components/kpi/KpiSparkline/KpiSparkline'
 import { KPI_TILE_SPECS } from '../kpiTileSpecs'
 import styles from './KpiGrid.module.css'
 

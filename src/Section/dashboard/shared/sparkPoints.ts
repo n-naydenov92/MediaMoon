@@ -1,4 +1,4 @@
-import type { SparkPoint } from '@/components/kpi'
+import type { SparkPoint } from '@/components/kpi/KpiSparkline/KpiSparkline'
 
 export function toSparkPoints<T extends { readonly date: string }>(
   byDay: readonly T[],

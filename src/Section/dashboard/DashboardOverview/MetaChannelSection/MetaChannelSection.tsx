@@ -1,6 +1,7 @@
 import { memo } from 'react'
 import FacebookIcon from '@mui/icons-material/Facebook'
-import { KpiTile, type SparkPoint } from '@/components/kpi'
+import KpiTile from '@/components/kpi/KpiTile/KpiTile'
+import type { SparkPoint } from '@/components/kpi/KpiSparkline/KpiSparkline'
 import { formatEur } from '@/lib/meta/fx'
 import type { AdChannelStats, MetaDailyPoint } from '@/types/dashboard'
 import ChannelSection from '../../ChannelSection/ChannelSection'
