@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
 import styles from './Notice.module.css'
 
 export type NoticeVariant = 'info' | 'error'
@@ -11,9 +13,9 @@ interface Props {
 
 export default function Notice({ variant, title, children }: Props): JSX.Element {
   return (
-    <div className={styles.notice} data-variant={variant}>
-      <strong>{title}</strong>
-      <p>{children}</p>
-    </div>
+    <Box className={styles.notice} data-variant={variant}>
+      <Typography component="strong" variant="inherit" className={styles.title}>{title}</Typography>
+      <Typography variant="body2" className={styles.body}>{children}</Typography>
+    </Box>
   )
 }

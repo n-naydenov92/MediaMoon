@@ -1,5 +1,7 @@
 'use client'
 
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
 import type { TooltipContentProps } from 'recharts'
 import { formatTooltipValue } from './helpers'
 import styles from '../SpendChart/SpendChart.module.css'
@@ -13,8 +15,8 @@ export default function SpendChartTooltip({
     return null
   }
   return (
-    <div className={styles.tooltip}>
-      <div className={styles.tooltipDate}>{String(label ?? '')}</div>
+    <Box className={styles.tooltip}>
+      <Box className={styles.tooltipDate}>{String(label ?? '')}</Box>
       {payload.map((entry) => {
         const key =
           typeof entry.dataKey === 'string' || typeof entry.dataKey === 'number'
@@ -22,13 +24,13 @@ export default function SpendChartTooltip({
             : String(entry.name ?? '')
         const numericValue = typeof entry.value === 'number' ? entry.value : 0
         return (
-          <div key={key} className={styles.tooltipRow}>
-            <span className={styles.tooltipDot} data-key={key} />
-            <span className={styles.tooltipLabel}>{entry.name}</span>
-            <span className={styles.tooltipValue}>{formatTooltipValue(key, numericValue)}</span>
-          </div>
+          <Box key={key} className={styles.tooltipRow}>
+            <Box component="span" className={styles.tooltipDot} data-key={key} />
+            <Typography component="span" variant="inherit" className={styles.tooltipLabel}>{entry.name}</Typography>
+            <Typography component="span" variant="inherit" className={styles.tooltipValue}>{formatTooltipValue(key, numericValue)}</Typography>
+          </Box>
         )
       })}
-    </div>
+    </Box>
   )
 }

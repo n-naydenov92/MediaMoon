@@ -1,5 +1,8 @@
 'use client'
 
+import Box from '@mui/material/Box'
+import List from '@mui/material/List'
+import Typography from '@mui/material/Typography'
 import Link from 'next/link'
 import type { AdLeaderboardEntry } from '@/lib/meta/aggregate'
 import LeaderboardRow from '../LeaderboardRow/LeaderboardRow'
@@ -23,25 +26,25 @@ export default function LeaderboardCard({
   seeMoreHref,
 }: Props): JSX.Element {
   return (
-    <div className={styles.card}>
-      <header className={styles.header}>
-        <h3 className={styles.title}>{title}</h3>
-        {subtitle && <span className={styles.subtitle}>{subtitle}</span>}
-      </header>
+    <Box className={styles.card}>
+      <Box component="header" className={styles.header}>
+        <Typography component="h3" variant="h3" className={styles.title}>{title}</Typography>
+        {subtitle && <Typography component="span" variant="inherit" className={styles.subtitle}>{subtitle}</Typography>}
+      </Box>
       {entries.length === 0 ? (
-        <p className={styles.empty}>{emptyLabel}</p>
+        <Typography variant="body2" className={styles.empty}>{emptyLabel}</Typography>
       ) : (
-        <ul className={styles.list}>
+        <List disablePadding className={styles.list}>
           {entries.map((entry) => (
             <LeaderboardRow key={entry.adId} entry={entry} />
           ))}
-        </ul>
+        </List>
       )}
       {seeMoreHref && (
         <Link href={seeMoreHref} className={styles.seeMore}>
           See more →
         </Link>
       )}
-    </div>
+    </Box>
   )
 }

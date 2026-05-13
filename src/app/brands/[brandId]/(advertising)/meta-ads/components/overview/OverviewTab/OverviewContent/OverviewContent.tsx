@@ -1,3 +1,4 @@
+import Box from '@mui/material/Box'
 import type { BrandId } from '@/config/brands'
 import type { Market } from '@/types'
 import type { DateRangeSelection } from '@/lib/meta/dateRange'
@@ -34,14 +35,14 @@ export default function OverviewContent({
   return (
     <>
       <Section title="Performance Overview" bare>
-        <div className={styles.midGrid}>
+        <Box className={styles.midGrid}>
           <Section title="Daily Trend" className={styles.spendSection}>
             <SpendChart data={summary.byDay} />
           </Section>
           <Section title="Accounts Breakdown" className={styles.accountSection}>
             <AccountBreakdown accounts={summary.byAccount} />
           </Section>
-        </div>
+        </Box>
       </Section>
       <Section title="Ads Highlights" bare>
         <Leaderboards

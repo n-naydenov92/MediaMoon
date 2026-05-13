@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
 import styles from './FormField.module.css'
 
 interface Props {
@@ -9,12 +11,12 @@ interface Props {
 
 export default function FormField({ label, hint, children }: Props): JSX.Element {
   return (
-    <label className={styles.field}>
-      <span className={styles.labelRow}>
-        <span className={styles.label}>{label}</span>
-        {hint && <span className={styles.hint}>{hint}</span>}
-      </span>
+    <Box component="label" className={styles.field}>
+      <Box component="span" className={styles.labelRow}>
+        <Typography component="span" variant="inherit" className={styles.label}>{label}</Typography>
+        {hint && <Typography component="span" variant="inherit" className={styles.hint}>{hint}</Typography>}
+      </Box>
       {children}
-    </label>
+    </Box>
   )
 }

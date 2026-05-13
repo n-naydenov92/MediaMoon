@@ -1,5 +1,6 @@
 'use client'
 
+import Box from '@mui/material/Box'
 import Tooltip from '@mui/material/Tooltip'
 import { adStatusTooltip, classifyAdStatus } from '../adStatusLabels'
 import styles from '../LeaderboardCard/LeaderboardCard.module.css'
@@ -13,7 +14,7 @@ export default function StatusDot({ status }: Props): JSX.Element {
   const label = adStatusTooltip(status)
   return (
     <Tooltip title={label} arrow disableInteractive>
-      <span className={styles.statusDot} data-status={kind} aria-label={label} />
+      <Box component="span" className={styles.statusDot} data-status={kind} aria-label={label} />
     </Tooltip>
   )
 }

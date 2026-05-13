@@ -1,6 +1,7 @@
 'use client'
 
 import { memo } from 'react'
+import Box from '@mui/material/Box'
 import Dialog from '@mui/material/Dialog'
 import IconButton from '@mui/material/IconButton'
 import Popper from '@mui/material/Popper'
@@ -50,7 +51,7 @@ const CreativePreviewCard = memo(function CreativePreviewCard({
         onClose={onClose}
         PaperProps={{ className: styles.sheet, 'data-theme': mode }}
       >
-        <div className={styles.sheetHeader}>
+        <Box className={styles.sheetHeader}>
           <IconButton
             size="small"
             aria-label="Close preview"
@@ -59,10 +60,10 @@ const CreativePreviewCard = memo(function CreativePreviewCard({
           >
             <CloseIcon fontSize="small" />
           </IconButton>
-        </div>
-        <div className={styles.sheetContent} role="dialog">
+        </Box>
+        <Box className={styles.sheetContent} role="dialog">
           {renderState(state)}
-        </div>
+        </Box>
       </Dialog>
     )
   }
@@ -79,7 +80,7 @@ const CreativePreviewCard = memo(function CreativePreviewCard({
       modifiers={POPPER_MODIFIERS}
       style={{ zIndex: POPPER_Z_INDEX }}
     >
-      <div
+      <Box
         className={styles.card}
         data-theme={mode}
         onPointerEnter={onPointerEnter}
@@ -87,7 +88,7 @@ const CreativePreviewCard = memo(function CreativePreviewCard({
         role="dialog"
       >
         {renderState(state)}
-      </div>
+      </Box>
     </Popper>
   )
 })

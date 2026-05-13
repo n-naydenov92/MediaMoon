@@ -1,6 +1,8 @@
 'use client'
 
 import { useMemo } from 'react'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
 import type { Market } from '@/types'
 import { findBrandById, type BrandId } from '@/config/brands'
 import { getBusinessManagersForBrand } from '@/config/metaBusinessManagers'
@@ -48,7 +50,7 @@ export default function MetaAdsView({ brandId }: Props): JSX.Element | null {
   }
 
   return (
-    <section className={styles.root}>
+    <Box component="section" className={styles.root}>
       {state.status === 'loading' && (
         <Notice variant="info" title="Loading…">
           Fetching ad accounts and campaigns from Meta.
@@ -59,7 +61,7 @@ export default function MetaAdsView({ brandId }: Props): JSX.Element | null {
         <Notice variant="info" title="Pending Meta token approval">
           Connection to {brand.label}&apos;s Business Manager
           {expectedEnvVars.length > 1 ? 's' : ''} is not yet configured. Add{' '}
-          <InlineList items={expectedEnvVars} separator=" or " renderItem={(v) => <code>{v}</code>} />{' '}
+          <InlineList items={expectedEnvVars} separator=" or " renderItem={(v) => <Typography component="code" variant="inherit">{v}</Typography>} />{' '}
           to environment variables once the System User token is generated.
         </Notice>
       )}
@@ -88,13 +90,13 @@ export default function MetaAdsView({ brandId }: Props): JSX.Element | null {
                 .map((m) => MARKET_LABELS[m])
                 .join(', ')}`}
             >
-              Add the <code>act_*</code> ID to <code>BRAND_MARKET_AD_ACCOUNTS</code> in{' '}
-              <code>src/config/adAccounts.ts</code>.
+              Add the <Typography component="code" variant="inherit">act_*</Typography> ID to <Typography component="code" variant="inherit">BRAND_MARKET_AD_ACCOUNTS</Typography> in{' '}
+              <Typography component="code" variant="inherit">src/config/adAccounts.ts</Typography>.
             </Notice>
           )}
         </>
       )}
-    </section>
+    </Box>
   )
 }
 
@@ -106,13 +108,13 @@ interface MarketSectionProps {
 
 function MarketSection({ block, brandColor, showHeading }: MarketSectionProps): JSX.Element {
   return (
-    <div className={styles.marketBlock}>
-      {showHeading && <h2 className={styles.marketHeading}>{MARKET_LABELS[block.market]}</h2>}
+    <Box className={styles.marketBlock}>
+      {showHeading && <Typography component="h2" variant="h2" className={styles.marketHeading}>{MARKET_LABELS[block.market]}</Typography>}
       {block.accounts.map(({ account, campaigns }) => (
-        <div key={account.id} className={styles.marketBlock}>
+        <Box key={account.id} className={styles.marketBlock}>
           <AdAccountSummary account={account} brandColor={brandColor} />
           <CampaignsList campaigns={campaigns} />
-        </div>
+        </Box>
       ))}
       {block.missingAccountIds.length > 0 && (
         <Notice
@@ -122,12 +124,12 @@ function MarketSection({ block, brandColor, showHeading }: MarketSectionProps): 
           <InlineList
             items={block.missingAccountIds}
             separator=", "
-            renderItem={(id) => <code>{id}</code>}
+            renderItem={(id) => <Typography component="code" variant="inherit">{id}</Typography>}
           />{' '}
           — verify the System User has access in Business Settings.
         </Notice>
       )}
-    </div>
+    </Box>
   )
 }
 
@@ -141,10 +143,10 @@ function InlineList<T extends string>({ items, separator, renderItem }: InlineLi
   return (
     <>
       {items.map((item, index) => (
-        <span key={item}>
+        <Box component="span" key={item}>
           {index > 0 ? separator : ''}
           {renderItem(item)}
-        </span>
+        </Box>
       ))}
     </>
   )

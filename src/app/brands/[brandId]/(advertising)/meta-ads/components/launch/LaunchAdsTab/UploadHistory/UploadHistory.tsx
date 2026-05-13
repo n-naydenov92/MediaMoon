@@ -1,6 +1,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Box from '@mui/material/Box'
+import List from '@mui/material/List'
+import ListItem from '@mui/material/ListItem'
+import Typography from '@mui/material/Typography'
 import type { JobFile } from '@prisma/client'
 import type { BrandId } from '@/config/brands'
 import styles from './UploadHistory.module.css'
@@ -45,33 +49,32 @@ export default function UploadHistory({ brandId }: Props): JSX.Element {
 
   if (loading) {
     return (
-      <ul className={styles.grid}>
+      <List disablePadding className={styles.grid}>
         {SKELETON_KEYS.map((key) => (
-          <li key={key} className={styles.skeleton} />
+          <ListItem key={key} disablePadding disableGutters className={styles.skeleton} />
         ))}
-      </ul>
+      </List>
     )
   }
   if (uploads.length === 0) {
-    return <p className={styles.empty}>No completed uploads yet.</p>
+    return <Typography variant="body2" className={styles.empty}>No completed uploads yet.</Typography>
   }
 
   return (
-    <ul className={styles.grid}>
+    <List disablePadding className={styles.grid}>
       {uploads.map((file) => (
-        <li key={file.id} className={styles.tile}>
+        <ListItem key={file.id} disablePadding disableGutters className={styles.tile}>
           {/* eslint-disable-next-line no-nested-ternary -- nested ternary clearer than refactor here */}
           {file.blobUrl && file.mimeType.startsWith('image/') ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img src={file.blobUrl} alt={file.originalName} className={styles.preview} />
+            <Box component="img" src={file.blobUrl} alt={file.originalName} className={styles.preview} />
           ) : file.blobUrl && file.mimeType.startsWith('video/') ? (
-            <video src={file.blobUrl} className={styles.preview} muted playsInline />
+            <Box component="video" src={file.blobUrl} className={styles.preview} muted playsInline />
           ) : (
-            <div className={styles.placeholder}>{file.mimeType.startsWith('video/') ? '▶' : '▣'}</div>
+            <Box className={styles.placeholder}>{file.mimeType.startsWith('video/') ? '▶' : '▣'}</Box>
           )}
-          <span className={styles.name}>{file.originalName}</span>
-        </li>
+          <Typography component="span" variant="inherit" className={styles.name}>{file.originalName}</Typography>
+        </ListItem>
       ))}
-    </ul>
+    </List>
   )
 }

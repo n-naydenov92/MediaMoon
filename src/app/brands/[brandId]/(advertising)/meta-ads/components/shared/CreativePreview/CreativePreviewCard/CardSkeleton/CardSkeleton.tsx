@@ -1,18 +1,19 @@
+import Box from '@mui/material/Box'
 import styles from '../CreativePreviewCard.module.css'
 
 export default function CardSkeleton(): JSX.Element {
   return (
     <>
-      <div className={styles.headerRow}>
-        <div className={`${styles.avatar} ${styles.skeletonBlock}`} />
-        <div className={styles.headerText}>
-          <div className={`${styles.skeletonLine} ${styles.skeletonLineWide}`} />
-          <div className={`${styles.skeletonLine} ${styles.skeletonLineNarrow}`} />
-        </div>
-      </div>
-      <div className={`${styles.skeletonBody} ${styles.skeletonBlock}`} />
-      <div className={`${styles.skeletonMedia} ${styles.skeletonBlock}`} />
-      <div className={`${styles.skeletonLine} ${styles.skeletonLineWide}`} />
+      <Box className={styles.headerRow}>
+        <Box className={`${styles.avatar} ${styles.skeletonBlock}`} />
+        <Box className={styles.headerText}>
+          <Box className={`${styles.skeletonLine} ${styles.skeletonLineWide}`} />
+          <Box className={`${styles.skeletonLine} ${styles.skeletonLineNarrow}`} />
+        </Box>
+      </Box>
+      <Box className={`${styles.skeletonBody} ${styles.skeletonBlock}`} />
+      <Box className={`${styles.skeletonMedia} ${styles.skeletonBlock}`} />
+      <Box className={`${styles.skeletonLine} ${styles.skeletonLineWide}`} />
     </>
   )
 }

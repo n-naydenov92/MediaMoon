@@ -1,3 +1,7 @@
+import Box from '@mui/material/Box'
+import List from '@mui/material/List'
+import ListItem from '@mui/material/ListItem'
+import Typography from '@mui/material/Typography'
 import type { AccountSummary } from '@/lib/meta/aggregate'
 import { formatEur, formatRoas } from '@/lib/meta/fx'
 import { classifyRoas } from '@/lib/meta/roasClassification'
@@ -10,33 +14,33 @@ interface Props {
 
 export default function AccountBreakdown({ accounts }: Props): JSX.Element {
   if (accounts.length === 0) {
-    return <div className={styles.empty}>No accounts configured for this view.</div>
+    return <Box className={styles.empty}>No accounts configured for this view.</Box>
   }
   const maxSpend = Math.max(...accounts.map((a) => a.spendEur), 1)
   return (
-    <ul className={styles.list}>
+    <List disablePadding className={styles.list}>
       {accounts.map((account) => {
         const fillPct = `${(account.spendEur / maxSpend) * 100}%`
         const adsLabel = account.activeAdsCount === 1 ? 'active ad' : 'active ads'
         return (
-          <li key={account.accountId} className={styles.row}>
-            <div className={styles.head}>
-              <span className={styles.name}>{account.accountName}</span>
-              <span className={styles.spend}>{formatEur(account.spendEur)}</span>
-            </div>
-            <div className={styles.bar} style={cssVars({ '--fill-pct': fillPct })}>
-              <span className={styles.barFill} />
-            </div>
-            <div className={styles.meta}>
-              <span className={styles.roas} data-tier={classifyRoas(account.roas)}>
+          <ListItem key={account.accountId} disablePadding disableGutters className={styles.row}>
+            <Box className={styles.head}>
+              <Typography component="span" variant="inherit" className={styles.name}>{account.accountName}</Typography>
+              <Typography component="span" variant="inherit" className={styles.spend}>{formatEur(account.spendEur)}</Typography>
+            </Box>
+            <Box className={styles.bar} style={cssVars({ '--fill-pct': fillPct })}>
+              <Box component="span" className={styles.barFill} />
+            </Box>
+            <Box className={styles.meta}>
+              <Typography component="span" variant="inherit" className={styles.roas} data-tier={classifyRoas(account.roas)}>
                 ROAS {formatRoas(account.roas)}
-              </span>
-              <span className={styles.dot}>·</span>
-              <span>{account.activeAdsCount} {adsLabel}</span>
-            </div>
-          </li>
+              </Typography>
+              <Box component="span" className={styles.dot}>·</Box>
+              <Typography component="span" variant="inherit">{account.activeAdsCount} {adsLabel}</Typography>
+            </Box>
+          </ListItem>
         )
       })}
-    </ul>
+    </List>
   )
 }

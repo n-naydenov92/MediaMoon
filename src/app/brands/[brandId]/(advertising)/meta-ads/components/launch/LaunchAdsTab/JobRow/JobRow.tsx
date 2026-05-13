@@ -1,6 +1,10 @@
 'use client'
 
+import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
+import List from '@mui/material/List'
+import ListItem from '@mui/material/ListItem'
+import Typography from '@mui/material/Typography'
 import { FileStatus, JobStatus } from '@prisma/client'
 import { cssVars } from '@/lib/css'
 import type { JobWithFiles } from '../../useLaunchJobs'
@@ -31,44 +35,44 @@ export default function JobRow({ job, clientProgress, onCancel }: Props): JSX.El
   const isActive = ACTIVE_STATUSES.has(job.status)
 
   return (
-    <li className={styles.row} data-status={job.status}>
-      <header className={styles.head}>
-        <div className={styles.titleCol}>
-          <span className={styles.title}>Batch #{job.batchNumber}</span>
-          <span className={styles.meta}>
+    <ListItem disablePadding disableGutters className={styles.row} data-status={job.status}>
+      <Box component="header" className={styles.head}>
+        <Box className={styles.titleCol}>
+          <Typography component="span" variant="inherit" className={styles.title}>Batch #{job.batchNumber}</Typography>
+          <Typography component="span" variant="inherit" className={styles.meta}>
             {job.market} · {job.accountId} · {job.files.length} {job.files.length === 1 ? 'ad' : 'ads'}
-          </span>
-        </div>
-        <span className={styles.status} data-status={job.status}>{job.status}</span>
-      </header>
+          </Typography>
+        </Box>
+        <Typography component="span" variant="inherit" className={styles.status} data-status={job.status}>{job.status}</Typography>
+      </Box>
 
-      <div className={styles.bar} style={cssVars({ '--bar-pct': `${overallPct}%` })}>
-        <span className={styles.barFill} />
-      </div>
+      <Box className={styles.bar} style={cssVars({ '--bar-pct': `${overallPct}%` })}>
+        <Box component="span" className={styles.barFill} />
+      </Box>
 
-      <div className={styles.summary}>
-        <span>✓ {counts.done} done</span>
-        <span>⟳ {counts.inFlight} working</span>
-        <span>✕ {counts.failed} failed</span>
-      </div>
+      <Box className={styles.summary}>
+        <Typography component="span" variant="inherit">✓ {counts.done} done</Typography>
+        <Typography component="span" variant="inherit">⟳ {counts.inFlight} working</Typography>
+        <Typography component="span" variant="inherit">✕ {counts.failed} failed</Typography>
+      </Box>
 
-      <ul className={styles.fileList}>
+      <List disablePadding className={styles.fileList}>
         {job.files.map((file) => {
           const label = progressLabel(file, clientProgress)
           return (
-            <li key={file.id} className={styles.fileRow}>
-              <span className={styles.fileIcon} data-status={file.status}>{STATUS_ICONS[file.status]}</span>
-              <span className={styles.fileName}>{file.originalName}</span>
-              {file.error && <span className={styles.fileError}>{file.error}</span>}
+            <ListItem key={file.id} disablePadding disableGutters className={styles.fileRow}>
+              <Typography component="span" variant="inherit" className={styles.fileIcon} data-status={file.status}>{STATUS_ICONS[file.status]}</Typography>
+              <Typography component="span" variant="inherit" className={styles.fileName}>{file.originalName}</Typography>
+              {file.error && <Typography component="span" variant="inherit" className={styles.fileError}>{file.error}</Typography>}
               {!FINAL_FILE_STATUSES.has(file.status) && label && (
-                <span className={styles.fileProgress}>{label}</span>
+                <Typography component="span" variant="inherit" className={styles.fileProgress}>{label}</Typography>
               )}
-            </li>
+            </ListItem>
           )
         })}
-      </ul>
+      </List>
 
-      <footer className={styles.footer}>
+      <Box component="footer" className={styles.footer}>
         {isActive && (
           <Button
             type="button"
@@ -83,16 +87,19 @@ export default function JobRow({ job, clientProgress, onCancel }: Props): JSX.El
           </Button>
         )}
         {job.status === JobStatus.DONE && (
-          <a
+          <Button
+            component="a"
+            variant="text"
+            color="inherit"
             className={styles.link}
             href={adsManagerUrl(job.accountId)}
             target="_blank"
             rel="noreferrer"
           >
             Open in Ads Manager ↗
-          </a>
+          </Button>
         )}
-      </footer>
-    </li>
+      </Box>
+    </ListItem>
   )
 }

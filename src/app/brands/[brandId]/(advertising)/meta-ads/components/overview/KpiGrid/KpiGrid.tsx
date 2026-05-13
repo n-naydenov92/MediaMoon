@@ -1,3 +1,4 @@
+import Box from '@mui/material/Box'
 import { relativeDelta, type DailyPoint, type KpiDelta } from '@/lib/meta/aggregate'
 import { KpiTile, type SparkPoint } from '@/components/kpi'
 import { KPI_TILE_SPECS } from '../kpiTileSpecs'
@@ -13,7 +14,7 @@ interface Props {
 export default function KpiGrid({ kpis, deltaLabel, compareEnabled, byDay }: Props): JSX.Element {
   const { current, previous } = kpis
   return (
-    <div className={styles.grid}>
+    <Box className={styles.grid}>
       {KPI_TILE_SPECS.map((spec) => {
         const { readDaily } = spec
         const points: readonly SparkPoint[] | undefined = readDaily
@@ -34,6 +35,6 @@ export default function KpiGrid({ kpis, deltaLabel, compareEnabled, byDay }: Pro
           />
         )
       })}
-    </div>
+    </Box>
   )
 }

@@ -1,5 +1,6 @@
 'use client'
 
+import Box from '@mui/material/Box'
 import MenuItem from '@mui/material/MenuItem'
 import TextField from '@mui/material/TextField'
 import { CtaType } from '@prisma/client'
@@ -34,7 +35,7 @@ const SELECT_PROPS = {
 
 export default function CopyForm({ value, onChange }: Props): JSX.Element {
   return (
-    <div className={styles.grid}>
+    <Box className={styles.grid}>
       <FormField label="Headline" hint={`${value.headline.length}/${HEADLINE_MAX_LENGTH}`}>
         <TextField
           type="text"
@@ -91,6 +92,6 @@ export default function CopyForm({ value, onChange }: Props): JSX.Element {
           ))}
         </TextField>
       </FormField>
-    </div>
+    </Box>
   )
 }

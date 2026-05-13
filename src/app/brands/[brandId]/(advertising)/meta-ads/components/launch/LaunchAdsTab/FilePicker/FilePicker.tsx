@@ -1,8 +1,12 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState, type DragEvent, type ChangeEvent } from 'react'
+import Box from '@mui/material/Box'
 import ButtonBase from '@mui/material/ButtonBase'
 import IconButton from '@mui/material/IconButton'
+import List from '@mui/material/List'
+import ListItem from '@mui/material/ListItem'
+import Typography from '@mui/material/Typography'
 import CloseIcon from '@mui/icons-material/Close'
 import styles from './FilePicker.module.css'
 
@@ -88,8 +92,8 @@ export default function FilePicker({ files, onChange, disabled = false }: Props)
   )
 
   return (
-    <div className={styles.root}>
-      <div
+    <Box className={styles.root}>
+      <Box
         className={styles.dropZone}
         data-disabled={disabled ? 'true' : 'false'}
         data-dragging={dragging ? 'true' : 'false'}
@@ -103,7 +107,8 @@ export default function FilePicker({ files, onChange, disabled = false }: Props)
           disabled={disabled}
           focusRipple
         >
-          <input
+          <Box
+            component="input"
             ref={inputRef}
             type="file"
             accept={ACCEPT}
@@ -112,22 +117,21 @@ export default function FilePicker({ files, onChange, disabled = false }: Props)
             onChange={handleSelect}
             disabled={disabled}
           />
-          <span className={styles.dropLabelMain}>Drop files here or click to browse</span>
-          <span className={styles.dropHint}>Images and videos. Up to 200 MB each.</span>
+          <Typography component="span" variant="inherit" className={styles.dropLabelMain}>Drop files here or click to browse</Typography>
+          <Typography component="span" variant="inherit" className={styles.dropHint}>Images and videos. Up to 200 MB each.</Typography>
         </ButtonBase>
-      </div>
+      </Box>
 
       {previews.length > 0 && (
-        <ul className={styles.grid}>
+        <List disablePadding className={styles.grid}>
           {previews.map(({ file, url, isVideo }, index) => (
-            <li key={`${file.name}-${index}`} className={styles.tile}>
+            <ListItem key={`${file.name}-${index}`} disablePadding disableGutters className={styles.tile}>
               {isVideo ? (
-                <video src={url} className={styles.preview} muted playsInline />
+                <Box component="video" src={url} className={styles.preview} muted playsInline />
               ) : (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img src={url} alt={file.name} className={styles.preview} />
+                <Box component="img" src={url} alt={file.name} className={styles.preview} />
               )}
-              <span className={styles.badge}>{isVideo ? '▶' : '▣'}</span>
+              <Typography component="span" variant="inherit" className={styles.badge}>{isVideo ? '▶' : '▣'}</Typography>
               <IconButton
                 size="small"
                 className={styles.remove}
@@ -137,11 +141,11 @@ export default function FilePicker({ files, onChange, disabled = false }: Props)
               >
                 <CloseIcon fontSize="inherit" />
               </IconButton>
-              <span className={styles.name}>{file.name}</span>
-            </li>
+              <Typography component="span" variant="inherit" className={styles.name}>{file.name}</Typography>
+            </ListItem>
           ))}
-        </ul>
+        </List>
       )}
-    </div>
+    </Box>
   )
 }

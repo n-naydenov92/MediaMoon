@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Box from '@mui/material/Box'
 import MenuItem from '@mui/material/MenuItem'
 import TextField from '@mui/material/TextField'
 import type { BrandId } from '@/config/brands'
@@ -131,7 +132,7 @@ export default function TargetingForm({
   }, [brandId, value.campaignId])
 
   return (
-    <div className={styles.grid}>
+    <Box className={styles.grid}>
       <FormField label="Ad account">
         <TextField
           select
@@ -206,6 +207,6 @@ export default function TargetingForm({
           ))}
         </TextField>
       </FormField>
-    </div>
+    </Box>
   )
 }

@@ -1,3 +1,4 @@
+import Box from '@mui/material/Box'
 import { findBrandById } from '@/config/brands'
 import ComingSoonPanel from '@/components/layout/ComingSoonPanel/ComingSoonPanel'
 import CreativePreviewProvider from './components/shared/CreativePreview/CreativePreviewProvider/CreativePreviewProvider'
@@ -16,9 +17,9 @@ export default async function MetaAdsLayout({ params, children }: Props): Promis
   }
   return (
     <CreativePreviewProvider>
-      <div className={styles.layout}>
-        <div className={styles.content}>{children}</div>
-      </div>
+      <Box className={styles.layout}>
+        <Box className={styles.content}>{children}</Box>
+      </Box>
     </CreativePreviewProvider>
   )
 }

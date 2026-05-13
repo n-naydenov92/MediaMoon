@@ -1,5 +1,6 @@
 'use client'
 
+import Box from '@mui/material/Box'
 import {
   Area,
   ComposedChart,
@@ -27,25 +28,25 @@ export default function SpendChart({ data }: Props): JSX.Element {
   const palette = mode === 'light' ? PALETTE_LIGHT : PALETTE_DARK
 
   if (data.length === 0) {
-    return <div className={styles.empty}>No spend recorded for the selected range.</div>
+    return <Box className={styles.empty}>No spend recorded for the selected range.</Box>
   }
   const enriched = enrichWithRoas(data)
   return (
-    <div className={styles.chart}>
-      <div className={styles.legend} aria-hidden="true">
-        <span className={styles.legendItem}>
-          <span className={styles.legendDot} data-key="spendEur" />
+    <Box className={styles.chart}>
+      <Box className={styles.legend} aria-hidden="true">
+        <Box component="span" className={styles.legendItem}>
+          <Box component="span" className={styles.legendDot} data-key="spendEur" />
           Spend
-        </span>
-        <span className={styles.legendItem}>
-          <span className={styles.legendDot} data-key="revenueEur" />
+        </Box>
+        <Box component="span" className={styles.legendItem}>
+          <Box component="span" className={styles.legendDot} data-key="revenueEur" />
           Revenue
-        </span>
-        <span className={styles.legendItem}>
-          <span className={styles.legendDot} data-key="roas" />
+        </Box>
+        <Box component="span" className={styles.legendItem}>
+          <Box component="span" className={styles.legendDot} data-key="roas" />
           ROAS
-        </span>
-      </div>
+        </Box>
+      </Box>
       <ResponsiveContainer width="100%" height={240}>
         <ComposedChart data={[...enriched]} margin={{ top: 8, right: 12, bottom: 8, left: 0 }}>
           <defs>
@@ -114,6 +115,6 @@ export default function SpendChart({ data }: Props): JSX.Element {
           />
         </ComposedChart>
       </ResponsiveContainer>
-    </div>
+    </Box>
   )
 }

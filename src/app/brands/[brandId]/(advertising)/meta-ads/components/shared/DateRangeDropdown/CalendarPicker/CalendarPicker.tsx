@@ -3,7 +3,9 @@
 import { useState } from 'react'
 import { DayPicker, type DateRange } from 'react-day-picker'
 import 'react-day-picker/style.css'
+import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
+import Typography from '@mui/material/Typography'
 import type { CustomRange } from '@/lib/meta/dateRange'
 import { formatHuman, isoOf, parseIso, startOfUtcDay } from './helpers'
 import styles from './CalendarPicker.module.css'
@@ -31,7 +33,7 @@ export default function CalendarPicker({ value, onApply, onCancel }: Props): JSX
   }
 
   return (
-    <div className={styles.root}>
+    <Box className={styles.root}>
       <DayPicker
         mode="range"
         selected={range}
@@ -42,21 +44,21 @@ export default function CalendarPicker({ value, onApply, onCancel }: Props): JSX
         defaultMonth={range?.from ?? today}
         showOutsideDays
       />
-      <div className={styles.footer}>
-        <span className={styles.range}>
+      <Box className={styles.footer}>
+        <Typography component="span" variant="inherit" className={styles.range}>
           {range?.from ? formatHuman(range.from) : 'Start date'}
           {' — '}
           {range?.to ? formatHuman(range.to) : 'End date'}
-        </span>
-        <div className={styles.actions}>
+        </Typography>
+        <Box className={styles.actions}>
           <Button onClick={onCancel} color="inherit" size="small">
             Cancel
           </Button>
           <Button onClick={handleApply} variant="contained" size="small" disabled={!canApply}>
             Apply
           </Button>
-        </div>
-      </div>
-    </div>
+        </Box>
+      </Box>
+    </Box>
   )
 }

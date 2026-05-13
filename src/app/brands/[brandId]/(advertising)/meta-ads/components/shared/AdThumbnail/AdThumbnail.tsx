@@ -1,3 +1,4 @@
+import Box from '@mui/material/Box'
 import styles from './AdThumbnail.module.css'
 
 interface Props {
@@ -10,16 +11,15 @@ interface Props {
 export default function AdThumbnail({ src, alt, type, size = 'sm' }: Props): JSX.Element {
   if (!src) {
     return (
-      <div className={styles.placeholder} data-size={size} data-type={type} aria-label={alt}>
+      <Box className={styles.placeholder} data-size={size} data-type={type} aria-label={alt}>
         {type === 'video' ? '▶' : '▣'}
-      </div>
+      </Box>
     )
   }
   return (
-    <div className={styles.wrap} data-size={size}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={src} alt={alt} className={styles.img} loading="lazy" />
-      {type === 'video' && <span className={styles.badge}>▶</span>}
-    </div>
+    <Box className={styles.wrap} data-size={size}>
+      <Box component="img" src={src} alt={alt} className={styles.img} loading="lazy" />
+      {type === 'video' && <Box component="span" className={styles.badge}>▶</Box>}
+    </Box>
   )
 }

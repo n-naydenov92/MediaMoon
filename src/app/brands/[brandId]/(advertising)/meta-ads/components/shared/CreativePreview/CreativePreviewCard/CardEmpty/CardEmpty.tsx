@@ -1,3 +1,5 @@
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
 import type { CreativePreviewData } from '../../creativePreviewTypes'
 import styles from '../CreativePreviewCard.module.css'
 
@@ -7,11 +9,11 @@ interface Props {
 
 export default function CardEmpty({ data }: Props): JSX.Element {
   return (
-    <div className={styles.errorBox}>
-      <span className={styles.errorTitle}>{data.adName || 'Preview unavailable'}</span>
-      <span className={styles.errorMessage}>
+    <Box className={styles.errorBox}>
+      <Typography component="span" variant="inherit" className={styles.errorTitle}>{data.adName || 'Preview unavailable'}</Typography>
+      <Typography component="span" variant="inherit" className={styles.errorMessage}>
         Meta returned no preview data for this ad (likely a deleted post or restricted creative).
-      </span>
-    </div>
+      </Typography>
+    </Box>
   )
 }

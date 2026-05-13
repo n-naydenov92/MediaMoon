@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import Box from '@mui/material/Box'
 import type { BrandId } from '@/config/brands'
 import { useBrandShellContext } from '@/contexts/brandShell/useBrandShellContext'
 import {
@@ -107,7 +108,7 @@ export default function OverviewTab({ brandId }: Props): JSX.Element {
   )
 
   return (
-    <div className={styles.root}>
+    <Box className={styles.root}>
       <PageHeader crumbs={CRUMBS} actions={actions} />
 
       {state.status === 'loading' && <KpiSkeletonRows />}
@@ -138,6 +139,6 @@ export default function OverviewTab({ brandId }: Props): JSX.Element {
           market={selectedMarket}
         />
       )}
-    </div>
+    </Box>
   )
 }

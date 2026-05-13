@@ -1,3 +1,5 @@
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
 import styles from '../CreativePreviewCard.module.css'
 
 interface Props {
@@ -6,9 +8,9 @@ interface Props {
 
 export default function CardError({ message }: Props): JSX.Element {
   return (
-    <div className={styles.errorBox}>
-      <span className={styles.errorTitle}>Couldn&apos;t load preview</span>
-      <span className={styles.errorMessage}>{message}</span>
-    </div>
+    <Box className={styles.errorBox}>
+      <Typography component="span" variant="inherit" className={styles.errorTitle}>Couldn&apos;t load preview</Typography>
+      <Typography component="span" variant="inherit" className={styles.errorMessage}>{message}</Typography>
+    </Box>
   )
 }

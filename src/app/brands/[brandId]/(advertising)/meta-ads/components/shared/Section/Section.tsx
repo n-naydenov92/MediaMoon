@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
 import { cls } from '@/lib/css'
 import styles from './Section.module.css'
 
@@ -12,14 +14,14 @@ interface Props {
 
 export default function Section({ title, action, children, className, bare = false }: Props): JSX.Element {
   return (
-    <section className={cls(styles.section, className)} data-bare={bare ? 'true' : undefined}>
+    <Box component="section" className={cls(styles.section, className)} data-bare={bare ? 'true' : undefined}>
       {(title || action) && (
-        <header className={styles.header}>
-          {title && <h2 className={styles.title}>{title}</h2>}
-          {action && <div className={styles.action}>{action}</div>}
-        </header>
+        <Box component="header" className={styles.header}>
+          {title && <Typography component="h2" variant="h2" className={styles.title}>{title}</Typography>}
+          {action && <Box className={styles.action}>{action}</Box>}
+        </Box>
       )}
-      <div className={styles.body}>{children}</div>
-    </section>
+      <Box className={styles.body}>{children}</Box>
+    </Box>
   )
 }

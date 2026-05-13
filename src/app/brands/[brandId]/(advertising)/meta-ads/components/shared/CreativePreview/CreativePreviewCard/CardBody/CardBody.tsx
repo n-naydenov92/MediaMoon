@@ -1,6 +1,9 @@
 'use client'
 
 import { useLayoutEffect, useRef, useState } from 'react'
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import Typography from '@mui/material/Typography'
 import styles from '../CreativePreviewCard.module.css'
 
 const CLIP_DETECTION_PIXEL_BUFFER = 1
@@ -23,13 +26,13 @@ export default function CardBody({ body }: Props): JSX.Element {
   }, [body, expanded])
 
   return (
-    <div className={styles.body} data-expanded={expanded}>
-      <p ref={textRef} className={styles.bodyText}>{body}</p>
+    <Box className={styles.body} data-expanded={expanded}>
+      <Typography ref={textRef} variant="body2" className={styles.bodyText}>{body}</Typography>
       {isClipped && !expanded && (
-        <button type="button" className={styles.seeMore} onClick={() => setExpanded(true)}>
+        <Button type="button" variant="text" className={styles.seeMore} onClick={() => setExpanded(true)}>
           See more
-        </button>
+        </Button>
       )}
-    </div>
+    </Box>
   )
 }

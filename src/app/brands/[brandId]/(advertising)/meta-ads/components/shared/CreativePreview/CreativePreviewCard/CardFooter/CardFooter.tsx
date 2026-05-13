@@ -1,3 +1,5 @@
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
 import styles from '../CreativePreviewCard.module.css'
 
 interface Props {
@@ -15,12 +17,12 @@ export default function CardFooter({
 }: Props): JSX.Element {
   const visibleHeadline = headline ?? (adName.trim().length > 0 ? adName : null)
   return (
-    <div className={styles.footer}>
-      <div className={styles.footerText}>
-        {visibleHeadline && <span className={styles.headline}>{visibleHeadline}</span>}
-        {description && <span className={styles.description}>{description}</span>}
-      </div>
-      <span className={styles.cta}>{callToAction}</span>
-    </div>
+    <Box className={styles.footer}>
+      <Box className={styles.footerText}>
+        {visibleHeadline && <Typography component="span" variant="inherit" className={styles.headline}>{visibleHeadline}</Typography>}
+        {description && <Typography component="span" variant="inherit" className={styles.description}>{description}</Typography>}
+      </Box>
+      <Typography component="span" variant="inherit" className={styles.cta}>{callToAction}</Typography>
+    </Box>
   )
 }

@@ -1,7 +1,9 @@
 'use client'
 
 import { useCallback, useMemo, useState } from 'react'
+import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
+import Typography from '@mui/material/Typography'
 import { CtaType } from '@prisma/client'
 import type { BrandId } from '@/config/brands'
 import type { Market } from '@/types'
@@ -82,27 +84,27 @@ export default function LaunchAdsTab({ brandId }: Props): JSX.Element {
 
   if (!brand || !targetMarket) {
     return (
-      <section className={styles.root}>
+      <Box component="section" className={styles.root}>
         <Notice variant="error" title="Unknown brand">
           This brand is not configured.
         </Notice>
-      </section>
+      </Box>
     )
   }
 
   if (allowedAccountIds.length === 0) {
     return (
-      <section className={styles.root}>
+      <Box component="section" className={styles.root}>
         <Notice variant="info" title="No ad accounts mapped">
           Map at least one ad account for {brand.label} {targetMarket} in
-          {' '}<code>BRAND_MARKET_AD_ACCOUNTS</code> before launching ads.
+          {' '}<Typography component="code" variant="inherit">BRAND_MARKET_AD_ACCOUNTS</Typography> before launching ads.
         </Notice>
-      </section>
+      </Box>
     )
   }
 
   return (
-    <section className={styles.root}>
+    <Box component="section" className={styles.root}>
       {launch.state.status === 'error' && (
         <Notice variant="error" title="Couldn't create the batch">
           {launch.state.message}
@@ -126,7 +128,7 @@ export default function LaunchAdsTab({ brandId }: Props): JSX.Element {
         <CopyForm value={copy} onChange={setCopy} />
       </Section>
 
-      <div className={styles.actions}>
+      <Box className={styles.actions}>
         <Button
           type="button"
           variant="contained"
@@ -139,7 +141,7 @@ export default function LaunchAdsTab({ brandId }: Props): JSX.Element {
             ? 'Uploading…'
             : `▶ Publish ${files.length || ''} ${files.length === 1 ? 'ad' : 'ads'}`.trim()}
         </Button>
-      </div>
+      </Box>
 
       <Section title="Active jobs">
         <JobsPanel
@@ -152,6 +154,6 @@ export default function LaunchAdsTab({ brandId }: Props): JSX.Element {
       <Section title="Recently uploaded">
         <UploadHistory brandId={brandId} />
       </Section>
-    </section>
+    </Box>
   )
 }

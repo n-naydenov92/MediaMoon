@@ -1,3 +1,4 @@
+import Box from '@mui/material/Box'
 import type { BrandId } from '@/config/brands'
 import type { Market } from '@/types'
 import type { DateRangeSelection } from '@/lib/meta/dateRange'
@@ -27,7 +28,7 @@ export default function Leaderboards({
   const underSubtitle = `spend over ${formatEur(summary.criteria.minSpend)}, ROAS under ${formatRoas(summary.criteria.underMaxRoas)}`
 
   return (
-    <div className={styles.grid}>
+    <Box className={styles.grid}>
       <LeaderboardCard
         title="Top creatives"
         subtitle={topSubtitle}
@@ -53,6 +54,6 @@ export default function Leaderboards({
         emptyLabel="No underperformers."
         seeMoreHref={hrefFor('underperformers')}
       />
-    </div>
+    </Box>
   )
 }

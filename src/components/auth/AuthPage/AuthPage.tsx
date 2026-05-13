@@ -1,5 +1,6 @@
 'use client'
 
+import Box from '@mui/material/Box'
 import { useThemeMode } from '@/styles/useThemeMode'
 import AuthBrandPanel from './AuthBrandPanel'
 import AuthForm from './AuthForm'
@@ -15,10 +16,10 @@ export default function AuthPage({ mode }: AuthPageProps): JSX.Element {
   const { mode: themeMode } = useThemeMode()
 
   return (
-    <main className={styles.root} data-theme={themeMode}>
+    <Box component="main" className={styles.root} data-theme={themeMode}>
       <AuthBrandPanel />
       <AuthForm mode={mode} />
       <AuthThemeToggle />
-    </main>
+    </Box>
   )
 }

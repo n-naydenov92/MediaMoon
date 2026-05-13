@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
 import StorefrontOutlinedIcon from '@mui/icons-material/StorefrontOutlined'
 import styles from '../CreativePreviewCard.module.css'
 
@@ -13,10 +15,10 @@ export default function CardHeader({ pageName, avatarUrl }: Props): JSX.Element 
   const [avatarFailed, setAvatarFailed] = useState(false)
   const showImage = avatarUrl && !avatarFailed
   return (
-    <div className={styles.headerRow}>
+    <Box className={styles.headerRow}>
       {showImage ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <Box
+          component="img"
           src={avatarUrl}
           alt=""
           className={styles.avatar}
@@ -24,14 +26,14 @@ export default function CardHeader({ pageName, avatarUrl }: Props): JSX.Element 
           onError={() => setAvatarFailed(true)}
         />
       ) : (
-        <div className={styles.avatarPlaceholder} aria-hidden>
+        <Box className={styles.avatarPlaceholder} aria-hidden>
           <StorefrontOutlinedIcon fontSize="small" />
-        </div>
+        </Box>
       )}
-      <div className={styles.headerText}>
-        <span className={styles.pageName}>{pageName}</span>
-        <span className={styles.sponsored}>Sponsored</span>
-      </div>
-    </div>
+      <Box className={styles.headerText}>
+        <Typography component="span" variant="inherit" className={styles.pageName}>{pageName}</Typography>
+        <Typography component="span" variant="inherit" className={styles.sponsored}>Sponsored</Typography>
+      </Box>
+    </Box>
   )
 }
