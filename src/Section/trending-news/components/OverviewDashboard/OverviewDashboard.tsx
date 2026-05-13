@@ -5,7 +5,6 @@ import Grid from '@mui/material/Grid'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import NewspaperOutlined from '@mui/icons-material/NewspaperOutlined'
-import type { AsyncState, NewsResult } from '@/types'
 import { useBrandShellContext } from '@/contexts/brandShell/useBrandShellContext'
 import { cacheKey } from '@/Section/trending-news/context/trendingNewsCtx'
 import { useTrendingNewsContext } from '@/Section/trending-news/context/useTrendingNewsContext'
@@ -18,6 +17,7 @@ import StatsRow from '../StatsRow/StatsRow'
 import HighlightsSidebar from '../HighlightsSidebar/HighlightsSidebar'
 import SourceStatsPopover from '../SourceStatsPopover/SourceStatsPopover'
 import LoadingOverview from './LoadingOverview/LoadingOverview'
+import { isSuccess } from './helpers'
 import styles from './OverviewDashboard.module.css'
 
 export default memo(function OverviewDashboard(): JSX.Element {
@@ -78,9 +78,3 @@ export default memo(function OverviewDashboard(): JSX.Element {
     </Stack>
   )
 })
-
-function isSuccess(
-  state: AsyncState<NewsResult> | undefined,
-): state is { status: 'success'; data: NewsResult } {
-  return state?.status === 'success'
-}

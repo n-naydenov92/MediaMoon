@@ -8,9 +8,8 @@ import EmojiEventsOutlined from '@mui/icons-material/EmojiEventsOutlined'
 import type { NewsCluster } from '@/types'
 import { LABELS } from '@/Section/trending-news/labels'
 import HighlightItem from './HighlightItem/HighlightItem'
+import { pickTop } from './helpers'
 import styles from './HighlightsSidebar.module.css'
-
-const TOP_N = 3
 
 interface Props {
   readonly clusters: readonly NewsCluster[]
@@ -43,7 +42,3 @@ export default memo(function HighlightsSidebar({ clusters }: Props): JSX.Element
     </Box>
   )
 })
-
-function pickTop(clusters: readonly NewsCluster[]): readonly NewsCluster[] {
-  return [...clusters].sort((a, b) => b.score - a.score).slice(0, TOP_N)
-}
