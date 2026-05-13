@@ -108,7 +108,6 @@ export function useMetaAdsData(
       return
     }
     const controller = new AbortController()
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- data fetching / external sync effect
     setState({ status: 'loading' })
 
     void (async () => {

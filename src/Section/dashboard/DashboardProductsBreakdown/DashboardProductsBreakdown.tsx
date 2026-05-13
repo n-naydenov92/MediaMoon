@@ -34,16 +34,11 @@ export default function DashboardProductsBreakdown({
       </Box>
       <Box className={`${styles.col} ${styles.categoryCol}`}>
         <Box className={styles.rightStack}>
-          <DashboardCategoryBreakdown
-            categories={categories}
-            hasCommerce={hasCommerce}
-            loading={loading}
-          />
+          <DashboardCategoryBreakdown categories={categories} hasCommerce={hasCommerce} />
           <AnchorProductScore
             products={products}
             storeAov={storeAov}
             hasCommerce={hasCommerce}
-            loading={loading}
           />
         </Box>
       </Box>

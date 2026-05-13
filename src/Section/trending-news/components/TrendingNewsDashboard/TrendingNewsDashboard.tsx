@@ -11,8 +11,10 @@ interface Props {
 /**
  * Root entry point for the Trending News module — mounts the brand-scoped provider and chrome.
  */
-export default memo(({ brandId }: Props): JSX.Element => (
-  <TrendingNewsProvider brandId={brandId}>
-    <DashboardChrome />
-  </TrendingNewsProvider>
-))
+export default memo(function TrendingNewsDashboard({ brandId }: Props): JSX.Element {
+  return (
+    <TrendingNewsProvider brandId={brandId}>
+      <DashboardChrome />
+    </TrendingNewsProvider>
+  )
+})

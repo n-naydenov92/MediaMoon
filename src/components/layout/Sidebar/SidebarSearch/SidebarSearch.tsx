@@ -1,7 +1,6 @@
 'use client'
 
 import { memo } from 'react'
-import Box from '@mui/material/Box'
 import SearchIcon from '@mui/icons-material/Search'
 import styles from './SidebarSearch.module.css'
 
@@ -12,21 +11,18 @@ interface Props {
   readonly onChange: (next: string) => void
 }
 
-function SidebarSearch({ value, onChange }: Props): JSX.Element {
+export default memo(function SidebarSearch({ value, onChange }: Props): JSX.Element {
   return (
-    <Box className={styles.root}>
+    <div className={styles.root}>
       <SearchIcon className={styles.icon} fontSize="small" aria-hidden="true" />
-      <Box
-        component="input"
+      <input
         type="text"
         className={styles.input}
         placeholder={PLACEHOLDER}
         value={value}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
+        onChange={(e) => onChange(e.target.value)}
         aria-label={PLACEHOLDER}
       />
-    </Box>
+    </div>
   )
-}
-
-export default memo(SidebarSearch)
+})

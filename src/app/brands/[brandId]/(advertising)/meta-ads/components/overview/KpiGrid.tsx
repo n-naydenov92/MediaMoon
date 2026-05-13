@@ -15,7 +15,7 @@ export default function KpiGrid({ kpis, deltaLabel, compareEnabled, byDay }: Pro
   return (
     <div className={styles.grid}>
       {KPI_TILE_SPECS.map((spec) => {
-        const { readDaily } = spec
+        const readDaily = spec.readDaily
         const points: readonly SparkPoint[] | undefined = readDaily
           ? byDay.map((point) => ({ date: point.date, value: readDaily(point) }))
           : undefined

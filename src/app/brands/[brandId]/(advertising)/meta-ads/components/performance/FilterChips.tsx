@@ -143,7 +143,6 @@ export default function FilterChips({
           Filter
         </Button>
         <Menu
-          // eslint-disable-next-line react-hooks/refs -- MUI Popover/Menu anchorEl pattern needs ref.current after first render
           anchorEl={mobileTriggerRef.current}
           open={mobileMenuOpen}
           onClose={() => setMobileMenuOpen(false)}
@@ -223,7 +222,6 @@ function RuleChip({
     if (!isEditing) {
       return
     }
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- data fetching / external sync effect
     setDraft(String(rule.value))
     if (kind === 'number') {
       requestAnimationFrame(() => {
@@ -253,7 +251,6 @@ function RuleChip({
   }
 
   const enumOptions =
-    // eslint-disable-next-line no-nested-ternary -- nested ternary clearer than refactor here
     kind === 'status' ? STATUS_VALUES : kind === 'creativeType' ? CREATIVE_TYPE_VALUES : null
 
   const showInput = isEditing && kind === 'number'
@@ -330,3 +327,4 @@ function RuleChip({
     </Box>
   )
 }
+

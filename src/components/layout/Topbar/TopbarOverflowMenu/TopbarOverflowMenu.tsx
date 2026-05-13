@@ -1,7 +1,6 @@
 'use client'
 
 import { memo, useCallback, useId, useRef, useState } from 'react'
-import Box from '@mui/material/Box'
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
 import SentimentSatisfiedAltIcon from '@mui/icons-material/SentimentSatisfiedAlt'
 import { useDismissPopover } from '@/components/layout/hooks/useDismissPopover'
@@ -10,7 +9,7 @@ import styles from './TopbarOverflowMenu.module.css'
 
 const FEEDBACK_LABEL = 'Give Feedback'
 
-function TopbarOverflowMenu(): JSX.Element {
+const TopbarOverflowMenu = memo(function TopbarOverflowMenu(): JSX.Element {
   const { mode } = useThemeMode()
   const [isOpen, setIsOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement | null>(null)
@@ -31,9 +30,8 @@ function TopbarOverflowMenu(): JSX.Element {
   useDismissPopover(rootRef, isOpen, dismiss)
 
   return (
-    <Box className={styles.root} ref={rootRef} data-theme={mode}>
-      <Box
-        component="button"
+    <div className={styles.root} ref={rootRef} data-theme={mode}>
+      <button
         type="button"
         className={styles.trigger}
         onClick={toggleOpen}
@@ -43,25 +41,24 @@ function TopbarOverflowMenu(): JSX.Element {
         aria-label="More actions"
       >
         <MoreHorizIcon fontSize="small" />
-      </Box>
+      </button>
       {isOpen && (
-        <Box component="ul" id={menuId} role="menu" className={styles.menu}>
-          <Box component="li" role="none">
-            <Box
-              component="button"
+        <ul id={menuId} role="menu" className={styles.menu}>
+          <li role="none">
+            <button
               type="button"
               role="menuitem"
               className={styles.option}
               onClick={handleFeedback}
             >
-              <Box component="span">{FEEDBACK_LABEL}</Box>
+              <span>{FEEDBACK_LABEL}</span>
               <SentimentSatisfiedAltIcon className={styles.optionIcon} fontSize="small" />
-            </Box>
-          </Box>
-        </Box>
+            </button>
+          </li>
+        </ul>
       )}
-    </Box>
+    </div>
   )
-}
+})
 
-export default memo(TopbarOverflowMenu)
+export default TopbarOverflowMenu

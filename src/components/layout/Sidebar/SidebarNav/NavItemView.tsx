@@ -2,9 +2,8 @@
 
 import { memo } from 'react'
 import Link from 'next/link'
-import Box from '@mui/material/Box'
-import Tooltip from '@mui/material/Tooltip'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import Tooltip from '@mui/material/Tooltip'
 import type { NavItem } from '@/types'
 import { buildHref, isHrefActive } from '@/config/sidebarNav'
 import ModuleIcon from '@/components/layout/ModuleIcon/ModuleIcon'
@@ -19,7 +18,7 @@ interface Props {
   readonly onDrillInto: (itemId: string) => void
 }
 
-function NavItemView({
+export default memo(function NavItemView({
   item,
   brandId,
   pathname,
@@ -28,24 +27,19 @@ function NavItemView({
   if (item.kind === 'link') {
     if (brandId === null) {
       return (
-        <Box component="span" className={styles.row} data-disabled="true">
+        <span className={styles.row} data-disabled="true">
           <ModuleIcon name={item.icon} size={ITEM_ICON_SIZE_PX} />
-          <Box component="span" className={styles.label}>{item.label}</Box>
-        </Box>
+          <span className={styles.label}>{item.label}</span>
+        </span>
       )
     }
     if (item.disabled) {
       return (
         <Tooltip title="Coming soon" placement="right" arrow disableInteractive>
-          <Box
-            component="span"
-            className={styles.row}
-            data-disabled="true"
-            aria-disabled="true"
-          >
+          <span className={styles.row} data-disabled="true" aria-disabled="true">
             <ModuleIcon name={item.icon} size={ITEM_ICON_SIZE_PX} />
-            <Box component="span" className={styles.label}>{item.label}</Box>
-          </Box>
+            <span className={styles.label}>{item.label}</span>
+          </span>
         </Tooltip>
       )
     }
@@ -59,24 +53,21 @@ function NavItemView({
         aria-current={isActive ? 'page' : undefined}
       >
         <ModuleIcon name={item.icon} size={ITEM_ICON_SIZE_PX} />
-        <Box component="span" className={styles.label}>{item.label}</Box>
+        <span className={styles.label}>{item.label}</span>
       </Link>
     )
   }
 
   return (
-    <Box
-      component="button"
+    <button
       type="button"
       className={styles.row}
       onClick={() => onDrillInto(item.id)}
       aria-haspopup="menu"
     >
       <ModuleIcon name={item.icon} size={ITEM_ICON_SIZE_PX} />
-      <Box component="span" className={styles.label}>{item.label}</Box>
+      <span className={styles.label}>{item.label}</span>
       <ChevronRightIcon className={styles.chevron} fontSize="small" />
-    </Box>
+    </button>
   )
-}
-
-export default memo(NavItemView)
+})

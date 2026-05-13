@@ -1,7 +1,6 @@
 'use client'
 
 import { memo } from 'react'
-import Box from '@mui/material/Box'
 import type { SvgIconProps } from '@mui/material'
 import TrendingUpIcon from '@mui/icons-material/TrendingUp'
 import LocalShippingIcon from '@mui/icons-material/LocalShipping'
@@ -39,7 +38,11 @@ interface Props {
   readonly color?: string
 }
 
-function ModuleIcon({ name, size = DEFAULT_ICON_SIZE_PX, color }: Props): JSX.Element {
+export default memo(function ModuleIcon({
+  name,
+  size = DEFAULT_ICON_SIZE_PX,
+  color,
+}: Props): JSX.Element {
   const Icon = (ICON_MAP as Record<string, React.ComponentType<SvgIconProps>>)[name] ?? DashboardIcon
 
   const vars: Record<`--${string}`, string> = { '--icon-size': `${size}px` }
@@ -48,10 +51,8 @@ function ModuleIcon({ name, size = DEFAULT_ICON_SIZE_PX, color }: Props): JSX.El
   }
 
   return (
-    <Box component="span" className={styles.root} style={cssVars(vars)} aria-hidden="true">
+    <span className={styles.root} style={cssVars(vars)} aria-hidden="true">
       <Icon className={styles.icon} />
-    </Box>
+    </span>
   )
-}
-
-export default memo(ModuleIcon)
+})

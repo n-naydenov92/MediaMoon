@@ -23,11 +23,11 @@ export default function PageHeader({ crumbs, actions }: Props): JSX.Element {
     <Box component="header" className={styles.root}>
       <Breadcrumbs
         aria-label="Breadcrumb"
-        separator={(
+        separator={
           <Box component="span" aria-hidden="true" className={styles.sep}>
             /
           </Box>
-        )}
+        }
         classes={{ ol: styles.list, li: styles.item, separator: styles.separator }}
         className={styles.crumbs}
       >

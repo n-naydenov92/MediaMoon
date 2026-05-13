@@ -3,7 +3,7 @@ import type { CSSProperties } from 'react'
 type CssVarRecord = Record<`--${string}`, string | number>
 
 export function cssVars(vars: CssVarRecord): CSSProperties {
-  return vars
+  return vars as CSSProperties
 }
 
 export function cls(...parts: (string | false | null | undefined)[]): string {

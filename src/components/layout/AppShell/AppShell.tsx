@@ -25,7 +25,7 @@ function isAuthPathname(pathname: string | null): boolean {
   return AUTH_ROUTE_PREFIXES.some((prefix) => pathname.startsWith(prefix))
 }
 
-export default memo(({ brands, role, children }: Props): JSX.Element => {
+export default memo(function AppShell({ brands, role, children }: Props): JSX.Element {
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [desktopHidden, setDesktopHidden] = useState(false)

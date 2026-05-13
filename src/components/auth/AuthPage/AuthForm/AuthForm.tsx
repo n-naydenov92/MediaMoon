@@ -1,6 +1,5 @@
 'use client'
 
-import Box from '@mui/material/Box'
 import GoogleSignInButton from '../GoogleSignInButton'
 import { useGoogleAuth, type AuthMode } from '../useGoogleAuth'
 import styles from './AuthForm.module.css'
@@ -40,14 +39,14 @@ export default function AuthForm({ mode }: AuthFormProps): JSX.Element {
   }
 
   return (
-    <Box component="section" className={styles.panel} aria-labelledby="auth-heading">
-      <Box className={styles.content}>
-        <Box component="header" className={styles.header}>
-          <Box component="h1" id="auth-heading" className={styles.heading}>
+    <section className={styles.panel} aria-labelledby="auth-heading">
+      <div className={styles.content}>
+        <header className={styles.header}>
+          <h1 id="auth-heading" className={styles.heading}>
             {copy.heading}
-          </Box>
-          <Box component="p" className={styles.subtitle}>{copy.subtitle}</Box>
-        </Box>
+          </h1>
+          <p className={styles.subtitle}>{copy.subtitle}</p>
+        </header>
 
         <GoogleSignInButton
           label={copy.button}
@@ -56,30 +55,30 @@ export default function AuthForm({ mode }: AuthFormProps): JSX.Element {
         />
 
         {errorMessage !== null ? (
-          <Box component="p" role="alert" className={styles.error}>
+          <p role="alert" className={styles.error}>
             {errorMessage}
-          </Box>
+          </p>
         ) : null}
 
-        <Box component="p" className={styles.altPrompt}>
-          {`${copy.altPrompt} `}
-          <Box component="a" className={styles.altLink} href={copy.altHref}>
+        <p className={styles.altPrompt}>
+          {copy.altPrompt}{' '}
+          <a className={styles.altLink} href={copy.altHref}>
             {copy.altLinkLabel}
-          </Box>
-        </Box>
+          </a>
+        </p>
 
-        <Box component="p" className={styles.terms}>
+        <p className={styles.terms}>
           By continuing, you agree to our{' '}
-          <Box component="a" className={styles.termsLink} href="#">
+          <a className={styles.termsLink} href="#">
             Terms of Service
-          </Box>
-          {' '}and{' '}
-          <Box component="a" className={styles.termsLink} href="#">
+          </a>{' '}
+          and{' '}
+          <a className={styles.termsLink} href="#">
             Privacy Policy
-          </Box>
+          </a>
           .
-        </Box>
-      </Box>
-    </Box>
+        </p>
+      </div>
+    </section>
   )
 }

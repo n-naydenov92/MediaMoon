@@ -31,13 +31,13 @@ interface Props {
   readonly onClose: () => void
 }
 
-const CreativePreviewCard = memo(({
+const CreativePreviewCard = memo(function CreativePreviewCard({
   anchor,
   state,
   onPointerEnter,
   onPointerLeave,
   onClose,
-}: Props): JSX.Element | null => {
+}: Props): JSX.Element | null {
   const { mode } = useThemeMode()
   const isMobile = useMediaQuery(MOBILE_QUERY)
   const isOpen = anchor !== null && state.status !== 'idle'
@@ -93,7 +93,6 @@ const CreativePreviewCard = memo(({
 })
 
 function renderState(state: CreativePreviewState): JSX.Element | null {
-  // eslint-disable-next-line default-case -- exhaustive enum
   switch (state.status) {
     case 'loading':
       return <CardSkeleton />

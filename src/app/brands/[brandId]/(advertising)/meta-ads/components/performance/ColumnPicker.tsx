@@ -28,7 +28,6 @@ export default function ColumnPicker({ visible, onChange }: Props): JSX.Element 
 
   useEffect(() => {
     if (!open) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- data fetching / external sync effect
       setQuery('')
     }
   }, [open])
@@ -69,7 +68,6 @@ export default function ColumnPicker({ visible, onChange }: Props): JSX.Element 
         Columns
       </Button>
       <Menu
-        // eslint-disable-next-line react-hooks/refs -- MUI Popover/Menu anchorEl pattern needs ref.current after first render
         anchorEl={triggerRef.current}
         open={open}
         onClose={() => setOpen(false)}

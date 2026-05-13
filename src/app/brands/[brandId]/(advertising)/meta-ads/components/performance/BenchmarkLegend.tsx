@@ -31,7 +31,6 @@ export default function BenchmarkLegend(): JSX.Element {
         </Box>
       </Button>
       <Popover
-        // eslint-disable-next-line react-hooks/refs -- MUI Popover/Menu anchorEl pattern needs ref.current after first render
         anchorEl={triggerRef.current}
         open={open}
         onClose={() => setOpen(false)}

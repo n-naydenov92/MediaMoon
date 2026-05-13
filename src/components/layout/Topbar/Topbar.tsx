@@ -4,7 +4,6 @@ import { memo, type ReactNode } from 'react'
 import AppBar from '@mui/material/AppBar'
 import Toolbar from '@mui/material/Toolbar'
 import IconButton from '@mui/material/IconButton'
-import Box from '@mui/material/Box'
 import MenuIcon from '@mui/icons-material/Menu'
 import ViewSidebarOutlinedIcon from '@mui/icons-material/ViewSidebarOutlined'
 import styles from './Topbar.module.css'
@@ -18,7 +17,7 @@ interface Props {
   readonly onShowSidebar?: () => void
 }
 
-function Topbar({
+export default memo(function Topbar({
   title,
   leftSlot,
   marketSlot,
@@ -49,13 +48,11 @@ function Topbar({
             <ViewSidebarOutlinedIcon fontSize="small" />
           </IconButton>
         )}
-        {leftSlot && <Box className={styles.leftSlot}>{leftSlot}</Box>}
-        <Box component="span" className={styles.title}>{title}</Box>
-        {marketSlot && <Box className={styles.marketSlot}>{marketSlot}</Box>}
-        <Box className={styles.rightSlot}>{rightSlot}</Box>
+        {leftSlot && <div className={styles.leftSlot}>{leftSlot}</div>}
+        <span className={styles.title}>{title}</span>
+        {marketSlot && <div className={styles.marketSlot}>{marketSlot}</div>}
+        <div className={styles.rightSlot}>{rightSlot}</div>
       </Toolbar>
     </AppBar>
   )
-}
-
-export default memo(Topbar)
+})

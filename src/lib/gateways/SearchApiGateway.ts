@@ -44,7 +44,7 @@ const MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000
 function parseDateSafe(dateStr?: string): string {
   if (!dateStr) return new Date().toISOString()
   const d = new Date(dateStr)
-  return Number.isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString()
+  return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString()
 }
 
 function isWithin30Days(pubDate: string): boolean {
@@ -78,13 +78,11 @@ export async function fetchFromSearchApi(
   const data = (await response.json()) as SearchApiResponse
 
   if (process.env.NODE_ENV === 'development') {
-    /* eslint-disable no-console -- dev-only debug logging */
     console.log('[SearchAPI] response keys:', Object.keys(data))
     console.log('[SearchAPI] news_results length:', data.news_results?.length ?? 'undefined')
     console.log('[SearchAPI] top_stories length:', data.top_stories?.length ?? 'undefined')
     console.log('[SearchAPI] organic_results length:', data.organic_results?.length ?? 'undefined')
     data.organic_results?.forEach((r, i) => console.log(`[SearchAPI] organic[${i}] iso_date=${r.iso_date ?? 'MISSING'} date=${r.date} title=${r.title?.slice(0, 40)}`))
-    /* eslint-enable no-console */
   }
 
   if (data.error) {
@@ -115,7 +113,6 @@ export async function fetchFromSearchApi(
     }))
 
   if (process.env.NODE_ENV === 'development') {
-    // eslint-disable-next-line no-console -- dev-only debug logging
     console.log(`[SearchAPI] returning: ${fromNews.length} from news/top_stories, ${fromOrganic.length} from organic`)
   }
 

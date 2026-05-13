@@ -71,11 +71,6 @@ export function toMetaInsightsParams(selection: DateRangeSelection): Record<stri
   }
 }
 
-const PREVIOUS_PRESET: Partial<Record<DatePreset, DatePreset>> = {
-  today: 'yesterday',
-  this_month: 'last_month',
-}
-
 export function previousPeriod(selection: DateRangeSelection): DateRangeSelection {
   if (selection.kind === 'custom') {
     return { kind: 'custom', range: shiftRangeBackwards(selection.range) }
@@ -85,6 +80,11 @@ export function previousPeriod(selection: DateRangeSelection): DateRangeSelectio
     return { kind: 'preset', preset }
   }
   return { kind: 'custom', range: shiftRangeBackwards(presetToRange(selection.preset)) }
+}
+
+const PREVIOUS_PRESET: Partial<Record<DatePreset, DatePreset>> = {
+  today: 'yesterday',
+  this_month: 'last_month',
 }
 
 function presetToRange(preset: DatePreset): CustomRange {
@@ -105,8 +105,7 @@ function presetToRange(preset: DatePreset): CustomRange {
       return { from: isoDate(addDays(today, -90)), to: isoDate(addDays(today, -1)) }
     case 'this_month':
       return { from: isoDate(firstOfMonth(today)), to: todayIso }
-    case 'last_month':
-    default: {
+    case 'last_month': {
       const firstThis = firstOfMonth(today)
       const lastPrev = addDays(firstThis, -1)
       return { from: isoDate(firstOfMonth(lastPrev)), to: isoDate(lastPrev) }

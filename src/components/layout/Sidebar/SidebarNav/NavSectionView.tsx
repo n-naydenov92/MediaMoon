@@ -1,7 +1,6 @@
 'use client'
 
 import { memo } from 'react'
-import Box from '@mui/material/Box'
 import type { NavSection, UserRole } from '@/types'
 import NavItemView from './NavItemView'
 import styles from './SidebarNav.module.css'
@@ -14,7 +13,7 @@ interface Props {
   readonly onDrillInto: (itemId: string) => void
 }
 
-function NavSectionView({
+export default memo(function NavSectionView({
   section,
   brandId,
   role,
@@ -27,24 +26,22 @@ function NavSectionView({
   }
 
   return (
-    <Box className={styles.section}>
+    <div className={styles.section}>
       {section.label !== '' && (
-        <Box component="span" className={styles.sectionLabel}>{section.label}</Box>
+        <span className={styles.sectionLabel}>{section.label}</span>
       )}
-      <Box component="ul" className={styles.items}>
+      <ul className={styles.items}>
         {accessibleItems.map((item) => (
-          <Box component="li" key={item.id}>
+          <li key={item.id}>
             <NavItemView
               item={item}
               brandId={brandId}
               pathname={pathname}
               onDrillInto={onDrillInto}
             />
-          </Box>
+          </li>
         ))}
-      </Box>
-    </Box>
+      </ul>
+    </div>
   )
-}
-
-export default memo(NavSectionView)
+})

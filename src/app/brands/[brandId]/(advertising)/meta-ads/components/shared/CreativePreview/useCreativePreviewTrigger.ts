@@ -41,8 +41,10 @@ export function useCreativePreviewTrigger<T extends HTMLElement>(
     }
   }, [adId, accountId, requestOpenImmediate])
 
-  useEffect(() => () => {
-    requestClose()
+  useEffect(() => {
+    return () => {
+      requestClose()
+    }
   }, [requestClose])
 
   if (isMobile) {

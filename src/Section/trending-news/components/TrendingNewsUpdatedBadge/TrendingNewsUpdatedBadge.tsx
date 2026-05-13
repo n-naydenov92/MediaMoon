@@ -12,7 +12,7 @@ import {
   pickLatestFetchedAt,
 } from '@/Section/trending-news/helpers'
 
-export default memo((): JSX.Element => {
+export default memo(function TrendingNewsUpdatedBadge(): JSX.Element {
   const { brandId, dataByKey, refresh, refreshAll } = useTrendingNewsContext()
   const { selectedMarket } = useBrandShellContext()
 

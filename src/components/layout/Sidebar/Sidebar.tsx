@@ -2,7 +2,6 @@
 
 import { memo, useState } from 'react'
 import { usePathname } from 'next/navigation'
-import Box from '@mui/material/Box'
 import type { BrandConfig, UserRole } from '@/types'
 import { LABELS } from '@/components/layout/labels'
 import { getActiveBrandId } from '@/lib/navigation'
@@ -24,7 +23,7 @@ interface Props {
   readonly hidden?: boolean
 }
 
-function Sidebar({
+export default memo(function Sidebar({
   brands,
   role,
   variant = 'fixed',
@@ -42,8 +41,7 @@ function Sidebar({
     variant === 'fixed' ? cssVars({ '--sidebar-width': `${resize.width}px` }) : undefined
 
   return (
-    <Box
-      component="aside"
+    <aside
       className={styles.root}
       data-variant={variant}
       data-hidden={hidden}
@@ -53,13 +51,13 @@ function Sidebar({
       aria-label={LABELS.sidebar.primaryNavAriaLabel}
       aria-hidden={hidden}
     >
-      <Box className={styles.brandSection}>
+      <div className={styles.brandSection}>
         <BrandSwitcher brands={brands} />
-      </Box>
+      </div>
 
-      <Box className={styles.searchSlot}>
+      <div className={styles.searchSlot}>
         <SidebarSearch value={searchQuery} onChange={setSearchQuery} />
-      </Box>
+      </div>
 
       {role !== null && <SidebarNav brandId={brandId} role={role} />}
 
@@ -76,8 +74,6 @@ function Sidebar({
           onClose={hideDesktopSidebar}
         />
       )}
-    </Box>
+    </aside>
   )
-}
-
-export default memo(Sidebar)
+})

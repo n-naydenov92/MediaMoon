@@ -2,7 +2,6 @@
 
 import { memo } from 'react'
 import { UserButton, useUser } from '@clerk/nextjs'
-import Box from '@mui/material/Box'
 import ThemeToggleButton from './ThemeToggleButton'
 import styles from './SidebarUserCard.module.css'
 
@@ -10,22 +9,20 @@ interface Props {
   readonly variant: 'fixed' | 'drawer'
 }
 
-function SidebarUserCard({ variant: _variant }: Props): JSX.Element {
+export default memo(function SidebarUserCard({ variant: _variant }: Props): JSX.Element {
   const { user } = useUser()
   const displayName =
     user?.fullName ?? user?.username ?? user?.primaryEmailAddress?.emailAddress ?? ''
 
   return (
-    <Box className={styles.root}>
-      <Box className={styles.avatar}>
+    <div className={styles.root}>
+      <div className={styles.avatar}>
         <UserButton afterSignOutUrl="/sign-in" />
-      </Box>
-      <Box component="span" className={styles.name} title={displayName}>
+      </div>
+      <span className={styles.name} title={displayName}>
         {displayName}
-      </Box>
+      </span>
       <ThemeToggleButton />
-    </Box>
+    </div>
   )
-}
-
-export default memo(SidebarUserCard)
+})

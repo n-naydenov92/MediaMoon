@@ -20,23 +20,15 @@ export default function LeaderboardRow({ entry }: Props): JSX.Element {
   return (
     <li
       className={styles.row}
-      // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- row exposed to keyboard navigation by design
       tabIndex={0}
-      // eslint-disable-next-line react-hooks/refs -- MUI Popover/Menu anchorEl pattern needs ref.current after first render
       onFocus={trigger.onFocus}
-      // eslint-disable-next-line react-hooks/refs -- MUI Popover/Menu anchorEl pattern needs ref.current after first render
       onBlur={trigger.onBlur}
     >
-      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events -- keyboard handled via focus/blur */}
       <div
-        // eslint-disable-next-line react-hooks/refs -- MUI Popover/Menu anchorEl pattern needs ref.current after first render
         ref={trigger.ref}
         className={styles.thumbnailWrap}
-        // eslint-disable-next-line react-hooks/refs -- MUI Popover/Menu anchorEl pattern needs ref.current after first render
         onPointerEnter={trigger.onPointerEnter}
-        // eslint-disable-next-line react-hooks/refs -- MUI Popover/Menu anchorEl pattern needs ref.current after first render
         onPointerLeave={trigger.onPointerLeave}
-        // eslint-disable-next-line react-hooks/refs -- MUI Popover/Menu anchorEl pattern needs ref.current after first render
         onClick={trigger.onClick}
       >
         <AdThumbnail src={entry.thumbnailUrl} alt={entry.name} type={entry.creativeType} />

@@ -15,19 +15,21 @@ interface Props {
 /**
  * Error display panel with optional retry action.
  */
-export default memo(({ title, message, onRetry }: Props): JSX.Element => (
-  <Alert
-    severity="error"
-    variant="outlined"
-    action={
-      onRetry ? (
-        <Button color="inherit" size="small" onClick={onRetry}>
-          {LABELS.errorPanel.retry}
-        </Button>
-      ) : null
-    }
-  >
-    <AlertTitle>{title}</AlertTitle>
-    {message}
-  </Alert>
-))
+export default memo(function ErrorPanel({ title, message, onRetry }: Props): JSX.Element {
+  return (
+    <Alert
+      severity="error"
+      variant="outlined"
+      action={
+        onRetry ? (
+          <Button color="inherit" size="small" onClick={onRetry}>
+            {LABELS.errorPanel.retry}
+          </Button>
+        ) : null
+      }
+    >
+      <AlertTitle>{title}</AlertTitle>
+      {message}
+    </Alert>
+  )
+})

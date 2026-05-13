@@ -2,20 +2,21 @@
 
 import { memo, useCallback, useId, useRef, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import Box from '@mui/material/Box'
 import type { BrandConfig } from '@/types'
 import { LABELS } from '@/components/layout/labels'
 import { resolveActiveBrand } from '@/lib/navigation'
-import { useDismissPopover } from '@/components/layout/hooks/useDismissPopover'
 import BrandSwitcherTrigger from './BrandSwitcherTrigger'
 import BrandMenu from './BrandMenu'
+import { useDismissPopover } from '@/components/layout/hooks/useDismissPopover'
 import styles from './BrandSwitcher.module.css'
 
 interface Props {
   readonly brands: readonly BrandConfig[]
 }
 
-function BrandSwitcher({ brands }: Props): JSX.Element {
+export default memo(function BrandSwitcher({
+  brands,
+}: Props): JSX.Element {
   const pathname = usePathname()
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
@@ -57,7 +58,7 @@ function BrandSwitcher({ brands }: Props): JSX.Element {
   useDismissPopover(rootRef, isOpen, dismiss)
 
   return (
-    <Box className={styles.root} ref={rootRef}>
+    <div className={styles.root} ref={rootRef}>
       <BrandSwitcherTrigger
         activeBrand={activeBrand}
         triggerLabel={triggerLabel}
@@ -74,8 +75,6 @@ function BrandSwitcher({ brands }: Props): JSX.Element {
           onSelect={navigateToBrand}
         />
       )}
-    </Box>
+    </div>
   )
-}
-
-export default memo(BrandSwitcher)
+})

@@ -1,7 +1,6 @@
 'use client'
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import Box from '@mui/material/Box'
 import SearchIcon from '@mui/icons-material/Search'
 import { ALL_MARKETS, type MarketSelection } from '@/lib/markets'
 import { MARKET_LABELS } from '@/lib/marketLabels'
@@ -18,7 +17,7 @@ interface Props {
 
 const SEARCH_PLACEHOLDER = 'Find market…'
 
-function MarketMenu({
+const MarketMenu = memo(function MarketMenu({
   id,
   options,
   selected,
@@ -54,11 +53,10 @@ function MarketMenu({
   }, [])
 
   return (
-    <Box id={id} className={styles.menu}>
-      <Box className={styles.searchRow}>
+    <div id={id} className={styles.menu}>
+      <div className={styles.searchRow}>
         <SearchIcon className={styles.searchIcon} fontSize="small" />
-        <Box
-          component="input"
+        <input
           ref={inputRef}
           type="text"
           className={styles.searchInput}
@@ -67,10 +65,10 @@ function MarketMenu({
           onChange={handleQueryChange}
           aria-label={SEARCH_PLACEHOLDER}
         />
-        <Box component="span" className={styles.escBadge} aria-hidden="true">Esc</Box>
-      </Box>
+        <span className={styles.escBadge} aria-hidden="true">Esc</span>
+      </div>
 
-      <Box component="ul" role="listbox" aria-label={ariaLabel} className={styles.list}>
+      <ul role="listbox" aria-label={ariaLabel} className={styles.list}>
         {!hasQuery && (
           <>
             <MarketMenuItem
@@ -78,7 +76,7 @@ function MarketMenu({
               isSelected={selected === ALL_MARKETS}
               onSelect={onSelect}
             />
-            <Box component="li" className={styles.separator} role="separator" />
+            <li className={styles.separator} role="separator" />
           </>
         )}
         {filteredMarkets.map((value) => (
@@ -89,9 +87,9 @@ function MarketMenu({
             onSelect={onSelect}
           />
         ))}
-      </Box>
-    </Box>
+      </ul>
+    </div>
   )
-}
+})
 
-export default memo(MarketMenu)
+export default MarketMenu

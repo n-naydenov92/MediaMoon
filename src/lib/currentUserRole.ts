@@ -13,7 +13,7 @@ export async function getCurrentUserRole(): Promise<UserRole | null> {
     return null
   }
 
-  const fromClaims = parseRole(session.sessionClaims?.role)
+  const fromClaims = parseRole(session.sessionClaims?.['role'])
   if (fromClaims) {
     return fromClaims
   }
@@ -22,5 +22,5 @@ export async function getCurrentUserRole(): Promise<UserRole | null> {
   if (!user) {
     return null
   }
-  return parseRole(user.publicMetadata.role)
+  return parseRole(user.publicMetadata['role'])
 }

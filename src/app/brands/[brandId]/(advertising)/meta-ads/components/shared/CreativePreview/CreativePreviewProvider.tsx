@@ -73,7 +73,6 @@ export default function CreativePreviewProvider({ children }: Props): JSX.Elemen
       const controller = new AbortController()
       inFlightRef.current.set(adId, controller)
       cacheRef.current.set(adId, { status: 'loading' })
-      // eslint-disable-next-line @typescript-eslint/no-use-before-define -- function defined later in file
       setState((prev) => (openAdIdRef.current === adId ? { status: 'loading' } : prev))
 
       try {
@@ -104,14 +103,12 @@ export default function CreativePreviewProvider({ children }: Props): JSX.Elemen
           ? { status: 'success', data: parsed.data }
           : { status: 'no-content', data: parsed.data }
         cacheRef.current.set(adId, next)
-        // eslint-disable-next-line @typescript-eslint/no-use-before-define -- function defined later in file
         setState((prev) => (openAdIdRef.current === adId ? next : prev))
       } catch (err) {
         if (controller.signal.aborted) return
         const message = err instanceof Error ? err.message : 'Failed to load preview'
         const fail: CreativePreviewState = { status: 'error', message }
         cacheRef.current.set(adId, fail)
-        // eslint-disable-next-line @typescript-eslint/no-use-before-define -- function defined later in file
         setState((prev) => (openAdIdRef.current === adId ? fail : prev))
       } finally {
         inFlightRef.current.delete(adId)
@@ -122,7 +119,6 @@ export default function CreativePreviewProvider({ children }: Props): JSX.Elemen
 
   const openAdIdRef = useRef<string | null>(null)
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/immutability -- legacy pattern
     openAdIdRef.current = openAdId
   }, [openAdId])
 
@@ -199,10 +195,12 @@ export default function CreativePreviewProvider({ children }: Props): JSX.Elemen
     setState({ status: 'idle' })
   }, [clearTimers])
 
-  useEffect(() => () => {
-    clearTimers()
-    inFlightRef.current.forEach((c) => c.abort())
-    inFlightRef.current.clear()
+  useEffect(() => {
+    return () => {
+      clearTimers()
+      inFlightRef.current.forEach((c) => c.abort())
+      inFlightRef.current.clear()
+    }
   }, [clearTimers])
 
   const value = useMemo<ContextValue>(

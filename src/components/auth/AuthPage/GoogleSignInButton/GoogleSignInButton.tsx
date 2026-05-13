@@ -1,7 +1,6 @@
 'use client'
 
 import type { MouseEvent } from 'react'
-import Box from '@mui/material/Box'
 import { GoogleIcon } from '../icons'
 import styles from './GoogleSignInButton.module.css'
 
@@ -21,15 +20,14 @@ export default function GoogleSignInButton({
   }
 
   return (
-    <Box
-      component="button"
+    <button
       type="button"
       className={styles.button}
       disabled={disabled}
       onClick={handleClick}
     >
       <GoogleIcon className={styles.icon} />
-      <Box component="span" className={styles.label}>{label}</Box>
-    </Box>
+      <span className={styles.label}>{label}</span>
+    </button>
   )
 }

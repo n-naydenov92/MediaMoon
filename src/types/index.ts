@@ -75,10 +75,10 @@ export interface NavPanel {
 // ─── Brand Registry ──────────────────────────────────────────────────────────
 
 export interface BrandConfig {
-  readonly id: string // URL-safe slug: 'stoitchkov'
-  readonly label: string // 'Stoitchkov Nutrition'
-  readonly emoji: string // '💪'
-  readonly color: string // '#FF6B35'
+  readonly id: string           // URL-safe slug: 'stoitchkov'
+  readonly label: string        // 'Stoitchkov Nutrition'
+  readonly emoji: string        // '💪'
+  readonly color: string        // '#FF6B35'
   readonly description: string
   readonly markets: readonly Market[]
 }

@@ -1,7 +1,6 @@
 'use client'
 
 import { memo } from 'react'
-import Box from '@mui/material/Box'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import EmojiEventsOutlined from '@mui/icons-material/EmojiEventsOutlined'
@@ -16,11 +15,11 @@ interface Props {
   readonly clusters: readonly NewsCluster[]
 }
 
-function HighlightsSidebar({ clusters }: Props): JSX.Element {
+export default memo(function HighlightsSidebar({ clusters }: Props): JSX.Element {
   const top = pickTop(clusters)
 
   return (
-    <Box className={styles.sidebar}>
+    <div className={styles.sidebar}>
       <Stack spacing={3}>
         <Stack direction="row" spacing={2} alignItems="center">
           <EmojiEventsOutlined fontSize="small" className={styles.headerIcon} />
@@ -40,11 +39,9 @@ function HighlightsSidebar({ clusters }: Props): JSX.Element {
           ))}
         </Stack>
       </Stack>
-    </Box>
+    </div>
   )
-}
-
-export default memo(HighlightsSidebar)
+})
 
 function pickTop(clusters: readonly NewsCluster[]): readonly NewsCluster[] {
   return [...clusters].sort((a, b) => b.score - a.score).slice(0, TOP_N)

@@ -21,7 +21,7 @@ function isCtaType(v: string): v is CtaType {
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const resolved = resolveBrandTokenFromRequest(request)
   if (!resolved.ok) return resolved.response
-  const { token } = resolved
+  const token = resolved.token
 
   const form = await request.formData()
 

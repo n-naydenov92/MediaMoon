@@ -13,7 +13,7 @@ interface Props {
   readonly title: string
   readonly icon: ReactNode
   readonly status: ChannelStatus
-  readonly tileCount?: 5 | 6
+  readonly tileCount: 5 | 6
   readonly children: ReactNode
   readonly notWiredMessage?: string
 }
@@ -50,18 +50,12 @@ export default function ChannelSection({
     <Card variant="outlined" className={styles.card}>
       <CardHeader title={headerTitle} className={styles.header} disableTypography />
       <CardContent className={styles.content}>
-        {tileCount ? (
-          <Box
-            className={`${styles.kpiGrid} ${status === 'not-wired' ? styles.dimmed : ''}`.trim()}
-            data-cols={String(tileCount)}
-          >
-            {children}
-          </Box>
-        ) : (
-          <Box className={status === 'not-wired' ? styles.dimmed : undefined}>
-            {children}
-          </Box>
-        )}
+        <Box
+          className={`${styles.kpiGrid} ${status === 'not-wired' ? styles.dimmed : ''}`.trim()}
+          data-cols={String(tileCount)}
+        >
+          {children}
+        </Box>
         {status === 'not-wired' && notWiredMessage && (
           <Alert severity="info" variant="outlined" className={styles.notWiredNote}>
             {notWiredMessage}

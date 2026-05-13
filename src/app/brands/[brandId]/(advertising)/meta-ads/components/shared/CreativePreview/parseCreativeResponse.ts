@@ -22,25 +22,25 @@ export interface ParsedCreative {
 
 export function parseCreativeResponse(adId: string, raw: ApiResponse): ParsedCreative {
   const ad = raw.ad ?? {}
-  const creative = (ad.creative as Record<string, unknown> | undefined) ?? {}
-  const storySpec = creative.object_story_spec as Record<string, unknown> | undefined
-  const linkData = storySpec?.link_data as Record<string, unknown> | undefined
-  const videoData = storySpec?.video_data as Record<string, unknown> | undefined
-  const photoData = storySpec?.photo_data as Record<string, unknown> | undefined
-  const childAttachments = linkData?.child_attachments as
-    | Record<string, unknown>[]
+  const creative = (ad['creative'] as Record<string, unknown> | undefined) ?? {}
+  const storySpec = creative['object_story_spec'] as Record<string, unknown> | undefined
+  const linkData = storySpec?.['link_data'] as Record<string, unknown> | undefined
+  const videoData = storySpec?.['video_data'] as Record<string, unknown> | undefined
+  const photoData = storySpec?.['photo_data'] as Record<string, unknown> | undefined
+  const childAttachments = linkData?.['child_attachments'] as
+    | Array<Record<string, unknown>>
     | undefined
   const firstChild = childAttachments?.[0]
-  const assetFeed = creative.asset_feed_spec as Record<string, unknown> | undefined
-  const assetBodies = assetFeed?.bodies as { text?: string }[] | undefined
-  const assetTitles = assetFeed?.titles as { text?: string }[] | undefined
-  const assetDescriptions = assetFeed?.descriptions as { text?: string }[] | undefined
+  const assetFeed = creative['asset_feed_spec'] as Record<string, unknown> | undefined
+  const assetBodies = assetFeed?.['bodies'] as Array<{ text?: string }> | undefined
+  const assetTitles = assetFeed?.['titles'] as Array<{ text?: string }> | undefined
+  const assetDescriptions = assetFeed?.['descriptions'] as Array<{ text?: string }> | undefined
   const callToActionObj =
-    (linkData?.call_to_action as Record<string, unknown> | undefined) ??
-    (videoData?.call_to_action as Record<string, unknown> | undefined) ??
-    (creative.call_to_action as Record<string, unknown> | undefined)
-  const ctaTypeFromObj = callToActionObj?.type as string | undefined
-  const ctaTypeFromAsset = pickFirstAssetCtaType(creative.asset_feed_spec)
+    (linkData?.['call_to_action'] as Record<string, unknown> | undefined) ??
+    (videoData?.['call_to_action'] as Record<string, unknown> | undefined) ??
+    (creative['call_to_action'] as Record<string, unknown> | undefined)
+  const ctaTypeFromObj = callToActionObj?.['type'] as string | undefined
+  const ctaTypeFromAsset = pickFirstAssetCtaType(creative['asset_feed_spec'])
   const ctaType = ctaTypeFromObj ?? ctaTypeFromAsset
 
   const previewRaw = raw.post_preview ?? {}
@@ -48,52 +48,52 @@ export function parseCreativeResponse(adId: string, raw: ApiResponse): ParsedCre
   const preview = previewHasError ? {} : previewRaw
 
   const attachment = extractFirstAttachment(preview)
-  const previewFrom = preview.from as { name?: string; id?: string } | undefined
-  const previewStory = preview.story as Record<string, unknown> | undefined
-  const storyFrom = previewStory?.from as { name?: string; id?: string } | undefined
+  const previewFrom = preview['from'] as { name?: string; id?: string } | undefined
+  const previewStory = preview['story'] as Record<string, unknown> | undefined
+  const storyFrom = previewStory?.['from'] as { name?: string; id?: string } | undefined
 
-  const storyId = pickString(creative.effective_object_story_id)
+  const storyId = pickString(creative['effective_object_story_id'])
   const pageIdFromStoryId = storyId?.includes('_') ? storyId.split('_')[0] : undefined
 
   const pageId =
-    (storySpec?.page_id as string | undefined) ??
+    (storySpec?.['page_id'] as string | undefined) ??
     previewFrom?.id ??
     storyFrom?.id ??
     pageIdFromStoryId ??
     null
 
   const body =
-    pickString(linkData?.message) ??
-    pickString(videoData?.message) ??
-    pickString(photoData?.message) ??
-    pickString(creative.body) ??
-    pickString(preview.message) ??
+    pickString(linkData?.['message']) ??
+    pickString(videoData?.['message']) ??
+    pickString(photoData?.['message']) ??
+    pickString(creative['body']) ??
+    pickString(preview['message']) ??
     pickString(assetBodies?.[0]?.text)
 
   const headline =
-    pickString(linkData?.name) ??
-    pickString(videoData?.title) ??
-    pickString(creative.title) ??
+    pickString(linkData?.['name']) ??
+    pickString(videoData?.['title']) ??
+    pickString(creative['title']) ??
     pickString(attachment?.title) ??
-    pickString(firstChild?.name) ??
+    pickString(firstChild?.['name']) ??
     pickString(assetTitles?.[0]?.text)
 
   const description =
-    pickString(linkData?.description) ??
-    pickString(videoData?.link_description) ??
+    pickString(linkData?.['description']) ??
+    pickString(videoData?.['link_description']) ??
     pickString(attachment?.description) ??
-    pickString(firstChild?.description) ??
+    pickString(firstChild?.['description']) ??
     pickString(assetDescriptions?.[0]?.text)
 
   const imageUrl =
-    pickString(preview.full_picture) ??
+    pickString(preview['full_picture']) ??
     pickString(attachment?.media?.image?.src) ??
-    pickString(creative.image_url) ??
-    pickString(creative.thumbnail_url)
+    pickString(creative['image_url']) ??
+    pickString(creative['thumbnail_url'])
 
   const data: CreativePreviewData = {
     adId,
-    adName: pickString(ad.name) ?? '',
+    adName: pickString(ad['name']) ?? '',
     pageName: previewFrom?.name ?? storyFrom?.name ?? null,
     pageAvatarUrl: pageId ? `https://graph.facebook.com/${pageId}/picture?type=square` : null,
     body: body ?? null,
@@ -116,7 +116,7 @@ function pickString(value: unknown): string | undefined {
 }
 
 function extractFirstAttachment(preview: Record<string, unknown>): PostAttachment | null {
-  const attachments = preview.attachments as { data?: PostAttachment[] } | undefined
+  const attachments = preview['attachments'] as { data?: PostAttachment[] } | undefined
   const first = attachments?.data?.[0]
   if (!first) return null
   const subFirst = first.subattachments?.data?.[0]

@@ -13,7 +13,7 @@ interface Props {
 /**
  * Renders news content for a single market of the active brand's topic.
  */
-export default memo(({ market }: Props): JSX.Element => {
+export default memo(function MarketPanel({ market }: Props): JSX.Element {
   const { brandId, dataByKey, refresh } = useTrendingNewsContext()
   const state: AsyncState<NewsResult> =
     dataByKey.get(cacheKey(brandId, market)) ?? { status: 'idle' }

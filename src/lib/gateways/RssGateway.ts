@@ -67,7 +67,7 @@ async function fetchXml(url: string): Promise<string> {
     if (!response.ok) {
       throw new Error(`RSS fetch failed: ${response.status} ${response.statusText}`)
     }
-    return await response.text()
+    return response.text()
   } finally {
     clearTimeout(timer)
   }

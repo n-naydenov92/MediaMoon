@@ -15,10 +15,10 @@ const SYSTEM_PROMPT =
   'clusters. Respond with valid JSON only — no markdown, no commentary.'
 
 interface ClaudeClusterResponse {
-  clusters: {
+  clusters: Array<{
     representative_title: string
     article_indexes: number[]
-  }[]
+  }>
 }
 
 export interface RawCluster {
@@ -65,7 +65,7 @@ async function callClaude(articles: readonly RssArticle[]): Promise<ClaudeCluste
 }
 
 function getClient(): Anthropic {
-  const apiKey = process.env.ANTHROPIC_API_KEY
+  const apiKey = process.env['ANTHROPIC_API_KEY']
   if (!apiKey) {
     throw new Error('ANTHROPIC_API_KEY is not set')
   }

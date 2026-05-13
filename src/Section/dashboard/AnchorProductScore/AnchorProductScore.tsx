@@ -10,14 +10,12 @@ import Typography from '@mui/material/Typography'
 import { formatEur, formatPercentage } from '@/lib/meta/fx'
 import type { DashboardTopProduct } from '@/types/dashboard'
 import { decodeProductTitle } from '../shared/productTitle'
-import SkeletonRows from '../shared/SkeletonRows'
 import styles from './AnchorProductScore.module.css'
 
 interface Props {
   readonly products: readonly DashboardTopProduct[]
   readonly storeAov: number | null
   readonly hasCommerce: boolean
-  readonly loading?: boolean
 }
 
 const TOP_N = 8
@@ -35,7 +33,6 @@ function AnchorProductScore({
   products,
   storeAov,
   hasCommerce,
-  loading = false,
 }: Props): JSX.Element {
   const rows = useMemo<readonly AnchorRow[]>(() => {
     const enriched = products
@@ -51,21 +48,6 @@ function AnchorProductScore({
     enriched.sort((a, b) => b.anchorAov - a.anchorAov)
     return enriched.slice(0, TOP_N)
   }, [products, storeAov])
-
-  if (loading) {
-    return (
-      <Card variant="outlined" className={styles.card}>
-        <CardHeader
-          title="Anchor Product Score"
-          titleTypographyProps={{ variant: 'subtitle1', className: styles.title }}
-          className={styles.header}
-        />
-        <Box className={styles.content}>
-          <SkeletonRows />
-        </Box>
-      </Card>
-    )
-  }
 
   if (!hasCommerce) {
     return (

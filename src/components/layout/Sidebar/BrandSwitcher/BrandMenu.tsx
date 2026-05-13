@@ -1,7 +1,6 @@
 'use client'
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import Box from '@mui/material/Box'
 import type { BrandConfig } from '@/types'
 import { LABELS } from '@/components/layout/labels'
 import BrandMenuItem from './BrandMenuItem'
@@ -16,7 +15,7 @@ interface Props {
   readonly onSelect: (brandId: string | null) => void
 }
 
-function BrandMenu({
+const BrandMenu = memo(function BrandMenu({
   id,
   brands,
   activeBrand,
@@ -46,7 +45,7 @@ function BrandMenu({
   }, [])
 
   return (
-    <Box id={id} className={styles.menu}>
+    <div id={id} className={styles.menu}>
       <BrandMenuSearch
         value={searchQuery}
         inputRef={inputRef}
@@ -54,8 +53,7 @@ function BrandMenu({
       />
 
       {hasMatches ? (
-        <Box
-          component="ul"
+        <ul
           role="listbox"
           aria-label={LABELS.sidebar.selectBrand}
           className={styles.list}
@@ -67,7 +65,7 @@ function BrandMenu({
                 isSelected={activeBrand === null}
                 onSelect={() => onSelect(null)}
               />
-              <Box component="li" className={styles.separator} role="separator" />
+              <li className={styles.separator} role="separator" />
             </>
           )}
           {filteredBrands.map((brand) => (
@@ -78,12 +76,12 @@ function BrandMenu({
               onSelect={() => onSelect(brand.id)}
             />
           ))}
-        </Box>
+        </ul>
       ) : (
         <BrandMenuEmpty query={searchQuery} />
       )}
-    </Box>
+    </div>
   )
-}
+})
 
-export default memo(BrandMenu)
+export default BrandMenu

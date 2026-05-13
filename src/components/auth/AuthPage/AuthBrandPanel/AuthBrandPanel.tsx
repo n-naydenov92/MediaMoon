@@ -1,4 +1,3 @@
-import Box from '@mui/material/Box'
 import { LABELS } from '@/components/layout/labels'
 import styles from './AuthBrandPanel.module.css'
 
@@ -28,30 +27,28 @@ const STATUS_LABEL: Record<ModuleStatus, string> = {
 
 export default function AuthBrandPanel(): JSX.Element {
   return (
-    <Box component="aside" className={styles.panel} aria-label="MediaMon">
-      <Box className={styles.pattern} aria-hidden="true" />
-      <Box className={styles.wordmark}>{LABELS.app.name}</Box>
+    <aside className={styles.panel} aria-label="MediaMon">
+      <div className={styles.pattern} aria-hidden="true" />
+      <div className={styles.wordmark}>{LABELS.app.name}</div>
 
-      <Box className={styles.modules}>
-        <Box className={styles.modulesHeader}>Modules</Box>
-        <Box component="ul" className={styles.moduleList}>
+      <div className={styles.modules}>
+        <div className={styles.modulesHeader}>Modules</div>
+        <ul className={styles.moduleList}>
           {MODULES.map((module) => (
-            <Box component="li" key={module.name} className={styles.moduleRow}>
-              <Box component="span" className={styles.moduleName}>{module.name}</Box>
-              <Box component="span" className={styles[`status_${module.status}`]}>
+            <li key={module.name} className={styles.moduleRow}>
+              <span className={styles.moduleName}>{module.name}</span>
+              <span className={styles[`status_${module.status}`]}>
                 {STATUS_LABEL[module.status]}
-              </Box>
-            </Box>
+              </span>
+            </li>
           ))}
-        </Box>
-      </Box>
+        </ul>
+      </div>
 
-      <Box component="blockquote" className={styles.quote}>
-        <Box component="p" className={styles.quoteText}>{BRAND_QUOTE}</Box>
-        <Box component="footer" className={styles.attribution}>
-          {BRAND_QUOTE_ATTRIBUTION}
-        </Box>
-      </Box>
-    </Box>
+      <blockquote className={styles.quote}>
+        <p className={styles.quoteText}>{BRAND_QUOTE}</p>
+        <footer className={styles.attribution}>{BRAND_QUOTE_ATTRIBUTION}</footer>
+      </blockquote>
+    </aside>
   )
 }

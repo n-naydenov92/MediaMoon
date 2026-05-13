@@ -9,11 +9,11 @@ import { useMobileNav } from '@/components/layout/AppShell/MobileNavContext'
 import { findModuleById } from '@/config/modules'
 import { extractModuleId } from './helpers'
 
-const BrandTopbar = memo((): JSX.Element => {
+const BrandTopbar = memo(function BrandTopbar(): JSX.Element {
   const pathname = usePathname()
   const moduleId = extractModuleId(pathname)
-  const activeModule = moduleId ? findModuleById(moduleId) : null
-  const title = activeModule?.label ?? ''
+  const module = moduleId ? findModuleById(moduleId) : null
+  const title = module?.label ?? ''
   const {
     openMobileNav,
     desktopSidebarHidden,
