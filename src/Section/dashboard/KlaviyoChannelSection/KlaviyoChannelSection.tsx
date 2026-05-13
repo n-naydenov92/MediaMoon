@@ -11,7 +11,7 @@ import { formatInteger, formatMoney, formatRate } from '../shared/dashboardForma
 import { pctDelta } from '../shared/metricsDelta'
 import EngagementTile from './EngagementTile/EngagementTile'
 import HeroWithBreakdown from './HeroWithBreakdown/HeroWithBreakdown'
-import { absolutePercent, shareOfTotal } from './KlaviyoChannelSection.helpers'
+import { absolutePercent, shareOfTotal } from './helpers'
 import styles from './KlaviyoChannelSection.module.css'
 
 interface Props {

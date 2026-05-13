@@ -26,7 +26,7 @@ import {
   shortMoney,
   THIRD_METRICS,
   type ThirdMetric,
-} from './DashboardChart.helpers'
+} from './helpers'
 import { renderChartTooltip } from './DashboardChartTooltip/DashboardChartTooltip'
 import DashboardChartLegend from '../DashboardChartLegend/DashboardChartLegend'
 import styles from './DashboardChart.module.css'

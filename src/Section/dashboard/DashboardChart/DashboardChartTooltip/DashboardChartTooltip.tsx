@@ -3,7 +3,7 @@ import Card from '@mui/material/Card'
 import Typography from '@mui/material/Typography'
 import type { TooltipContentProps } from 'recharts'
 import { formatEur } from '@/lib/meta/fx'
-import type { ChartRow, MetricSpec } from '../DashboardChart.helpers'
+import type { ChartRow, MetricSpec } from '../helpers'
 import styles from '../DashboardChart.module.css'
 
 export function renderChartTooltip(

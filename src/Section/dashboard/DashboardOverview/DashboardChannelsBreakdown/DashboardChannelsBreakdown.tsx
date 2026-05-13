@@ -1,6 +1,5 @@
 import Box from '@mui/material/Box'
 import type {
-  AdChannelStats,
   DashboardChannels,
   DashboardChannelsByDay,
   KlaviyoBucketStats,
@@ -10,6 +9,7 @@ import type {
 import GoogleAdsChannelSection from '../GoogleAdsChannelSection/GoogleAdsChannelSection'
 import KlaviyoChannelSection from '../../KlaviyoChannelSection/KlaviyoChannelSection'
 import MetaChannelSection from '../MetaChannelSection/MetaChannelSection'
+import { deriveAdChannel } from './helpers'
 import styles from './DashboardChannelsBreakdown.module.css'
 
 interface Props {
@@ -35,26 +35,6 @@ const EMPTY_KLAVIYO: KlaviyoChannelStats = {
   total: EMPTY_KLAVIYO_BUCKET,
   flows: EMPTY_KLAVIYO_BUCKET,
   campaigns: EMPTY_KLAVIYO_BUCKET,
-}
-
-function deriveAdChannel(
-  channel: 'meta' | 'googleAds',
-  spendBreakdown: readonly SpendBreakdownPoint[],
-): AdChannelStats {
-  const point = spendBreakdown.find((p) => p.channel === channel)
-  const spend = point?.spend ?? null
-  const wired = spend !== null && spend > 0
-  return {
-    wired,
-    spend: wired ? spend : null,
-    revenue: null,
-    roas: null,
-    orders: null,
-    cpo: null,
-    ctr: null,
-    checkoutRate: null,
-    costPerVisitor: null,
-  }
 }
 
 export default function DashboardChannelsBreakdown({

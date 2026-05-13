@@ -28,6 +28,7 @@ import DashboardProductsBreakdown from './DashboardProductsBreakdown/DashboardPr
 import DashboardSpendBreakdown from '../DashboardSpendBreakdown/DashboardSpendBreakdown'
 import { buildDashboardCrumbs } from './dashboardCrumbs'
 import KpiSkeletons from './KpiSkeletons/KpiSkeletons'
+import { isSingleDayRange } from './helpers'
 import styles from './DashboardOverview.module.css'
 
 interface Props {
@@ -266,11 +267,4 @@ export default function DashboardOverview({ brand }: Props): JSX.Element {
       />
     </Stack>
   )
-}
-
-function isSingleDayRange(selection: ReturnType<typeof parseDateRangeFromQuery>): boolean {
-  if (selection.kind === 'preset') {
-    return selection.preset === 'today' || selection.preset === 'yesterday'
-  }
-  return selection.range.from === selection.range.to
 }

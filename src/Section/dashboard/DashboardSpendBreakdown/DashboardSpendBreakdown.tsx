@@ -16,13 +16,13 @@ import {
 import {
   PALETTE_DARK,
   PALETTE_LIGHT,
-  type ChartPalette,
 } from '@/app/brands/[brandId]/(advertising)/meta-ads/components/overview/spendChartPalette'
 import { formatEur, formatPercentage } from '@/lib/meta/fx'
 import { useThemeMode } from '@/styles/useThemeMode'
-import type { SpendBreakdownPoint, SpendChannel } from '@/types/dashboard'
+import type { SpendBreakdownPoint } from '@/types/dashboard'
 import RechartsTooltipShell from '../shared/RechartsTooltipShell/RechartsTooltipShell'
 import SpendBreakdownLegendRow from './SpendBreakdownLegendRow/SpendBreakdownLegendRow'
+import { channelColor } from './helpers'
 import styles from './DashboardSpendBreakdown.module.css'
 
 interface Props {
@@ -104,16 +104,6 @@ export default function DashboardSpendBreakdown({ breakdown }: Props): JSX.Eleme
       </CardContent>
     </Card>
   )
-}
-
-function channelColor(channel: SpendChannel, palette: ChartPalette): string {
-  if (channel === 'meta') {
-    return palette.channelMeta
-  }
-  if (channel === 'googleAds') {
-    return palette.channelGoogle
-  }
-  return palette.channelTiktok
 }
 
 function renderTooltip(total: number): (props: TooltipContentProps) => JSX.Element | null {

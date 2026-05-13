@@ -7,10 +7,11 @@ import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
-import { formatEur, formatPercentage } from '@/lib/meta/fx'
+import { formatEur } from '@/lib/meta/fx'
 import type { DashboardTopProduct } from '@/types/dashboard'
 import { decodeProductTitle } from '../shared/productTitle'
 import SkeletonRows from '../shared/SkeletonRows/SkeletonRows'
+import { formatDelta, tierFor } from './helpers'
 import styles from './AnchorProductScore.module.css'
 
 interface Props {
@@ -149,33 +150,3 @@ export default memo(function AnchorProductScore({
     </Card>
   )
 })
-
-function tierFor(delta: number | null): 'anchor' | 'solo' | 'neutral' {
-  if (delta === null) {
-    return 'neutral'
-  }
-  if (delta >= 0.1) {
-    return 'anchor'
-  }
-  if (delta <= -0.1) {
-    return 'solo'
-  }
-  return 'neutral'
-}
-
-function formatDelta(delta: number | null): string {
-  if (delta === null) {
-    return '—'
-  }
-  return `${arrowForDelta(delta)} ${formatPercentage(Math.abs(delta), 0)} vs store`
-}
-
-function arrowForDelta(delta: number): string {
-  if (delta > 0) {
-    return '↗'
-  }
-  if (delta < 0) {
-    return '↘'
-  }
-  return '→'
-}

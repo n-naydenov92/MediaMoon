@@ -8,11 +8,11 @@ import Typography from '@mui/material/Typography'
 import {
   PALETTE_DARK,
   PALETTE_LIGHT,
-  type ChartPalette,
 } from '@/app/brands/[brandId]/(advertising)/meta-ads/components/overview/spendChartPalette'
 import { formatPercentage } from '@/lib/meta/fx'
 import { useThemeMode } from '@/styles/useThemeMode'
 import type { FunnelStage } from '@/types/dashboard'
+import { stageColor, tierForConversion } from './helpers'
 import styles from './AnalyticsFunnel.module.css'
 
 interface Props {
@@ -90,30 +90,3 @@ export default memo(function AnalyticsFunnel({ stages }: Props): JSX.Element {
     </Box>
   )
 })
-
-function tierForConversion(conversion: number): 'good' | 'bad' | 'idle' {
-  if (conversion >= 0.5) {
-    return 'good'
-  }
-  if (conversion < 0.1) {
-    return 'bad'
-  }
-  return 'idle'
-}
-
-function stageColor(key: FunnelStage['key'], palette: ChartPalette): string {
-  switch (key) {
-    case 'homePage':
-      return palette.channelMeta
-    case 'productPage':
-      return palette.metric
-    case 'addToCart':
-      return palette.channelTiktok
-    case 'initiateCheckout':
-      return '#ef4444'
-    case 'purchase':
-      return '#22c55e'
-    default:
-      return palette.channelMeta
-  }
-}

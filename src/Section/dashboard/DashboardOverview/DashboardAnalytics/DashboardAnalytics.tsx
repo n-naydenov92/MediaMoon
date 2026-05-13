@@ -18,7 +18,7 @@ import {
   cartARSelector,
   computeArpu,
   deriveAnalyticsKpis,
-} from './DashboardAnalytics.helpers'
+} from './helpers'
 import BreakdownCard from '../../shared/BreakdownCard/BreakdownCard'
 import {
   formatInteger,
