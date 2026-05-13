@@ -3,6 +3,13 @@
 import { memo, useCallback, useEffect, useRef } from 'react'
 import Box from '@mui/material/Box'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
+import {
+  computeResizeStep,
+  lockGlobalCursor,
+  unlockGlobalCursor,
+  type DragState,
+  type ResizeBounds,
+} from './helpers'
 import styles from './SidebarResizeHandle.module.css'
 
 interface Props {
@@ -13,50 +20,6 @@ interface Props {
   readonly onWidthChange: (next: number) => void
   readonly onCollapsingChange: (collapsing: boolean) => void
   readonly onClose: () => void
-}
-
-interface DragState {
-  readonly startX: number
-  readonly startWidth: number
-  latestWidth: number
-}
-
-interface ResizeBounds {
-  readonly minWidth: number
-  readonly maxWidth: number
-  readonly closeThreshold: number
-}
-
-interface ResizeStep {
-  readonly width: number
-  readonly collapsing: boolean
-}
-
-function computeResizeStep(
-  drag: DragState,
-  clientX: number,
-  bounds: ResizeBounds,
-): ResizeStep {
-  const raw = drag.startWidth + (clientX - drag.startX)
-  // eslint-disable-next-line no-param-reassign -- drag is a ref-held mutable state container
-  drag.latestWidth = raw
-  if (raw < bounds.closeThreshold) {
-    return { width: bounds.minWidth, collapsing: true }
-  }
-  return {
-    width: Math.min(bounds.maxWidth, Math.max(bounds.minWidth, raw)),
-    collapsing: false,
-  }
-}
-
-function lockGlobalCursor(): void {
-  document.body.style.cursor = 'col-resize'
-  document.body.style.userSelect = 'none'
-}
-
-function unlockGlobalCursor(): void {
-  document.body.style.cursor = ''
-  document.body.style.userSelect = ''
 }
 
 export default memo(function SidebarResizeHandle({

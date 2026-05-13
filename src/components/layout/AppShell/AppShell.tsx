@@ -8,21 +8,13 @@ import Drawer from '@mui/material/Drawer'
 import Sidebar from '@/components/layout/Sidebar/Sidebar'
 import type { BrandConfig, UserRole } from '@/types'
 import { MobileNavProvider } from './MobileNavContext'
+import { isAuthPathname } from './helpers'
 import styles from './AppShell.module.css'
 
 interface Props {
   readonly brands: readonly BrandConfig[]
   readonly role: UserRole | null
   readonly children: ReactNode
-}
-
-const AUTH_ROUTE_PREFIXES = ['/sign-in', '/sign-up', '/sso-callback'] as const
-
-function isAuthPathname(pathname: string | null): boolean {
-  if (pathname === null) {
-    return false
-  }
-  return AUTH_ROUTE_PREFIXES.some((prefix) => pathname.startsWith(prefix))
 }
 
 export default memo(function AppShell({ brands, role, children }: Props): JSX.Element {
