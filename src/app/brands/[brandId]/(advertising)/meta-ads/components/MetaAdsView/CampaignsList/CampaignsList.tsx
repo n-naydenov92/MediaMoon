@@ -4,22 +4,11 @@ import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import Typography from '@mui/material/Typography'
 import type { Campaign } from '@/lib/gateways/MetaAdsGateway'
+import { toneFor } from './helpers'
 import styles from './CampaignsList.module.css'
 
 interface Props {
   readonly campaigns: readonly Campaign[]
-}
-
-function toneFor(effectiveStatus: string): 'active' | 'inactive' | 'warn' {
-  if (effectiveStatus === 'ACTIVE') return 'active'
-  if (
-    effectiveStatus === 'PAUSED'
-    || effectiveStatus === 'ARCHIVED'
-    || effectiveStatus === 'DELETED'
-  ) {
-    return 'inactive'
-  }
-  return 'warn'
 }
 
 export default memo(function CampaignsList({ campaigns }: Props): JSX.Element {
