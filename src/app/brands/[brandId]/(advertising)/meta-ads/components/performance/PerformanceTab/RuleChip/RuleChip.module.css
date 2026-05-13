@@ -3,23 +3,23 @@
   align-items: center;
 }
 
-.ruleChip {
-  font-family: var(--font-dm-sans), system-ui, sans-serif !important;
-  font-size: var(--text-sm) !important;
-  height: 30px !important;
-  background: var(--surface-1) !important;
+.ruleChip.ruleChip {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: var(--text-sm);
+  height: 30px;
+  background: var(--surface-1);
 }
 
-.ruleChip[data-editing='true'] {
-  background: var(--surface-2) !important;
-  border-color: var(--hairline-strong) !important;
+.ruleChip.ruleChip[data-editing='true'] {
+  background: var(--surface-2);
+  border-color: var(--hairline-strong);
 }
 
-.ruleChip:focus,
-.ruleChip:focus-visible,
-.ruleChip:focus-within {
-  outline: none !important;
-  box-shadow: none !important;
+.ruleChip.ruleChip:focus,
+.ruleChip.ruleChip:focus-visible,
+.ruleChip.ruleChip:focus-within {
+  outline: none;
+  box-shadow: none;
 }
 
 .ruleLabelInner {
@@ -55,23 +55,23 @@
   background: var(--surface-3);
 }
 
-.ruleInput {
-  display: inline-flex !important;
-  align-items: center !important;
-  box-sizing: border-box !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  min-width: 0 !important;
-  width: auto !important;
-  background: transparent !important;
-  border: 0 !important;
-  outline: none !important;
-  box-shadow: none !important;
-  font-family: inherit !important;
-  font-size: inherit !important;
-  font-weight: 600 !important;
-  line-height: 20px !important;
-  color: var(--text-primary) !important;
+.ruleInput.ruleInput {
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+  width: auto;
+  background: transparent;
+  border: 0;
+  outline: none;
+  box-shadow: none;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--text-primary);
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -102,12 +102,12 @@
   color: var(--text-primary);
 }
 
-.ruleInput :global(.MuiInputBase-input:focus),
-.ruleInput :global(.MuiInputBase-input:focus-visible),
-.ruleInput :global(.MuiInputBase-input:active) {
-  outline: none !important;
-  box-shadow: none !important;
-  border: 0 !important;
+.ruleInput.ruleInput :global(.MuiInputBase-input:focus),
+.ruleInput.ruleInput :global(.MuiInputBase-input:focus-visible),
+.ruleInput.ruleInput :global(.MuiInputBase-input:active) {
+  outline: none;
+  box-shadow: none;
+  border: 0;
 }
 
 .menuPaper {

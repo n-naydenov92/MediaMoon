@@ -1,37 +1,37 @@
-.trigger {
-  text-transform: none !important;
-  font-family: var(--font-dm-sans), system-ui, sans-serif !important;
-  font-size: var(--text-sm) !important;
-  font-weight: 500 !important;
-  color: var(--text-primary) !important;
-  border-color: var(--hairline) !important;
-  border-radius: 999px !important;
-  height: 30px !important;
-  padding: 0 12px !important;
+.trigger.trigger {
+  text-transform: none;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-primary);
+  border-color: var(--hairline);
+  border-radius: 999px;
+  height: 30px;
+  padding: 0 12px;
 }
 
-.trigger:hover {
-  background: var(--surface-2) !important;
-  border-color: var(--hairline-strong) !important;
+.trigger.trigger:hover {
+  background: var(--surface-2);
+  border-color: var(--hairline-strong);
 }
 
-.menuPaper {
-  min-width: 220px !important;
-  max-height: 280px !important;
-  margin-top: 4px !important;
-  background: var(--bg-surface) !important;
-  border: 1px solid var(--hairline) !important;
-  color: var(--text-primary) !important;
-  font-family: var(--font-dm-sans), system-ui, sans-serif !important;
-  overflow: hidden !important;
-  display: flex !important;
-  flex-direction: column !important;
-}
-
-.menuList {
-  display: flex !important;
+.menuPaper.menuPaper {
+  min-width: 220px;
+  max-height: 280px;
+  margin-top: 4px;
+  background: var(--bg-surface);
+  border: 1px solid var(--hairline);
+  color: var(--text-primary);
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  overflow: hidden;
+  display: flex;
   flex-direction: column;
-  padding: 0 !important;
+}
+
+.menuList.menuList {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
   max-height: 100%;
   overflow: hidden;
 }
@@ -45,9 +45,9 @@
   z-index: 1;
 }
 
-.searchInput {
-  font-size: var(--text-sm) !important;
-  font-family: var(--font-dm-sans), system-ui, sans-serif !important;
+.searchInput.searchInput {
+  font-size: var(--text-sm);
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
   background: var(--surface-1);
 }
 
@@ -58,17 +58,17 @@
   padding: 4px 0;
 }
 
-.scrollArea :global(.MuiMenuItem-root) {
-  min-height: 32px !important;
-  padding: 0 12px 0 16px !important;
+.scrollArea.scrollArea :global(.MuiMenuItem-root) {
+  min-height: 32px;
+  padding: 0 12px 0 16px;
 }
 
-.scrollArea :global(.MuiCheckbox-root) {
-  padding: 2px !important;
+.scrollArea.scrollArea :global(.MuiCheckbox-root) {
+  padding: 2px;
 }
 
-.checkboxSlot {
-  min-width: 28px !important;
+.checkboxSlot.checkboxSlot {
+  min-width: 28px;
   margin-right: 4px;
   pointer-events: none;
 }

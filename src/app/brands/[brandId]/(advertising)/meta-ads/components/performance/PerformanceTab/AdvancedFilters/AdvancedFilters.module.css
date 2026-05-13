@@ -1,52 +1,52 @@
-.paper {
-  background: var(--bg-surface) !important;
+.paper.paper {
+  background: var(--bg-surface);
   border: 1px solid var(--hairline);
-  font-family: var(--font-dm-sans), system-ui, sans-serif !important;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
   color: var(--text-primary);
 }
 
-.title {
-  display: flex !important;
+.title.title {
+  display: flex;
   align-items: center;
   justify-content: space-between;
-  font-family: var(--font-syne), system-ui, sans-serif !important;
-  font-size: var(--text-md) !important;
-  font-weight: 600 !important;
-  padding: 16px 20px !important;
+  font-family: var(--font-syne), system-ui, sans-serif;
+  font-size: var(--text-md);
+  font-weight: 600;
+  padding: 16px 20px;
 }
 
-.close {
-  color: var(--text-muted) !important;
+.close.close {
+  color: var(--text-muted);
 }
 
-.content {
+.paper.paper .content {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 8px 20px 20px !important;
+  padding: 8px 20px 20px;
 }
 
-.actions {
-  padding: 12px 20px !important;
+.actions.actions {
+  padding: 12px 20px;
   border-top: 1px solid var(--hairline);
 }
 
-.selectMenuPaper {
-  margin-top: 4px !important;
-  background: var(--bg-surface) !important;
+.selectMenuPaper.selectMenuPaper {
+  margin-top: 4px;
+  background: var(--bg-surface);
   border: 1px solid var(--hairline);
-  color: var(--text-primary) !important;
-  font-family: var(--font-dm-sans), system-ui, sans-serif !important;
-  max-height: 280px !important;
+  color: var(--text-primary);
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  max-height: 280px;
 }
 
-.selectMenuList {
-  padding: 4px 0 !important;
+.selectMenuList.selectMenuList {
+  padding: 4px 0;
 }
 
-.selectMenuList :global(.MuiMenuItem-root) {
-  min-height: 32px !important;
-  padding: 0 12px !important;
-  font-family: var(--font-dm-sans), system-ui, sans-serif !important;
-  font-size: var(--text-sm) !important;
+.selectMenuList.selectMenuList :global(.MuiMenuItem-root) {
+  min-height: 32px;
+  padding: 0 12px;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: var(--text-sm);
 }

@@ -1,43 +1,43 @@
-.trigger {
-  text-transform: none !important;
-  font-family: var(--font-dm-sans), system-ui, sans-serif !important;
-  font-size: var(--text-sm) !important;
-  font-weight: 500 !important;
-  color: var(--text-primary) !important;
-  border-color: var(--hairline) !important;
-  border-radius: 999px !important;
-  height: 30px !important;
-  padding: 0 12px !important;
+.trigger.trigger {
+  text-transform: none;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-primary);
+  border-color: var(--hairline);
+  border-radius: 999px;
+  height: 30px;
+  padding: 0 12px;
 }
 
-.trigger:hover {
-  background: var(--surface-2) !important;
-  border-color: var(--hairline-strong) !important;
+.trigger.trigger:hover {
+  background: var(--surface-2);
+  border-color: var(--hairline-strong);
 }
 
-.menuPaper {
+.menuPaper.menuPaper {
   min-width: 240px;
-  background: var(--bg-surface) !important;
+  background: var(--bg-surface);
   border: 1px solid var(--hairline);
-  color: var(--text-primary) !important;
-  font-family: var(--font-dm-sans), system-ui, sans-serif !important;
+  color: var(--text-primary);
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
 }
 
-.divider {
-  border-color: var(--hairline) !important;
+.divider.divider {
+  border-color: var(--hairline);
 }
 
-.toggleItem {
-  cursor: default !important;
-  display: flex !important;
-  justify-content: space-between !important;
+.toggleItem.toggleItem {
+  cursor: default;
+  display: flex;
+  justify-content: space-between;
 }
 
-.calendarPaper {
-  background: var(--bg-surface) !important;
+.calendarPaper.calendarPaper {
+  background: var(--bg-surface);
   border: 1px solid var(--hairline);
   margin-left: 8px;
-  width: auto !important;
-  max-width: none !important;
-  border-radius: 12px !important;
+  width: auto;
+  max-width: none;
+  border-radius: 12px;
 }

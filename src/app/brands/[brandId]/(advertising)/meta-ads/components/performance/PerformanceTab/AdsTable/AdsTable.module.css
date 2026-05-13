@@ -16,7 +16,7 @@
  * =========================================================================*/
 
 .tableContainer {
-  display: none !important;
+  display: none;
 }
 
 .mobileList {
@@ -177,7 +177,7 @@
 
 @media (min-width: 1024px) {
   .tableContainer {
-    display: block !important;
+    display: block;
     background: var(--bg-surface);
     border: 1px solid var(--hairline);
     border-radius: 12px;
@@ -187,76 +187,76 @@
     display: none;
   }
 
-  .table {
-    background: transparent !important;
+  .table.table {
+    background: transparent;
   }
 
   .tableHead {
     background: var(--surface-2);
   }
 
-  .tableHead :global(.MuiTableCell-root) {
+  .tableHead.tableHead :global(.MuiTableCell-root) {
     background: var(--surface-2);
-    color: var(--text-muted) !important;
-    font-family: var(--font-dm-sans), system-ui, sans-serif !important;
-    font-size: 12px !important;
-    font-weight: 500 !important;
+    color: var(--text-muted);
+    font-family: var(--font-dm-sans), system-ui, sans-serif;
+    font-size: 12px;
+    font-weight: 500;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    border-bottom: 1px solid var(--hairline) !important;
-    padding: 10px 12px !important;
+    border-bottom: 1px solid var(--hairline);
+    padding: 10px 12px;
     white-space: nowrap;
   }
 
-  .tableHead :global(.MuiTableSortLabel-root) {
-    color: var(--text-muted) !important;
-    font: inherit !important;
+  .tableHead.tableHead :global(.MuiTableSortLabel-root) {
+    color: var(--text-muted);
+    font: inherit;
   }
 
-  .tableHead :global(.MuiTableSortLabel-root:hover),
-  .tableHead :global(.MuiTableSortLabel-root.Mui-active) {
-    color: var(--text-primary) !important;
+  .tableHead.tableHead :global(.MuiTableSortLabel-root:hover),
+  .tableHead.tableHead :global(.MuiTableSortLabel-root.Mui-active) {
+    color: var(--text-primary);
   }
 
-  .tableHead :global(.MuiTableSortLabel-root.Mui-active .MuiTableSortLabel-icon) {
-    color: var(--accent) !important;
+  .tableHead.tableHead :global(.MuiTableSortLabel-root.Mui-active .MuiTableSortLabel-icon) {
+    color: var(--accent);
     opacity: 1;
   }
 
-  .bodyRow :global(.MuiTableCell-root) {
+  .bodyRow.bodyRow :global(.MuiTableCell-root) {
     color: var(--text-primary);
-    font-family: var(--font-dm-sans), system-ui, sans-serif !important;
-    font-size: var(--text-sm) !important;
-    font-weight: 500 !important;
+    font-family: var(--font-dm-sans), system-ui, sans-serif;
+    font-size: var(--text-sm);
+    font-weight: 500;
     font-variant-numeric: tabular-nums;
-    border-bottom: 1px solid var(--hairline) !important;
-    padding: 8px 12px !important;
+    border-bottom: 1px solid var(--hairline);
+    padding: 8px 12px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 0;
   }
 
-  .bodyRow:last-child :global(.MuiTableCell-root) {
-    border-bottom: 0 !important;
+  .bodyRow.bodyRow:last-child :global(.MuiTableCell-root) {
+    border-bottom: 0;
   }
 
-  .bodyRow:hover {
-    background: var(--surface-2) !important;
+  .bodyRow.bodyRow:hover {
+    background: var(--surface-2);
   }
 
-  .thumbCell {
-    width: 64px !important;
-    min-width: 64px !important;
-    max-width: 64px !important;
-    padding: 6px 8px 6px 12px !important;
-    overflow: visible !important;
+  .bodyRow.bodyRow .thumbCell {
+    width: 64px;
+    min-width: 64px;
+    max-width: 64px;
+    padding: 6px 8px 6px 12px;
+    overflow: visible;
   }
 
-  .nameCell {
+  .bodyRow.bodyRow .nameCell {
     min-width: 180px;
-    max-width: 220px !important;
-    font-weight: 500 !important;
+    max-width: 220px;
+    font-weight: 500;
   }
 
   .nameRow {
@@ -274,11 +274,11 @@
     white-space: nowrap;
   }
 
-  .accountCell {
+  .bodyRow.bodyRow .accountCell {
     min-width: 100px;
-    max-width: 140px !important;
-    color: var(--text-secondary) !important;
-    font-weight: 400 !important;
+    max-width: 140px;
+    color: var(--text-secondary);
+    font-weight: 400;
   }
 
   .account {
@@ -289,10 +289,10 @@
     white-space: nowrap;
   }
 
-  .metricCell {
+  .bodyRow.bodyRow .metricCell {
     min-width: 88px;
-    font-variant-numeric: tabular-nums !important;
-    font-weight: 500 !important;
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
     position: relative;
   }
 
@@ -332,16 +332,16 @@
     box-shadow: inset -1px 0 0 var(--error), inset 0 1px 0 var(--error), inset 0 -1px 0 var(--error);
   }
 
-  .openLinkCell {
-    width: 48px !important;
-    max-width: 48px !important;
-    padding: 8px 12px !important;
-    text-align: right !important;
-    overflow: visible !important;
+  .bodyRow.bodyRow .openLinkCell {
+    width: 48px;
+    max-width: 48px;
+    padding: 8px 12px;
+    text-align: right;
+    overflow: visible;
   }
 
-  .openLink {
-    color: var(--text-muted) !important;
+  .openLink.openLink {
+    color: var(--text-muted);
     opacity: 0;
     transition: opacity 120ms ease, color 80ms ease, background 80ms ease;
   }
@@ -351,9 +351,9 @@
     opacity: 1;
   }
 
-  .openLink:hover,
-  .openLink:focus-visible {
-    color: var(--text-primary) !important;
-    background: var(--surface-3) !important;
+  .openLink.openLink:hover,
+  .openLink.openLink:focus-visible {
+    color: var(--text-primary);
+    background: var(--surface-3);
   }
 }

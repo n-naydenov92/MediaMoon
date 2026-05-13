@@ -34,12 +34,12 @@
   font-size: 13px;
 }
 
-.root :global(.rdp-months) {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap !important;
+.root :global(.rdp-root .rdp-months) {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
   gap: 24px;
-  max-width: none !important;
+  max-width: none;
 }
 
 .root :global(.rdp-month) {
@@ -156,8 +156,8 @@
 }
 
 @media (max-width: 640px) {
-  .root :global(.rdp-months) {
-    flex-direction: column !important;
+  .root :global(.rdp-root .rdp-months) {
+    flex-direction: column;
     gap: 12px;
   }
 }

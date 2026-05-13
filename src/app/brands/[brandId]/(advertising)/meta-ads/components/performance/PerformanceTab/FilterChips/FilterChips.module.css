@@ -19,24 +19,24 @@
   font-family: var(--font-dm-sans), system-ui, sans-serif;
 }
 
-.mobileTrigger {
-  flex: 1 1 auto !important;
-  min-width: 0 !important;
-  justify-content: space-between !important;
-  text-transform: none !important;
-  font-family: var(--font-dm-sans), system-ui, sans-serif !important;
-  font-size: var(--text-sm) !important;
-  font-weight: 500 !important;
-  color: var(--text-primary) !important;
-  border-color: var(--hairline) !important;
-  border-radius: 999px !important;
-  height: 32px !important;
-  padding: 0 14px !important;
+.mobileTrigger.mobileTrigger {
+  flex: 1 1 auto;
+  min-width: 0;
+  justify-content: space-between;
+  text-transform: none;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-primary);
+  border-color: var(--hairline);
+  border-radius: 999px;
+  height: 32px;
+  padding: 0 14px;
 }
 
-.mobileTrigger:hover {
-  background: var(--surface-2) !important;
-  border-color: var(--hairline-strong) !important;
+.mobileTrigger.mobileTrigger:hover {
+  background: var(--surface-2);
+  border-color: var(--hairline-strong);
 }
 
 .mobileTriggerLabel {
@@ -48,51 +48,51 @@
   text-align: left;
 }
 
-.mobileAddFilter {
-  flex: 0 0 auto !important;
-  text-transform: none !important;
-  font-family: var(--font-dm-sans), system-ui, sans-serif !important;
-  font-size: var(--text-sm) !important;
-  font-weight: 500 !important;
-  color: var(--text-primary) !important;
-  border-color: var(--hairline) !important;
-  border-style: dashed !important;
-  border-radius: 999px !important;
-  height: 32px !important;
-  padding: 0 12px !important;
+.mobileAddFilter.mobileAddFilter {
+  flex: 0 0 auto;
+  text-transform: none;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-primary);
+  border-color: var(--hairline);
+  border-style: dashed;
+  border-radius: 999px;
+  height: 32px;
+  padding: 0 12px;
 }
 
-.mobileAddFilter:hover {
-  background: var(--surface-2) !important;
-  border-color: var(--hairline-strong) !important;
+.mobileAddFilter.mobileAddFilter:hover {
+  background: var(--surface-2);
+  border-color: var(--hairline-strong);
 }
 
-.mobileMenuPaper {
-  min-width: 220px !important;
-  margin-top: 4px !important;
-  background: var(--bg-surface) !important;
+.mobileMenuPaper.mobileMenuPaper {
+  min-width: 220px;
+  margin-top: 4px;
+  background: var(--bg-surface);
   border: 1px solid var(--hairline);
-  color: var(--text-primary) !important;
-  font-family: var(--font-dm-sans), system-ui, sans-serif !important;
+  color: var(--text-primary);
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
 }
 
-.mobileMenuPaper :global(.MuiMenuItem-root) {
-  min-height: 36px !important;
-  padding: 0 14px !important;
-  font-size: var(--text-sm) !important;
+.mobileMenuPaper.mobileMenuPaper :global(.MuiMenuItem-root) {
+  min-height: 36px;
+  padding: 0 14px;
+  font-size: var(--text-sm);
 }
 
-.presetChip {
-  font-family: var(--font-dm-sans), system-ui, sans-serif !important;
-  font-size: var(--text-sm) !important;
-  font-weight: 500 !important;
-  height: 30px !important;
+.presetChip.presetChip {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  height: 30px;
 }
 
-.presetChip[data-active='true'] {
-  background: var(--accent-soft) !important;
-  border-color: var(--accent) !important;
-  color: var(--text-primary) !important;
+.presetChip.presetChip[data-active='true'] {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--text-primary);
 }
 
 .chipIcon {
@@ -144,13 +144,13 @@
   color: var(--accent);
 }
 
-.addFilter {
-  margin-left: auto !important;
-  font-family: var(--font-dm-sans), system-ui, sans-serif !important;
-  font-size: var(--text-sm) !important;
-  font-weight: 500 !important;
-  height: 30px !important;
-  border-style: dashed !important;
+.addFilter.addFilter {
+  margin-left: auto;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  height: 30px;
+  border-style: dashed;
 }
 
 .ruleRow {
