@@ -16,7 +16,7 @@ interface Props {
   readonly onSelect: (brandId: string | null) => void
 }
 
-function BrandMenu({
+export default memo(function BrandMenu({
   id,
   brands,
   activeBrand,
@@ -84,6 +84,4 @@ function BrandMenu({
       )}
     </Box>
   )
-}
-
-export default memo(BrandMenu)
+})

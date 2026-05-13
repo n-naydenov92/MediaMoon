@@ -13,7 +13,7 @@ interface Props {
   readonly onSelect: (value: MarketSelection) => void
 }
 
-function MarketMenuItem({ value, isSelected, onSelect }: Props): JSX.Element {
+export default memo(function MarketMenuItem({ value, isSelected, onSelect }: Props): JSX.Element {
   const label = MARKET_LABELS[value]
 
   return (
@@ -31,6 +31,4 @@ function MarketMenuItem({ value, isSelected, onSelect }: Props): JSX.Element {
       </Box>
     </Box>
   )
-}
-
-export default memo(MarketMenuItem)
+})

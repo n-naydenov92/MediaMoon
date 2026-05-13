@@ -12,7 +12,7 @@ interface Props {
   readonly onChange: (next: string) => void
 }
 
-function SidebarSearch({ value, onChange }: Props): JSX.Element {
+export default memo(function SidebarSearch({ value, onChange }: Props): JSX.Element {
   return (
     <Box className={styles.root}>
       <SearchIcon className={styles.icon} fontSize="small" aria-hidden="true" />
@@ -27,6 +27,4 @@ function SidebarSearch({ value, onChange }: Props): JSX.Element {
       />
     </Box>
   )
-}
-
-export default memo(SidebarSearch)
+})

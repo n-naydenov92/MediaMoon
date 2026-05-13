@@ -15,7 +15,7 @@ interface Props {
  * Live countdown label showing time remaining until the next cache refresh.
  * Updates every 30 seconds. Returns null when no expiry is set.
  */
-export default memo(({ cacheExpiresAt }: Props): JSX.Element | null => {
+export default memo(function CacheStatus({ cacheExpiresAt }: Props): JSX.Element | null {
   const [label, setLabel] = useState<string>(() =>
     cacheExpiresAt ? formatRemaining(cacheExpiresAt) : '',
   )

@@ -19,7 +19,7 @@ const DEVICE_LABEL: Record<DeviceCategory, string> = {
   tablet: 'Tablet',
 }
 
-function AnalyticsDevices({ devices }: Props): JSX.Element {
+export default memo(function AnalyticsDevices({ devices }: Props): JSX.Element {
   if (devices.length === 0) {
     return (
       <Alert severity="info" variant="outlined">
@@ -53,9 +53,7 @@ function AnalyticsDevices({ devices }: Props): JSX.Element {
       })}
     </Box>
   )
-}
-
-export default memo(AnalyticsDevices)
+})
 
 function deviceIcon(device: DeviceCategory): ReactNode {
   if (device === 'mobile') return <SmartphoneIcon fontSize="small" />

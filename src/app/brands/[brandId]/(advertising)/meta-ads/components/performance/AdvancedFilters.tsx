@@ -48,7 +48,7 @@ export default function AdvancedFilters({ open, onClose, onAdd }: Props): JSX.El
     if (!open) {
       return
     }
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- data fetching / external sync effect
+
     setField(DEFAULT_FIELD)
     setOperator('gt')
     setValueText('')

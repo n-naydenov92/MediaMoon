@@ -31,7 +31,7 @@ export default function FilePicker({ files, onChange, disabled = false }: Props)
       url: URL.createObjectURL(file),
       isVideo: file.type.startsWith('video/'),
     }))
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- data fetching / external sync effect
+
     setPreviews(next)
     return () => {
       for (const p of next) {

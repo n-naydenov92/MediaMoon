@@ -17,7 +17,7 @@ interface Props {
   readonly onSelect: () => void
 }
 
-function BrandMenuItem({
+export default memo(function BrandMenuItem({
   brand,
   isSelected,
   onSelect,
@@ -54,6 +54,4 @@ function BrandMenuItem({
       </SidebarTooltip>
     </Box>
   )
-}
-
-export default memo(BrandMenuItem)
+})

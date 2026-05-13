@@ -17,7 +17,7 @@ export default function UploadHistory({ brandId }: Props): JSX.Element {
 
   useEffect(() => {
     const ctrl = new AbortController()
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- data fetching / external sync effect
+
     setLoading(true)
     void (async () => {
       try {

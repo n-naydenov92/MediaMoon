@@ -17,7 +17,7 @@ interface Props {
   readonly onDrillInto: (itemId: string) => void
 }
 
-function NavPanelView({
+export default memo(function NavPanelView({
   panel,
   brandId,
   role,
@@ -54,6 +54,4 @@ function NavPanelView({
       </Box>
     </Box>
   )
-}
-
-export default memo(NavPanelView)
+})

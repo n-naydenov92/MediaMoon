@@ -18,7 +18,7 @@ interface Props {
   readonly onComparisonChange: (next: boolean) => void
 }
 
-function DashboardHeaderActions({
+export default memo(function DashboardHeaderActions({
   fetchedAt,
   isLoading,
   onRefresh,
@@ -40,6 +40,4 @@ function DashboardHeaderActions({
       />
     </>
   )
-}
-
-export default memo(DashboardHeaderActions)
+})

@@ -39,7 +39,7 @@ const DONUT_PAD = 2
 const DONUT_CORNER = 3
 const CHART_HEIGHT = 200
 
-function DashboardCategoryBreakdown({
+export default memo(function DashboardCategoryBreakdown({
   categories,
   hasCommerce,
   loading = false,
@@ -126,12 +126,10 @@ function DashboardCategoryBreakdown({
       </CardContent>
     </Card>
   )
-}
-
-export default memo(DashboardCategoryBreakdown)
+})
 
 function renderTooltip(total: number): (props: TooltipContentProps) => JSX.Element | null {
-  return ({ active, payload }) => {
+  return function ({ active, payload }) {
     if (!active || !payload || payload.length === 0) {
       return null
     }

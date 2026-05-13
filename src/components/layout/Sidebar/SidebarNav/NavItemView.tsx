@@ -19,7 +19,7 @@ interface Props {
   readonly onDrillInto: (itemId: string) => void
 }
 
-function NavItemView({
+export default memo(function NavItemView({
   item,
   brandId,
   pathname,
@@ -77,6 +77,4 @@ function NavItemView({
       <ChevronRightIcon className={styles.chevron} fontSize="small" />
     </Box>
   )
-}
-
-export default memo(NavItemView)
+})

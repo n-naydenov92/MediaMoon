@@ -18,7 +18,7 @@ interface Props {
   readonly onShowSidebar?: () => void
 }
 
-function Topbar({
+export default memo(function Topbar({
   title,
   leftSlot,
   marketSlot,
@@ -56,6 +56,4 @@ function Topbar({
       </Toolbar>
     </AppBar>
   )
-}
-
-export default memo(Topbar)
+})

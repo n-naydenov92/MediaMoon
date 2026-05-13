@@ -24,7 +24,7 @@ interface Props {
   readonly hidden?: boolean
 }
 
-function Sidebar({
+export default memo(function Sidebar({
   brands,
   role,
   variant = 'fixed',
@@ -78,6 +78,4 @@ function Sidebar({
       )}
     </Box>
   )
-}
-
-export default memo(Sidebar)
+})

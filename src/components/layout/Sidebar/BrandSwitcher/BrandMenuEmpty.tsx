@@ -10,7 +10,7 @@ interface Props {
   readonly query: string
 }
 
-function BrandMenuEmpty({ query }: Props): JSX.Element {
+export default memo(function BrandMenuEmpty({ query }: Props): JSX.Element {
   return (
     <Box className={styles.empty} role="status">
       <Box component="span" className={styles.emptyIcon} aria-hidden="true">
@@ -22,6 +22,4 @@ function BrandMenuEmpty({ query }: Props): JSX.Element {
       <Box component="span" className={styles.emptyHint}>{`“${query}”`}</Box>
     </Box>
   )
-}
-
-export default memo(BrandMenuEmpty)
+})

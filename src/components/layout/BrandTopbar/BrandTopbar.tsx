@@ -9,7 +9,7 @@ import { useMobileNav } from '@/components/layout/AppShell/MobileNavContext'
 import { findModuleById } from '@/config/modules'
 import { extractModuleId } from './helpers'
 
-const BrandTopbar = memo((): JSX.Element => {
+const BrandTopbar = memo(function BrandTopbar(): JSX.Element {
   const pathname = usePathname()
   const moduleId = extractModuleId(pathname)
   const activeModule = moduleId ? findModuleById(moduleId) : null

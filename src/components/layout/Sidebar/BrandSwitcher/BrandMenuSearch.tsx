@@ -12,7 +12,7 @@ interface Props {
   readonly onChange: (next: string) => void
 }
 
-function BrandMenuSearch({ value, inputRef, onChange }: Props): JSX.Element {
+export default memo(function BrandMenuSearch({ value, inputRef, onChange }: Props): JSX.Element {
   const handleChange = (event: ChangeEvent<HTMLInputElement>): void => {
     onChange(event.target.value)
   }
@@ -35,6 +35,4 @@ function BrandMenuSearch({ value, inputRef, onChange }: Props): JSX.Element {
       </Box>
     </Box>
   )
-}
-
-export default memo(BrandMenuSearch)
+})

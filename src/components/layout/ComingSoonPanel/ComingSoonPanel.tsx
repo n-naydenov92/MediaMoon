@@ -7,7 +7,7 @@ interface Props {
   readonly brandLabel?: string
 }
 
-function ComingSoonPanel({ moduleLabel, brandLabel }: Props): JSX.Element {
+export default memo(function ComingSoonPanel({ moduleLabel, brandLabel }: Props): JSX.Element {
   return (
     <Box component="section" className={styles.root}>
       <Box className={styles.card}>
@@ -21,6 +21,4 @@ function ComingSoonPanel({ moduleLabel, brandLabel }: Props): JSX.Element {
       </Box>
     </Box>
   )
-}
-
-export default memo(ComingSoonPanel)
+})

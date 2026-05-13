@@ -34,7 +34,7 @@ const DONUT_PAD = 2
 const DONUT_CORNER = 3
 const CHART_HEIGHT = 160
 
-function AnalyticsTrafficSources({ sources }: Props): JSX.Element {
+export default memo(function AnalyticsTrafficSources({ sources }: Props): JSX.Element {
   const { mode } = useThemeMode()
   const palette = mode === 'light' ? PALETTE_LIGHT : PALETTE_DARK
 
@@ -121,15 +121,13 @@ function AnalyticsTrafficSources({ sources }: Props): JSX.Element {
       </Box>
     </>
   )
-}
-
-export default memo(AnalyticsTrafficSources)
+})
 
 function renderTooltip(
   totalUsers: number,
   totalRevenue: number,
 ): (props: TooltipContentProps) => JSX.Element | null {
-  return ({ active, payload }) => {
+  return function ({ active, payload }) {
     if (!active || !payload || payload.length === 0) {
       return null
     }

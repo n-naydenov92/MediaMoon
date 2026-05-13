@@ -13,7 +13,7 @@ interface Props {
   readonly percent: number
 }
 
-function MiniBar({ channel, label, value, percent }: Props): JSX.Element {
+export default memo(function MiniBar({ channel, label, value, percent }: Props): JSX.Element {
   const fillStyle = { '--bar-fill-width': `${clampPercent(percent)}%` } as CSSProperties
   return (
     <Box className={styles.row}>
@@ -28,6 +28,4 @@ function MiniBar({ channel, label, value, percent }: Props): JSX.Element {
       </Box>
     </Box>
   )
-}
-
-export default memo(MiniBar)
+})

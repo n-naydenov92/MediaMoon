@@ -59,7 +59,7 @@ function unlockGlobalCursor(): void {
   document.body.style.userSelect = ''
 }
 
-function SidebarResizeHandle({
+export default memo(function SidebarResizeHandle({
   currentWidth,
   minWidth,
   maxWidth,
@@ -150,6 +150,4 @@ function SidebarResizeHandle({
       </Box>
     </>
   )
-}
-
-export default memo(SidebarResizeHandle)
+})

@@ -14,7 +14,6 @@ export function buildInitialState(): State {
 }
 
 export function reducer(state: State, action: Action): State {
-  // eslint-disable-next-line default-case -- exhaustive enum
   switch (action.type) {
     case 'FETCH_START':
       return { dataByKey: setKey(state.dataByKey, action.key, { status: 'loading' }) }

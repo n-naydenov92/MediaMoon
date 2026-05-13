@@ -18,7 +18,7 @@ interface Props {
 
 const SEARCH_PLACEHOLDER = 'Find market…'
 
-function MarketMenu({
+export default memo(function MarketMenu({
   id,
   options,
   selected,
@@ -92,6 +92,4 @@ function MarketMenu({
       </Box>
     </Box>
   )
-}
-
-export default memo(MarketMenu)
+})

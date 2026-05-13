@@ -12,7 +12,7 @@ interface Props {
   readonly onToggle: () => void
 }
 
-function MarketSwitcherTrigger({
+export default memo(function MarketSwitcherTrigger({
   label,
   menuId,
   isOpen,
@@ -33,6 +33,4 @@ function MarketSwitcherTrigger({
       <UnfoldMoreIcon className={styles.chevron} fontSize="small" />
     </Box>
   )
-}
-
-export default memo(MarketSwitcherTrigger)
+})

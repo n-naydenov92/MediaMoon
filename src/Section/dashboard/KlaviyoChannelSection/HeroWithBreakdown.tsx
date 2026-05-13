@@ -20,7 +20,7 @@ interface Props {
   readonly flowsPercent: number
 }
 
-function HeroWithBreakdown({
+export default memo(function HeroWithBreakdown({
   label,
   totalValue,
   delta,
@@ -62,6 +62,4 @@ function HeroWithBreakdown({
       </Box>
     </Box>
   )
-}
-
-export default memo(HeroWithBreakdown)
+})

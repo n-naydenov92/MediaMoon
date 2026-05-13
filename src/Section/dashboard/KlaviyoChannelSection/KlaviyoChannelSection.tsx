@@ -21,7 +21,7 @@ interface Props {
   readonly deltaLabel: string
 }
 
-function KlaviyoChannelSection({
+export default memo(function KlaviyoChannelSection({
   stats,
   previousStats,
   comparisonEnabled,
@@ -95,6 +95,4 @@ function KlaviyoChannelSection({
       </Box>
     </ChannelSection>
   )
-}
-
-export default memo(KlaviyoChannelSection)
+})

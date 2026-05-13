@@ -11,7 +11,7 @@ import MarketSwitcherTrigger from './MarketSwitcherTrigger'
 import MarketMenu from './MarketMenu'
 import styles from './MarketSwitcher.module.css'
 
-function MarketSwitcher(): JSX.Element {
+export default memo(function MarketSwitcher(): JSX.Element {
   const { markets, selectedMarket, setSelectedMarket } = useBrandShellContext()
   const { mode } = useThemeMode()
   const [isOpen, setIsOpen] = useState(false)
@@ -62,6 +62,4 @@ function MarketSwitcher(): JSX.Element {
       )}
     </Box>
   )
-}
-
-export default memo(MarketSwitcher)
+})

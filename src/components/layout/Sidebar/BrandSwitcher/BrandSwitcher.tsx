@@ -15,7 +15,7 @@ interface Props {
   readonly brands: readonly BrandConfig[]
 }
 
-function BrandSwitcher({ brands }: Props): JSX.Element {
+export default memo(function BrandSwitcher({ brands }: Props): JSX.Element {
   const pathname = usePathname()
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
@@ -76,6 +76,4 @@ function BrandSwitcher({ brands }: Props): JSX.Element {
       )}
     </Box>
   )
-}
-
-export default memo(BrandSwitcher)
+})

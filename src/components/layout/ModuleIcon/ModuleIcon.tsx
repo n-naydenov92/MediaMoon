@@ -39,7 +39,7 @@ interface Props {
   readonly color?: string
 }
 
-function ModuleIcon({ name, size = DEFAULT_ICON_SIZE_PX, color }: Props): JSX.Element {
+export default memo(function ModuleIcon({ name, size = DEFAULT_ICON_SIZE_PX, color }: Props): JSX.Element {
   const Icon = (ICON_MAP as Record<string, React.ComponentType<SvgIconProps>>)[name] ?? DashboardIcon
 
   const vars: Record<`--${string}`, string> = { '--icon-size': `${size}px` }
@@ -52,6 +52,4 @@ function ModuleIcon({ name, size = DEFAULT_ICON_SIZE_PX, color }: Props): JSX.El
       <Icon className={styles.icon} />
     </Box>
   )
-}
-
-export default memo(ModuleIcon)
+})

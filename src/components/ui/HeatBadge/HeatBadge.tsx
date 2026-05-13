@@ -25,7 +25,7 @@ interface Props {
 /**
  * Colour-coded chip badge indicating a news cluster's heat level (viral / hot / normal).
  */
-export default memo(({ heat }: Props): JSX.Element => {
+export default memo(function HeatBadge({ heat }: Props): JSX.Element {
   const { bg, fg } = HEAT_STYLES[heat]
   return (
     <Chip

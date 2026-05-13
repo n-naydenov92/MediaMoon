@@ -19,7 +19,7 @@ import styles from './KeywordsBar.module.css'
 
 const POPOVER_SLOT_PROPS = { paper: { className: styles.popoverPaper } } as const
 
-function KeywordsBar(): JSX.Element | null {
+export default memo(function KeywordsBar(): JSX.Element | null {
   const { topic } = useTrendingNewsContext()
   const { selectedMarket } = useBrandShellContext()
   const anchorRef = useRef<HTMLButtonElement>(null)
@@ -50,7 +50,6 @@ function KeywordsBar(): JSX.Element | null {
       </Tooltip>
       <Popover
         open={open}
-        // eslint-disable-next-line react-hooks/refs -- MUI Popover/Menu anchorEl pattern needs ref.current after first render
         anchorEl={anchorRef.current}
         onClose={handleClose}
         anchorOrigin={POPOVER_ANCHOR}
@@ -70,6 +69,4 @@ function KeywordsBar(): JSX.Element | null {
       </Popover>
     </>
   )
-}
-
-export default memo(KeywordsBar)
+})

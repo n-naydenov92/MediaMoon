@@ -23,7 +23,7 @@ interface Props {
  * Subject-specific chip badge identifying which monitored person a news cluster belongs to.
  * Returns null when the tabId has no registered subject.
  */
-export default memo(({ tabId }: Props): JSX.Element | null => {
+export default memo(function SubjectBadge({ tabId }: Props): JSX.Element | null {
   const style = SUBJECT_STYLES[tabId]
   if (!style) {
     return null

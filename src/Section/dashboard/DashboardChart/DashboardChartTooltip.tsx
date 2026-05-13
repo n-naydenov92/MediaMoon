@@ -10,7 +10,7 @@ export function renderChartTooltip(
   config: MetricSpec | null,
   hasCommerce: boolean,
 ): (props: TooltipContentProps) => JSX.Element | null {
-  return ({ active, payload }) => {
+  return function ({ active, payload }) {
     if (!active || !payload || payload.length === 0) {
       return null
     }

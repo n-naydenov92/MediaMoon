@@ -14,7 +14,7 @@ interface Props {
   readonly onDrillInto: (itemId: string) => void
 }
 
-function NavSectionView({
+export default memo(function NavSectionView({
   section,
   brandId,
   role,
@@ -45,6 +45,4 @@ function NavSectionView({
       </Box>
     </Box>
   )
-}
-
-export default memo(NavSectionView)
+})

@@ -30,7 +30,7 @@ function resolveState(hasError: boolean, count: number): SourceState {
   return count > 0 ? 'ok' : 'empty'
 }
 
-export default memo(({ sourceCounts, sourceErrors }: Props): JSX.Element => {
+export default memo(function SourceDebugRow({ sourceCounts, sourceErrors }: Props): JSX.Element {
   if (!sourceCounts) {
     // eslint-disable-next-line react/jsx-no-useless-fragment -- fragment kept for consistency
     return <></>

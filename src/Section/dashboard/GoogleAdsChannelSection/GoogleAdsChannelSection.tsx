@@ -13,7 +13,7 @@ interface Props {
   readonly deltaLabel: string
 }
 
-function GoogleAdsChannelSection({
+export default memo(function GoogleAdsChannelSection({
   stats,
   previousStats,
   comparisonEnabled,
@@ -70,6 +70,4 @@ function GoogleAdsChannelSection({
       />
     </ChannelSection>
   )
-}
-
-export default memo(GoogleAdsChannelSection)
+})

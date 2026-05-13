@@ -10,7 +10,7 @@ import styles from './TopbarOverflowMenu.module.css'
 
 const FEEDBACK_LABEL = 'Give Feedback'
 
-function TopbarOverflowMenu(): JSX.Element {
+export default memo(function TopbarOverflowMenu(): JSX.Element {
   const { mode } = useThemeMode()
   const [isOpen, setIsOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement | null>(null)
@@ -62,6 +62,4 @@ function TopbarOverflowMenu(): JSX.Element {
       )}
     </Box>
   )
-}
-
-export default memo(TopbarOverflowMenu)
+})

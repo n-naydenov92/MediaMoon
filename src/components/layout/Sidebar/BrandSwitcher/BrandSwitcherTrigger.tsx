@@ -18,7 +18,7 @@ interface Props {
   readonly onToggle: () => void
 }
 
-function BrandSwitcherTrigger({
+export default memo(function BrandSwitcherTrigger({
   activeBrand,
   triggerLabel,
   menuId,
@@ -53,6 +53,4 @@ function BrandSwitcherTrigger({
       </Box>
     </SidebarTooltip>
   )
-}
-
-export default memo(BrandSwitcherTrigger)
+})

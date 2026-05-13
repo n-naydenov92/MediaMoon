@@ -20,8 +20,7 @@ interface Props {
 /**
  * Renders the correct UI for each async state of a topic tab's news data.
  */
-export default memo(({ state, onRetry }: Props): JSX.Element => {
-  // eslint-disable-next-line default-case -- exhaustive enum
+export default memo(function TopicContent({ state, onRetry }: Props): JSX.Element {
   switch (state.status) {
     case 'idle':
       return <CenteredSpinner label={LABELS.topicPanel.preparing} />

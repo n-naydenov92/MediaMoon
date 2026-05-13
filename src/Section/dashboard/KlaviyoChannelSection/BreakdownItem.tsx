@@ -15,7 +15,7 @@ interface Props {
   readonly percent: number
 }
 
-function BreakdownItem({ channel, icon, label, value, percent }: Props): JSX.Element {
+export default memo(function BreakdownItem({ channel, icon, label, value, percent }: Props): JSX.Element {
   const safePercent = clampPercent(percent)
   return (
     <Box className={styles.item}>
@@ -42,6 +42,4 @@ function BreakdownItem({ channel, icon, label, value, percent }: Props): JSX.Ele
       </Box>
     </Box>
   )
-}
-
-export default memo(BreakdownItem)
+})

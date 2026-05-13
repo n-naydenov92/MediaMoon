@@ -16,42 +16,44 @@ interface Props {
   readonly brands: readonly BrandConfig[]
 }
 
-export default memo(({ brands }: Props): JSX.Element => (
-  <Box sx={{ p: { xs: 2, md: 6 } }}>
-    <Typography
-      variant="h5"
-      sx={{
-        mb: 0.5,
-        fontWeight: 700,
-        fontSize: { xs: 20, md: 24 },
-      }}
-    >
-      Brands
-    </Typography>
-    <Typography
-      variant="body2"
-      color="text.secondary"
-      sx={{ mb: { xs: 3, md: 6 }, fontSize: { xs: 13, md: 14 } }}
-    >
-      Select a brand to manage its modules.
-    </Typography>
+export default memo(function BrandsOverview({ brands }: Props): JSX.Element {
+  return (
+    <Box sx={{ p: { xs: 2, md: 6 } }}>
+      <Typography
+        variant="h5"
+        sx={{
+          mb: 0.5,
+          fontWeight: 700,
+          fontSize: { xs: 20, md: 24 },
+        }}
+      >
+        Brands
+      </Typography>
+      <Typography
+        variant="body2"
+        color="text.secondary"
+        sx={{ mb: { xs: 3, md: 6 }, fontSize: { xs: 13, md: 14 } }}
+      >
+        Select a brand to manage its modules.
+      </Typography>
 
-    <Grid container spacing={{ xs: 2, md: 3 }}>
-      {brands.map((brand) => (
-        <Grid key={brand.id} item xs={12} sm={6} lg={4}>
-          {/* eslint-disable-next-line @typescript-eslint/no-use-before-define -- function defined later in file */}
-          <BrandCard brand={brand} />
-        </Grid>
-      ))}
-    </Grid>
-  </Box>
-))
+      <Grid container spacing={{ xs: 2, md: 3 }}>
+        {brands.map((brand) => (
+          <Grid key={brand.id} item xs={12} sm={6} lg={4}>
+            {/* eslint-disable-next-line @typescript-eslint/no-use-before-define -- function defined later in file */}
+            <BrandCard brand={brand} />
+          </Grid>
+        ))}
+      </Grid>
+    </Box>
+  )
+})
 
 interface BrandCardProps {
   readonly brand: BrandConfig
 }
 
-const BrandCard = memo(({ brand }: BrandCardProps): JSX.Element => {
+const BrandCard = memo(function BrandCard({ brand }: BrandCardProps): JSX.Element {
   const href = `/brands/${brand.id}`
 
   return (

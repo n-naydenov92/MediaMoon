@@ -20,7 +20,7 @@ import SourceStatsPopover from '../SourceStatsPopover/SourceStatsPopover'
 import LoadingOverview from './LoadingOverview/LoadingOverview'
 import styles from './OverviewDashboard.module.css'
 
-export default memo((): JSX.Element => {
+export default memo(function OverviewDashboard(): JSX.Element {
   const { brandId, dataByKey, ensureLoaded } = useTrendingNewsContext()
   const { markets } = useBrandShellContext()
 

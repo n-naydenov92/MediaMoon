@@ -13,7 +13,7 @@ interface Props {
   readonly role: UserRole
 }
 
-function SidebarNav({ brandId, role }: Props): JSX.Element {
+export default memo(function SidebarNav({ brandId, role }: Props): JSX.Element {
   const pathname = usePathname()
   const [drillTrail, setDrillTrail] = useState<readonly string[]>([])
 
@@ -24,7 +24,6 @@ function SidebarNav({ brandId, role }: Props): JSX.Element {
 
   useEffect(() => {
     if (routeTrail.length > 0) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- sync drill state to route changes
       setDrillTrail(routeTrail)
     }
   }, [routeTrail])
@@ -57,6 +56,4 @@ function SidebarNav({ brandId, role }: Props): JSX.Element {
       />
     </Box>
   )
-}
-
-export default memo(SidebarNav)
+})

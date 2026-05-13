@@ -16,7 +16,7 @@ interface Props {
   readonly clusters: readonly NewsCluster[]
 }
 
-function HighlightsSidebar({ clusters }: Props): JSX.Element {
+export default memo(function HighlightsSidebar({ clusters }: Props): JSX.Element {
   const top = pickTop(clusters)
 
   return (
@@ -42,9 +42,7 @@ function HighlightsSidebar({ clusters }: Props): JSX.Element {
       </Stack>
     </Box>
   )
-}
-
-export default memo(HighlightsSidebar)
+})
 
 function pickTop(clusters: readonly NewsCluster[]): readonly NewsCluster[] {
   return [...clusters].sort((a, b) => b.score - a.score).slice(0, TOP_N)

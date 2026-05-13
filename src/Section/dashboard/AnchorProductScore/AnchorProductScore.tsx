@@ -31,7 +31,7 @@ interface AnchorRow {
   readonly deltaVsStore: number | null
 }
 
-function AnchorProductScore({
+export default memo(function AnchorProductScore({
   products,
   storeAov,
   hasCommerce,
@@ -148,9 +148,7 @@ function AnchorProductScore({
       </Box>
     </Card>
   )
-}
-
-export default memo(AnchorProductScore)
+})
 
 function tierFor(delta: number | null): 'anchor' | 'solo' | 'neutral' {
   if (delta === null) {

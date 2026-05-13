@@ -8,7 +8,7 @@ import { LABELS } from '@/components/layout/labels'
 import { useThemeMode } from '@/styles/useThemeMode'
 import styles from './ThemeToggleButton.module.css'
 
-function ThemeToggleButton(): JSX.Element {
+export default memo(function ThemeToggleButton(): JSX.Element {
   const { mode, toggle } = useThemeMode()
   const isDark = mode === 'dark'
   const label = isDark
@@ -31,6 +31,4 @@ function ThemeToggleButton(): JSX.Element {
       )}
     </Box>
   )
-}
-
-export default memo(ThemeToggleButton)
+})

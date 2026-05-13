@@ -11,7 +11,7 @@ interface Props {
   readonly pages: readonly TopLandingPage[]
 }
 
-function AnalyticsTopPages({ pages }: Props): JSX.Element {
+export default memo(function AnalyticsTopPages({ pages }: Props): JSX.Element {
   if (pages.length === 0) {
     return (
       <Alert severity="info" variant="outlined">
@@ -73,6 +73,4 @@ function AnalyticsTopPages({ pages }: Props): JSX.Element {
       })}
     </Box>
   )
-}
-
-export default memo(AnalyticsTopPages)
+})

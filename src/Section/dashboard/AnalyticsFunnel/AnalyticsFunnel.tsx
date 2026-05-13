@@ -19,7 +19,7 @@ interface Props {
   readonly stages: readonly FunnelStage[]
 }
 
-function AnalyticsFunnel({ stages }: Props): JSX.Element {
+export default memo(function AnalyticsFunnel({ stages }: Props): JSX.Element {
   const { mode } = useThemeMode()
   const palette = mode === 'light' ? PALETTE_LIGHT : PALETTE_DARK
 
@@ -89,9 +89,7 @@ function AnalyticsFunnel({ stages }: Props): JSX.Element {
       })}
     </Box>
   )
-}
-
-export default memo(AnalyticsFunnel)
+})
 
 function tierForConversion(conversion: number): 'good' | 'bad' | 'idle' {
   if (conversion >= 0.5) {

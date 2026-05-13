@@ -16,7 +16,7 @@ interface Props {
   readonly cluster: NewsCluster
 }
 
-export default memo(({ cluster }: Props): JSX.Element => {
+export default memo(function HighlightItem({ cluster }: Props): JSX.Element {
   const meta = buildMeta(cluster)
 
   return (

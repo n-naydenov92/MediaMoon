@@ -241,7 +241,7 @@ function matchesRule(row: AdRow, rule: FilterRule): boolean {
   if (typeof value !== 'number' || typeof rule.value !== 'number') {
     return true
   }
-  // eslint-disable-next-line default-case -- exhaustive enum
+
   switch (rule.operator) {
     case 'gt':
       return value > rule.value

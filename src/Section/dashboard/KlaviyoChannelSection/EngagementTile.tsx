@@ -20,7 +20,7 @@ interface Props {
   readonly flowsPercent: number
 }
 
-function EngagementTile({
+export default memo(function EngagementTile({
   icon,
   label,
   totalValue,
@@ -68,6 +68,4 @@ function EngagementTile({
       </Box>
     </Box>
   )
-}
-
-export default memo(EngagementTile)
+})

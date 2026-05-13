@@ -25,7 +25,7 @@ interface Props {
   readonly deltaLabel: string
 }
 
-function MetaChannelSection({
+export default memo(function MetaChannelSection({
   stats,
   previousStats,
   byDay,
@@ -103,9 +103,7 @@ function MetaChannelSection({
       />
     </ChannelSection>
   )
-}
-
-export default memo(MetaChannelSection)
+})
 
 function roasOfDay(p: MetaDailyPoint): number {
   return p.spend > 0 ? p.revenue / p.spend : 0
