@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, type RefObject } from 'react'
 import useMediaQuery from '@mui/material/useMediaQuery'
-import { useCreativePreviewControl } from './CreativePreviewProvider'
+import { useCreativePreviewControl } from './CreativePreviewProvider/CreativePreviewProvider'
 
 const MOBILE_QUERY = '(max-width: 1023px)'
 

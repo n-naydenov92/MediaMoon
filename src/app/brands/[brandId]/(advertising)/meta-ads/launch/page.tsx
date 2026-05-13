@@ -1,5 +1,5 @@
 import { findBrandById } from '@/config/brands'
-import LaunchAdsTab from '../components/launch/LaunchAdsTab'
+import LaunchAdsTab from '../components/launch/LaunchAdsTab/LaunchAdsTab'
 
 interface Props {
   readonly params: Promise<{ readonly brandId: string }>

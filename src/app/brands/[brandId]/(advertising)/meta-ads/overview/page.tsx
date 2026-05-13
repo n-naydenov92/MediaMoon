@@ -1,5 +1,5 @@
 import { findBrandById } from '@/config/brands'
-import OverviewTab from '../components/overview/OverviewTab'
+import OverviewTab from '../components/overview/OverviewTab/OverviewTab'
 
 interface Props {
   readonly params: Promise<{ readonly brandId: string }>

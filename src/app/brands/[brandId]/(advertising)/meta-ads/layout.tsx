@@ -1,6 +1,6 @@
 import { findBrandById } from '@/config/brands'
 import ComingSoonPanel from '@/components/layout/ComingSoonPanel/ComingSoonPanel'
-import CreativePreviewProvider from './components/shared/CreativePreview/CreativePreviewProvider'
+import CreativePreviewProvider from './components/shared/CreativePreview/CreativePreviewProvider/CreativePreviewProvider'
 import styles from './layout.module.css'
 
 interface Props {

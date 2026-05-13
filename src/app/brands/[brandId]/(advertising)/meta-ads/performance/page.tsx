@@ -1,5 +1,5 @@
 import { findBrandById } from '@/config/brands'
-import PerformanceTab from '../components/performance/PerformanceTab'
+import PerformanceTab from '../components/performance/PerformanceTab/PerformanceTab'
 
 interface Props {
   readonly params: Promise<{ readonly brandId: string }>
