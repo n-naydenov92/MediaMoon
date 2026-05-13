@@ -3,7 +3,7 @@
 import Box from '@mui/material/Box'
 import type { TooltipContentProps } from 'recharts'
 import { shortDate } from '@/lib/dateFormat'
-import styles from './KpiSparkline.module.css'
+import styles from '../KpiSparkline.module.css'
 
 interface Props extends TooltipContentProps {
   readonly formatValue: (value: number) => string

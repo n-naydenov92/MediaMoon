@@ -3,7 +3,7 @@
 import { memo } from 'react'
 import Box from '@mui/material/Box'
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore'
-import styles from './MarketSwitcher.module.css'
+import styles from '../MarketSwitcher.module.css'
 
 interface Props {
   readonly label: string

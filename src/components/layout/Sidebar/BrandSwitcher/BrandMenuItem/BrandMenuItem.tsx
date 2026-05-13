@@ -7,7 +7,7 @@ import type { BrandConfig } from '@/types'
 import { LABELS } from '@/components/layout/labels'
 import { cssVars } from '@/lib/css'
 import SidebarTooltip from '@/components/layout/ui/SidebarTooltip'
-import styles from './BrandSwitcher.module.css'
+import styles from '../BrandSwitcher.module.css'
 
 const OVERVIEW_GLYPH = '◎'
 

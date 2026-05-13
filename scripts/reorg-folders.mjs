@@ -7,6 +7,22 @@ const PROJECT_ROOT = process.cwd()
 const SRC_ABS = path.resolve(PROJECT_ROOT, 'src')
 
 const PHASES = {
+  '5-layout-split': [
+    ['src/components/layout/Sidebar/BrandSwitcher/BrandMenu.tsx', 'src/components/layout/Sidebar/BrandSwitcher/BrandMenu/BrandMenu.tsx'],
+    ['src/components/layout/Sidebar/BrandSwitcher/BrandMenuEmpty.tsx', 'src/components/layout/Sidebar/BrandSwitcher/BrandMenuEmpty/BrandMenuEmpty.tsx'],
+    ['src/components/layout/Sidebar/BrandSwitcher/BrandMenuItem.tsx', 'src/components/layout/Sidebar/BrandSwitcher/BrandMenuItem/BrandMenuItem.tsx'],
+    ['src/components/layout/Sidebar/BrandSwitcher/BrandMenuSearch.tsx', 'src/components/layout/Sidebar/BrandSwitcher/BrandMenuSearch/BrandMenuSearch.tsx'],
+    ['src/components/layout/Sidebar/BrandSwitcher/BrandSwitcherTrigger.tsx', 'src/components/layout/Sidebar/BrandSwitcher/BrandSwitcherTrigger/BrandSwitcherTrigger.tsx'],
+    ['src/components/layout/Sidebar/SidebarNav/NavItemView.tsx', 'src/components/layout/Sidebar/SidebarNav/NavItemView/NavItemView.tsx'],
+    ['src/components/layout/Sidebar/SidebarNav/NavPanelView.tsx', 'src/components/layout/Sidebar/SidebarNav/NavPanelView/NavPanelView.tsx'],
+    ['src/components/layout/Sidebar/SidebarNav/NavSectionView.tsx', 'src/components/layout/Sidebar/SidebarNav/NavSectionView/NavSectionView.tsx'],
+    ['src/components/layout/Sidebar/SidebarUserCard/ThemeToggleButton.tsx', 'src/components/layout/Sidebar/SidebarUserCard/ThemeToggleButton/ThemeToggleButton.tsx'],
+    ['src/components/layout/Topbar/MarketSwitcher/MarketMenu.tsx', 'src/components/layout/Topbar/MarketSwitcher/MarketMenu/MarketMenu.tsx'],
+    ['src/components/layout/Topbar/MarketSwitcher/MarketMenuItem.tsx', 'src/components/layout/Topbar/MarketSwitcher/MarketMenuItem/MarketMenuItem.tsx'],
+    ['src/components/layout/Topbar/MarketSwitcher/MarketSwitcherTrigger.tsx', 'src/components/layout/Topbar/MarketSwitcher/MarketSwitcherTrigger/MarketSwitcherTrigger.tsx'],
+    ['src/components/layout/PageHeader/UpdatedBadge.tsx', 'src/components/layout/PageHeader/UpdatedBadge/UpdatedBadge.tsx'],
+    ['src/components/kpi/KpiSparkline/KpiSparklineTooltip.tsx', 'src/components/kpi/KpiSparkline/KpiSparklineTooltip/KpiSparklineTooltip.tsx'],
+  ],
   '1-brands': [
     ['src/Section/brands/BrandsOverview.tsx', 'src/Section/brands/BrandsOverview/BrandsOverview.tsx'],
     ['src/Section/brands/BrandCard.tsx', 'src/Section/brands/BrandsOverview/BrandCard/BrandCard.tsx'],

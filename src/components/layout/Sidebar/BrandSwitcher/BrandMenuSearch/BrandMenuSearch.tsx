@@ -4,7 +4,7 @@ import { memo, type ChangeEvent, type RefObject } from 'react'
 import Box from '@mui/material/Box'
 import SearchIcon from '@mui/icons-material/Search'
 import { LABELS } from '@/components/layout/labels'
-import styles from './BrandMenu.module.css'
+import styles from '../BrandMenu/BrandMenu.module.css'
 
 interface Props {
   readonly value: string

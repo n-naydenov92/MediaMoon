@@ -8,7 +8,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import type { NavItem } from '@/types'
 import { buildHref, isHrefActive } from '@/config/sidebarNav'
 import ModuleIcon from '@/components/layout/ModuleIcon/ModuleIcon'
-import styles from './SidebarNav.module.css'
+import styles from '../SidebarNav.module.css'
 
 const ITEM_ICON_SIZE_PX = 18
 

@@ -4,9 +4,9 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Box from '@mui/material/Box'
 import type { BrandConfig } from '@/types'
 import { LABELS } from '@/components/layout/labels'
-import BrandMenuItem from './BrandMenuItem'
-import BrandMenuSearch from './BrandMenuSearch'
-import BrandMenuEmpty from './BrandMenuEmpty'
+import BrandMenuItem from '../BrandMenuItem/BrandMenuItem'
+import BrandMenuSearch from '../BrandMenuSearch/BrandMenuSearch'
+import BrandMenuEmpty from '../BrandMenuEmpty/BrandMenuEmpty'
 import styles from './BrandMenu.module.css'
 
 interface Props {

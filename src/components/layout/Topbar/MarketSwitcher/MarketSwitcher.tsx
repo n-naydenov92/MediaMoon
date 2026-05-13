@@ -7,8 +7,8 @@ import { MARKET_LABELS } from '@/lib/marketLabels'
 import { useDismissPopover } from '@/components/layout/hooks/useDismissPopover'
 import { useBrandShellContext } from '@/contexts/brandShell/useBrandShellContext'
 import { useThemeMode } from '@/styles/useThemeMode'
-import MarketSwitcherTrigger from './MarketSwitcherTrigger'
-import MarketMenu from './MarketMenu'
+import MarketSwitcherTrigger from './MarketSwitcherTrigger/MarketSwitcherTrigger'
+import MarketMenu from './MarketMenu/MarketMenu'
 import styles from './MarketSwitcher.module.css'
 
 export default memo(function MarketSwitcher(): JSX.Element {

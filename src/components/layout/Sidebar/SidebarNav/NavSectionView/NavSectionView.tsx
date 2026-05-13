@@ -3,8 +3,8 @@
 import { memo } from 'react'
 import Box from '@mui/material/Box'
 import type { NavSection, UserRole } from '@/types'
-import NavItemView from './NavItemView'
-import styles from './SidebarNav.module.css'
+import NavItemView from '../NavItemView/NavItemView'
+import styles from '../SidebarNav.module.css'
 
 interface Props {
   readonly section: NavSection

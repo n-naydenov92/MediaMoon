@@ -3,7 +3,7 @@
 import { memo } from 'react'
 import { UserButton, useUser } from '@clerk/nextjs'
 import Box from '@mui/material/Box'
-import ThemeToggleButton from './ThemeToggleButton'
+import ThemeToggleButton from './ThemeToggleButton/ThemeToggleButton'
 import styles from './SidebarUserCard.module.css'
 
 interface Props {

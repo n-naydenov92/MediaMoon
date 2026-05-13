@@ -6,7 +6,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import type { BrandConfig } from '@/types'
 import { cssVars } from '@/lib/css'
 import SidebarTooltip from '@/components/layout/ui/SidebarTooltip'
-import styles from './BrandSwitcher.module.css'
+import styles from '../BrandSwitcher.module.css'
 
 const FALLBACK_GLYPH = '◎'
 

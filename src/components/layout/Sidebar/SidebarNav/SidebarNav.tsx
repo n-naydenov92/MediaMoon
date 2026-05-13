@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import Box from '@mui/material/Box'
 import { MAIN_PANEL, findActivePanelPath, findPanelByTrail } from '@/config/sidebarNav'
 import type { UserRole } from '@/types'
-import NavPanelView from './NavPanelView'
+import NavPanelView from './NavPanelView/NavPanelView'
 import styles from './SidebarNav.module.css'
 
 interface Props {

@@ -4,8 +4,8 @@ import { memo } from 'react'
 import Box from '@mui/material/Box'
 import ArrowBackIcon from '@mui/icons-material/ArrowBackIos'
 import type { NavPanel, UserRole } from '@/types'
-import NavSectionView from './NavSectionView'
-import styles from './SidebarNav.module.css'
+import NavSectionView from '../NavSectionView/NavSectionView'
+import styles from '../SidebarNav.module.css'
 
 interface Props {
   readonly panel: NavPanel

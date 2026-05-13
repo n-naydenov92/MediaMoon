@@ -5,7 +5,7 @@ import Box from '@mui/material/Box'
 import CheckIcon from '@mui/icons-material/Check'
 import type { MarketSelection } from '@/lib/markets'
 import { MARKET_LABELS } from '@/lib/marketLabels'
-import styles from './MarketSwitcher.module.css'
+import styles from '../MarketSwitcher.module.css'
 
 interface Props {
   readonly value: MarketSelection

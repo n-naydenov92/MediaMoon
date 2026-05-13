@@ -7,8 +7,8 @@ import type { BrandConfig } from '@/types'
 import { LABELS } from '@/components/layout/labels'
 import { resolveActiveBrand } from '@/lib/navigation'
 import { useDismissPopover } from '@/components/layout/hooks/useDismissPopover'
-import BrandSwitcherTrigger from './BrandSwitcherTrigger'
-import BrandMenu from './BrandMenu'
+import BrandSwitcherTrigger from './BrandSwitcherTrigger/BrandSwitcherTrigger'
+import BrandMenu from './BrandMenu/BrandMenu'
 import styles from './BrandSwitcher.module.css'
 
 interface Props {

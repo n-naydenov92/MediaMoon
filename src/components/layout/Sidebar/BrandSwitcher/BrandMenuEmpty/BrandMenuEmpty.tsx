@@ -4,7 +4,7 @@ import { memo } from 'react'
 import Box from '@mui/material/Box'
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined'
 import { LABELS } from '@/components/layout/labels'
-import styles from './BrandMenu.module.css'
+import styles from '../BrandMenu/BrandMenu.module.css'
 
 interface Props {
   readonly query: string

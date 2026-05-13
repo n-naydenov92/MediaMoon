@@ -5,8 +5,8 @@ import Box from '@mui/material/Box'
 import SearchIcon from '@mui/icons-material/Search'
 import { ALL_MARKETS, type MarketSelection } from '@/lib/markets'
 import { MARKET_LABELS } from '@/lib/marketLabels'
-import MarketMenuItem from './MarketMenuItem'
-import styles from './MarketSwitcher.module.css'
+import MarketMenuItem from '../MarketMenuItem/MarketMenuItem'
+import styles from '../MarketSwitcher.module.css'
 
 interface Props {
   readonly id: string

@@ -4,7 +4,7 @@ import { useId } from 'react'
 import Box from '@mui/material/Box'
 import { Area, AreaChart, ResponsiveContainer, Tooltip } from 'recharts'
 import type { KpiTrend } from '../kpiTrend'
-import KpiSparklineTooltip from './KpiSparklineTooltip'
+import KpiSparklineTooltip from './KpiSparklineTooltip/KpiSparklineTooltip'
 import styles from './KpiSparkline.module.css'
 
 export interface SparkPoint {
