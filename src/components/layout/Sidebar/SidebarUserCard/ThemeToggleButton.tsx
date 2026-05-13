@@ -1,13 +1,14 @@
 'use client'
 
 import { memo } from 'react'
+import Box from '@mui/material/Box'
 import DarkModeIcon from '@mui/icons-material/DarkMode'
 import LightModeIcon from '@mui/icons-material/LightMode'
 import { LABELS } from '@/components/layout/labels'
 import { useThemeMode } from '@/styles/useThemeMode'
 import styles from './ThemeToggleButton.module.css'
 
-const ThemeToggleButton = memo(function ThemeToggleButton(): JSX.Element {
+function ThemeToggleButton(): JSX.Element {
   const { mode, toggle } = useThemeMode()
   const isDark = mode === 'dark'
   const label = isDark
@@ -15,7 +16,8 @@ const ThemeToggleButton = memo(function ThemeToggleButton(): JSX.Element {
     : LABELS.themeToggle.toDarkTheme
 
   return (
-    <button
+    <Box
+      component="button"
       type="button"
       className={styles.root}
       onClick={toggle}
@@ -27,8 +29,8 @@ const ThemeToggleButton = memo(function ThemeToggleButton(): JSX.Element {
       ) : (
         <DarkModeIcon fontSize="small" />
       )}
-    </button>
+    </Box>
   )
-})
+}
 
-export default ThemeToggleButton
+export default memo(ThemeToggleButton)

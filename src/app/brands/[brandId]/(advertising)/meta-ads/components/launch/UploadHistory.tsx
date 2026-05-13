@@ -17,6 +17,7 @@ export default function UploadHistory({ brandId }: Props): JSX.Element {
 
   useEffect(() => {
     const ctrl = new AbortController()
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- data fetching / external sync effect
     setLoading(true)
     void (async () => {
       try {
@@ -59,6 +60,7 @@ export default function UploadHistory({ brandId }: Props): JSX.Element {
     <ul className={styles.grid}>
       {uploads.map((file) => (
         <li key={file.id} className={styles.tile}>
+          {/* eslint-disable-next-line no-nested-ternary -- nested ternary clearer than refactor here */}
           {file.blobUrl && file.mimeType.startsWith('image/') ? (
             /* eslint-disable-next-line @next/next/no-img-element */
             <img src={file.blobUrl} alt={file.originalName} className={styles.preview} />

@@ -53,7 +53,7 @@ export async function getJobWithFiles(jobId: string): Promise<JobWithFiles | nul
 
 export async function listRecentJobsForBrand(
   brandId: string,
-  limit: number = 30,
+  limit = 30,
 ): Promise<readonly JobWithFiles[]> {
   return prisma.job.findMany({
     where: { brandId },
@@ -65,7 +65,7 @@ export async function listRecentJobsForBrand(
 
 export async function listCompletedUploadsForBrand(
   brandId: string,
-  limit: number = 60,
+  limit = 60,
 ): Promise<readonly JobFile[]> {
   return prisma.jobFile.findMany({
     where: {

@@ -1,6 +1,7 @@
 'use client'
 
 import { memo } from 'react'
+import Box from '@mui/material/Box'
 import CheckIcon from '@mui/icons-material/Check'
 import type { BrandConfig } from '@/types'
 import { LABELS } from '@/components/layout/labels'
@@ -16,36 +17,43 @@ interface Props {
   readonly onSelect: () => void
 }
 
-const BrandMenuItem = memo(function BrandMenuItem({
+function BrandMenuItem({
   brand,
   isSelected,
   onSelect,
 }: Props): JSX.Element {
   const glyph = brand?.emoji ?? OVERVIEW_GLYPH
   const label = brand?.label ?? LABELS.sidebar.overview
-  const glyphStyle = brand ? cssVars({ '--brand-color': brand.color }) : undefined
 
   return (
-    <li>
+    <Box component="li">
       <SidebarTooltip label={label} enabled>
-        <button
+        <Box
+          component="button"
           type="button"
           role="option"
           aria-selected={isSelected}
           className={styles.option}
           onClick={onSelect}
         >
-          <span className={styles.optionGlyph} aria-hidden="true" style={glyphStyle}>
+          <Box
+            component="span"
+            className={styles.optionGlyph}
+            aria-hidden="true"
+            style={brand ? cssVars({ '--brand-color': brand.color }) : undefined}
+          >
             {glyph}
-          </span>
-          <span className={styles.optionLabel}>{label}</span>
+          </Box>
+          <Box component="span" className={styles.optionLabel}>
+            {label}
+          </Box>
           {isSelected && (
             <CheckIcon className={styles.optionCheck} fontSize="small" />
           )}
-        </button>
+        </Box>
       </SidebarTooltip>
-    </li>
+    </Box>
   )
-})
+}
 
-export default BrandMenuItem
+export default memo(BrandMenuItem)

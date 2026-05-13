@@ -86,6 +86,7 @@ export default function JobRow({ job, clientProgress, onCancel }: Props): JSX.El
             variant="outlined"
             color="inherit"
             className={styles.cancel}
+            // eslint-disable-next-line no-void -- void signals intentionally-ignored promise
             onClick={() => void onCancel(job.id)}
           >
             Cancel

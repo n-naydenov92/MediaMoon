@@ -29,6 +29,7 @@ export function useSidebarResize(): SidebarResizeApi {
     }
     const parsed = Number.parseInt(stored, 10)
     if (Number.isFinite(parsed) && parsed >= MIN_WIDTH_PX && parsed <= MAX_WIDTH_PX) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- hydrating from localStorage; safe to skip SSR
       setWidthState(parsed)
     }
   }, [])

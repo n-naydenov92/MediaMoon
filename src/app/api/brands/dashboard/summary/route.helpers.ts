@@ -12,6 +12,7 @@ import {
 } from '@/lib/dashboard/aggregate'
 import { fetchAnalyticsForBrand } from '@/lib/dashboard/fetchAnalytics'
 import { fetchCommerceForBrand } from '@/lib/dashboard/fetchCommerce'
+import { fetchKlaviyoForBrand } from '@/lib/dashboard/fetchKlaviyo'
 import { fetchSpendBothPeriods } from '@/lib/dashboard/fetchSpend'
 import type { MarketSelection } from '@/lib/markets'
 import type { DateRangeSelection } from '@/lib/meta/dateRange'
@@ -21,7 +22,7 @@ import type {
   DashboardSummary,
 } from '@/types/dashboard'
 
-export const CACHE_VERSION = 'v16'
+export const CACHE_VERSION = 'v18'
 
 export async function buildSummary(
   brandId: BrandId,
@@ -29,11 +30,20 @@ export async function buildSummary(
   previous: DateRangeSelection,
   market: MarketSelection,
 ): Promise<DashboardSummary> {
-  const [spend, commercePeriods, analyticsCurrent, analyticsPrevious] = await Promise.all([
+  const [
+    spend,
+    commercePeriods,
+    analyticsCurrent,
+    analyticsPrevious,
+    klaviyoCurrent,
+    klaviyoPrevious,
+  ] = await Promise.all([
     fetchSpendBothPeriods(brandId, current, previous, market),
     fetchCommerceBothPeriods(brandId, current, previous, market),
     fetchAnalyticsForBrand(brandId, current, market),
     fetchAnalyticsForBrand(brandId, previous, market),
+    fetchKlaviyoForBrand(brandId, current),
+    fetchKlaviyoForBrand(brandId, previous),
   ])
   const commerceCurrent = commercePeriods.current
   const commercePrevious = commercePeriods.previous
@@ -82,8 +92,8 @@ export async function buildSummary(
     fetchedAt: Date.now(),
     hasCommerce: commerceCurrent !== null,
     hasAnalytics: analyticsCurrent !== null,
-    channels: buildChannelsBreakdown(spend.current.meta),
-    previousChannels: buildChannelsBreakdown(spend.previous.meta),
+    channels: buildChannelsBreakdown(spend.current.meta, klaviyoCurrent),
+    previousChannels: buildChannelsBreakdown(spend.previous.meta, klaviyoPrevious),
     channelsByDay: buildChannelsByDay(spend.current.meta),
     analytics: buildAnalytics(analyticsCurrent, kpis),
     previousAnalytics: buildAnalytics(analyticsPrevious, previousKpis),

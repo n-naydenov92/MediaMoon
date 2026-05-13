@@ -53,6 +53,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     cache.set(tag, { data: summary, expiresAt: Date.now() + CACHE_TTL_MS })
     return NextResponse.json(summary)
   } catch (err) {
+    // eslint-disable-next-line no-console -- intentional logging
     console.error('[dashboard/summary] failed', err)
     const message = err instanceof Error ? err.message : 'Unknown error'
     return NextResponse.json({ error: message }, { status: UPSTREAM_ERROR_STATUS })

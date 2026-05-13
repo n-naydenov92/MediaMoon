@@ -3,6 +3,7 @@ import type {
   AdChannelStats,
   DashboardChannels,
   DashboardChannelsByDay,
+  KlaviyoBucketStats,
   KlaviyoChannelStats,
   SpendBreakdownPoint,
 } from '@/types/dashboard'
@@ -21,13 +22,19 @@ interface Props {
   readonly deltaLabel: string
 }
 
-const EMPTY_KLAVIYO: KlaviyoChannelStats = {
-  wired: false,
+const EMPTY_KLAVIYO_BUCKET: KlaviyoBucketStats = {
   sent: null,
   openRate: null,
   clickRate: null,
   attributedRevenue: null,
   attributedOrders: null,
+}
+
+const EMPTY_KLAVIYO: KlaviyoChannelStats = {
+  wired: false,
+  total: EMPTY_KLAVIYO_BUCKET,
+  flows: EMPTY_KLAVIYO_BUCKET,
+  campaigns: EMPTY_KLAVIYO_BUCKET,
 }
 
 function deriveAdChannel(

@@ -71,6 +71,7 @@ export default function DateRangeDropdown({
         {triggerLabel}
       </Button>
       <Menu
+        // eslint-disable-next-line react-hooks/refs -- MUI Popover/Menu anchorEl pattern needs ref.current after first render
         anchorEl={triggerRef.current}
         open={menuOpen}
         onClose={() => setMenuOpen(false)}
@@ -133,6 +134,7 @@ export default function DateRangeDropdown({
         </MenuItem>
       </Menu>
       <Popover
+        // eslint-disable-next-line react-hooks/refs -- MUI Popover/Menu anchorEl pattern needs ref.current after first render
         anchorEl={calendarAnchorRef.current}
         open={calendarOpen}
         onClose={() => setCalendarOpen(false)}

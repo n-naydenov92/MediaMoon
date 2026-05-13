@@ -13,7 +13,7 @@ async function get<T>(token: string, path: string, params: Record<string, string
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const resolved = resolveBrandTokenFromRequest(request)
   if (!resolved.ok) return resolved.response
-  const token = resolved.token
+  const { token } = resolved
 
   const accountId = request.nextUrl.searchParams.get('accountId')
   const campaignId = request.nextUrl.searchParams.get('campaignId')
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         const adset = a as Record<string, unknown>
         const ads = await get<{ data: unknown[]; error?: unknown }>(
           token,
-          `/${adset['id'] as string}/ads`,
+          `/${adset.id as string}/ads`,
           { fields: 'id,name,status,effective_status,created_time', limit: '100' },
         )
         return { ...adset, ads: ads.data ?? [] }

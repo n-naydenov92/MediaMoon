@@ -2,6 +2,7 @@ import type {
   AdChannelStats,
   DashboardChannels,
   DashboardChannelsByDay,
+  KlaviyoBucketStats,
   KlaviyoChannelStats,
 } from '@/types/dashboard'
 import type { MetaChannelTotals } from './types'
@@ -18,13 +19,19 @@ const EMPTY_AD_STATS: AdChannelStats = {
   costPerVisitor: null,
 }
 
-const EMPTY_KLAVIYO_STATS: KlaviyoChannelStats = {
-  wired: false,
+const EMPTY_KLAVIYO_BUCKET: KlaviyoBucketStats = {
   sent: null,
   openRate: null,
   clickRate: null,
   attributedRevenue: null,
   attributedOrders: null,
+}
+
+const EMPTY_KLAVIYO_STATS: KlaviyoChannelStats = {
+  wired: false,
+  total: EMPTY_KLAVIYO_BUCKET,
+  flows: EMPTY_KLAVIYO_BUCKET,
+  campaigns: EMPTY_KLAVIYO_BUCKET,
 }
 
 export function buildChannelsByDay(meta: MetaChannelTotals): DashboardChannelsByDay {
@@ -41,7 +48,10 @@ export function buildChannelsByDay(meta: MetaChannelTotals): DashboardChannelsBy
   }
 }
 
-export function buildChannelsBreakdown(meta: MetaChannelTotals): DashboardChannels {
+export function buildChannelsBreakdown(
+  meta: MetaChannelTotals,
+  klaviyo: KlaviyoChannelStats | null,
+): DashboardChannels {
   const spend = meta.spendEur
   const revenue = meta.revenueEur
   const orders = meta.purchases
@@ -67,6 +77,6 @@ export function buildChannelsBreakdown(meta: MetaChannelTotals): DashboardChanne
   return {
     meta: metaStats,
     googleAds: EMPTY_AD_STATS,
-    klaviyo: EMPTY_KLAVIYO_STATS,
+    klaviyo: klaviyo ?? EMPTY_KLAVIYO_STATS,
   }
 }

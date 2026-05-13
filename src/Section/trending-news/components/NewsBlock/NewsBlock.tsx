@@ -16,10 +16,10 @@ interface Props {
 
 const COLLAPSE_DURATION_MS = 200
 
-export default memo(function NewsBlock({
+export default memo(({
   cluster,
   defaultExpanded = false,
-}: Props): JSX.Element {
+}: Props): JSX.Element => {
   const [expanded, setExpanded] = useState(defaultExpanded)
 
   const handleToggle = useCallback((): void => {

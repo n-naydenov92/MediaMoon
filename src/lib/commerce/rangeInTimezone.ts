@@ -39,6 +39,7 @@ export function rangeForCommerce(
       }
     case 'this_month':
     case 'last_month':
+    default:
       return rangeFromSelection(selection)
   }
 }

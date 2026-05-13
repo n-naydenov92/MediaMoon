@@ -1,6 +1,7 @@
 'use client'
 
 import { memo } from 'react'
+import Box from '@mui/material/Box'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import type { BrandConfig } from '@/types'
 import { cssVars } from '@/lib/css'
@@ -17,20 +18,17 @@ interface Props {
   readonly onToggle: () => void
 }
 
-const BrandSwitcherTrigger = memo(function BrandSwitcherTrigger({
+function BrandSwitcherTrigger({
   activeBrand,
   triggerLabel,
   menuId,
   isOpen,
   onToggle,
 }: Props): JSX.Element {
-  const glyphStyle = activeBrand
-    ? cssVars({ '--brand-color': activeBrand.color })
-    : undefined
-
   return (
     <SidebarTooltip label={triggerLabel} enabled={false}>
-      <button
+      <Box
+        component="button"
         type="button"
         className={styles.trigger}
         onClick={onToggle}
@@ -39,21 +37,22 @@ const BrandSwitcherTrigger = memo(function BrandSwitcherTrigger({
         aria-controls={menuId}
         aria-label={triggerLabel}
       >
-        <span
+        <Box
+          component="span"
           className={styles.glyph}
           aria-hidden="true"
           data-color={activeBrand?.color ?? 'transparent'}
-          style={glyphStyle}
+          style={activeBrand ? cssVars({ '--brand-color': activeBrand.color }) : undefined}
         >
           {activeBrand?.emoji ?? FALLBACK_GLYPH}
-        </span>
-        <span className={styles.label} title={triggerLabel}>
+        </Box>
+        <Box component="span" className={styles.label} title={triggerLabel}>
           {triggerLabel}
-        </span>
+        </Box>
         <KeyboardArrowDownIcon className={styles.chevron} fontSize="small" />
-      </button>
+      </Box>
     </SidebarTooltip>
   )
-})
+}
 
-export default BrandSwitcherTrigger
+export default memo(BrandSwitcherTrigger)

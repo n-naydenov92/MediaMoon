@@ -36,12 +36,18 @@ export default function AdsTableDesktopRow({ row, visibleColumns }: Props): JSX.
     >
       <TableCell className={styles.thumbCell}>
         <Box
+          // eslint-disable-next-line react-hooks/refs -- MUI Popover/Menu anchorEl pattern needs ref.current after first render
           ref={trigger.ref}
           className={styles.thumbnailWrap}
+          // eslint-disable-next-line react-hooks/refs -- MUI Popover/Menu anchorEl pattern needs ref.current after first render
           onPointerEnter={trigger.onPointerEnter}
+          // eslint-disable-next-line react-hooks/refs -- MUI Popover/Menu anchorEl pattern needs ref.current after first render
           onPointerLeave={trigger.onPointerLeave}
+          // eslint-disable-next-line react-hooks/refs -- MUI Popover/Menu anchorEl pattern needs ref.current after first render
           onFocus={trigger.onFocus}
+          // eslint-disable-next-line react-hooks/refs -- MUI Popover/Menu anchorEl pattern needs ref.current after first render
           onBlur={trigger.onBlur}
+          // eslint-disable-next-line react-hooks/refs -- MUI Popover/Menu anchorEl pattern needs ref.current after first render
           onClick={trigger.onClick}
           tabIndex={0}
         >

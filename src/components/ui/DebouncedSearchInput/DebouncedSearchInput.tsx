@@ -24,13 +24,13 @@ const SEARCH_INPUT_PROPS = {
   ),
 } as const
 
-const DebouncedSearchInput = memo(function DebouncedSearchInput({
+const DebouncedSearchInput = memo(({
   placeholder = 'Search…',
   defaultValue = '',
   debounceMs = DEFAULT_DEBOUNCE_MS,
   className,
   onDebouncedChange,
-}: Props): JSX.Element {
+}: Props): JSX.Element => {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const onChangeRef = useRef(onDebouncedChange)
 
@@ -38,11 +38,9 @@ const DebouncedSearchInput = memo(function DebouncedSearchInput({
     onChangeRef.current = onDebouncedChange
   }, [onDebouncedChange])
 
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current)
-      }
+  useEffect(() => () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current)
     }
   }, [])
 

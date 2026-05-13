@@ -24,11 +24,13 @@ import { useThemeMode } from '@/styles/useThemeMode'
 import type { CategoryBreakdownPoint } from '@/types/dashboard'
 import { pickPaletteColor } from '../shared/chartColorPalette'
 import RechartsTooltipShell from '../shared/RechartsTooltipShell'
+import SkeletonRows from '../shared/SkeletonRows'
 import styles from './DashboardCategoryBreakdown.module.css'
 
 interface Props {
   readonly categories: readonly CategoryBreakdownPoint[]
   readonly hasCommerce: boolean
+  readonly loading?: boolean
 }
 
 const DONUT_INNER = 70
@@ -40,6 +42,7 @@ const CHART_HEIGHT = 200
 function DashboardCategoryBreakdown({
   categories,
   hasCommerce,
+  loading = false,
 }: Props): JSX.Element {
   const { mode } = useThemeMode()
   const palette = mode === 'light' ? PALETTE_LIGHT : PALETTE_DARK
@@ -53,17 +56,18 @@ function DashboardCategoryBreakdown({
         className={styles.header}
       />
       <CardContent className={styles.content}>
-        {!hasCommerce && (
+        {loading && <SkeletonRows />}
+        {!loading && !hasCommerce && (
           <Alert severity="info" variant="outlined" className={styles.empty}>
             Магазинът не е свързан за този бранд.
           </Alert>
         )}
-        {hasCommerce && categories.length === 0 && (
+        {!loading && hasCommerce && categories.length === 0 && (
           <Alert severity="info" variant="outlined" className={styles.empty}>
             Category breakdown not yet available — pending WooCommerce mapping.
           </Alert>
         )}
-        {hasCommerce && categories.length > 0 && (
+        {!loading && hasCommerce && categories.length > 0 && (
           <>
             <Box className={styles.donutWrap}>
               <ResponsiveContainer width="100%" height={CHART_HEIGHT}>

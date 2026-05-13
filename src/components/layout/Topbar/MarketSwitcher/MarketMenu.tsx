@@ -1,6 +1,7 @@
 'use client'
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import Box from '@mui/material/Box'
 import SearchIcon from '@mui/icons-material/Search'
 import { ALL_MARKETS, type MarketSelection } from '@/lib/markets'
 import { MARKET_LABELS } from '@/lib/marketLabels'
@@ -17,7 +18,7 @@ interface Props {
 
 const SEARCH_PLACEHOLDER = 'Find market…'
 
-const MarketMenu = memo(function MarketMenu({
+function MarketMenu({
   id,
   options,
   selected,
@@ -53,10 +54,11 @@ const MarketMenu = memo(function MarketMenu({
   }, [])
 
   return (
-    <div id={id} className={styles.menu}>
-      <div className={styles.searchRow}>
+    <Box id={id} className={styles.menu}>
+      <Box className={styles.searchRow}>
         <SearchIcon className={styles.searchIcon} fontSize="small" />
-        <input
+        <Box
+          component="input"
           ref={inputRef}
           type="text"
           className={styles.searchInput}
@@ -65,10 +67,10 @@ const MarketMenu = memo(function MarketMenu({
           onChange={handleQueryChange}
           aria-label={SEARCH_PLACEHOLDER}
         />
-        <span className={styles.escBadge} aria-hidden="true">Esc</span>
-      </div>
+        <Box component="span" className={styles.escBadge} aria-hidden="true">Esc</Box>
+      </Box>
 
-      <ul role="listbox" aria-label={ariaLabel} className={styles.list}>
+      <Box component="ul" role="listbox" aria-label={ariaLabel} className={styles.list}>
         {!hasQuery && (
           <>
             <MarketMenuItem
@@ -76,7 +78,7 @@ const MarketMenu = memo(function MarketMenu({
               isSelected={selected === ALL_MARKETS}
               onSelect={onSelect}
             />
-            <li className={styles.separator} role="separator" />
+            <Box component="li" className={styles.separator} role="separator" />
           </>
         )}
         {filteredMarkets.map((value) => (
@@ -87,9 +89,9 @@ const MarketMenu = memo(function MarketMenu({
             onSelect={onSelect}
           />
         ))}
-      </ul>
-    </div>
+      </Box>
+    </Box>
   )
-})
+}
 
-export default MarketMenu
+export default memo(MarketMenu)

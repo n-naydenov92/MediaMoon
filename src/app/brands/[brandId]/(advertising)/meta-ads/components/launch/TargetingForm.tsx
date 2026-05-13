@@ -65,6 +65,7 @@ export default function TargetingForm({
         if (err instanceof DOMException && err.name === 'AbortError') {
           return
         }
+        // eslint-disable-next-line no-console -- intentional logging
         console.error(err)
       }
     })()
@@ -73,6 +74,7 @@ export default function TargetingForm({
 
   useEffect(() => {
     if (!value.accountId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- data fetching / external sync effect
       setCampaigns([])
       return
     }
@@ -102,6 +104,7 @@ export default function TargetingForm({
 
   useEffect(() => {
     if (!value.campaignId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- data fetching / external sync effect
       setAdSets([])
       return
     }

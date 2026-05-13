@@ -22,11 +22,11 @@ interface Props {
   readonly onToggle: () => void
 }
 
-export default memo(function NewsBlockHeader({
+export default memo(({
   cluster,
   expanded,
   onToggle,
-}: Props): JSX.Element {
+}: Props): JSX.Element => {
   const subline = buildSubline(cluster)
 
   return (

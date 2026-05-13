@@ -62,13 +62,19 @@ export interface AdChannelStats {
   readonly costPerVisitor: number | null
 }
 
-export interface KlaviyoChannelStats {
-  readonly wired: boolean
+export interface KlaviyoBucketStats {
   readonly sent: number | null
   readonly openRate: number | null
   readonly clickRate: number | null
   readonly attributedRevenue: number | null
   readonly attributedOrders: number | null
+}
+
+export interface KlaviyoChannelStats {
+  readonly wired: boolean
+  readonly total: KlaviyoBucketStats
+  readonly flows: KlaviyoBucketStats
+  readonly campaigns: KlaviyoBucketStats
 }
 
 export interface DashboardChannels {
