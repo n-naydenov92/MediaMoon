@@ -15,6 +15,7 @@ import {
   formatRoasValue,
 } from '../../shared/dashboardFormatters'
 import { toSparkPoints } from '../../shared/sparkPoints'
+import { roasOfDay } from './helpers'
 import styles from './DashboardKpiGrid.module.css'
 
 interface Props {
@@ -110,11 +111,4 @@ export default function DashboardKpiGrid({
       />
     </Box>
   )
-}
-
-function roasOfDay(p: DashboardDailyPoint): number | null {
-  if (p.revenue === null || p.spend === null || p.spend <= 0) {
-    return null
-  }
-  return p.revenue / p.spend
 }

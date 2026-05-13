@@ -15,6 +15,7 @@ import {
 } from '../../shared/dashboardFormatters'
 import { pctDelta } from '../../shared/metricsDelta'
 import { toSparkPoints } from '../../shared/sparkPoints'
+import { checkoutRateOfDay, cpoOfDay, roasOfDay } from './helpers'
 
 interface Props {
   readonly stats: AdChannelStats
@@ -104,15 +105,3 @@ export default memo(function MetaChannelSection({
     </ChannelSection>
   )
 })
-
-function roasOfDay(p: MetaDailyPoint): number {
-  return p.spend > 0 ? p.revenue / p.spend : 0
-}
-
-function cpoOfDay(p: MetaDailyPoint): number {
-  return p.orders > 0 ? p.spend / p.orders : 0
-}
-
-function checkoutRateOfDay(p: MetaDailyPoint): number {
-  return p.checkoutsInitiated > 0 ? p.orders / p.checkoutsInitiated : 0
-}
