@@ -1,0 +1,119 @@
+.ruleChipWrap {
+  display: inline-flex;
+  align-items: center;
+}
+
+.ruleChip {
+  font-family: var(--font-dm-sans), system-ui, sans-serif !important;
+  font-size: var(--text-sm) !important;
+  height: 30px !important;
+  background: var(--surface-1) !important;
+}
+
+.ruleChip[data-editing='true'] {
+  background: var(--surface-2) !important;
+  border-color: var(--hairline-strong) !important;
+}
+
+.ruleChip:focus,
+.ruleChip:focus-visible,
+.ruleChip:focus-within {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.ruleLabelInner {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ruleFieldOp {
+  white-space: nowrap;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.ruleValue {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  min-width: 32px;
+  padding: 0 6px;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  transition: background 80ms ease;
+}
+
+.ruleChip:hover .ruleValue {
+  background: var(--surface-3);
+}
+
+.ruleInput {
+  display: inline-flex !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  min-width: 0 !important;
+  width: auto !important;
+  background: transparent !important;
+  border: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  font-family: inherit !important;
+  font-size: inherit !important;
+  font-weight: 600 !important;
+  line-height: 20px !important;
+  color: var(--text-primary) !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ruleInput :global(.MuiInputBase-input) {
+  box-sizing: border-box;
+  height: 20px;
+  padding: 0 6px;
+  min-width: 32px;
+  max-width: 80px;
+  width: auto;
+  text-align: center;
+  background: var(--surface-3);
+  border: 0;
+  border-radius: 4px;
+  color: var(--text-primary);
+  font: inherit;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 20px;
+  outline: none;
+  box-shadow: none;
+  caret-color: var(--accent);
+  field-sizing: content;
+}
+
+.ruleInput :global(.MuiInputBase-input::selection) {
+  background: var(--accent-soft);
+  color: var(--text-primary);
+}
+
+.ruleInput :global(.MuiInputBase-input:focus),
+.ruleInput :global(.MuiInputBase-input:focus-visible),
+.ruleInput :global(.MuiInputBase-input:active) {
+  outline: none !important;
+  box-shadow: none !important;
+  border: 0 !important;
+}
+
+.menuPaper {
+  min-width: 140px;
+  background: var(--bg-surface);
+  border: 1px solid var(--hairline);
+  color: var(--text-primary);
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+}

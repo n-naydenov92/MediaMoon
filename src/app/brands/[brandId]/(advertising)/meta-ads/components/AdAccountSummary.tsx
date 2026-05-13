@@ -1,4 +1,6 @@
-import { memo } from 'react'
+import { memo, type CSSProperties } from 'react'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
 import type { AdAccount } from '@/lib/gateways/MetaAdsGateway'
 import styles from './AdAccountSummary.module.css'
 
@@ -24,27 +26,39 @@ function statusFor(code: number): { readonly label: string; readonly tone: 'acti
 
 export default memo(function AdAccountSummary({ account, brandColor }: Props): JSX.Element {
   const status = statusFor(account.accountStatus)
+  const cssVars = { '--brand-color': brandColor } as CSSProperties
+
   return (
-    <div
-      className={styles.card}
-      style={{ '--brand-color': brandColor } as React.CSSProperties}
-    >
-      <div className={styles.accent} />
-      <div className={styles.body}>
-        <div className={styles.titleRow}>
-          <span className={styles.name}>{account.name}</span>
-          <span className={styles.status} data-tone={status.tone}>
+    <Box className={styles.card} style={cssVars}>
+      <Box className={styles.accent} />
+      <Box className={styles.body}>
+        <Box className={styles.titleRow}>
+          <Typography component="span" variant="inherit" className={styles.name}>
+            {account.name}
+          </Typography>
+          <Typography
+            component="span"
+            variant="inherit"
+            className={styles.status}
+            data-tone={status.tone}
+          >
             {status.label}
-          </span>
-        </div>
-        <div className={styles.metaRow}>
-          <span className={styles.id}>{account.id}</span>
-          <span className={styles.dot}>•</span>
-          <span className={styles.currency}>{account.currency}</span>
-          <span className={styles.dot}>•</span>
-          <span className={styles.timezone}>{account.timezoneName}</span>
-        </div>
-      </div>
-    </div>
+          </Typography>
+        </Box>
+        <Box className={styles.metaRow}>
+          <Typography component="span" variant="inherit" className={styles.id}>
+            {account.id}
+          </Typography>
+          <Box component="span" className={styles.dot}>•</Box>
+          <Typography component="span" variant="inherit" className={styles.currency}>
+            {account.currency}
+          </Typography>
+          <Box component="span" className={styles.dot}>•</Box>
+          <Typography component="span" variant="inherit" className={styles.timezone}>
+            {account.timezoneName}
+          </Typography>
+        </Box>
+      </Box>
+    </Box>
   )
 })

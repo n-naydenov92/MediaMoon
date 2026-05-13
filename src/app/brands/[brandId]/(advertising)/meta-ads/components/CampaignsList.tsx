@@ -1,4 +1,8 @@
 import { memo } from 'react'
+import Box from '@mui/material/Box'
+import List from '@mui/material/List'
+import ListItem from '@mui/material/ListItem'
+import Typography from '@mui/material/Typography'
 import type { Campaign } from '@/lib/gateways/MetaAdsGateway'
 import styles from './CampaignsList.module.css'
 
@@ -8,35 +12,59 @@ interface Props {
 
 function toneFor(effectiveStatus: string): 'active' | 'inactive' | 'warn' {
   if (effectiveStatus === 'ACTIVE') return 'active'
-  if (effectiveStatus === 'PAUSED' || effectiveStatus === 'ARCHIVED' || effectiveStatus === 'DELETED') return 'inactive'
+  if (
+    effectiveStatus === 'PAUSED'
+    || effectiveStatus === 'ARCHIVED'
+    || effectiveStatus === 'DELETED'
+  ) {
+    return 'inactive'
+  }
   return 'warn'
 }
 
 export default memo(function CampaignsList({ campaigns }: Props): JSX.Element {
   return (
-    <section className={styles.section}>
-      <header className={styles.header}>
-        <h2 className={styles.heading}>Campaigns</h2>
-        <span className={styles.count}>{campaigns.length}</span>
-      </header>
+    <Box component="section" className={styles.section}>
+      <Box component="header" className={styles.header}>
+        <Typography component="h2" variant="inherit" className={styles.heading}>
+          Campaigns
+        </Typography>
+        <Typography component="span" variant="inherit" className={styles.count}>
+          {campaigns.length}
+        </Typography>
+      </Box>
 
       {campaigns.length === 0 ? (
-        <div className={styles.empty}>No campaigns in this ad account.</div>
+        <Box className={styles.empty}>No campaigns in this ad account.</Box>
       ) : (
-        <ul className={styles.list}>
+        <List disablePadding className={styles.list}>
           {campaigns.map((campaign) => (
-            <li key={campaign.id} className={styles.item}>
-              <div className={styles.titleRow}>
-                <span className={styles.name}>{campaign.name}</span>
-                <span className={styles.status} data-tone={toneFor(campaign.effectiveStatus)}>
+            <ListItem
+              key={campaign.id}
+              disablePadding
+              disableGutters
+              className={styles.item}
+            >
+              <Box className={styles.titleRow}>
+                <Typography component="span" variant="inherit" className={styles.name}>
+                  {campaign.name}
+                </Typography>
+                <Typography
+                  component="span"
+                  variant="inherit"
+                  className={styles.status}
+                  data-tone={toneFor(campaign.effectiveStatus)}
+                >
                   {campaign.effectiveStatus}
-                </span>
-              </div>
-              <span className={styles.id}>{campaign.id}</span>
-            </li>
+                </Typography>
+              </Box>
+              <Typography component="span" variant="inherit" className={styles.id}>
+                {campaign.id}
+              </Typography>
+            </ListItem>
           ))}
-        </ul>
+        </List>
       )}
-    </section>
+    </Box>
   )
 })
