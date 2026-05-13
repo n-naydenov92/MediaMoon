@@ -6,7 +6,7 @@ import Collapse from '@mui/material/Collapse'
 import Stack from '@mui/material/Stack'
 import type { NewsCluster } from '@/types'
 import NewsBlockHeader from './NewsBlockHeader/NewsBlockHeader'
-import NewsItem from '../NewsItem/NewsItem'
+import NewsItem from './NewsItem/NewsItem'
 import styles from './NewsBlock.module.css'
 
 interface Props {

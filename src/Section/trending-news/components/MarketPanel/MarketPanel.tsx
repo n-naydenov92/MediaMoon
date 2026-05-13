@@ -4,7 +4,7 @@ import { memo } from 'react'
 import { useTrendingNewsContext } from '@/Section/trending-news/context/useTrendingNewsContext'
 import { cacheKey } from '@/Section/trending-news/context/trendingNewsCtx'
 import type { AsyncState, Market, NewsResult } from '@/types'
-import TopicContent from '../TopicPanel/TopicContent/TopicContent'
+import TopicContent from './TopicContent/TopicContent'
 
 interface Props {
   readonly market: Market
