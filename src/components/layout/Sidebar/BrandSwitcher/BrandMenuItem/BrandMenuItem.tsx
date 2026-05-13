@@ -6,7 +6,7 @@ import CheckIcon from '@mui/icons-material/Check'
 import type { BrandConfig } from '@/types'
 import { LABELS } from '@/components/layout/labels'
 import { cssVars } from '@/lib/css'
-import SidebarTooltip from '@/components/layout/ui/SidebarTooltip'
+import SidebarTooltip from '@/components/layout/SidebarTooltip/SidebarTooltip'
 import styles from '../BrandSwitcher.module.css'
 
 const OVERVIEW_GLYPH = '◎'

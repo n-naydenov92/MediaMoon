@@ -7,6 +7,10 @@ const PROJECT_ROOT = process.cwd()
 const SRC_ABS = path.resolve(PROJECT_ROOT, 'src')
 
 const PHASES = {
+  '6-layout-cleanup': [
+    ['src/components/layout/ui/SidebarTooltip.tsx', 'src/components/layout/SidebarTooltip/SidebarTooltip.tsx'],
+    ['src/components/layout/Sidebar/BrandSwitcher/BrandMenuSearch/DebouncedSearchInput/DebouncedSearchInput.tsx', 'src/components/ui/DebouncedSearchInput/DebouncedSearchInput.tsx'],
+  ],
   '5-layout-split': [
     ['src/components/layout/Sidebar/BrandSwitcher/BrandMenu.tsx', 'src/components/layout/Sidebar/BrandSwitcher/BrandMenu/BrandMenu.tsx'],
     ['src/components/layout/Sidebar/BrandSwitcher/BrandMenuEmpty.tsx', 'src/components/layout/Sidebar/BrandSwitcher/BrandMenuEmpty/BrandMenuEmpty.tsx'],
