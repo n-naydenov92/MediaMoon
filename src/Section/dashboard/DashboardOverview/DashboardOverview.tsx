@@ -261,7 +261,6 @@ export default function DashboardOverview({ brand }: Props): JSX.Element {
       <DashboardProductsBreakdown
         products={state.status === 'success' ? state.data.topProducts : []}
         categories={state.status === 'success' ? state.data.categories ?? [] : []}
-        storeAov={state.status === 'success' ? state.data.kpis.aov : null}
         hasCommerce={state.status === 'success' ? state.data.hasCommerce : true}
         loading={state.status === 'loading'}
       />

@@ -59,8 +59,6 @@ export async function fetchCommerceForBrand(
       title: p.title,
       quantity: p.quantity,
       revenue: convertToEur(p.revenue, sales.currency),
-      anchorAov: p.anchorAov === null ? null : convertToEur(p.anchorAov, sales.currency),
-      anchorOrders: p.anchorOrders,
     })),
     categories: categoryRevenue.map((p) => ({
       category: p.category,

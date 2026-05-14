@@ -3,7 +3,6 @@ import type {
   CategoryBreakdownPoint,
   DashboardTopProduct,
 } from '@/types/dashboard'
-import AnchorProductScore from '../../AnchorProductScore/AnchorProductScore'
 import DashboardCategoryBreakdown from '../DashboardCategoryBreakdown/DashboardCategoryBreakdown'
 import DashboardTopProducts from '../../DashboardTopProducts/DashboardTopProducts'
 import styles from './DashboardProductsBreakdown.module.css'
@@ -11,7 +10,6 @@ import styles from './DashboardProductsBreakdown.module.css'
 interface Props {
   readonly products: readonly DashboardTopProduct[]
   readonly categories: readonly CategoryBreakdownPoint[]
-  readonly storeAov: number | null
   readonly hasCommerce: boolean
   readonly loading?: boolean
 }
@@ -19,7 +17,6 @@ interface Props {
 export default function DashboardProductsBreakdown({
   products,
   categories,
-  storeAov,
   hasCommerce,
   loading = false,
 }: Props): JSX.Element {
@@ -33,19 +30,11 @@ export default function DashboardProductsBreakdown({
         />
       </Box>
       <Box className={`${styles.col} ${styles.categoryCol}`}>
-        <Box className={styles.rightStack}>
-          <DashboardCategoryBreakdown
-            categories={categories}
-            hasCommerce={hasCommerce}
-            loading={loading}
-          />
-          <AnchorProductScore
-            products={products}
-            storeAov={storeAov}
-            hasCommerce={hasCommerce}
-            loading={loading}
-          />
-        </Box>
+        <DashboardCategoryBreakdown
+          categories={categories}
+          hasCommerce={hasCommerce}
+          loading={loading}
+        />
       </Box>
     </Box>
   )

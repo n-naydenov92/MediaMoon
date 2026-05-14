@@ -37,8 +37,6 @@ export interface DashboardTopProduct {
   readonly title: string
   readonly quantity: number
   readonly revenue: number
-  readonly anchorAov: number | null
-  readonly anchorOrders: number
 }
 
 export type SpendChannel = 'meta' | 'googleAds' | 'tiktok'

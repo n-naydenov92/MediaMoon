@@ -52,8 +52,6 @@ interface ProductAgg {
   title: string
   quantity: number
   revenue: number
-  anchorRevenueTotal: number
-  anchorOrders: number
 }
 
 export function deriveTopProducts(
@@ -62,8 +60,6 @@ export function deriveTopProducts(
 ): readonly DashboardTopProduct[] {
   const aggregate = new Map<number, ProductAgg>()
   for (const order of orders) {
-    const orderNet = orderRevenue(order)
-    const uniqueProductIds = new Set<number>()
     for (const item of order.line_items ?? []) {
       if (typeof item.product_id !== 'number' || item.product_id === 0) {
         continue
@@ -72,21 +68,10 @@ export function deriveTopProducts(
         title: item.name ?? `#${item.product_id}`,
         quantity: 0,
         revenue: 0,
-        anchorRevenueTotal: 0,
-        anchorOrders: 0,
       }
       existing.quantity += item.quantity ?? 0
       existing.revenue += parseAmount(item.subtotal)
       aggregate.set(item.product_id, existing)
-      uniqueProductIds.add(item.product_id)
-    }
-    for (const productId of uniqueProductIds) {
-      const agg = aggregate.get(productId)
-      if (!agg) {
-        continue
-      }
-      agg.anchorRevenueTotal += orderNet
-      agg.anchorOrders += 1
     }
   }
   return Array.from(aggregate.entries())
@@ -95,8 +80,6 @@ export function deriveTopProducts(
       title: agg.title,
       quantity: agg.quantity,
       revenue: agg.revenue,
-      anchorAov: agg.anchorOrders > 0 ? agg.anchorRevenueTotal / agg.anchorOrders : null,
-      anchorOrders: agg.anchorOrders,
     }))
     .sort((a, b) => b.revenue - a.revenue)
     .slice(0, limit)
