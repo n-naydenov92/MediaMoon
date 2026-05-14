@@ -35,14 +35,16 @@ export function resolveCommerceProvider(brandId: BrandId): CommerceProviderConfi
   }
 
   if (entry.kind === 'shopify') {
-    const accessToken = readEnv(entry.tokenEnvVar)
-    if (!accessToken) {
+    const clientId = readEnv(entry.clientIdEnvVar)
+    const clientSecret = readEnv(entry.clientSecretEnvVar)
+    if (!clientId || !clientSecret) {
       return null
     }
     return {
       kind: 'shopify',
       storeUrl,
-      accessToken,
+      clientId,
+      clientSecret,
       currency: entry.currency,
       timezone: entry.timezone,
     }

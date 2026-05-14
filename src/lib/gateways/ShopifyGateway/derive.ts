@@ -2,7 +2,9 @@ import type { MarketSelection } from '@/lib/markets'
 import type { DashboardTopProduct } from '@/types/dashboard'
 import { orderRevenue, parseAmount } from './parse'
 import type { ShopifyOrder } from './types'
-import type { CommerceSalesRangeResult } from '../WooGateway'
+import type { CategoryRevenuePoint, CommerceSalesRangeResult } from '../WooGateway'
+
+const UNCATEGORIZED_LABEL = 'Uncategorized'
 
 export function filterOrdersByMarket(
   orders: readonly ShopifyOrder[],
@@ -43,12 +45,44 @@ export function deriveSalesRange(
   }
 }
 
+export function deriveCategoryRevenue(
+  orders: readonly ShopifyOrder[],
+  productToCategory: ReadonlyMap<number, string>,
+): readonly CategoryRevenuePoint[] {
+  const totals = new Map<string, number>()
+  for (const order of orders) {
+    for (const item of order.line_items ?? []) {
+      const id = typeof item.product_id === 'number' ? item.product_id : 0
+      if (id === 0) {
+        continue
+      }
+      const category = productToCategory.get(id) ?? UNCATEGORIZED_LABEL
+      const amount = parseAmount(item.price) * (item.quantity ?? 0)
+      totals.set(category, (totals.get(category) ?? 0) + amount)
+    }
+  }
+  return Array.from(totals.entries())
+    .map(([category, revenue]) => ({ category, revenue }))
+    .filter((p) => p.revenue > 0)
+    .sort((a, b) => b.revenue - a.revenue)
+}
+
+interface ProductAgg {
+  title: string
+  quantity: number
+  revenue: number
+  anchorRevenueTotal: number
+  anchorOrders: number
+}
+
 export function deriveTopProducts(
   orders: readonly ShopifyOrder[],
   limit: number,
 ): readonly DashboardTopProduct[] {
-  const aggregate = new Map<number, { title: string; quantity: number; revenue: number }>()
+  const aggregate = new Map<number, ProductAgg>()
   for (const order of orders) {
+    const orderNet = orderRevenue(order)
+    const uniqueProductIds = new Set<number>()
     for (const item of order.line_items ?? []) {
       if (typeof item.product_id !== 'number' || item.product_id === 0) {
         continue
@@ -57,19 +91,32 @@ export function deriveTopProducts(
         title: item.title ?? `#${item.product_id}`,
         quantity: 0,
         revenue: 0,
+        anchorRevenueTotal: 0,
+        anchorOrders: 0,
       }
       const quantity = item.quantity ?? 0
       existing.quantity += quantity
       existing.revenue += parseAmount(item.price) * quantity
       aggregate.set(item.product_id, existing)
+      uniqueProductIds.add(item.product_id)
+    }
+    for (const productId of uniqueProductIds) {
+      const agg = aggregate.get(productId)
+      if (!agg) {
+        continue
+      }
+      agg.anchorRevenueTotal += orderNet
+      agg.anchorOrders += 1
     }
   }
   return Array.from(aggregate.entries())
     .map(([productId, agg]) => ({
       productId,
-      ...agg,
-      anchorAov: null,
-      anchorOrders: 0,
+      title: agg.title,
+      quantity: agg.quantity,
+      revenue: agg.revenue,
+      anchorAov: agg.anchorOrders > 0 ? agg.anchorRevenueTotal / agg.anchorOrders : null,
+      anchorOrders: agg.anchorOrders,
     }))
     .sort((a, b) => b.revenue - a.revenue)
     .slice(0, limit)

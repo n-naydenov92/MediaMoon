@@ -1,11 +1,13 @@
-// One-shot diagnostic: pull Shopify orders for the last 7 days per brand and print totals.
+// One-shot diagnostic: exchange Shopify Client ID + Secret for an access token via
+// client_credentials grant, then pull last 7 days of orders per brand and print totals.
 // Run with: node --env-file=.env.local scripts/verify-shopify.mjs
 const BRANDS = [
   {
     id: 'stoitchkov',
     label: 'Stoitchkov Nutrition',
     urlVar: 'SHOPIFY_URL_STOITCHKOV',
-    tokenVar: 'SHOPIFY_TOKEN_STOITCHKOV',
+    clientIdVar: 'SHOPIFY_CLIENT_ID_STOITCHKOV',
+    clientSecretVar: 'SHOPIFY_CLIENT_SECRET_STOITCHKOV',
   },
 ]
 
@@ -44,6 +46,27 @@ function sleep(ms) {
   })
 }
 
+async function exchangeForAccessToken(storeUrl, clientId, clientSecret) {
+  const response = await fetch(`${storeUrl}/admin/oauth/access_token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      client_id: clientId,
+      client_secret: clientSecret,
+      grant_type: 'client_credentials',
+    }),
+  })
+  if (!response.ok) {
+    const body = await response.text().catch(() => '')
+    throw new Error(`token grant HTTP ${response.status}: ${body || response.statusText}`)
+  }
+  const data = await response.json()
+  if (!data.access_token) {
+    throw new Error('token grant: missing access_token in response')
+  }
+  return { token: data.access_token, expiresIn: data.expires_in }
+}
+
 const today = new Date()
 const sevenDaysAgo = new Date(today.getTime() - 7 * 86_400_000)
 const dateMin = dayString(sevenDaysAgo)
@@ -51,30 +74,36 @@ const dateMax = dayString(today)
 
 for (const brand of BRANDS) {
   const storeUrlRaw = process.env[brand.urlVar]
-  const token = process.env[brand.tokenVar]
-  if (!storeUrlRaw || !token) {
+  const clientId = process.env[brand.clientIdVar]
+  const clientSecret = process.env[brand.clientSecretVar]
+  if (!storeUrlRaw || !clientId || !clientSecret) {
     console.log(`\n=== ${brand.label} ===`)
-    console.log(`  (env vars missing: ${brand.urlVar} / ${brand.tokenVar})`)
+    console.log(`  (env vars missing: ${brand.urlVar} / ${brand.clientIdVar} / ${brand.clientSecretVar})`)
     continue
   }
   const storeUrl = storeUrlRaw.replace(/\/+$/, '')
 
-  const initialParams = new URLSearchParams({
-    status: 'any',
-    created_at_min: `${dateMin}T00:00:00Z`,
-    created_at_max: `${dateMax}T23:59:59Z`,
-    limit: String(ORDERS_PER_PAGE),
-    fields: ORDER_FIELDS,
-  })
-  let url = `${storeUrl}/admin/api/${API_VERSION}/orders.json?${initialParams.toString()}`
-
-  let totalOrders = 0
-  let totalRevenue = 0
-  let pages = 0
-  let lastSentAt = 0
-  let lastCallLimit = ''
-
   try {
+    const { token, expiresIn } = await exchangeForAccessToken(storeUrl, clientId, clientSecret)
+    console.log(`\n=== ${brand.label} (${storeUrl}) ===`)
+    console.log(`  Token: ${token.slice(0, 14)}... (expires in ${expiresIn}s)`)
+    console.log(`  Window: ${dateMin} → ${dateMax}`)
+
+    const initialParams = new URLSearchParams({
+      status: 'any',
+      created_at_min: `${dateMin}T00:00:00Z`,
+      created_at_max: `${dateMax}T23:59:59Z`,
+      limit: String(ORDERS_PER_PAGE),
+      fields: ORDER_FIELDS,
+    })
+    let url = `${storeUrl}/admin/api/${API_VERSION}/orders.json?${initialParams.toString()}`
+
+    let totalOrders = 0
+    let totalRevenue = 0
+    let pages = 0
+    let lastSentAt = 0
+    let lastCallLimit = ''
+
     while (url && pages < MAX_PAGES) {
       const wait = MIN_INTERVAL_MS - (Date.now() - lastSentAt)
       if (wait > 0) await sleep(wait)
@@ -113,8 +142,6 @@ for (const brand of BRANDS) {
       }
     }
 
-    console.log(`\n=== ${brand.label} (${storeUrl}) ===`)
-    console.log(`  Window: ${dateMin} → ${dateMax}`)
     console.log(`  Pages fetched: ${pages}`)
     console.log(`  Orders: ${totalOrders.toLocaleString()}`)
     console.log(`  Revenue (total - shipping, raw currency): ${totalRevenue.toFixed(2)}`)

@@ -1,5 +1,6 @@
 import type { ShopifyProviderConfig } from '@/types/commerce'
 import { parseCallLimit, parseNextPageInfo, sleep } from './parse'
+import { getShopifyAccessToken } from './tokenManager'
 import type { OrdersPage, ShopifyOrder } from './types'
 
 const SHOPIFY_API_VERSION = '2024-10'
@@ -18,6 +19,7 @@ export async function fetchOrdersInRange(
   dateMin: string,
   dateMax: string,
 ): Promise<readonly ShopifyOrder[]> {
+  const accessToken = await getShopifyAccessToken(config)
   const initialUrl = buildInitialUrl(config, dateMin, dateMax)
   const all: ShopifyOrder[] = []
   let url: string | null = initialUrl
@@ -31,7 +33,7 @@ export async function fetchOrdersInRange(
     }
     lastSentAt = Date.now()
 
-    const page = await fetchPage(config, url)
+    const page = await fetchPage(accessToken, url)
     all.push(...page.orders)
     pagesFetched += 1
 
@@ -49,7 +51,7 @@ export async function fetchOrdersInRange(
 }
 
 async function fetchPage(
-  config: ShopifyProviderConfig,
+  accessToken: string,
   url: string,
 ): Promise<OrdersPage> {
   const controller = new AbortController()
@@ -57,7 +59,7 @@ async function fetchPage(
   try {
     const response = await fetch(url, {
       headers: {
-        'X-Shopify-Access-Token': config.accessToken,
+        'X-Shopify-Access-Token': accessToken,
         'Content-Type': 'application/json',
       },
       signal: controller.signal,
@@ -70,7 +72,7 @@ async function fetchPage(
       const wait = Number.isFinite(retryAfter) ? retryAfter : RETRY_AFTER_FALLBACK_S
       await sleep(wait * 1000)
       clearTimeout(timer)
-      return await fetchPage(config, url)
+      return await fetchPage(accessToken, url)
     }
     if (!response.ok) {
       const body = await response.text().catch(() => '')

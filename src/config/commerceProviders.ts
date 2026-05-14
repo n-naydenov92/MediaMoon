@@ -15,7 +15,8 @@ interface WooCommerceProviderEntry extends CommerceProviderEntryBase {
 
 interface ShopifyProviderEntry extends CommerceProviderEntryBase {
   readonly kind: 'shopify'
-  readonly tokenEnvVar: string
+  readonly clientIdEnvVar: string
+  readonly clientSecretEnvVar: string
 }
 
 export type CommerceProviderEntry = WooCommerceProviderEntry | ShopifyProviderEntry
@@ -43,7 +44,8 @@ export const COMMERCE_PROVIDERS: readonly CommerceProviderEntry[] = [
     brandId: 'stoitchkov',
     kind: 'shopify',
     urlEnvVar: 'SHOPIFY_URL_STOITCHKOV',
-    tokenEnvVar: 'SHOPIFY_TOKEN_STOITCHKOV',
+    clientIdEnvVar: 'SHOPIFY_CLIENT_ID_STOITCHKOV',
+    clientSecretEnvVar: 'SHOPIFY_CLIENT_SECRET_STOITCHKOV',
     currency: 'EUR',
     timezone: 'Europe/Sofia',
   },

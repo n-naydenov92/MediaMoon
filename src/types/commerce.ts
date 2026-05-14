@@ -11,8 +11,6 @@ export interface CommerceDailyStats {
   readonly fetchedAt: string
 }
 
-export type CommerceProviderKind = 'woocommerce' | 'shopify'
-
 export interface WooProviderConfig {
   readonly kind: 'woocommerce'
   readonly storeUrl: string
@@ -25,7 +23,8 @@ export interface WooProviderConfig {
 export interface ShopifyProviderConfig {
   readonly kind: 'shopify'
   readonly storeUrl: string
-  readonly accessToken: string
+  readonly clientId: string
+  readonly clientSecret: string
   readonly currency: string
   readonly timezone: string
 }

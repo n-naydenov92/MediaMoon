@@ -50,3 +50,11 @@ export function sleep(ms: number): Promise<void> {
     setTimeout(resolve, ms)
   })
 }
+
+export function chunkArray<T>(items: readonly T[], size: number): readonly (readonly T[])[] {
+  const out: T[][] = []
+  for (let i = 0; i < items.length; i += size) {
+    out.push(items.slice(i, i + size))
+  }
+  return out
+}
