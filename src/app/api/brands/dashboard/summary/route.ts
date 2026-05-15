@@ -4,7 +4,7 @@ import { findBrandById, isBrandId } from '@/config/brands'
 import { parseMarketSelection } from '@/lib/markets'
 import { parseDateRangeFromQuery, previousPeriod } from '@/lib/meta/dateRange'
 import type { DashboardSummary } from '@/types/dashboard'
-import { buildCacheTag, buildSummary } from './route.helpers'
+import { buildCacheTag, buildSummary } from './helpers'
 
 const CACHE_TTL_MS = 3_600_000
 const UPSTREAM_ERROR_STATUS = 502

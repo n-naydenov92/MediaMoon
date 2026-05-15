@@ -29,6 +29,23 @@ export interface MetaChannelTotals {
   readonly byDay: readonly MetaChannelDailyPoint[]
 }
 
+export interface GoogleAdsChannelDailyPoint {
+  readonly date: string
+  readonly spendEur: number
+  readonly revenueEur: number
+  readonly conversions: number
+  readonly clicks: number
+}
+
+export interface GoogleAdsChannelTotals {
+  readonly spendEur: number
+  readonly revenueEur: number
+  readonly conversions: number
+  readonly impressions: number
+  readonly clicks: number
+  readonly byDay: readonly GoogleAdsChannelDailyPoint[]
+}
+
 export interface AnalyticsTotalsForAggregate {
   readonly sessions: number
   readonly activeUsers: number

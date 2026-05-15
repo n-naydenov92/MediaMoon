@@ -63,7 +63,9 @@ export default function DashboardChannelsBreakdown({
       <GoogleAdsChannelSection
         stats={googleAds}
         previousStats={previousChannels?.googleAds}
+        byDay={channelsByDay?.googleAds}
         comparisonEnabled={comparisonEnabled}
+        showSparklines={showSparklines}
         deltaLabel={deltaLabel}
       />
       <KlaviyoChannelSection

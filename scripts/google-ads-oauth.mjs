@@ -27,7 +27,7 @@ authUrl.searchParams.set('redirect_uri', REDIRECT_URI)
 authUrl.searchParams.set('response_type', 'code')
 authUrl.searchParams.set('scope', SCOPE)
 authUrl.searchParams.set('access_type', 'offline')
-authUrl.searchParams.set('prompt', 'consent')
+authUrl.searchParams.set('prompt', 'select_account consent')
 authUrl.searchParams.set('state', STATE)
 
 console.log('\n=== Google Ads OAuth helper ===')

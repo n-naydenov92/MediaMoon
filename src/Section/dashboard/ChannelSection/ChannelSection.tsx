@@ -18,11 +18,6 @@ interface Props {
   readonly notWiredMessage?: string
 }
 
-const STATUS_LABEL: Record<ChannelStatus, string> = {
-  live: 'live',
-  'not-wired': 'not wired',
-}
-
 export default function ChannelSection({
   title,
   icon,
@@ -39,10 +34,12 @@ export default function ChannelSection({
       <Typography component="span" variant="subtitle1" className={styles.title}>
         {title}
       </Typography>
-      <Box component="span" className={styles.statusPill} data-status={status}>
-        <Box component="span" className={styles.statusDot} aria-hidden="true" />
-        {STATUS_LABEL[status]}
-      </Box>
+      {status === 'not-wired' && (
+        <Box component="span" className={styles.statusPill} data-status={status}>
+          <Box component="span" className={styles.statusDot} aria-hidden="true" />
+          not wired
+        </Box>
+      )}
     </Box>
   )
 

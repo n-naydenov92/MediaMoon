@@ -5,7 +5,7 @@ import type {
   KlaviyoBucketStats,
   KlaviyoChannelStats,
 } from '@/types/dashboard'
-import type { MetaChannelTotals } from './types'
+import type { GoogleAdsChannelTotals, MetaChannelTotals } from './types'
 
 const EMPTY_AD_STATS: AdChannelStats = {
   wired: false,
@@ -34,7 +34,10 @@ const EMPTY_KLAVIYO_STATS: KlaviyoChannelStats = {
   campaigns: EMPTY_KLAVIYO_BUCKET,
 }
 
-export function buildChannelsByDay(meta: MetaChannelTotals): DashboardChannelsByDay {
+export function buildChannelsByDay(
+  meta: MetaChannelTotals,
+  googleAds: GoogleAdsChannelTotals | null,
+): DashboardChannelsByDay {
   return {
     meta: meta.byDay.map((p) => ({
       date: p.date,
@@ -45,11 +48,19 @@ export function buildChannelsByDay(meta: MetaChannelTotals): DashboardChannelsBy
       linkClicks: p.linkClicks,
       checkoutsInitiated: p.checkoutsInitiated,
     })),
+    googleAds: (googleAds?.byDay ?? []).map((p) => ({
+      date: p.date,
+      spend: p.spendEur,
+      revenue: p.revenueEur,
+      orders: Math.round(p.conversions),
+      clicks: p.clicks,
+    })),
   }
 }
 
 export function buildChannelsBreakdown(
   meta: MetaChannelTotals,
+  googleAds: GoogleAdsChannelTotals | null,
   klaviyo: KlaviyoChannelStats | null,
 ): DashboardChannels {
   const spend = meta.spendEur
@@ -76,7 +87,29 @@ export function buildChannelsBreakdown(
     : EMPTY_AD_STATS
   return {
     meta: metaStats,
-    googleAds: EMPTY_AD_STATS,
+    googleAds: buildGoogleAdsStats(googleAds),
     klaviyo: klaviyo ?? EMPTY_KLAVIYO_STATS,
+  }
+}
+
+function buildGoogleAdsStats(totals: GoogleAdsChannelTotals | null): AdChannelStats {
+  if (!totals || totals.spendEur <= 0) {
+    return EMPTY_AD_STATS
+  }
+  const orders = Math.round(totals.conversions)
+  const roas = totals.revenueEur > 0 ? totals.revenueEur / totals.spendEur : null
+  const cpo = orders > 0 ? totals.spendEur / orders : null
+  const ctr = totals.impressions > 0 ? totals.clicks / totals.impressions : null
+  const costPerVisitor = totals.clicks > 0 ? totals.spendEur / totals.clicks : null
+  return {
+    wired: true,
+    spend: totals.spendEur,
+    revenue: totals.revenueEur > 0 ? totals.revenueEur : null,
+    roas,
+    orders: orders > 0 ? orders : null,
+    cpo,
+    ctr,
+    checkoutRate: null,
+    costPerVisitor,
   }
 }

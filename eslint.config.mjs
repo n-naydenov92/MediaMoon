@@ -54,6 +54,8 @@ export default [
       '@stylistic/comma-dangle': ['error', 'always-multiline'],
       '@stylistic/arrow-parens': ['error', 'always'],
       '@stylistic/operator-linebreak': 'off',
+      // Line endings are managed by git autocrlf / the editor, not ESLint (cross-platform repo).
+      '@stylistic/linebreak-style': 'off',
       '@stylistic/object-curly-newline': 'off',
       '@stylistic/implicit-arrow-linebreak': 'off',
       '@stylistic/function-paren-newline': 'off',
@@ -106,6 +108,16 @@ export default [
     files: ['**/meta-ads/**/*.{ts,tsx}'],
     rules: {
       'no-restricted-syntax': 'off',
+    },
+  },
+  {
+    // Standalone Node CLI scripts — diagnostics and one-off codemods, not app code.
+    files: ['scripts/**/*.mjs'],
+    languageOptions: {
+      globals: { process: 'readonly' },
+    },
+    rules: {
+      'no-console': 'off',
     },
   },
   {

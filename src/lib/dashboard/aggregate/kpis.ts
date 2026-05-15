@@ -1,24 +1,23 @@
 import { relativeDelta } from '@/lib/meta/aggregate'
 import type { DashboardKpiDeltas, DashboardKpis } from '@/types/dashboard'
-import type { AnalyticsTotalsForAggregate, CommerceTotals, SpendTotals } from './types'
+import type { AnalyticsTotalsForAggregate, CommerceTotals } from './types'
 
 export function combineKpis(
-  spend: SpendTotals,
+  adSpendEur: number,
   commerce: CommerceTotals | null,
   analytics: AnalyticsTotalsForAggregate | null,
 ): DashboardKpis {
-  const { spendEur } = spend
   const revenue = commerce?.revenueEur ?? null
   const orders = commerce?.ordersCount ?? null
   const activeUsers = analytics?.activeUsers ?? null
-  const roas = revenue !== null && spendEur > 0 ? revenue / spendEur : null
+  const roas = revenue !== null && adSpendEur > 0 ? revenue / adSpendEur : null
   const aov = revenue !== null && orders !== null && orders > 0 ? revenue / orders : null
-  const cpo = orders !== null && orders > 0 && spendEur > 0 ? spendEur / orders : null
+  const cpo = orders !== null && orders > 0 && adSpendEur > 0 ? adSpendEur / orders : null
   const conversionRate =
     orders !== null && activeUsers !== null && activeUsers > 0 ? orders / activeUsers : null
   const costPerUser =
-    activeUsers !== null && activeUsers > 0 && spendEur > 0 ? spendEur / activeUsers : null
-  return { spend: spendEur, revenue, roas, orders, aov, cpo, conversionRate, costPerUser }
+    activeUsers !== null && activeUsers > 0 && adSpendEur > 0 ? adSpendEur / activeUsers : null
+  return { spend: adSpendEur, revenue, roas, orders, aov, cpo, conversionRate, costPerUser }
 }
 
 export function computeDeltas(current: DashboardKpis, previous: DashboardKpis): DashboardKpiDeltas {

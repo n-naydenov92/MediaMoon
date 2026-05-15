@@ -51,11 +51,6 @@
   color: var(--text-secondary);
 }
 
-.statusPill[data-status='live'] {
-  border-color: color-mix(in srgb, var(--success) 35%, transparent);
-  color: var(--success);
-}
-
 .statusPill[data-status='not-wired'] {
   color: var(--text-muted);
 }

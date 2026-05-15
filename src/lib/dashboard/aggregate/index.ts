@@ -1,6 +1,7 @@
 export type {
   AnalyticsTotalsForAggregate,
   CommerceTotals,
+  GoogleAdsChannelTotals,
   MetaChannelDailyPoint,
   MetaChannelTotals,
   SpendTotals,

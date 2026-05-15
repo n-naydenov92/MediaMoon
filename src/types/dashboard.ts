@@ -91,8 +91,17 @@ export interface MetaDailyPoint {
   readonly checkoutsInitiated: number
 }
 
+export interface GoogleAdsDailyPoint {
+  readonly date: string
+  readonly spend: number
+  readonly revenue: number
+  readonly orders: number
+  readonly clicks: number
+}
+
 export interface DashboardChannelsByDay {
   readonly meta: readonly MetaDailyPoint[]
+  readonly googleAds: readonly GoogleAdsDailyPoint[]
 }
 
 export interface AnalyticsKpis {

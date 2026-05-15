@@ -9,9 +9,11 @@ import {
   computeDeltas,
   mergeDailyPoints,
   type AnalyticsTotalsForAggregate,
+  type CommerceTotals,
 } from '@/lib/dashboard/aggregate'
 import { fetchAnalyticsForBrand } from '@/lib/dashboard/fetchAnalytics'
 import { fetchCommerceForBrand } from '@/lib/dashboard/fetchCommerce'
+import { fetchGoogleAdsBothPeriods } from '@/lib/dashboard/fetchGoogleAds'
 import { fetchKlaviyoForBrand } from '@/lib/dashboard/fetchKlaviyo'
 import { fetchSpendBothPeriods } from '@/lib/dashboard/fetchSpend'
 import type { MarketSelection } from '@/lib/markets'
@@ -22,7 +24,7 @@ import type {
   DashboardSummary,
 } from '@/types/dashboard'
 
-export const CACHE_VERSION = 'v18'
+export const CACHE_VERSION = 'v22'
 
 export async function buildSummary(
   brandId: BrandId,
@@ -30,9 +32,10 @@ export async function buildSummary(
   previous: DateRangeSelection,
   market: MarketSelection,
 ): Promise<DashboardSummary> {
-  const [spend, commercePeriods, analyticsPeriods, klaviyoCurrent, klaviyoPrevious] =
+  const [spend, googleAds, commercePeriods, analyticsPeriods, klaviyoCurrent, klaviyoPrevious] =
     await Promise.all([
       fetchSpendBothPeriods(brandId, current, previous, market),
+      fetchGoogleAdsBothPeriods(brandId, current, previous, market),
       fetchCommerceBothPeriods(brandId, current, previous, market),
       fetchAnalyticsBothPeriods(brandId, current, previous, market),
       fetchKlaviyoForBrand(brandId, current),
@@ -48,33 +51,22 @@ export async function buildSummary(
   const analyticsCurrentForAgg = toAggregateAnalytics(analyticsCurrent)
   const analyticsPreviousForAgg = toAggregateAnalytics(analyticsPrevious)
 
-  const kpisBase = combineKpis(spend.current.spend, commerceCurrentTotals, analyticsCurrentForAgg)
-  const previousKpisBase = combineKpis(
-    spend.previous.spend,
-    commercePreviousTotals,
-    analyticsPreviousForAgg,
-  )
-  const dailyAvgCrCurrent = averageDailyConversionRate(
+  const kpis = buildPeriodKpis(
+    spend.current.spend.spendEur + (googleAds.current?.spendEur ?? 0),
     commerceCurrentTotals,
     analyticsCurrentForAgg,
   )
-  const dailyAvgCrPrevious = averageDailyConversionRate(
+  const previousKpis = buildPeriodKpis(
+    spend.previous.spend.spendEur + (googleAds.previous?.spendEur ?? 0),
     commercePreviousTotals,
     analyticsPreviousForAgg,
   )
-  const kpis = {
-    ...kpisBase,
-    conversionRate: dailyAvgCrCurrent ?? kpisBase.conversionRate,
-  }
-  const previousKpis = {
-    ...previousKpisBase,
-    conversionRate: dailyAvgCrPrevious ?? previousKpisBase.conversionRate,
-  }
-  const byDay = mergeDailyPoints(
-    spend.current.spend.byDay,
-    commerceCurrentTotals?.byDay ?? null,
-    analyticsCurrentForAgg?.byDay ?? null,
-  )
+  const byDay = mergeDailyPoints({
+    metaSpend: spend.current.spend.byDay,
+    googleAdsSpend: googleAds.current?.byDay ?? [],
+    commerce: commerceCurrentTotals?.byDay ?? null,
+    analytics: analyticsCurrentForAgg?.byDay ?? null,
+  })
 
   return {
     currency: 'EUR',
@@ -83,13 +75,17 @@ export async function buildSummary(
     deltas: computeDeltas(kpis, previousKpis),
     byDay,
     topProducts: commerceCurrent?.topProducts ?? [],
-    spendBreakdown: buildSpendBreakdown(spend.current.meta),
+    spendBreakdown: buildSpendBreakdown(spend.current.meta, googleAds.current),
     fetchedAt: Date.now(),
     hasCommerce: commerceCurrent !== null,
     hasAnalytics: analyticsCurrent !== null,
-    channels: buildChannelsBreakdown(spend.current.meta, klaviyoCurrent),
-    previousChannels: buildChannelsBreakdown(spend.previous.meta, klaviyoPrevious),
-    channelsByDay: buildChannelsByDay(spend.current.meta),
+    channels: buildChannelsBreakdown(spend.current.meta, googleAds.current, klaviyoCurrent),
+    previousChannels: buildChannelsBreakdown(
+      spend.previous.meta,
+      googleAds.previous,
+      klaviyoPrevious,
+    ),
+    channelsByDay: buildChannelsByDay(spend.current.meta, googleAds.current),
     analytics: buildAnalytics(analyticsCurrent, kpis),
     previousAnalytics: buildAnalytics(analyticsPrevious, previousKpis),
     categories: commerceCurrent?.categories ?? [],
@@ -108,6 +104,16 @@ export function buildCacheTag(
   }
   const preset = params.get('datePreset') ?? 'today'
   return `dashboard:${CACHE_VERSION}:${brandId}:${market}:${preset}`
+}
+
+function buildPeriodKpis(
+  adSpendEur: number,
+  commerce: CommerceTotals | null,
+  analytics: AnalyticsTotalsForAggregate | null,
+): DashboardKpis {
+  const base = combineKpis(adSpendEur, commerce, analytics)
+  const dailyAvgConversionRate = averageDailyConversionRate(commerce, analytics)
+  return { ...base, conversionRate: dailyAvgConversionRate ?? base.conversionRate }
 }
 
 function buildAnalytics(
