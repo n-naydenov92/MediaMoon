@@ -7,6 +7,13 @@
   font-family: var(--font-dm-sans), system-ui, sans-serif;
   font-size: var(--text-sm);
   color: var(--text-primary);
+}
+
+/* react-day-picker re-declares every --rdp-* token on .rdp-root itself, so
+   overrides must target .rdp-root too — tokens set on the wrapper are shadowed
+   by the library defaults (range_middle stayed #f0f0ff, unreadable on dark). */
+.root :global(.rdp-root) {
+  font-size: 13px;
 
   --rdp-accent-color: var(--accent);
   --rdp-accent-background-color: var(--accent-soft);
@@ -25,13 +32,8 @@
   --rdp-disabled-opacity: 0.3;
   --rdp-weekday-text-transform: none;
   --rdp-weekday-opacity: 1;
-  --rdp-month_caption-font: 600 13px/1 var(--font-dm-sans), system-ui, sans-serif;
   --rdp-nav_button-height: 28px;
   --rdp-nav_button-width: 28px;
-}
-
-.root :global(.rdp-root) {
-  font-size: 13px;
 }
 
 .root :global(.rdp-root .rdp-months) {
@@ -122,8 +124,13 @@
   border-radius: 6px;
 }
 
-.root :global(.rdp-day_button:hover) {
+.root :global(.rdp-day:not(.rdp-selected) .rdp-day_button:hover) {
   background: var(--surface-2);
+}
+
+.root :global(.rdp-range_start .rdp-day_button:hover),
+.root :global(.rdp-range_end .rdp-day_button:hover) {
+  background-color: var(--accent-hover);
 }
 
 .root :global(.rdp-today .rdp-day_button) {
