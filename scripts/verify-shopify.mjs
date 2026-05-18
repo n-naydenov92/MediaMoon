@@ -8,6 +8,7 @@ const BRANDS = [
     urlVar: 'SHOPIFY_URL_STOITCHKOV',
     clientIdVar: 'SHOPIFY_CLIENT_ID_STOITCHKOV',
     clientSecretVar: 'SHOPIFY_CLIENT_SECRET_STOITCHKOV',
+    timezone: 'Europe/Sofia',
   },
 ]
 
@@ -16,10 +17,21 @@ const ORDERS_PER_PAGE = 250
 const MAX_PAGES = 200
 const MIN_INTERVAL_MS = 600
 const ORDER_FIELDS =
-  'id,line_items,created_at,total_price,total_shipping_price_set,currency'
+  'id,line_items,created_at,total_price,current_total_price,currency'
 
 function dayString(d) {
   return new Date(d).toISOString().slice(0, 10)
+}
+
+function timezoneOffsetForDate(dateStr, timezone) {
+  const reference = new Date(`${dateStr}T12:00:00Z`)
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: timezone,
+    timeZoneName: 'longOffset',
+  }).formatToParts(reference)
+  const offsetName = parts.find((part) => part.type === 'timeZoneName')?.value ?? ''
+  const match = offsetName.match(/GMT([+-]\d{2}:\d{2})/)
+  return match ? match[1] : '+00:00'
 }
 
 function parseAmount(raw) {
@@ -91,8 +103,8 @@ for (const brand of BRANDS) {
 
     const initialParams = new URLSearchParams({
       status: 'any',
-      created_at_min: `${dateMin}T00:00:00Z`,
-      created_at_max: `${dateMax}T23:59:59Z`,
+      created_at_min: `${dateMin}T00:00:00.000${timezoneOffsetForDate(dateMin, brand.timezone)}`,
+      created_at_max: `${dateMax}T23:59:59.999${timezoneOffsetForDate(dateMax, brand.timezone)}`,
       limit: String(ORDERS_PER_PAGE),
       fields: ORDER_FIELDS,
     })
@@ -123,9 +135,10 @@ for (const brand of BRANDS) {
       const orders = json.orders ?? []
       for (const order of orders) {
         totalOrders += 1
-        const total = parseAmount(order.total_price)
-        const shipping = parseAmount(order.total_shipping_price_set?.shop_money?.amount)
-        totalRevenue += total - shipping
+        totalRevenue +=
+          order.current_total_price !== undefined
+            ? parseAmount(order.current_total_price)
+            : parseAmount(order.total_price)
       }
       lastCallLimit = response.headers.get('x-shopify-shop-api-call-limit') ?? 'n/a'
       const nextPageInfo = parseNextPageInfo(response.headers.get('link'))
@@ -144,7 +157,7 @@ for (const brand of BRANDS) {
 
     console.log(`  Pages fetched: ${pages}`)
     console.log(`  Orders: ${totalOrders.toLocaleString()}`)
-    console.log(`  Revenue (total - shipping, raw currency): ${totalRevenue.toFixed(2)}`)
+    console.log(`  Revenue (current_total_price, raw currency): ${totalRevenue.toFixed(2)}`)
     console.log(`  Last X-Shopify-Shop-Api-Call-Limit: ${lastCallLimit}`)
   } catch (err) {
     console.error(`\n=== ${brand.label} (${storeUrl}) ===`)

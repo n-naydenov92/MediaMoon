@@ -12,9 +12,24 @@ export function parseAmount(raw: unknown): number {
 }
 
 export function orderRevenue(order: ShopifyOrder): number {
-  const total = parseAmount(order.total_price)
-  const shipping = parseAmount(order.total_shipping_price_set?.shop_money?.amount)
-  return total - shipping
+  // current_total_price already nets out refunds, returns and order edits, and
+  // includes shipping + tax — the same basis as Shopify's "Total sales" metric.
+  if (order.current_total_price !== undefined) {
+    return parseAmount(order.current_total_price)
+  }
+  return parseAmount(order.total_price)
+}
+
+export function timezoneOffsetForDate(dateStr: string, timezone: string): string {
+  // Noon side-steps the DST-transition hour, where a midnight reference is ambiguous.
+  const reference = new Date(`${dateStr}T12:00:00Z`)
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: timezone,
+    timeZoneName: 'longOffset',
+  }).formatToParts(reference)
+  const offsetName = parts.find((part) => part.type === 'timeZoneName')?.value ?? ''
+  const match = offsetName.match(/GMT([+-]\d{2}:\d{2})/)
+  return match?.[1] ?? '+00:00'
 }
 
 export function parseNextPageInfo(linkHeader: string | null): string | null {

@@ -1,13 +1,3 @@
-interface ShopifyMoney {
-  readonly amount?: string | number
-  readonly currency_code?: string
-}
-
-export interface ShopifyMoneySet {
-  readonly shop_money?: ShopifyMoney
-  readonly presentment_money?: ShopifyMoney
-}
-
 export interface ShopifyLineItem {
   readonly product_id?: number | null
   readonly title?: string
@@ -19,7 +9,7 @@ export interface ShopifyOrder {
   readonly created_at?: string
   readonly currency?: string
   readonly total_price?: string | number
-  readonly total_shipping_price_set?: ShopifyMoneySet
+  readonly current_total_price?: string | number
   readonly line_items?: readonly ShopifyLineItem[]
   readonly billing_address?: { readonly country_code?: string }
 }

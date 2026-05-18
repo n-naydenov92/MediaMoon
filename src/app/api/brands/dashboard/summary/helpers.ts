@@ -24,7 +24,7 @@ import type {
   DashboardSummary,
 } from '@/types/dashboard'
 
-export const CACHE_VERSION = 'v22'
+export const CACHE_VERSION = 'v23'
 
 export async function buildSummary(
   brandId: BrandId,

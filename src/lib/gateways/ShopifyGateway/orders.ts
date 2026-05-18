@@ -1,5 +1,5 @@
 import type { ShopifyProviderConfig } from '@/types/commerce'
-import { parseCallLimit, parseNextPageInfo, sleep } from './parse'
+import { parseCallLimit, parseNextPageInfo, sleep, timezoneOffsetForDate } from './parse'
 import { getShopifyAccessToken } from './tokenManager'
 import type { OrdersPage, ShopifyOrder } from './types'
 
@@ -12,7 +12,7 @@ const NEAR_LIMIT_RATIO = 0.8
 const NEAR_LIMIT_BACKOFF_MS = 1_000
 const RETRY_AFTER_FALLBACK_S = 2
 const ORDER_FIELDS =
-  'id,line_items,created_at,total_price,total_shipping_price_set,currency,billing_address'
+  'id,line_items,created_at,total_price,current_total_price,currency,billing_address'
 
 export async function fetchOrdersInRange(
   config: ShopifyProviderConfig,
@@ -94,10 +94,12 @@ function buildInitialUrl(
   dateMin: string,
   dateMax: string,
 ): string {
+  const offsetMin = timezoneOffsetForDate(dateMin, config.timezone)
+  const offsetMax = timezoneOffsetForDate(dateMax, config.timezone)
   const params = new URLSearchParams({
     status: 'any',
-    created_at_min: `${dateMin}T00:00:00Z`,
-    created_at_max: `${dateMax}T23:59:59Z`,
+    created_at_min: `${dateMin}T00:00:00.000${offsetMin}`,
+    created_at_max: `${dateMax}T23:59:59.999${offsetMax}`,
     limit: String(ORDERS_PER_PAGE),
     fields: ORDER_FIELDS,
   })
