@@ -97,6 +97,13 @@
   field-sizing: content;
 }
 
+/* Keep the focused field at 16px on touch screens so iOS Safari does not zoom. */
+@media (max-width: 1023px) {
+  .ruleInput :global(.MuiInputBase-input) {
+    font-size: 16px;
+  }
+}
+
 .ruleInput :global(.MuiInputBase-input::selection) {
   background: var(--accent-soft);
   color: var(--text-primary);

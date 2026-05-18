@@ -7,3 +7,10 @@
 .root :global(.MuiInputAdornment-root) {
   color: var(--text-muted);
 }
+
+/* Keep the focused field at 16px on touch screens so iOS Safari does not zoom. */
+@media (max-width: 1023px) {
+  .root :global(.MuiOutlinedInput-input) {
+    font-size: 16px;
+  }
+}

@@ -167,6 +167,14 @@ function buildComponents(mode: Mode): ThemeOptions['components'] {
     MuiAlert: {
       styleOverrides: { root: { borderRadius: RADIUS_MD } },
     },
+    MuiInputBase: {
+      styleOverrides: {
+        input: {
+          // iOS Safari zooms the viewport when a focused field renders below 16px.
+          '@media (max-width:1023px)': { fontSize: 16 },
+        },
+      },
+    },
   }
 }
 

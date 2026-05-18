@@ -41,3 +41,10 @@
   outline: none;
   box-shadow: none;
 }
+
+/* Keep the focused field at 16px on touch screens so iOS Safari does not zoom. */
+@media (max-width: 1023px) {
+  .input {
+    font-size: 16px;
+  }
+}
