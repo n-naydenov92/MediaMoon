@@ -24,13 +24,13 @@
   padding: var(--space-xl);
 }
 
-.avatar {
+.avatar.avatar {
   width: 48px;
   height: 48px;
   font-size: 24px;
   margin-bottom: var(--space-lg);
-  background-color: color-mix(in srgb, var(--brand-color) 16%, var(--bg-surface));
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--brand-color) 35%, transparent);
+  background-color: color-mix(in srgb, var(--brand-color) 20%, var(--bg-surface));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--brand-color) 40%, transparent);
 }
 
 .label {
