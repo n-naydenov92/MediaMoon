@@ -5,13 +5,19 @@
 
 // ─── Roles (mirrors Clerk publicMetadata.role) ───────────────────────────────
 
-export type UserRole = 'admin' | 'team' | 'stoichkov_only' | 'shtonova_only'
+export type UserRole =
+  | 'admin'
+  | 'team'
+  | 'stoichkov_only'
+  | 'shtonova_only'
+  | 'creative_analyst'
 
 export const ALL_ROLES: readonly UserRole[] = [
   'admin',
   'team',
   'stoichkov_only',
   'shtonova_only',
+  'creative_analyst',
 ] as const
 
 // ─── Markets ────────────────────────────────────────────────────────────────
