@@ -35,7 +35,6 @@ const ADVERTISING_PANEL: NavPanel = {
           icon: 'AddCircleOutline',
           pathSuffix: 'meta-ads/launch',
           roles: ROLES_TEAM,
-          disabled: true,
         },
         {
           kind: 'link',
