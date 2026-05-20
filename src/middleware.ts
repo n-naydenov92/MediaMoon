@@ -100,5 +100,5 @@ function isRoleAllowed(role: UserRole | null, moduleId: string | null): boolean 
 }
 
 export const config = {
-  matcher: ['/((?!_next|.*\\..*).*)', '/api/(.*)'],
+  matcher: ['/((?!_next|.+\\.[\\w]+$).*)', '/', '/api/(.*)'],
 }

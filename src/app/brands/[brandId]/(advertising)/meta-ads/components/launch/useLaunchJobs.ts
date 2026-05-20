@@ -163,14 +163,26 @@ async function uploadAllFiles(
   await Promise.all(
     pairs.map(async ({ meta, browserFile }) => {
       const pathname = `${BLOB_PATH_PREFIX}/${jobId}/${meta.id}-${sanitizeFilename(meta.originalName)}`
-      await upload(pathname, browserFile, {
-        access: 'public',
-        handleUploadUrl: '/api/meta-ads/jobs/upload',
-        clientPayload: JSON.stringify({ jobId, fileId: meta.id }),
-        onUploadProgress: (event: UploadProgressEvent) => {
-          onProgress(meta.id, event.percentage)
-        },
-      })
+      try {
+        await upload(pathname, browserFile, {
+          access: 'public',
+          handleUploadUrl: '/api/meta-ads/jobs/upload',
+          clientPayload: JSON.stringify({ jobId, fileId: meta.id }),
+          multipart: true,
+          onUploadProgress: (event: UploadProgressEvent) => {
+            onProgress(meta.id, event.percentage)
+          },
+        })
+      } catch (err) {
+        // eslint-disable-next-line no-console -- temporary diagnostic logging for blob upload smoke test
+        console.error('[blob-upload] FAILED', {
+          pathname,
+          fileSize: browserFile.size,
+          fileType: browserFile.type,
+          error: err instanceof Error ? { name: err.name, message: err.message, stack: err.stack } : err,
+        })
+        throw err
+      }
     }),
   )
 }
