@@ -11,6 +11,7 @@ interface UploadTokenPayload {
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const body = (await request.json()) as HandleUploadBody
+  const callbackUrl = resolveCallbackUrl(request)
 
   try {
     const result = await handleUpload({
@@ -23,6 +24,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           allowedContentTypes: [...BLOB_ALLOWED_CONTENT_TYPES],
           maximumSizeInBytes: BLOB_MAX_SIZE_BYTES,
           tokenPayload: JSON.stringify(parsed),
+          callbackUrl,
         }
       },
       onUploadCompleted: async ({ blob, tokenPayload }) => {
@@ -36,8 +38,20 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json(result)
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error'
+    // eslint-disable-next-line no-console -- temporary diagnostic logging for Vercel Blob upload smoke test
+    console.error('[blob-upload route] handleUpload failed', { message, callbackUrl })
     return NextResponse.json({ error: message }, { status: 400 })
   }
+}
+
+function resolveCallbackUrl(request: NextRequest): string {
+  const explicit = process.env.VERCEL_BLOB_CALLBACK_URL
+  if (explicit) {
+    return explicit
+  }
+  const host = request.headers.get('host')
+  const proto = request.headers.get('x-forwarded-proto') ?? (host?.startsWith('localhost') ? 'http' : 'https')
+  return `${proto}://${host}/api/meta-ads/jobs/upload`
 }
 
 function parseClientPayload(raw: string | null): UploadTokenPayload {
