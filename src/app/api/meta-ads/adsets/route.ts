@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { fetchAdSets } from '@/lib/gateways/MetaAdsGateway'
-import { resolveBrandTokenFromRequest } from '@/lib/meta/resolveBrandToken'
+import { resolveAccountTokenFromRequest } from '@/lib/meta/resolveBrandToken'
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
-  const resolved = resolveBrandTokenFromRequest(request)
+  const resolved = resolveAccountTokenFromRequest(request)
   if (!resolved.ok) return resolved.response
 
   const campaignId = request.nextUrl.searchParams.get('campaignId')

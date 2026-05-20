@@ -103,7 +103,7 @@ export default function TargetingForm({
   }, [value.accountId])
 
   useEffect(() => {
-    if (!value.campaignId) {
+    if (!value.accountId || !value.campaignId) {
       setAdSets([])
       return
     }
@@ -111,7 +111,7 @@ export default function TargetingForm({
     void (async () => {
       try {
         const response = await fetch(
-          `/api/meta-ads/adsets?brandId=${brandId}&campaignId=${value.campaignId}`,
+          `/api/meta-ads/adsets?accountId=${value.accountId}&campaignId=${value.campaignId}`,
           { signal: ctrl.signal },
         )
         if (!response.ok) {
@@ -129,7 +129,7 @@ export default function TargetingForm({
       }
     })()
     return () => ctrl.abort()
-  }, [brandId, value.campaignId])
+  }, [value.accountId, value.campaignId])
 
   return (
     <Box className={styles.grid}>
