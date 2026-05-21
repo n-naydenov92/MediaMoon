@@ -3,12 +3,12 @@
 import Box from '@mui/material/Box'
 import MenuItem from '@mui/material/MenuItem'
 import TextField from '@mui/material/TextField'
-import { CtaType } from '@prisma/client'
-import { BODY_MAX_LENGTH, HEADLINE_MAX_LENGTH } from '@/lib/meta/copyLimits'
+import type { CtaType } from '@/lib/gateways/MetaAdsGateway'
 import FormField from '../../FormField/FormField'
 import styles from './CopyForm.module.css'
 
 export interface CopyValue {
+  readonly name: string
   readonly headline: string
   readonly body: string
   readonly url: string
@@ -36,7 +36,19 @@ const SELECT_PROPS = {
 export default function CopyForm({ value, onChange }: Props): JSX.Element {
   return (
     <Box className={styles.grid}>
-      <FormField label="Headline" hint={`${value.headline.length}/${HEADLINE_MAX_LENGTH}`}>
+      <FormField label="Ad name">
+        <TextField
+          type="text"
+          size="small"
+          variant="outlined"
+          fullWidth
+          className={styles.input}
+          value={value.name}
+          onChange={(e) => onChange({ ...value, name: e.target.value })}
+        />
+      </FormField>
+
+      <FormField label="Headline">
         <TextField
           type="text"
           size="small"
@@ -44,12 +56,11 @@ export default function CopyForm({ value, onChange }: Props): JSX.Element {
           fullWidth
           className={styles.input}
           value={value.headline}
-          inputProps={{ maxLength: HEADLINE_MAX_LENGTH }}
           onChange={(e) => onChange({ ...value, headline: e.target.value })}
         />
       </FormField>
 
-      <FormField label="Body" hint={`${value.body.length}/${BODY_MAX_LENGTH}`}>
+      <FormField label="Body">
         <TextField
           multiline
           minRows={3}
@@ -58,7 +69,6 @@ export default function CopyForm({ value, onChange }: Props): JSX.Element {
           fullWidth
           className={styles.textarea}
           value={value.body}
-          inputProps={{ maxLength: BODY_MAX_LENGTH }}
           onChange={(e) => onChange({ ...value, body: e.target.value })}
         />
       </FormField>

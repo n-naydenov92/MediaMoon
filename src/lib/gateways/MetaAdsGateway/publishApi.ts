@@ -115,38 +115,41 @@ function buildStorySpec(params: AdCreativeParams): Record<string, unknown> {
     value: { link: params.destinationUrl },
   }
 
+  const base: Record<string, unknown> = { page_id: params.pageId }
+  if (params.instagramActorId) {
+    // Modern field accepting the Instagram Business Account ID returned by
+    // `/{pageId}?fields=instagram_business_account`. The legacy `instagram_actor_id`
+    // field rejects this ID format with "must be a valid Instagram account id".
+    base.instagram_user_id = params.instagramActorId
+  }
+
   if (params.imageHash) {
-    return {
-      page_id: params.pageId,
-      link_data: {
-        image_hash: params.imageHash,
-        link: params.destinationUrl,
-        message: params.bodyText,
-        name: params.headline,
-        call_to_action: callToAction,
-      },
+    const linkData: Record<string, unknown> = {
+      image_hash: params.imageHash,
+      link: params.destinationUrl,
+      call_to_action: callToAction,
     }
+    if (params.bodyText) linkData.message = params.bodyText
+    if (params.headline) linkData.name = params.headline
+    return { ...base, link_data: linkData }
   }
 
   if (params.videoId) {
-    return {
-      page_id: params.pageId,
-      video_data: {
-        video_id: params.videoId,
-        title: params.headline,
-        message: params.bodyText,
-        call_to_action: callToAction,
-      },
+    const videoData: Record<string, unknown> = {
+      video_id: params.videoId,
+      call_to_action: callToAction,
     }
+    if (params.thumbnailHash) videoData.image_hash = params.thumbnailHash
+    if (params.headline) videoData.title = params.headline
+    if (params.bodyText) videoData.message = params.bodyText
+    return { ...base, video_data: videoData }
   }
 
-  return {
-    page_id: params.pageId,
-    link_data: {
-      link: params.destinationUrl,
-      message: params.bodyText,
-      name: params.headline,
-      call_to_action: callToAction,
-    },
+  const linkData: Record<string, unknown> = {
+    link: params.destinationUrl,
+    call_to_action: callToAction,
   }
+  if (params.bodyText) linkData.message = params.bodyText
+  if (params.headline) linkData.name = params.headline
+  return { ...base, link_data: linkData }
 }

@@ -4,7 +4,6 @@ import { useCallback, useMemo, useState } from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
-import { CtaType } from '@prisma/client'
 import type { BrandId } from '@/config/brands'
 import type { Market } from '@/types'
 import { useBrandShellContext } from '@/contexts/brandShell/useBrandShellContext'
@@ -16,17 +15,22 @@ import Section from '../../shared/Section/Section'
 import FilePicker from './FilePicker/FilePicker'
 import TargetingForm, { type TargetingValue } from './TargetingForm/TargetingForm'
 import CopyForm, { type CopyValue } from './CopyForm/CopyForm'
-import JobsPanel from './JobsPanel/JobsPanel'
-import UploadHistory from './UploadHistory/UploadHistory'
-import { useLaunchJobs } from '../useLaunchJobs'
+import QueuePanel from './QueuePanel/QueuePanel'
+import { useLaunchQueue } from '../useLaunchQueue'
 import styles from './LaunchAdsTab.module.css'
 
 interface Props {
   readonly brandId: BrandId
 }
 
-const EMPTY_COPY: CopyValue = { headline: '', body: '', url: '', cta: CtaType.SHOP_NOW }
-const EMPTY_TARGETING: TargetingValue = { accountId: '', campaignId: '', adSetId: '', pageId: '' }
+const EMPTY_COPY: CopyValue = { name: '', headline: '', body: '', url: '', cta: 'SHOP_NOW' }
+const EMPTY_TARGETING: TargetingValue = {
+  accountId: '',
+  campaignId: '',
+  adSetId: '',
+  pageId: '',
+  instagramId: '',
+}
 
 export default function LaunchAdsTab({ brandId }: Props): JSX.Element {
   const brand = findBrandById(brandId)
@@ -34,7 +38,7 @@ export default function LaunchAdsTab({ brandId }: Props): JSX.Element {
   const [files, setFiles] = useState<readonly File[]>([])
   const [targeting, setTargeting] = useState<TargetingValue>(EMPTY_TARGETING)
   const [copy, setCopy] = useState<CopyValue>(EMPTY_COPY)
-  const launch = useLaunchJobs(brandId)
+  const queue = useLaunchQueue()
 
   const targetMarket = useMemo<Market | null>(() => {
     if (!brand) {
@@ -52,35 +56,32 @@ export default function LaunchAdsTab({ brandId }: Props): JSX.Element {
   )
 
   const canSubmit =
-    files.length > 0 &&
-    targeting.accountId !== '' &&
-    targeting.campaignId !== '' &&
-    targeting.adSetId !== '' &&
-    targeting.pageId !== '' &&
-    copy.headline !== '' &&
-    copy.body !== '' &&
-    copy.url !== '' &&
-    launch.state.status !== 'creating'
+    files.length > 0
+    && targeting.accountId !== ''
+    && targeting.campaignId !== ''
+    && targeting.adSetId !== ''
+    && targeting.pageId !== ''
+    && copy.name !== ''
+    && copy.headline !== ''
+    && copy.body !== ''
+    && copy.url !== ''
 
-  const handleSubmit = useCallback(async () => {
+  const handleSubmit = useCallback(() => {
     if (!canSubmit || !targetMarket) {
       return
     }
-    const result = await launch.createAndStartJob({
-      brandId,
-      market: targetMarket,
+    const payload = {
       accountId: targeting.accountId,
-      campaignId: targeting.campaignId,
       adSetId: targeting.adSetId,
       pageId: targeting.pageId,
+      instagramId: targeting.instagramId,
       copy,
-      files,
-    })
-    if (result.ok) {
-      setFiles([])
-      setCopy(EMPTY_COPY)
     }
-  }, [brandId, canSubmit, copy, files, launch, targeting, targetMarket])
+    for (const file of files) {
+      queue.enqueue(payload, file)
+    }
+    setFiles([])
+  }, [canSubmit, copy, files, queue, targeting, targetMarket])
 
   if (!brand || !targetMarket) {
     return (
@@ -105,14 +106,8 @@ export default function LaunchAdsTab({ brandId }: Props): JSX.Element {
 
   return (
     <Box component="section" className={styles.root}>
-      {launch.state.status === 'error' && (
-        <Notice variant="error" title="Couldn't create the batch">
-          {launch.state.message}
-        </Notice>
-      )}
-
       <Section title="Step 1 — Pick creatives">
-        <FilePicker files={files} onChange={setFiles} disabled={launch.state.status === 'creating'} />
+        <FilePicker files={files} onChange={setFiles} disabled={false} />
       </Section>
 
       <Section title="Step 2 — Targeting">
@@ -137,22 +132,17 @@ export default function LaunchAdsTab({ brandId }: Props): JSX.Element {
           disabled={!canSubmit}
           onClick={handleSubmit}
         >
-          {launch.state.status === 'creating'
-            ? 'Uploading…'
-            : `▶ Publish ${files.length || ''} ${files.length === 1 ? 'ad' : 'ads'}`.trim()}
+          {`▶ Publish ${files.length || ''} ${files.length === 1 ? 'ad' : 'ads'}`.trim()}
         </Button>
       </Box>
 
-      <Section title="Active jobs">
-        <JobsPanel
-          jobs={launch.jobs}
-          clientProgress={launch.clientProgress}
-          onCancel={launch.cancelJob}
+      <Section title="Queue">
+        <QueuePanel
+          jobs={queue.jobs}
+          accountId={targeting.accountId}
+          onRetry={queue.retry}
+          onDismiss={queue.dismiss}
         />
-      </Section>
-
-      <Section title="Recently uploaded">
-        <UploadHistory brandId={brandId} />
       </Section>
     </Box>
   )

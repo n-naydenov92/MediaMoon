@@ -5,7 +5,13 @@ import Box from '@mui/material/Box'
 import MenuItem from '@mui/material/MenuItem'
 import TextField from '@mui/material/TextField'
 import type { BrandId } from '@/config/brands'
-import type { AdAccount, AdSet, Campaign, Page } from '@/lib/gateways/MetaAdsGateway'
+import type {
+  AdAccount,
+  AdSet,
+  Campaign,
+  InstagramAccount,
+  Page,
+} from '@/lib/gateways/MetaAdsGateway'
 import FormField from '../../FormField/FormField'
 import styles from './TargetingForm.module.css'
 
@@ -14,6 +20,7 @@ export interface TargetingValue {
   readonly campaignId: string
   readonly adSetId: string
   readonly pageId: string
+  readonly instagramId: string
 }
 
 interface Props {
@@ -41,6 +48,7 @@ export default function TargetingForm({
   const [campaigns, setCampaigns] = useState<readonly Campaign[]>([])
   const [adSets, setAdSets] = useState<readonly AdSet[]>([])
   const [pages, setPages] = useState<readonly Page[]>([])
+  const [instagramAccounts, setInstagramAccounts] = useState<readonly InstagramAccount[]>([])
 
   useEffect(() => {
     const ctrl = new AbortController()
@@ -103,6 +111,37 @@ export default function TargetingForm({
   }, [value.accountId])
 
   useEffect(() => {
+    if (!value.accountId || !value.pageId) {
+      setInstagramAccounts([])
+      return
+    }
+    const ctrl = new AbortController()
+    void (async () => {
+      try {
+        const response = await fetch(
+          `/api/meta-ads/instagram-accounts?accountId=${value.accountId}&pageId=${value.pageId}`,
+          { signal: ctrl.signal },
+        )
+        if (!response.ok) {
+          return
+        }
+        const { instagramAccounts: data } = (await response.json()) as {
+          instagramAccounts: readonly InstagramAccount[]
+        }
+        if (!ctrl.signal.aborted) {
+          setInstagramAccounts(data)
+        }
+      } catch (err) {
+        if (err instanceof DOMException && err.name === 'AbortError') {
+          return
+        }
+        throw err
+      }
+    })()
+    return () => ctrl.abort()
+  }, [value.accountId, value.pageId])
+
+  useEffect(() => {
     if (!value.accountId || !value.campaignId) {
       setAdSets([])
       return
@@ -142,7 +181,13 @@ export default function TargetingForm({
           className={styles.select}
           value={value.accountId}
           SelectProps={SELECT_PROPS}
-          onChange={(e) => onChange({ ...value, accountId: e.target.value, campaignId: '', adSetId: '' })}
+          onChange={(e) => onChange({
+            ...value,
+            accountId: e.target.value,
+            campaignId: '',
+            adSetId: '',
+            instagramId: '',
+          })}
         >
           <MenuItem value="">Select account…</MenuItem>
           {accounts.map((a) => (
@@ -199,11 +244,30 @@ export default function TargetingForm({
           value={value.pageId}
           SelectProps={SELECT_PROPS}
           disabled={pages.length === 0}
-          onChange={(e) => onChange({ ...value, pageId: e.target.value })}
+          onChange={(e) => onChange({ ...value, pageId: e.target.value, instagramId: '' })}
         >
           <MenuItem value="">Select page…</MenuItem>
           {pages.map((p) => (
             <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>
+          ))}
+        </TextField>
+      </FormField>
+
+      <FormField label="Instagram account">
+        <TextField
+          select
+          size="small"
+          variant="outlined"
+          fullWidth
+          className={styles.select}
+          value={value.instagramId}
+          SelectProps={SELECT_PROPS}
+          disabled={!value.pageId || instagramAccounts.length === 0}
+          onChange={(e) => onChange({ ...value, instagramId: e.target.value })}
+        >
+          <MenuItem value="">Select Instagram…</MenuItem>
+          {instagramAccounts.map((ig) => (
+            <MenuItem key={ig.id} value={ig.id}>@{ig.username}</MenuItem>
           ))}
         </TextField>
       </FormField>

@@ -1,8 +1,8 @@
 .row {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 16px;
+  gap: 10px;
+  padding: 14px 16px;
   border-radius: 12px;
   border: 1px solid var(--hairline);
   background: var(--surface-1);
@@ -13,26 +13,52 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
 }
 
 .titleCol {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
 }
 
-.title {
-  font-family: var(--font-syne), system-ui, sans-serif;
-  font-size: 14px;
+.icon {
+  width: 16px;
+  text-align: center;
   font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.icon[data-status='done'] {
+  color: var(--success);
+}
+
+.icon[data-status='failed'] {
+  color: var(--error);
+}
+
+.icon[data-status='uploading'],
+.icon[data-status='publishing'] {
+  color: var(--accent);
+}
+
+.fileName {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
   color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .meta {
   font-size: 11px;
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .status {
@@ -44,23 +70,23 @@
   letter-spacing: 0.05em;
 }
 
-.status[data-status='QUEUED'] {
+.status[data-status='queued'] {
   background: var(--surface-3);
   color: var(--text-secondary);
 }
 
-.status[data-status='RUNNING'] {
+.status[data-status='uploading'],
+.status[data-status='publishing'] {
   background: var(--accent-soft);
   color: var(--accent);
 }
 
-.status[data-status='DONE'] {
+.status[data-status='done'] {
   background: var(--success-soft);
   color: var(--success);
 }
 
-.status[data-status='FAILED'],
-.status[data-status='CANCELLED'] {
+.status[data-status='failed'] {
   background: var(--error-soft);
   color: var(--error);
 }
@@ -82,88 +108,30 @@
   transition: width 200ms ease-out;
 }
 
-.summary {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.barFill[data-status='done'] {
+  background: var(--success);
+}
+
+.barFill[data-status='failed'] {
+  background: var(--error);
+}
+
+.error {
   font-size: 12px;
-  color: var(--text-secondary);
-  font-variant-numeric: tabular-nums;
-}
-
-.fileList {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.fileRow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 8px;
-  border-radius: 6px;
-  font-size: 12px;
-  background: var(--surface-2);
-}
-
-.fileIcon {
-  width: 16px;
-  text-align: center;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-secondary);
-}
-
-.fileIcon[data-status='DONE'] {
-  color: var(--success);
-}
-
-.fileIcon[data-status='FAILED'] {
   color: var(--error);
-}
-
-.fileIcon[data-status='UPLOADING'],
-.fileIcon[data-status='PUBLISHING'] {
-  color: var(--accent);
-}
-
-.fileName {
-  flex: 1;
-  color: var(--text-primary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.fileError {
-  font-size: 11px;
-  color: var(--error);
-  max-width: 40%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.fileProgress {
-  font-size: 11px;
-  color: var(--text-secondary);
-  font-variant-numeric: tabular-nums;
+  word-break: break-word;
 }
 
 .footer {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 12px;
+  gap: 8px;
 }
 
-.footer .cancel {
+.footer .action {
   min-width: 0;
-  padding: 6px 12px;
+  padding: 4px 10px;
   font-family: var(--font-dm-sans), system-ui, sans-serif;
   font-size: 12px;
   font-weight: 500;
@@ -175,19 +143,20 @@
   transition: border-color 80ms ease-out, color 80ms ease-out;
 }
 
-.footer .cancel:hover {
-  border-color: var(--error);
-  color: var(--error);
+.footer .action:hover {
+  border-color: var(--accent);
+  color: var(--accent);
   background: transparent;
 }
 
-.link {
+.footer .link {
   font-size: 12px;
   font-weight: 500;
   color: var(--accent);
   text-decoration: none;
+  padding: 4px 10px;
 }
 
-.link:hover {
+.footer .link:hover {
   text-decoration: underline;
 }

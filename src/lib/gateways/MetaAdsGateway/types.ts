@@ -25,7 +25,13 @@ export interface Page {
   readonly name: string
 }
 
-export type CtaType = 'LEARN_MORE' | 'SHOP_NOW' | 'SIGN_UP'
+export interface InstagramAccount {
+  readonly id: string
+  readonly username: string
+}
+
+export const CTA_TYPES = ['LEARN_MORE', 'SHOP_NOW', 'SIGN_UP'] as const
+export type CtaType = typeof CTA_TYPES[number]
 
 export interface AdCreativeParams {
   readonly accountId: string
@@ -34,8 +40,10 @@ export interface AdCreativeParams {
   readonly destinationUrl: string
   readonly ctaType: CtaType
   readonly pageId: string
+  readonly instagramActorId?: string
   readonly imageHash?: string
   readonly videoId?: string
+  readonly thumbnailHash?: string
 }
 
 export interface PublishAdResult {

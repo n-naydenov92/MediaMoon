@@ -1,5 +1,5 @@
 import { buildUrl, callGraphApi } from './http'
-import type { AdAccount, AdSet, Campaign, Page } from './types'
+import type { AdAccount, AdSet, Campaign, InstagramAccount, Page } from './types'
 
 interface GraphListResponse<T> {
   data: T[]
@@ -82,6 +82,42 @@ export async function fetchPages(token: string): Promise<readonly Page[]> {
     throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
   }
   return (json.data ?? []).map(toPage)
+}
+
+interface GraphPageWithInstagramRaw {
+  instagram_business_account?: { id: string; username: string }
+  connected_instagram_account?: { id: string; username: string }
+  error?: { message: string; type: string; code: number }
+}
+
+export async function fetchInstagramAccountsForPage(
+  token: string,
+  pageId: string,
+): Promise<readonly InstagramAccount[]> {
+  const url = buildUrl(`/${pageId}`, token, {
+    fields: 'instagram_business_account{id,username},connected_instagram_account{id,username}',
+  })
+  const json = await callGraphApi<GraphPageWithInstagramRaw>(url)
+  if (json.error) {
+    throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
+  }
+  const accounts: InstagramAccount[] = []
+  if (json.instagram_business_account) {
+    accounts.push({
+      id: json.instagram_business_account.id,
+      username: json.instagram_business_account.username,
+    })
+  }
+  if (
+    json.connected_instagram_account
+    && json.connected_instagram_account.id !== json.instagram_business_account?.id
+  ) {
+    accounts.push({
+      id: json.connected_instagram_account.id,
+      username: json.connected_instagram_account.username,
+    })
+  }
+  return accounts
 }
 
 export async function countActiveAdsInAccount(token: string, accountId: string): Promise<number> {

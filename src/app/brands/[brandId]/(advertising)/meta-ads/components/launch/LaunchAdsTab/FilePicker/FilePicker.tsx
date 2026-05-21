@@ -118,7 +118,7 @@ export default function FilePicker({ files, onChange, disabled = false }: Props)
             disabled={disabled}
           />
           <Typography component="span" variant="inherit" className={styles.dropLabelMain}>Drop files here or click to browse</Typography>
-          <Typography component="span" variant="inherit" className={styles.dropHint}>Images and videos. Up to 200 MB each.</Typography>
+          <Typography component="span" variant="inherit" className={styles.dropHint}>Images and videos. Videos up to 2 GB, images compressed to 3.5 MB if larger.</Typography>
         </ButtonBase>
       </Box>
 
