@@ -7,11 +7,6 @@ export interface GraphErrorBody {
   error?: { message?: string; type?: string; code?: number }
 }
 
-function redactToken(url: string): string {
-  return url.replace(/access_token=[^&]+/g, 'access_token=***')
-}
-
-/* eslint-disable no-console -- temporary diagnostic logging for Meta publish smoke test */
 export function buildUrl(path: string, token: string, params: Record<string, string>): string {
   const qs = new URLSearchParams({ ...params, access_token: token })
   return `${GRAPH_API_BASE}${path}?${qs.toString()}`
@@ -20,13 +15,10 @@ export function buildUrl(path: string, token: string, params: Record<string, str
 export async function callGraphApi<T>(url: string): Promise<T> {
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), LIST_FETCH_TIMEOUT_MS)
-  console.log(`[meta-ads] GET ${redactToken(url)}`)
   try {
     const response = await fetch(url, { signal: controller.signal })
-    console.log(`[meta-ads] GET -> ${response.status} ${response.statusText}`)
     if (!response.ok) {
       const body = await response.text().catch(() => '')
-      console.error(`[meta-ads] GET error body: ${body}`)
       const parsed = parseGraphApiError(body)
       throw new Error(parsed ?? `Graph API HTTP ${response.status}: ${response.statusText}`)
     }
@@ -39,7 +31,6 @@ export async function callGraphApi<T>(url: string): Promise<T> {
 export async function callGraphApiPost<T>(path: string, body: URLSearchParams): Promise<T> {
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), LIST_FETCH_TIMEOUT_MS)
-  console.log(`[meta-ads] POST ${path}`)
   try {
     const response = await fetch(`${GRAPH_API_BASE}${path}`, {
       method: 'POST',
@@ -47,10 +38,8 @@ export async function callGraphApiPost<T>(path: string, body: URLSearchParams): 
       body: body.toString(),
       signal: controller.signal,
     })
-    console.log(`[meta-ads] POST ${path} -> ${response.status} ${response.statusText}`)
     if (!response.ok) {
       const text = await response.text()
-      console.error(`[meta-ads] POST ${path} error body: ${text}`)
       throw new Error(`Graph API HTTP ${response.status}: ${text}`)
     }
     return await (response.json() as Promise<T>)
@@ -62,17 +51,14 @@ export async function callGraphApiPost<T>(path: string, body: URLSearchParams): 
 export async function callGraphApiMultipart<T>(path: string, form: FormData): Promise<T> {
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), UPLOAD_FETCH_TIMEOUT_MS)
-  console.log(`[meta-ads] POST (multipart) ${path}`)
   try {
     const response = await fetch(`${GRAPH_API_BASE}${path}`, {
       method: 'POST',
       body: form,
       signal: controller.signal,
     })
-    console.log(`[meta-ads] POST (multipart) ${path} -> ${response.status} ${response.statusText}`)
     if (!response.ok) {
       const text = await response.text()
-      console.error(`[meta-ads] POST (multipart) ${path} error body: ${text}`)
       throw new Error(`Graph API HTTP ${response.status}: ${text}`)
     }
     return await (response.json() as Promise<T>)
@@ -80,7 +66,6 @@ export async function callGraphApiMultipart<T>(path: string, form: FormData): Pr
     clearTimeout(timer)
   }
 }
-/* eslint-enable no-console */
 
 function parseGraphApiError(body: string): string | null {
   if (!body) {

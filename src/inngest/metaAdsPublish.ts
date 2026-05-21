@@ -49,8 +49,6 @@ export const metaAdsPublishFn = inngest.createFunction(
   },
   async ({ event, step }) => {
     const { jobId } = event.data as MetaAdsPublishEventData
-    // eslint-disable-next-line no-console -- temporary diagnostic logging for Meta publish smoke test
-    console.log(`[meta-ads worker] start jobId=${jobId}`)
 
     const job = await step.run('load-job', () => getJobWithFiles(jobId))
     if (!job) {
@@ -60,16 +58,12 @@ export const metaAdsPublishFn = inngest.createFunction(
 
     const token = getMetaTokenForAccount(job.accountId)
     if (!token) {
-      // eslint-disable-next-line no-console -- temporary diagnostic logging for Meta publish smoke test
-      console.error(`[meta-ads worker] no token for accountId=${job.accountId}`)
       throw new NonRetriableError(`Meta token not configured for account ${job.accountId}`)
     }
 
     const eligibleFiles = job.files.filter(
       (f) => f.status === FileStatus.UPLOADED && f.blobUrl !== null,
     )
-    // eslint-disable-next-line no-console -- temporary diagnostic logging for Meta publish smoke test
-    console.log(`[meta-ads worker] accountId=${job.accountId} eligibleFiles=${eligibleFiles.length}`)
 
     await Promise.all(eligibleFiles.map((file) => processFile(token, job, file, step)))
 
@@ -125,12 +119,8 @@ async function processFile(
         mediaId: mediaResult.kind === 'video' ? mediaResult.id : null,
       }),
     )
-    // eslint-disable-next-line no-console -- temporary diagnostic logging for Meta publish smoke test
-    console.log(`[meta-ads worker] file=${file.id} DONE adId=${ad.id} creativeId=${creative.id}`)
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error'
-    // eslint-disable-next-line no-console -- temporary diagnostic logging for Meta publish smoke test
-    console.error(`[meta-ads worker] file=${file.id} FAILED: ${message}`)
     await step.run(`${baseId}-failed`, () => markFileFailed(file.id, message))
   }
 }
