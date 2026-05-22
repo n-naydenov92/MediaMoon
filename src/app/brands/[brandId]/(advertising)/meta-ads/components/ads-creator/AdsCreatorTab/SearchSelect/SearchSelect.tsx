@@ -6,6 +6,7 @@ import Box from '@mui/material/Box'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import CheckIcon from '@mui/icons-material/Check'
+import TruncatedLabel from './TruncatedLabel/TruncatedLabel'
 import styles from './SearchSelect.module.css'
 
 export type OptionStatus = 'active' | 'paused'
@@ -110,9 +111,7 @@ function SearchSelectInner<T>({
                 aria-hidden
               />
             )}
-            <Typography component="span" variant="inherit" className={styles.optionName}>
-              {getOptionLabel(option)}
-            </Typography>
+            <TruncatedLabel label={getOptionLabel(option)} className={styles.optionName} />
             {getOptionSecondary && (
               <Typography component="span" variant="inherit" className={styles.optionSecondary}>
                 {getOptionSecondary(option)}
