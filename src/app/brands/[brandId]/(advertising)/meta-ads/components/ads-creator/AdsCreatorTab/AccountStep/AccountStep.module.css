@@ -1,0 +1,11 @@
+.root {
+  display: flex;
+  flex-direction: column;
+}
+
+.brandIcon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  display: inline-block;
+}

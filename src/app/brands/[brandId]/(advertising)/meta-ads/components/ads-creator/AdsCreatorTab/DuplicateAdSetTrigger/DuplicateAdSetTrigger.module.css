@@ -1,0 +1,23 @@
+.trigger {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--text-secondary);
+  padding: 4px 8px;
+  min-width: 0;
+  height: 28px;
+  border-radius: 6px;
+  text-transform: none;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.trigger:hover:not(:disabled) {
+  background: var(--surface-2);
+  color: var(--text-primary);
+}
+
+.trigger:disabled {
+  color: var(--text-muted);
+  opacity: 0.7;
+}

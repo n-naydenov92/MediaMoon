@@ -1,0 +1,33 @@
+.root {
+  display: flex;
+  width: 100%;
+  padding: 4px 0;
+  background: var(--bg-surface);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 24px;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  background: var(--accent);
+  border: none;
+  border-radius: 10px;
+  text-transform: none;
+  transition: background 80ms ease-out;
+}
+
+.button:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.button:disabled {
+  background: var(--surface-3);
+  color: var(--text-muted);
+}

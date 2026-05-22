@@ -1,0 +1,39 @@
+.button {
+  width: 40px;
+  height: 40px;
+  color: var(--text-secondary);
+  background: var(--surface-1);
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.button:hover {
+  background: var(--surface-2);
+  border-color: var(--hairline-strong);
+  color: var(--text-primary);
+}
+
+.button[data-active='true'] {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--hairline));
+}
+
+.button[data-active='true']:hover {
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface-1));
+}
+
+.icon {
+  font-size: 20px;
+}
+
+.badge {
+  background: var(--accent);
+  color: #ffffff;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+}

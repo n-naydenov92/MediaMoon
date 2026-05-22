@@ -19,6 +19,7 @@ interface PublishRequestBody {
   readonly pageId?: string
   readonly headline?: string
   readonly bodyText?: string
+  readonly description?: string
   readonly destinationUrl?: string
   readonly ctaType?: string
   readonly adName?: string
@@ -44,7 +45,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
 
   const {
-    adSetId, pageId, headline, bodyText, destinationUrl, ctaType, adName,
+    adSetId, pageId, headline, bodyText, description, destinationUrl, ctaType, adName,
     instagramActorId, imageHash, videoId, thumbnailHash,
   } = body
 
@@ -82,6 +83,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       accountId: resolved.accountId,
       headline,
       bodyText,
+      description: typeof description === 'string' && description ? description : undefined,
       destinationUrl,
       ctaType,
       pageId,

@@ -23,11 +23,13 @@ export interface AdSet {
 export interface Page {
   readonly id: string
   readonly name: string
+  readonly pictureUrl: string | null
 }
 
 export interface InstagramAccount {
   readonly id: string
   readonly username: string
+  readonly pictureUrl: string | null
 }
 
 export const CTA_TYPES = ['LEARN_MORE', 'SHOP_NOW', 'SIGN_UP'] as const
@@ -37,6 +39,7 @@ export interface AdCreativeParams {
   readonly accountId: string
   readonly headline: string
   readonly bodyText: string
+  readonly description?: string
   readonly destinationUrl: string
   readonly ctaType: CtaType
   readonly pageId: string

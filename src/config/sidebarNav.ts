@@ -30,10 +30,10 @@ const ADVERTISING_PANEL: NavPanel = {
         },
         {
           kind: 'link',
-          id: 'meta-ads-launch',
-          label: 'Launch New Ads',
+          id: 'meta-ads-ads-creator',
+          label: 'Ads Creator',
           icon: 'AddCircleOutline',
-          pathSuffix: 'meta-ads/launch',
+          pathSuffix: 'meta-ads/ads-creator',
           roles: ROLES_TEAM,
         },
         {

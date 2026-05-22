@@ -1,0 +1,117 @@
+.input :global(.MuiOutlinedInput-root:hover:not(.Mui-disabled):not(.Mui-focused) .MuiOutlinedInput-notchedOutline) {
+  border-color: var(--accent-hover);
+}
+
+.input :global(.MuiAutocomplete-input::placeholder) {
+  color: var(--text-primary);
+  opacity: 1;
+}
+
+.triggerIconWrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 4px;
+  flex-shrink: 0;
+  color: var(--accent);
+}
+
+.menuPaper {
+  margin-top: 6px;
+  background: var(--bg-surface);
+  border: 1.5px solid color-mix(in srgb, var(--text-primary) 18%, transparent);
+  border-radius: 12px;
+  color: var(--text-primary);
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--text-primary) 10%, transparent),
+    0 24px 56px rgba(0, 0, 0, 0.22),
+    0 8px 20px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}
+
+.menuList {
+  padding: 6px;
+  max-height: 320px;
+}
+
+.menuList .option.option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 10px 14px;
+  margin: 2px 0;
+  border-radius: 8px;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 100ms ease, color 100ms ease;
+}
+
+.menuList .option.option:hover,
+.menuList .option.option:global(.Mui-focused) {
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface-1));
+}
+
+.menuList .option.option[data-selected='true'] {
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface-1));
+}
+
+.optionIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--accent);
+}
+
+.statusDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.statusDot[data-status='active'] {
+  background: var(--success, #10b981);
+}
+
+.statusDot[data-status='paused'] {
+  background: var(--text-muted);
+}
+
+.optionName {
+  font-weight: 600;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.optionSecondary {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  margin-left: 2px;
+}
+
+.checkIconTrailing {
+  margin-left: auto;
+  font-size: 20px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.empty {
+  display: block;
+  padding: 12px 8px;
+  color: var(--text-muted);
+  text-align: center;
+}

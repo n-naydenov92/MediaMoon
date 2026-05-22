@@ -1,0 +1,104 @@
+.root {
+  background: var(--surface-1);
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  box-shadow: none;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  color: var(--text-primary);
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.root::before {
+  display: none;
+}
+
+.root.expandedAccordion {
+  border-color: var(--hairline-strong);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.summary {
+  min-height: 56px;
+  padding: 0 24px;
+  border-radius: 12px;
+}
+
+.summary:hover {
+  background: color-mix(in srgb, var(--surface-2) 60%, transparent);
+}
+
+.summaryContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 12px 0;
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  min-width: 0;
+}
+
+.index {
+  font-family: var(--font-syne), system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.title.title {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  margin-right: 12px;
+  border-radius: 50%;
+  border: 1.5px solid var(--hairline-strong);
+  background: transparent;
+  color: transparent;
+  font-size: 14px;
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.status[data-complete='true'] {
+  background: var(--success, #10b981);
+  border-color: var(--success, #10b981);
+  color: #ffffff;
+}
+
+.checkIcon {
+  font-size: 14px;
+}
+
+.chevron {
+  color: var(--text-secondary);
+  transition: transform 160ms ease, color 160ms ease;
+}
+
+.summary:hover .chevron {
+  color: var(--text-primary);
+}
+
+.details {
+  padding: 8px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  border-top: 1px solid color-mix(in srgb, var(--hairline) 60%, transparent);
+}

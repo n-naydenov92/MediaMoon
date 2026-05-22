@@ -131,6 +131,7 @@ function buildStorySpec(params: AdCreativeParams): Record<string, unknown> {
     }
     if (params.bodyText) linkData.message = params.bodyText
     if (params.headline) linkData.name = params.headline
+    if (params.description) linkData.description = params.description
     return { ...base, link_data: linkData }
   }
 
@@ -142,6 +143,7 @@ function buildStorySpec(params: AdCreativeParams): Record<string, unknown> {
     if (params.thumbnailHash) videoData.image_hash = params.thumbnailHash
     if (params.headline) videoData.title = params.headline
     if (params.bodyText) videoData.message = params.bodyText
+    if (params.description) videoData.link_description = params.description
     return { ...base, video_data: videoData }
   }
 
@@ -151,5 +153,6 @@ function buildStorySpec(params: AdCreativeParams): Record<string, unknown> {
   }
   if (params.bodyText) linkData.message = params.bodyText
   if (params.headline) linkData.name = params.headline
+  if (params.description) linkData.description = params.description
   return { ...base, link_data: linkData }
 }

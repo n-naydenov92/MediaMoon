@@ -18,12 +18,15 @@ export { CTA_TYPES } from './types'
 
 export {
   countActiveAdsInAccount,
+  duplicateAdSet,
   fetchAdAccounts,
   fetchAdSets,
   fetchCampaigns,
   fetchInstagramAccountsForPage,
   fetchPages,
 } from './accountsApi'
+
+export type { StatusFilter } from './accountsApi'
 
 export { fetchAccountInsights } from './insightsApi'
 
