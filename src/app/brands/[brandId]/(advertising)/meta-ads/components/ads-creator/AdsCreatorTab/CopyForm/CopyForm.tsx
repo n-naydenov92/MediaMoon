@@ -1,5 +1,6 @@
 'use client'
 
+import { memo } from 'react'
 import Box from '@mui/material/Box'
 import IconButton from '@mui/material/IconButton'
 import TextField from '@mui/material/TextField'
@@ -61,7 +62,7 @@ function removeAt(arr: readonly string[], index: number): readonly string[] {
   return arr.filter((_, i) => i !== index)
 }
 
-export default function CopyForm({ value, onChange }: Props): JSX.Element {
+export default memo(function CopyForm({ value, onChange }: Props): JSX.Element {
   const primaryRemaining = MAX_TOTAL - value.primaryTexts.length
   const headlineRemaining = MAX_TOTAL - value.headlines.length
 
@@ -256,4 +257,4 @@ export default function CopyForm({ value, onChange }: Props): JSX.Element {
       </Box>
     </Box>
   )
-}
+})

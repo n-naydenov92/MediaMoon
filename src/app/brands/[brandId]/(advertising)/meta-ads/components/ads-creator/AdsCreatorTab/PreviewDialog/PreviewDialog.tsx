@@ -13,6 +13,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import type { CtaType, Page } from '@/lib/gateways/MetaAdsGateway'
 import type { CopyValue } from '../CopyForm/CopyForm'
+import { computeCombo, domainOf, initialOf, type FilePreview } from './helpers'
 import styles from './PreviewDialog.module.css'
 
 interface Props {
@@ -23,29 +24,10 @@ interface Props {
   readonly page: Page | null
 }
 
-interface FilePreview {
-  readonly url: string
-  readonly name: string
-  readonly isVideo: boolean
-}
-
 const CTA_LABELS: Record<CtaType, string> = {
   LEARN_MORE: 'Learn more',
   SHOP_NOW: 'Shop now',
   SIGN_UP: 'Sign up',
-}
-
-function domainOf(url: string): string {
-  try {
-    return new URL(url).hostname.replace(/^www\./, '')
-  } catch {
-    return url
-  }
-}
-
-function initialOf(name: string): string {
-  const trimmed = name.trim()
-  return trimmed.length > 0 ? trimmed[0]!.toUpperCase() : '?'
 }
 
 export default memo(function PreviewDialog({
@@ -88,22 +70,10 @@ export default memo(function PreviewDialog({
 
   const safeIndex = total === 0 ? 0 : Math.min(index, total - 1)
 
-  const combo = useMemo(() => {
-    if (total === 0) return null
-    const fileCount = filePreviews.length
-    const headlineCount = filledHeadlines.length
-    const fileIdx = safeIndex % fileCount
-    const headlineIdx = Math.floor(safeIndex / fileCount) % headlineCount
-    const primaryIdx = Math.floor(safeIndex / (fileCount * headlineCount))
-    return {
-      primary: filledPrimary[primaryIdx]!,
-      headline: filledHeadlines[headlineIdx]!,
-      file: filePreviews[fileIdx]!,
-      primaryIdx,
-      headlineIdx,
-      fileIdx,
-    }
-  }, [total, safeIndex, filePreviews, filledHeadlines, filledPrimary])
+  const combo = useMemo(
+    () => computeCombo(safeIndex, total, filePreviews, filledHeadlines, filledPrimary),
+    [total, safeIndex, filePreviews, filledHeadlines, filledPrimary],
+  )
 
   const handlePrev = (): void => {
     setIndex((i) => Math.max(0, i - 1))

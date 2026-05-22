@@ -1,13 +1,13 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { extractVideoThumbnail } from '../launchPipeline/imageProcessing'
 import {
-  extractVideoThumbnail,
   publishAd,
   uploadImageSingleShot,
   uploadVideoChunked,
   type PublishPayload,
-} from '../launchQueueHelpers'
+} from '../launchPipeline/mediaUpload'
 
 export type JobStatus = 'queued' | 'uploading' | 'publishing' | 'done' | 'failed'
 
