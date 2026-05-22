@@ -12,23 +12,15 @@ import { getAdAccountIds } from '@/config/adAccounts'
 import Notice from '../../Notice/Notice'
 import CreatorPane from './CreatorPane/CreatorPane'
 import LibraryPane from './LibraryPane/LibraryPane'
-import { type CopyValue } from './CopyForm/CopyForm'
+import { EMPTY_COPY, type CopyValue } from './CopyForm/CopyForm'
 import { type TargetingValue } from './CreatorPane/useTargetingData'
-import { useLaunchQueue } from '../useLaunchQueue'
+import { useLaunchQueue } from './useLaunchQueue'
 import styles from './AdsCreatorTab.module.css'
 
 interface Props {
   readonly brandId: BrandId
 }
 
-const EMPTY_COPY: CopyValue = {
-  name: '',
-  primaryTexts: [''],
-  headlines: [''],
-  description: '',
-  url: '',
-  cta: 'SHOP_NOW',
-}
 const EMPTY_TARGETING: TargetingValue = {
   accountId: '',
   campaignId: '',

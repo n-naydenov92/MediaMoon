@@ -6,7 +6,7 @@ import Button from '@mui/material/Button'
 import ListItem from '@mui/material/ListItem'
 import Typography from '@mui/material/Typography'
 import { cssVars } from '@/lib/css'
-import type { LaunchJob } from '../../useLaunchQueue'
+import type { LaunchJob } from '../useLaunchQueue'
 import { STATUS_ICONS, STATUS_LABELS, adsManagerUrl, formatFileSize } from './helpers'
 import styles from './QueueRow.module.css'
 

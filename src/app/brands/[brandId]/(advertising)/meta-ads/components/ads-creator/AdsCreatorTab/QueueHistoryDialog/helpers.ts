@@ -1,4 +1,4 @@
-import type { JobStatus, LaunchJob } from '../../useLaunchQueue'
+import type { JobStatus, LaunchJob } from '../useLaunchQueue'
 
 export type QueueFilter = 'all' | 'active' | 'done' | 'failed'
 

@@ -6,7 +6,7 @@ import TextField from '@mui/material/TextField'
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 import CloseIcon from '@mui/icons-material/Close'
 import type { CtaType } from '@/lib/gateways/MetaAdsGateway'
-import FormField from '../../FormField/FormField'
+import FormField from '../FormField/FormField'
 import SearchSelect from '../SearchSelect/SearchSelect'
 import styles from './CopyForm.module.css'
 

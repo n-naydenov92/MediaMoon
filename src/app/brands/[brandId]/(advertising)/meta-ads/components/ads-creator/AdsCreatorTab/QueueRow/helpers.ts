@@ -1,4 +1,4 @@
-import type { JobStatus } from '../../useLaunchQueue'
+import type { JobStatus } from '../useLaunchQueue'
 
 export const STATUS_ICONS: Record<JobStatus, string> = {
   queued: '·',

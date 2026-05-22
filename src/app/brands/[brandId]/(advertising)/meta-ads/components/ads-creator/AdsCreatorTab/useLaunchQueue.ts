@@ -7,7 +7,7 @@ import {
   uploadImageSingleShot,
   uploadVideoChunked,
   type PublishPayload,
-} from './launchQueueHelpers'
+} from '../launchQueueHelpers'
 
 export type JobStatus = 'queued' | 'uploading' | 'publishing' | 'done' | 'failed'
 
@@ -55,7 +55,7 @@ export function useLaunchQueue(): UseLaunchQueueResult {
       if (job.mediaType === 'video') {
         const thumbnailFile = await extractVideoThumbnail(file)
         const [videoId, thumbnailHash] = await Promise.all([
-          uploadVideoChunked(file, payload.accountId, (pct) => {
+          uploadVideoChunked(file, payload.accountId, (pct: number) => {
             updateJob(job.id, { progress: pct * 0.95 })
           }),
           uploadImageSingleShot(thumbnailFile, payload.accountId, () => {}),
@@ -63,7 +63,7 @@ export function useLaunchQueue(): UseLaunchQueueResult {
         mediaRef = { videoId, thumbnailHash }
       } else {
         mediaRef = {
-          imageHash: await uploadImageSingleShot(file, payload.accountId, (pct) => {
+          imageHash: await uploadImageSingleShot(file, payload.accountId, (pct: number) => {
             updateJob(job.id, { progress: pct })
           }),
         }
