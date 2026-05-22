@@ -1,12 +1,3 @@
-.input :global(.MuiOutlinedInput-root:hover:not(.Mui-disabled):not(.Mui-focused) .MuiOutlinedInput-notchedOutline) {
-  border-color: var(--accent-hover);
-}
-
-.input :global(.MuiAutocomplete-input::placeholder) {
-  color: var(--text-primary);
-  opacity: 1;
-}
-
 .triggerIconWrap {
   display: inline-flex;
   align-items: center;

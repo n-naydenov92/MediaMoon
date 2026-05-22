@@ -75,6 +75,11 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
     if (!canSubmit || !targetMarket) {
       return
     }
+    const headline = copy.headlines[0]
+    const body = copy.primaryTexts[0]
+    if (!headline || !body) {
+      return
+    }
     const payload = {
       accountId: targeting.accountId,
       adSetId: targeting.adSetId,
@@ -82,8 +87,8 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
       instagramId: targeting.instagramId,
       copy: {
         name: copy.name,
-        headline: copy.headlines[0],
-        body: copy.primaryTexts[0],
+        headline,
+        body,
         description: copy.description,
         url: copy.url,
         cta: copy.cta,

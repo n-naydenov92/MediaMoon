@@ -74,7 +74,6 @@ function SearchSelectInner<T>({
         <TextField
           {...params}
           placeholder={placeholder}
-          className={styles.input}
           InputProps={{
             ...params.InputProps,
             startAdornment: triggerIcon ? (

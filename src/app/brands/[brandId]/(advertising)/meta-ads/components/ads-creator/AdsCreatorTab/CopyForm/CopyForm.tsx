@@ -75,7 +75,7 @@ export default function CopyForm({ value, onChange }: Props): JSX.Element {
               size="small"
               variant="outlined"
               fullWidth
-              className={styles.input}
+              className="density-form"
               value={value.name}
               onChange={(e) => onChange({ ...value, name: e.target.value })}
             />
@@ -90,7 +90,7 @@ export default function CopyForm({ value, onChange }: Props): JSX.Element {
               size="small"
               variant="outlined"
               fullWidth
-              className={styles.textarea}
+              className="density-form"
               placeholder="Enter your ad primary text here"
               value={value.primaryTexts[0]}
               onChange={(e) => onChange({
@@ -110,7 +110,7 @@ export default function CopyForm({ value, onChange }: Props): JSX.Element {
                   size="small"
                   variant="outlined"
                   fullWidth
-                  className={styles.textarea}
+                  className="density-form"
                   placeholder={`Variation ${index}`}
                   value={text}
                   onChange={(e) => onChange({
@@ -156,7 +156,7 @@ export default function CopyForm({ value, onChange }: Props): JSX.Element {
               size="small"
               variant="outlined"
               fullWidth
-              className={styles.input}
+              className="density-form"
               placeholder="Enter your ad title here"
               value={value.headlines[0]}
               onChange={(e) => onChange({
@@ -175,7 +175,7 @@ export default function CopyForm({ value, onChange }: Props): JSX.Element {
                   size="small"
                   variant="outlined"
                   fullWidth
-                  className={styles.input}
+                  className="density-form"
                   placeholder={`Variation ${index}`}
                   value={text}
                   onChange={(e) => onChange({
@@ -221,7 +221,7 @@ export default function CopyForm({ value, onChange }: Props): JSX.Element {
             size="small"
             variant="outlined"
             fullWidth
-            className={styles.textarea}
+            className="density-form"
             placeholder="Enter your ad description here"
             value={value.description}
             onChange={(e) => onChange({ ...value, description: e.target.value })}
@@ -234,7 +234,7 @@ export default function CopyForm({ value, onChange }: Props): JSX.Element {
             size="small"
             variant="outlined"
             fullWidth
-            className={styles.input}
+            className="density-form"
             placeholder="https://"
             value={value.url}
             onChange={(e) => onChange({ ...value, url: e.target.value })}

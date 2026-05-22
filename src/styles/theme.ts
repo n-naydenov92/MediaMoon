@@ -175,6 +175,101 @@ function buildComponents(mode: Mode): ThemeOptions['components'] {
         },
       },
     },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          fontFamily: FONT_BODY,
+          color: c.textPrimary,
+          backgroundColor: 'transparent',
+          borderRadius: 10,
+          '& .MuiOutlinedInput-notchedOutline': {
+            borderColor: c.borderSubtle,
+            borderRadius: 10,
+          },
+          '&:hover:not(.Mui-disabled):not(.Mui-focused) .MuiOutlinedInput-notchedOutline': {
+            borderColor: c.accentHover,
+          },
+          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+            borderColor: c.accent,
+            borderWidth: 1.5,
+          },
+        },
+      },
+    },
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          // Density: dense form input (CopyForm) — opt in with className="density-form"
+          '&.density-form .MuiOutlinedInput-root': {
+            fontSize: 13,
+            minHeight: 40,
+          },
+          '&.density-form .MuiOutlinedInput-input': {
+            padding: '10px 12px',
+            color: c.textPrimary,
+          },
+          '&.density-form .MuiInputBase-multiline': {
+            alignItems: 'flex-start',
+          },
+          '&.density-form .MuiInputBase-multiline .MuiOutlinedInput-input': {
+            padding: '10px 12px',
+            fontFamily: 'inherit',
+            resize: 'vertical',
+            minHeight: 48,
+          },
+          '&.density-form .MuiSelect-select': {
+            display: 'flex',
+            alignItems: 'center',
+            padding: '10px 32px 10px 12px',
+            minHeight: 0,
+          },
+          // Density: dialog input (DuplicateAdSetDialog) — opt in with className="density-dialog"
+          '&.density-dialog .MuiOutlinedInput-root': {
+            minHeight: 44,
+            fontSize: 14,
+          },
+        },
+      },
+    },
+    MuiSelect: {
+      styleOverrides: {
+        icon: { color: c.textSecondary },
+      },
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          minHeight: 38,
+          padding: '8px 12px',
+          margin: '2px 0',
+          fontFamily: FONT_BODY,
+          fontSize: 13,
+          color: c.textPrimary,
+          borderRadius: 8,
+          '&:hover, &.Mui-focusVisible': {
+            backgroundColor: `color-mix(in srgb, ${c.accent} 8%, ${c.bgElevated})`,
+          },
+          '&.Mui-selected': {
+            backgroundColor: `color-mix(in srgb, ${c.accent} 14%, ${c.bgElevated})`,
+            color: c.accent,
+            fontWeight: 600,
+            '&:hover, &.Mui-focusVisible': {
+              backgroundColor: `color-mix(in srgb, ${c.accent} 14%, ${c.bgElevated})`,
+            },
+          },
+        },
+      },
+    },
+    MuiAutocomplete: {
+      styleOverrides: {
+        input: {
+          '&::placeholder': {
+            color: c.textPrimary,
+            opacity: 1,
+          },
+        },
+      },
+    },
   }
 }
 

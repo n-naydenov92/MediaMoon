@@ -140,7 +140,7 @@ export default memo(function DuplicateAdSetDialog({
             size="small"
             variant="outlined"
             fullWidth
-            className={styles.input}
+            className="density-dialog"
             placeholder="e.g. Lookalike 1% — 2026-05-22"
           />
         </Box>
