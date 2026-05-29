@@ -64,7 +64,7 @@ export default memo(function ProfilesStep({
             value={null}
             options={[]}
             onChange={() => {}}
-            placeholder="AUTO SELECTED"
+            placeholder="Instagram profiles mapped automatically"
             leadingIcon={<InstagramIcon fontSize="small" />}
             disabled
             getOptionId={(o) => o.id}

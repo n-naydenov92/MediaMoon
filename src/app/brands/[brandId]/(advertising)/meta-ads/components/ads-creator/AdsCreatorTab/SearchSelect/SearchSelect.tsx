@@ -49,7 +49,10 @@ function SearchSelectInner<T>({
   renderRowAction,
   noOptionsText = 'No matches.',
 }: Props<T>): JSX.Element {
-  const triggerIcon: ReactNode = value && getOptionIcon ? getOptionIcon(value) : leadingIcon
+  // The trigger always prefers leadingIcon when provided so the picker shows
+  // a stable brand/category mark; getOptionIcon stays for dropdown rows where
+  // per-option visuals (avatars, status) help distinguish entries.
+  const triggerIcon: ReactNode = leadingIcon ?? (value && getOptionIcon ? getOptionIcon(value) : null)
 
   const [collapsedGroups, setCollapsedGroups] = useState<ReadonlySet<string>>(() => new Set())
   const toggleGroup = useCallback((group: string) => {
