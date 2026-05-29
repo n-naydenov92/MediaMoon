@@ -13,20 +13,12 @@ import Notice from '../../Notice/Notice'
 import CreatorPane from './CreatorPane/CreatorPane'
 import LibraryPane from './LibraryPane/LibraryPane'
 import { EMPTY_COPY, type CopyValue } from './CopyForm/CopyForm'
-import { type TargetingValue } from './CreatorPane/useTargetingData'
+import { EMPTY_TARGETING, type TargetingValue } from './CreatorPane/useTargetingData'
 import { useLaunchQueue } from './useLaunchQueue'
 import styles from './AdsCreatorTab.module.css'
 
 interface Props {
   readonly brandId: BrandId
-}
-
-const EMPTY_TARGETING: TargetingValue = {
-  accountId: '',
-  campaignId: '',
-  adSetId: '',
-  pageIds: [],
-  instagramId: '',
 }
 
 export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
