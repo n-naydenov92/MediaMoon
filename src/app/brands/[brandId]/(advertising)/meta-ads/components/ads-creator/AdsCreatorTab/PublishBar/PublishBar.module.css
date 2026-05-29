@@ -47,7 +47,7 @@
 .progressFailed {
   font-family: var(--font-dm-sans), system-ui, sans-serif;
   font-size: 12px;
-  color: #b91c1c;
+  color: var(--error-strong);
   margin-top: 2px;
 }
 
@@ -61,7 +61,7 @@
   font-family: var(--font-dm-sans), system-ui, sans-serif;
   font-size: 14px;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--text-on-accent);
   background: var(--accent);
   border: none;
   border-radius: 10px;

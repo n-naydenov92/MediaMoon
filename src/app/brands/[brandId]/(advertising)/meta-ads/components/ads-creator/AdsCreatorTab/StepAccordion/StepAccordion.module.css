@@ -77,9 +77,9 @@
 }
 
 .status[data-complete='true'] {
-  background: var(--success, #10b981);
-  border-color: var(--success, #10b981);
-  color: #ffffff;
+  background: var(--success);
+  border-color: var(--success);
+  color: var(--text-on-accent);
 }
 
 .checkIcon {

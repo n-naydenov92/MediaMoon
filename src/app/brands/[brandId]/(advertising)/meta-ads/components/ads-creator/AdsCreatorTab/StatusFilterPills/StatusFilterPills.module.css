@@ -44,7 +44,7 @@
 }
 
 .dot[data-tone='active'] {
-  background: var(--success, #10b981);
+  background: var(--success);
 }
 
 .dot[data-tone='paused'] {

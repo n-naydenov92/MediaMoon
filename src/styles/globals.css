@@ -17,8 +17,10 @@
   --success-soft: rgba(16, 185, 129, 0.15);
   --error: #ef4444;
   --error-soft: rgba(239, 68, 68, 0.15);
+  --error-strong: #b91c1c;
   --warning: #eab308;
   --warning-soft: rgba(234, 179, 8, 0.15);
+  --text-on-accent: #ffffff;
   --overlay-strong: rgba(0, 0, 0, 0.6);
 
   --surface-1: rgba(255, 255, 255, 0.02);
@@ -60,8 +62,10 @@
   --success-soft: rgba(5, 150, 105, 0.12);
   --error: #dc2626;
   --error-soft: rgba(220, 38, 38, 0.1);
+  --error-strong: #991b1b;
   --warning: #ca8a04;
   --warning-soft: rgba(202, 138, 4, 0.12);
+  --text-on-accent: #ffffff;
   --overlay-strong: rgba(0, 0, 0, 0.6);
 
   --surface-1: rgba(10, 10, 15, 0.02);

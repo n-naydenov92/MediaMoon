@@ -14,7 +14,7 @@
   line-height: 1;
 }
 
-.text.text {
+.text {
   font-family: var(--font-syne), system-ui, sans-serif;
   font-size: 14px;
   font-weight: 700;

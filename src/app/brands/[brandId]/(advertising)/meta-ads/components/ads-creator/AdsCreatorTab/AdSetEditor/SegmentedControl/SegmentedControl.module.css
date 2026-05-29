@@ -38,10 +38,10 @@
 
 .button.button:global(.Mui-selected) {
   background: var(--accent);
-  color: #ffffff;
+  color: var(--text-on-accent);
 }
 
 .button.button:global(.Mui-selected):hover {
   background: var(--accent-hover);
-  color: #ffffff;
+  color: var(--text-on-accent);
 }
