@@ -3,7 +3,7 @@
 import { memo } from 'react'
 import Box from '@mui/material/Box'
 import TextField from '@mui/material/TextField'
-import Typography from '@mui/material/Typography'
+import FieldLabel from '../FieldLabel/FieldLabel'
 import styles from './NameSection.module.css'
 
 interface Props {
@@ -19,14 +19,7 @@ export default memo(function NameSection({
 }: Props): JSX.Element {
   return (
     <Box className={styles.root}>
-      <Typography
-        component="label"
-        variant="inherit"
-        className={styles.label}
-        htmlFor="ad-set-editor-name"
-      >
-        Name
-      </Typography>
+      <FieldLabel htmlFor="ad-set-editor-name">Name</FieldLabel>
       <TextField
         id="ad-set-editor-name"
         value={name}

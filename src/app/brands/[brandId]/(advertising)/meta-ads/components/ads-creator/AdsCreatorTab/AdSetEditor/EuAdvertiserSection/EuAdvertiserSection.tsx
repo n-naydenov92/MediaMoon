@@ -3,8 +3,8 @@
 import { memo } from 'react'
 import Box from '@mui/material/Box'
 import TextField from '@mui/material/TextField'
-import Typography from '@mui/material/Typography'
 import GavelOutlinedIcon from '@mui/icons-material/GavelOutlined'
+import FieldLabel from '../FieldLabel/FieldLabel'
 import SectionTitle from '../SectionTitle/SectionTitle'
 import styles from './EuAdvertiserSection.module.css'
 
@@ -31,14 +31,7 @@ export default memo(function EuAdvertiserSection({
 
       <Box className={styles.row}>
         <Box className={styles.field}>
-          <Typography
-            component="label"
-            variant="inherit"
-            className={styles.label}
-            htmlFor="ad-set-editor-beneficiary"
-          >
-            Beneficiary
-          </Typography>
+          <FieldLabel htmlFor="ad-set-editor-beneficiary">Beneficiary</FieldLabel>
           <TextField
             id="ad-set-editor-beneficiary"
             value={beneficiary}
@@ -53,14 +46,7 @@ export default memo(function EuAdvertiserSection({
         </Box>
 
         <Box className={styles.field}>
-          <Typography
-            component="label"
-            variant="inherit"
-            className={styles.label}
-            htmlFor="ad-set-editor-payor"
-          >
-            Payer
-          </Typography>
+          <FieldLabel htmlFor="ad-set-editor-payor">Payer</FieldLabel>
           <TextField
             id="ad-set-editor-payor"
             value={payor}

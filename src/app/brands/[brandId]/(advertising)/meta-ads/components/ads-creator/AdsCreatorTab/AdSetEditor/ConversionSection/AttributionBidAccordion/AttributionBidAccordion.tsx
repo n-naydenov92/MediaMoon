@@ -1,12 +1,11 @@
 'use client'
 
-import { memo, useMemo, useState } from 'react'
+import { memo, useMemo } from 'react'
 import Box from '@mui/material/Box'
-import Collapse from '@mui/material/Collapse'
-import Typography from '@mui/material/Typography'
-import ExpandMoreOutlinedIcon from '@mui/icons-material/ExpandMoreOutlined'
 import type { AttributionWindow } from '@/lib/gateways/MetaAdsGateway'
+import AccordionToggle from '../../AccordionToggle/AccordionToggle'
 import BudgetField from '../../BudgetField/BudgetField'
+import FieldLabel from '../../FieldLabel/FieldLabel'
 import SearchSelect from '../../../SearchSelect/SearchSelect'
 import SegmentedControl from '../../SegmentedControl/SegmentedControl'
 import {
@@ -52,8 +51,6 @@ export default memo(function AttributionBidAccordion({
   onAttributionSpecChange,
   disabled,
 }: Props): JSX.Element {
-  const [open, setOpen] = useState<boolean>(false)
-
   const strategyOptions = useMemo(
     () => resolveOption(BID_STRATEGY_OPTIONS, bidStrategy),
     [bidStrategy],
@@ -80,102 +77,74 @@ export default memo(function AttributionBidAccordion({
   }
 
   return (
-    <Box className={styles.root}>
-      <Box
-        component="button"
-        type="button"
-        className={styles.toggle}
-        onClick={() => setOpen((prev) => !prev)}
-        disabled={disabled}
-        aria-expanded={open}
-      >
-        <Typography component="span" variant="inherit" className={styles.title}>
-          {open ? 'Hide attribution and bid settings' : 'Show attribution and bid settings'}
-        </Typography>
-        <ExpandMoreOutlinedIcon
-          className={`${styles.chevron} ${open ? styles.chevronOpen : ''}`}
-          fontSize="small"
-        />
-      </Box>
-
-      <Collapse in={open} timeout={200} unmountOnExit>
-        <Box className={styles.fields}>
-          <Box className={styles.field}>
-            <Typography component="span" variant="inherit" className={styles.label}>
-              Bid strategy
-            </Typography>
-            <SearchSelect<ConversionOption>
-              value={selectedStrategy}
-              options={strategyOptions}
-              onChange={(next) => onBidStrategyChange(next?.value ?? '')}
-              placeholder="Select strategy…"
-              disabled={disabled}
-              getOptionId={(o) => o.value}
-              getOptionLabel={(o) => o.label}
-              noOptionsText="No matches."
-            />
-          </Box>
-
-          {showBidAmount && (
-            <Box className={styles.field}>
-              <Typography
-                component="label"
-                variant="inherit"
-                className={styles.label}
-                htmlFor="ad-set-editor-bid-amount"
-              >
-                {bidStrategy === 'COST_CAP' ? 'Cost cap' : 'Bid cap'}
-              </Typography>
-              <BudgetField
-                id="ad-set-editor-bid-amount"
-                value={bidAmountMajorUnits}
-                onChange={onBidAmountChange}
-                currency={currency}
-                disabled={disabled}
-              />
-            </Box>
-          )}
-
-          <Box className={styles.field}>
-            <Typography component="span" variant="inherit" className={styles.label}>
-              Click-through window
-            </Typography>
-            <SegmentedControl<ClickWindow>
-              value={clickDays}
-              options={CLICK_OPTIONS}
-              onChange={handleClickChange}
-              disabled={disabled}
-              ariaLabel="Click-through attribution window"
-            />
-          </Box>
-
-          <Box className={styles.field}>
-            <Typography component="span" variant="inherit" className={styles.label}>
-              View-through window
-            </Typography>
-            <SegmentedControl<OptionalWindow>
-              value={viewDays}
-              options={OPTIONAL_OPTIONS}
-              onChange={handleViewChange}
-              disabled={disabled}
-              ariaLabel="View-through attribution window"
-            />
-          </Box>
-
-          <Box className={styles.field}>
-            <Typography component="span" variant="inherit" className={styles.label}>
-              Engaged video view window
-            </Typography>
-            <SegmentedControl<OptionalWindow>
-              value={engagedDays}
-              options={OPTIONAL_OPTIONS}
-              onChange={handleEngagedChange}
-              disabled={disabled}
-              ariaLabel="Engaged video view attribution window"
-            />
-          </Box>
+    <AccordionToggle
+      closedLabel="Show attribution and bid settings"
+      openLabel="Hide attribution and bid settings"
+      disabled={disabled}
+    >
+      <Box className={styles.fields}>
+        <Box className={styles.field}>
+          <FieldLabel>Bid strategy</FieldLabel>
+          <SearchSelect<ConversionOption>
+            value={selectedStrategy}
+            options={strategyOptions}
+            onChange={(next) => onBidStrategyChange(next?.value ?? '')}
+            placeholder="Select strategy…"
+            disabled={disabled}
+            getOptionId={(o) => o.value}
+            getOptionLabel={(o) => o.label}
+            noOptionsText="No matches."
+          />
         </Box>
-      </Collapse>
-    </Box>
+
+        {showBidAmount && (
+          <Box className={styles.field}>
+            <FieldLabel htmlFor="ad-set-editor-bid-amount">
+              {bidStrategy === 'COST_CAP' ? 'Cost cap' : 'Bid cap'}
+            </FieldLabel>
+            <BudgetField
+              id="ad-set-editor-bid-amount"
+              value={bidAmountMajorUnits}
+              onChange={onBidAmountChange}
+              currency={currency}
+              disabled={disabled}
+            />
+          </Box>
+        )}
+
+        <Box className={styles.field}>
+          <FieldLabel>Click-through window</FieldLabel>
+          <SegmentedControl<ClickWindow>
+            value={clickDays}
+            options={CLICK_OPTIONS}
+            onChange={handleClickChange}
+            disabled={disabled}
+            ariaLabel="Click-through attribution window"
+          />
+        </Box>
+
+        <Box className={styles.field}>
+          <FieldLabel>View-through window</FieldLabel>
+          <SegmentedControl<OptionalWindow>
+            value={viewDays}
+            options={OPTIONAL_OPTIONS}
+            onChange={handleViewChange}
+            disabled={disabled}
+            ariaLabel="View-through attribution window"
+          />
+        </Box>
+
+        <Box className={styles.field}>
+          <FieldLabel>Engaged video view window</FieldLabel>
+          <SegmentedControl<OptionalWindow>
+            value={engagedDays}
+            options={OPTIONAL_OPTIONS}
+            onChange={handleEngagedChange}
+            disabled={disabled}
+            ariaLabel="Engaged video view attribution window"
+          />
+        </Box>
+      </Box>
+    </AccordionToggle>
   )
 })

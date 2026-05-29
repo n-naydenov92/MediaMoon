@@ -2,11 +2,11 @@
 
 import { memo } from 'react'
 import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
 import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined'
 import type { Gender } from '@/lib/gateways/MetaAdsGateway'
 import AdvantageBadge from '../AdvantageBadge/AdvantageBadge'
-import AgeRangeSlider from '../AgeRangeSlider/AgeRangeSlider'
+import AgeRangeSlider from './AgeRangeSlider/AgeRangeSlider'
+import FieldLabel from '../FieldLabel/FieldLabel'
 import SectionTitle from '../SectionTitle/SectionTitle'
 import SegmentedControl from '../SegmentedControl/SegmentedControl'
 import AdvantagePlusToggles from './AdvantagePlusToggles/AdvantagePlusToggles'
@@ -62,9 +62,7 @@ export default memo(function AudienceSection({
       </Box>
 
       <Box className={styles.field}>
-        <Typography component="span" variant="inherit" className={styles.label}>
-          Locations
-        </Typography>
+        <FieldLabel>Locations</FieldLabel>
         <LocationsField
           countries={countries}
           onChange={onCountriesChange}
@@ -74,9 +72,7 @@ export default memo(function AudienceSection({
 
       <Box className={styles.row}>
         <Box className={styles.field}>
-          <Typography component="span" variant="inherit" className={styles.label}>
-            Age
-          </Typography>
+          <FieldLabel>Age</FieldLabel>
           <AgeRangeSlider
             ageMin={ageMin}
             ageMax={ageMax}
@@ -86,9 +82,7 @@ export default memo(function AudienceSection({
         </Box>
 
         <Box className={styles.field}>
-          <Typography component="span" variant="inherit" className={styles.label}>
-            Gender
-          </Typography>
+          <FieldLabel>Gender</FieldLabel>
           <SegmentedControl<Gender>
             value={gender}
             options={GENDER_OPTIONS}

@@ -43,13 +43,13 @@
 
 .body :global(.rdp-selected .rdp-day_button) {
   background: var(--accent);
-  color: #ffffff;
+  color: var(--text-on-accent);
   font-weight: 600;
 }
 
 .body :global(.rdp-selected .rdp-day_button:hover) {
   background: var(--accent-hover);
-  color: #ffffff;
+  color: var(--text-on-accent);
 }
 
 .body :global(.rdp-today:not(.rdp-selected) .rdp-day_button) {
@@ -166,6 +166,8 @@
   gap: 6px;
 }
 
+/* Width override is intentional — MUI size="small" controls minHeight only, */
+/* and these are 2-digit numeric inputs in a calendar popover (scope: .timeInputs). */
 .timeInputs .MuiOutlinedInput-root {
   width: 60px;
 }

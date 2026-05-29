@@ -1,12 +1,11 @@
 'use client'
 
-import { memo, useState } from 'react'
+import { memo } from 'react'
 import Box from '@mui/material/Box'
-import Collapse from '@mui/material/Collapse'
 import Switch from '@mui/material/Switch'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
-import ExpandMoreOutlinedIcon from '@mui/icons-material/ExpandMoreOutlined'
+import AccordionToggle from '../../AccordionToggle/AccordionToggle'
 import styles from './AdvantagePlusToggles.module.css'
 
 interface Props {
@@ -35,8 +34,6 @@ export default memo(function AdvantagePlusToggles({
   onAdvantageGenderChange,
   disabled,
 }: Props): JSX.Element {
-  const [open, setOpen] = useState<boolean>(false)
-
   const rows: readonly Row[] = [
     {
       title: 'Advantage+ audience',
@@ -60,24 +57,7 @@ export default memo(function AdvantagePlusToggles({
 
   return (
     <Box className={styles.root}>
-      <Box
-        component="button"
-        type="button"
-        className={styles.toggle}
-        onClick={() => setOpen((prev) => !prev)}
-        disabled={disabled}
-        aria-expanded={open}
-      >
-        <Typography component="span" variant="inherit" className={styles.title}>
-          Advantage+ audience
-        </Typography>
-        <ExpandMoreOutlinedIcon
-          className={`${styles.chevron} ${open ? styles.chevronOpen : ''}`}
-          fontSize="small"
-        />
-      </Box>
-
-      <Collapse in={open} timeout={200} unmountOnExit>
+      <AccordionToggle closedLabel="Advantage+ audience" disabled={disabled}>
         <Box className={styles.rows}>
           {rows.map((row) => (
             <Box key={row.title} className={styles.row}>
@@ -100,7 +80,7 @@ export default memo(function AdvantagePlusToggles({
             </Box>
           ))}
         </Box>
-      </Collapse>
+      </AccordionToggle>
     </Box>
   )
 })

@@ -31,10 +31,9 @@
   min-width: 0;
 }
 
-.label {
-  font-family: var(--font-dm-sans), system-ui, sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  letter-spacing: 0.01em;
+/* Age column has an extra "18 — 65+" line above the slider, which makes it
+   taller than Gender. Push each row child's primary control to the bottom so
+   the SegmentedControl aligns visually with the slider's bar. */
+.row > .field {
+  justify-content: space-between;
 }
