@@ -100,7 +100,9 @@
 
 .listbox {
   padding: 4px;
+  height: 320px;
   max-height: 320px;
+  overflow-y: auto;
 }
 
 .group {
@@ -108,22 +110,59 @@
   list-style: none;
 }
 
+.group + .group {
+  margin-top: 2px;
+}
+
 .groupHeader {
-  padding: 10px 12px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px 6px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
   font-family: var(--font-dm-sans), system-ui, sans-serif;
-  font-size: 11px;
-  font-weight: 800;
+  color: var(--text-muted);
+  transition: color 120ms ease, background 120ms ease;
+}
+
+.groupHeader:hover,
+.groupHeader[aria-expanded='true'] {
   color: var(--text-primary);
+}
+
+.groupHeaderText {
+  flex: 1 1 auto;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: inherit;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  border-bottom: 1px solid var(--hairline-strong);
-  margin-bottom: 4px;
+  pointer-events: none;
+}
+
+.groupChevron {
+  flex-shrink: 0;
+  font-size: 16px;
+  color: inherit;
+  transition: transform 200ms ease;
+}
+
+.groupChevronExpanded {
+  transform: rotate(180deg);
 }
 
 .groupList {
   padding: 0;
   margin: 0;
   list-style: none;
+  background: transparent;
 }
 
 .listbox .option.option {
@@ -143,7 +182,7 @@
 
 .listbox .option.option:hover,
 .listbox .option.option:global(.Mui-focused) {
-  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  background: var(--surface-2);
 }
 
 .optionCode {

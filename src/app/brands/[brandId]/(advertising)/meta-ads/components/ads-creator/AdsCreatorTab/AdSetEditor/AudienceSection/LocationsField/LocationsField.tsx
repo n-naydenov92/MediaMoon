@@ -1,15 +1,17 @@
 'use client'
 
-import { memo, useCallback, useMemo, useState, type HTMLAttributes } from 'react'
-import Autocomplete from '@mui/material/Autocomplete'
+import { createContext, memo, useCallback, useContext, useMemo, useState, type HTMLAttributes } from 'react'
+import Autocomplete, { type AutocompleteRenderGetTagProps, type AutocompleteRenderGroupParams } from '@mui/material/Autocomplete'
 import Box from '@mui/material/Box'
 import Chip from '@mui/material/Chip'
+import Collapse from '@mui/material/Collapse'
 import Paper, { type PaperProps } from '@mui/material/Paper'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import AddIcon from '@mui/icons-material/Add'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import {
   COUNTRIES_SORTED,
   COUNTRY_PRESETS,
@@ -47,48 +49,148 @@ function mergeCodes(existing: readonly string[], add: readonly string[]): readon
   return Array.from(set)
 }
 
+function renderCountryOption(
+  props: HTMLAttributes<HTMLLIElement>,
+  option: Country,
+): JSX.Element {
+  // eslint-disable-next-line @typescript-eslint/naming-convention -- React 19 requires extracting key before spread
+  const { key: _ignored, ...rest } = props as HTMLAttributes<HTMLLIElement> & { key?: string }
+  return (
+    <Box component="li" key={option.code} {...rest} className={styles.option}>
+      <Typography component="span" variant="inherit" className={styles.optionCode}>
+        {option.code}
+      </Typography>
+      <Typography component="span" variant="inherit" className={styles.optionName}>
+        {option.name}
+      </Typography>
+    </Box>
+  )
+}
+
+interface ContinentContextValue {
+  readonly value: ContinentFilter
+  readonly onChange: (next: ContinentFilter) => void
+}
+
+const ContinentContext = createContext<ContinentContextValue | null>(null)
+
+function ContinentTabsStrip(): JSX.Element | null {
+  const ctx = useContext(ContinentContext)
+  if (!ctx) return null
+  return (
+    <Box
+      className={styles.tabsWrap}
+      // Prevent input blur when clicking the tab strip — otherwise the
+      // Autocomplete popper closes before setContinent fires.
+      onMouseDown={(e) => e.preventDefault()}
+    >
+      <Tabs
+        value={ctx.value}
+        onChange={(_, next: ContinentFilter) => ctx.onChange(next)}
+        variant="scrollable"
+        scrollButtons
+        allowScrollButtonsMobile
+        className={styles.tabs}
+      >
+        {CONTINENT_TABS.map((label) => (
+          <Tab
+            key={label}
+            value={label}
+            label={label}
+            className={styles.tab}
+            disableRipple
+          />
+        ))}
+      </Tabs>
+    </Box>
+  )
+}
+
+function PaperWithTabs(paperProps: PaperProps): JSX.Element {
+  return (
+    <Paper {...paperProps} className={styles.paper}>
+      <ContinentTabsStrip />
+      {paperProps.children}
+    </Paper>
+  )
+}
+
+function renderCountryTags(
+  value: readonly Country[],
+  getTagProps: AutocompleteRenderGetTagProps,
+): JSX.Element[] {
+  return value.map((option, index) => {
+    const { key, ...rest } = getTagProps({ index })
+    return (
+      <Chip
+        key={key}
+        label={`${option.code} · ${option.name}`}
+        size="small"
+        {...rest}
+        className={styles.chip}
+      />
+    )
+  })
+}
+
 export default memo(function LocationsField({
   countries,
   onChange,
   disabled,
 }: Props): JSX.Element {
   const [continent, setContinent] = useState<ContinentFilter>('All')
+  const [collapsedGroups, setCollapsedGroups] = useState<ReadonlySet<string>>(() => new Set())
+  const toggleGroup = useCallback((group: string) => {
+    setCollapsedGroups((prev) => {
+      const next = new Set(prev)
+      if (next.has(group)) next.delete(group)
+      else next.add(group)
+      return next
+    })
+  }, [])
 
   const selected = useMemo(() => countries.map((c) => findCountry(c)), [countries])
+
+  const continentCtx = useMemo<ContinentContextValue>(
+    () => ({ value: continent, onChange: setContinent }),
+    [continent],
+  )
+
+  const renderGroup = useCallback((params: AutocompleteRenderGroupParams): JSX.Element => {
+    const collapsed = collapsedGroups.has(params.group)
+    return (
+      <Box component="li" key={params.key} className={styles.group}>
+        <Box
+          component="button"
+          type="button"
+          className={styles.groupHeader}
+          onClick={() => toggleGroup(params.group)}
+          onMouseDown={(e) => e.preventDefault()}
+          aria-expanded={!collapsed}
+        >
+          <Typography component="span" variant="inherit" className={styles.groupHeaderText}>
+            {params.group}
+          </Typography>
+          <ExpandMoreIcon
+            className={`${styles.groupChevron} ${!collapsed ? styles.groupChevronExpanded : ''}`}
+            fontSize="inherit"
+          />
+        </Box>
+        <Collapse in={!collapsed} timeout={180}>
+          <Box component="ul" className={styles.groupList}>
+            {params.children}
+          </Box>
+        </Collapse>
+      </Box>
+    )
+  }, [collapsedGroups, toggleGroup])
 
   const handlePreset = (preset: CountryPreset): void => {
     onChange(mergeCodes(countries, preset.codes))
   }
 
-  const PaperComponent = useCallback((paperProps: PaperProps) => (
-    <Paper {...paperProps} className={styles.paper}>
-      <Box
-        className={styles.tabsWrap}
-        onMouseDown={(e) => e.preventDefault()}
-      >
-        <Tabs
-          value={continent}
-          onChange={(_, next: ContinentFilter) => setContinent(next)}
-          variant="scrollable"
-          scrollButtons="auto"
-          className={styles.tabs}
-        >
-          {CONTINENT_TABS.map((label) => (
-            <Tab
-              key={label}
-              value={label}
-              label={label}
-              className={styles.tab}
-              disableRipple
-            />
-          ))}
-        </Tabs>
-      </Box>
-      {paperProps.children}
-    </Paper>
-  ), [continent])
-
   return (
+    <ContinentContext.Provider value={continentCtx}>
     <Box className={styles.root}>
       <Box className={styles.presets}>
         <Typography component="span" variant="inherit" className={styles.presetsLabel}>
@@ -120,7 +222,7 @@ export default memo(function LocationsField({
         groupBy={continent === 'All' ? (option) => option.continent : undefined}
         filterSelectedOptions
         size="small"
-        PaperComponent={PaperComponent}
+        PaperComponent={PaperWithTabs}
         classes={{ listbox: styles.listbox, option: styles.option }}
         filterOptions={(options, state) => {
           let filtered = options
@@ -135,41 +237,9 @@ export default memo(function LocationsField({
           }
           return filtered
         }}
-        renderOption={(props, option) => {
-          const { key, ...rest } = props as HTMLAttributes<HTMLLIElement> & { key?: string }
-          return (
-            <Box component="li" key={option.code} {...rest} className={styles.option}>
-              <Typography component="span" variant="inherit" className={styles.optionCode}>
-                {option.code}
-              </Typography>
-              <Typography component="span" variant="inherit" className={styles.optionName}>
-                {option.name}
-              </Typography>
-            </Box>
-          )
-        }}
-        renderGroup={(params) => (
-          <Box component="li" key={params.key} className={styles.group}>
-            <Typography component="div" variant="inherit" className={styles.groupHeader}>
-              {params.group}
-            </Typography>
-            <Box component="ul" className={styles.groupList}>
-              {params.children}
-            </Box>
-          </Box>
-        )}
-        renderTags={(value, getTagProps) => value.map((option, index) => {
-          const { key, ...rest } = getTagProps({ index })
-          return (
-            <Chip
-              key={key}
-              label={`${option.code} · ${option.name}`}
-              size="small"
-              {...rest}
-              className={styles.chip}
-            />
-          )
-        })}
+        renderOption={renderCountryOption}
+        renderGroup={renderGroup}
+        renderTags={renderCountryTags}
         renderInput={(params) => (
           <TextField
             {...params}
@@ -179,5 +249,6 @@ export default memo(function LocationsField({
         )}
       />
     </Box>
+    </ContinentContext.Provider>
   )
 })

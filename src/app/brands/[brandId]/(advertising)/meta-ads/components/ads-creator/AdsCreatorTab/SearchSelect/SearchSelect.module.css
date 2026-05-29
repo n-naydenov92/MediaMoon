@@ -23,7 +23,88 @@
 
 .menuList {
   padding: 4px;
+  height: 320px;
   max-height: 320px;
+  overflow-y: auto;
+}
+
+.group {
+  padding: 0;
+  list-style: none;
+}
+
+.group + .group {
+  margin-top: 2px;
+}
+
+.sectionLabel {
+  display: block;
+  padding: 10px 12px 4px;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  pointer-events: none;
+  user-select: none;
+}
+
+.sectionList {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.groupHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px 6px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  color: var(--text-muted);
+  transition: color 120ms ease, background 120ms ease;
+}
+
+.groupHeader:hover,
+.groupHeader[aria-expanded='true'] {
+  color: var(--text-primary);
+}
+
+.groupHeaderText {
+  flex: 1 1 auto;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: inherit;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.groupChevron {
+  flex-shrink: 0;
+  font-size: 16px;
+  color: inherit;
+  transition: transform 200ms ease;
+}
+
+.groupChevronExpanded {
+  transform: rotate(180deg);
+}
+
+.groupList {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  background: transparent;
 }
 
 .menuList .option.option {
@@ -44,11 +125,16 @@
 
 .menuList .option.option:hover,
 .menuList .option.option:global(.Mui-focused) {
-  background: color-mix(in srgb, var(--accent) 8%, var(--surface-1));
+  background: var(--surface-2);
 }
 
 .menuList .option.option[data-selected='true'] {
   background: color-mix(in srgb, var(--accent) 14%, var(--surface-1));
+}
+
+.menuList .option.option[data-selected='true']:hover,
+.menuList .option.option[data-selected='true']:global(.Mui-focused) {
+  background: color-mix(in srgb, var(--accent) 20%, var(--surface-1));
 }
 
 .optionIcon {
@@ -68,7 +154,7 @@
 }
 
 .statusDot[data-status='active'] {
-  background: var(--success, #10b981);
+  background: var(--success);
 }
 
 .statusDot[data-status='paused'] {

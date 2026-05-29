@@ -1,12 +1,14 @@
 'use client'
 
-import { memo, type ReactNode } from 'react'
-import Autocomplete from '@mui/material/Autocomplete'
+import { memo, useCallback, useState, type ReactNode } from 'react'
+import Autocomplete, { type AutocompleteRenderGroupParams } from '@mui/material/Autocomplete'
 import Box from '@mui/material/Box'
+import Collapse from '@mui/material/Collapse'
 import TextField from '@mui/material/TextField'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import CheckIcon from '@mui/icons-material/Check'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import styles from './SearchSelect.module.css'
 
 export type OptionStatus = 'active' | 'paused'
@@ -23,9 +25,12 @@ interface Props<T> {
   readonly getOptionSecondary?: (option: T) => string
   readonly getOptionStatus?: (option: T) => OptionStatus
   readonly getOptionIcon?: (option: T) => ReactNode
+  readonly getOptionGroup?: (option: T) => string
+  readonly collapsibleGroups?: boolean
   readonly renderRowAction?: (option: T) => ReactNode
   readonly noOptionsText?: string
 }
+
 
 function SearchSelectInner<T>({
   value,
@@ -39,10 +44,64 @@ function SearchSelectInner<T>({
   getOptionSecondary,
   getOptionStatus,
   getOptionIcon,
+  getOptionGroup,
+  collapsibleGroups = false,
   renderRowAction,
   noOptionsText = 'No matches.',
 }: Props<T>): JSX.Element {
   const triggerIcon: ReactNode = value && getOptionIcon ? getOptionIcon(value) : leadingIcon
+
+  const [collapsedGroups, setCollapsedGroups] = useState<ReadonlySet<string>>(() => new Set())
+  const toggleGroup = useCallback((group: string) => {
+    setCollapsedGroups((prev) => {
+      const next = new Set(prev)
+      if (next.has(group)) next.delete(group)
+      else next.add(group)
+      return next
+    })
+  }, [])
+
+  const renderGroupCollapsible = useCallback((params: AutocompleteRenderGroupParams): ReactNode => {
+    const collapsed = collapsedGroups.has(params.group)
+    return (
+      <Box component="li" key={params.key} className={styles.group}>
+        <Box
+          component="button"
+          type="button"
+          className={styles.groupHeader}
+          onClick={() => toggleGroup(params.group)}
+          onMouseDown={(e) => e.preventDefault()}
+          aria-expanded={!collapsed}
+        >
+          <Typography component="span" variant="inherit" className={styles.groupHeaderText}>
+            {params.group}
+          </Typography>
+          <ExpandMoreIcon
+            className={`${styles.groupChevron} ${!collapsed ? styles.groupChevronExpanded : ''}`}
+            fontSize="inherit"
+          />
+        </Box>
+        <Collapse in={!collapsed} timeout={180}>
+          <Box component="ul" className={styles.groupList}>
+            {params.children}
+          </Box>
+        </Collapse>
+      </Box>
+    )
+  }, [collapsedGroups, toggleGroup])
+
+  const renderGroupStatic = useCallback((params: AutocompleteRenderGroupParams): ReactNode => (
+    <Box component="li" key={params.key} className={styles.group}>
+      <Typography component="div" variant="inherit" className={styles.sectionLabel}>
+        {params.group}
+      </Typography>
+      <Box component="ul" className={styles.sectionList}>
+        {params.children}
+      </Box>
+    </Box>
+  ), [])
+
+  const renderGroup = collapsibleGroups ? renderGroupCollapsible : renderGroupStatic
   return (
     <Autocomplete<T>
       size="small"
@@ -64,10 +123,11 @@ function SearchSelectInner<T>({
       }}
       onChange={(_, next) => onChange(next)}
       openOnFocus
-      autoHighlight
       selectOnFocus
       clearOnBlur
       handleHomeEndKeys
+      groupBy={getOptionGroup ? (option) => getOptionGroup(option) : undefined}
+      renderGroup={getOptionGroup ? renderGroup : undefined}
       classes={{
         paper: styles.menuPaper,
         listbox: styles.menuList,
