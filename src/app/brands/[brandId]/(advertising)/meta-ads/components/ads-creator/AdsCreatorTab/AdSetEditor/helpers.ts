@@ -1,4 +1,35 @@
-import type { AttributionWindow, DeviceMode, Gender, PlacementSelection } from '@/lib/gateways/MetaAdsGateway'
+import type {
+  AdSetDetail,
+  AttributionWindow,
+  BudgetType,
+  DeviceMode,
+  Gender,
+  PlacementSelection,
+} from '@/lib/gateways/MetaAdsGateway'
+import type { DraftState } from './useAdSetDraft'
+
+// Meta refuses start_time<=now; small buffer covers clock skew + request travel.
+const START_TIME_GRACE_MS = 60_000
+
+export interface DuplicateRequestPayload {
+  readonly adSetId: string
+  readonly newName: string
+  readonly status: 'PAUSED' | 'ACTIVE'
+  budgetType?: BudgetType
+  budgetMinorUnits?: number
+  startTime?: string
+  endTime?: string
+  targeting?: Record<string, unknown>
+  isDynamicCreative?: boolean
+  dsaBeneficiary?: string
+  dsaPayor?: string
+  optimizationGoal?: string
+  bidStrategy?: string
+  bidAmountMinorUnits?: number
+  destinationType?: string
+  promotedObject?: Record<string, unknown>
+  attributionSpec?: readonly { event_type: string; window_days: number }[]
+}
 
 export function buildDuplicateName(sourceName: string, now: Date = new Date()): string {
   const yyyy = now.getFullYear()
@@ -15,13 +46,6 @@ export function genderToMetaArray(gender: Gender): readonly number[] {
     return [2]
   }
   return []
-}
-
-export function countriesEqual(a: readonly string[], b: readonly string[]): boolean {
-  if (a.length !== b.length) return false
-  const aSorted = [...a].slice().sort()
-  const bSorted = [...b].slice().sort()
-  return aSorted.every((v, i) => v === bSorted[i])
 }
 
 export function buildGeoLocations(
@@ -73,10 +97,10 @@ export function attributionSpecEqual(
   return aKeys.every((k, i) => k === bKeys[i])
 }
 
-function stringArraysEqual(a: readonly string[], b: readonly string[]): boolean {
+export function stringArraysEqual(a: readonly string[], b: readonly string[]): boolean {
   if (a.length !== b.length) return false
-  const aSorted = [...a].slice().sort()
-  const bSorted = [...b].slice().sort()
+  const aSorted = [...a].sort()
+  const bSorted = [...b].sort()
   return aSorted.every((v, i) => v === bSorted[i])
 }
 
@@ -114,4 +138,120 @@ export function buildPlacementsForTargeting(p: PlacementSelection): Record<strin
     out.messenger_positions = [...p.messengerPositions]
   }
   return out
+}
+
+const ADVANTAGE_PLUS_PLACEMENT: PlacementSelection = {
+  mode: 'ADVANTAGE_PLUS',
+  deviceMode: 'ALL',
+  publisherPlatforms: [],
+  facebookPositions: [],
+  instagramPositions: [],
+  audienceNetworkPositions: [],
+  messengerPositions: [],
+}
+
+export function buildDuplicatePayload(
+  draft: DraftState,
+  source: AdSetDetail | null,
+  adSetId: string,
+  now: number = Date.now(),
+): DuplicateRequestPayload {
+  const trimmedName = draft.name.trim()
+  const payload: DuplicateRequestPayload = {
+    adSetId,
+    newName: trimmedName,
+    status: draft.activate ? 'ACTIVE' : 'PAUSED',
+  }
+
+  if (!source) {
+    return payload
+  }
+
+  // CBO: budget is owned by the campaign, never patch it on the ad set.
+  const cbo = source.campaignBudget !== null && source.budgetMinorUnits === 0
+  if (!cbo) {
+    const budgetMinorUnits = Math.round(draft.budgetMajorUnits * 100)
+    if (source.budgetType !== draft.budgetType || source.budgetMinorUnits !== budgetMinorUnits) {
+      payload.budgetType = draft.budgetType
+      payload.budgetMinorUnits = budgetMinorUnits
+    }
+  }
+
+  const stateStartTs = Date.parse(draft.startTime)
+  const stateStartIsFuture = Number.isFinite(stateStartTs) && stateStartTs > now
+  payload.startTime = stateStartIsFuture
+    ? draft.startTime
+    : new Date(now + START_TIME_GRACE_MS).toISOString()
+
+  if ((source.endTime ?? '') !== draft.endTime) {
+    const ts = Date.parse(draft.endTime)
+    if (Number.isFinite(ts) && ts > now) {
+      payload.endTime = draft.endTime
+    }
+  }
+
+  const ageChanged = source.targeting.ageMin !== draft.ageMin
+    || source.targeting.ageMax !== draft.ageMax
+  const genderChanged = source.targeting.gender !== draft.gender
+  const countriesChanged = !stringArraysEqual(source.targeting.countries, draft.countries)
+  const advantageChanged = source.targeting.advantageAudience !== draft.advantageAudience
+    || source.targeting.advantageAge !== draft.advantageAge
+    || source.targeting.advantageGender !== draft.advantageGender
+  const placementsChanged = !placementsEqual(source.placements, ADVANTAGE_PLUS_PLACEMENT)
+  if (ageChanged || genderChanged || countriesChanged || advantageChanged || placementsChanged) {
+    const targetingPayload: Record<string, unknown> = {
+      ...source.rawTargeting,
+      age_min: draft.ageMin,
+      age_max: draft.ageMax,
+      genders: genderToMetaArray(draft.gender),
+      geo_locations: buildGeoLocations(source.rawTargeting, draft.countries),
+      targeting_automation: buildTargetingAutomation(
+        source.rawTargeting,
+        draft.advantageAudience,
+        draft.advantageAge,
+        draft.advantageGender,
+      ),
+      ...buildPlacementsForTargeting(ADVANTAGE_PLUS_PLACEMENT),
+    }
+    // age_range requires advantage_audience enabled; Meta rejects otherwise.
+    if (!draft.advantageAudience) {
+      delete targetingPayload.age_range
+    }
+    payload.targeting = targetingPayload
+  }
+
+  if (source.isDynamicCreative !== draft.isDynamicCreative) {
+    payload.isDynamicCreative = draft.isDynamicCreative
+  }
+  if (source.dsaBeneficiary !== draft.dsaBeneficiary) {
+    payload.dsaBeneficiary = draft.dsaBeneficiary
+  }
+  if (source.dsaPayor !== draft.dsaPayor) {
+    payload.dsaPayor = draft.dsaPayor
+  }
+  if (source.optimizationGoal !== draft.optimizationGoal) {
+    payload.optimizationGoal = draft.optimizationGoal
+  }
+  if (source.bidStrategy !== draft.bidStrategy) {
+    payload.bidStrategy = draft.bidStrategy
+  }
+  const bidAmountMinorUnits = Math.round(draft.bidAmountMajorUnits * 100)
+  if (source.bidAmountMinorUnits !== bidAmountMinorUnits) {
+    payload.bidAmountMinorUnits = bidAmountMinorUnits
+  }
+  if (source.destinationType !== draft.destinationType) {
+    payload.destinationType = draft.destinationType
+  }
+  if (source.pixelId !== draft.pixelId || source.customEventType !== draft.customEventType) {
+    payload.promotedObject = {
+      ...source.rawPromotedObject,
+      pixel_id: draft.pixelId,
+      custom_event_type: draft.customEventType,
+    }
+  }
+  if (!attributionSpecEqual(source.attributionSpec, draft.attributionSpec)) {
+    payload.attributionSpec = attributionSpecToPayload(draft.attributionSpec)
+  }
+
+  return payload
 }
