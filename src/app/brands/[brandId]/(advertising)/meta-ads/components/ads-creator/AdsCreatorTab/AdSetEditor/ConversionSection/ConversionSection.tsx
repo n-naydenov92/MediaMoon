@@ -2,16 +2,18 @@
 
 import { memo, useMemo } from 'react'
 import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
+import Tooltip from '@mui/material/Tooltip'
 import TrackChangesOutlinedIcon from '@mui/icons-material/TrackChangesOutlined'
 import type { AttributionWindow, Pixel } from '@/lib/gateways/MetaAdsGateway'
 import SearchSelect from '../../SearchSelect/SearchSelect'
+import FieldLabel from '../FieldLabel/FieldLabel'
 import SectionTitle from '../SectionTitle/SectionTitle'
 import AttributionBidAccordion from './AttributionBidAccordion/AttributionBidAccordion'
 import {
   CUSTOM_EVENT_OPTIONS,
   DESTINATION_TYPE_OPTIONS,
   OPTIMIZATION_GOAL_OPTIONS,
+  isKnownDestination,
   resolveOption,
   type ConversionOption,
 } from './options'
@@ -58,7 +60,10 @@ export default memo(function ConversionSection({
   onAttributionSpecChange,
   disabled,
 }: Props): JSX.Element {
-  const destinationOptions = DESTINATION_TYPE_OPTIONS
+  const destinationOptions = useMemo(
+    () => resolveOption(DESTINATION_TYPE_OPTIONS, destinationType),
+    [destinationType],
+  )
   const goalOptions = useMemo(
     () => resolveOption(OPTIMIZATION_GOAL_OPTIONS, optimizationGoal),
     [optimizationGoal],
@@ -93,9 +98,11 @@ export default memo(function ConversionSection({
     [pixelOptions, pixelId],
   )
 
-  const showWebsiteFields = destinationType === 'WEBSITE'
-    || destinationType === ''
+  // Show Dataset (Pixel) + Conversion event rows whenever the destination
+  // involves a website / pixel-tracked surface (single or combined types).
+  const showWebsiteFields = destinationType === ''
     || destinationType === 'UNDEFINED'
+    || destinationType.includes('WEBSITE')
 
   return (
     <Box className={styles.root}>
@@ -105,25 +112,32 @@ export default memo(function ConversionSection({
 
       <Box className={styles.row}>
         <Box className={styles.field}>
-          <Typography component="span" variant="inherit" className={styles.label}>
-            Conversion location
-          </Typography>
-          <SearchSelect<ConversionOption>
-            value={selectedDestination}
-            options={destinationOptions}
-            onChange={(next) => onDestinationTypeChange(next?.value ?? '')}
-            placeholder="Select location…"
-            disabled={disabled}
-            getOptionId={(o) => o.value}
-            getOptionLabel={(o) => o.label}
-            noOptionsText="No matches."
-          />
+          <FieldLabel>Conversion location</FieldLabel>
+          <Tooltip
+            title={isKnownDestination(destinationType)
+              ? ''
+              : 'This destination type is not yet supported here. Edit it in Ads Manager.'}
+            placement="top"
+            enterDelay={200}
+          >
+            <Box>
+              <SearchSelect<ConversionOption>
+                value={selectedDestination}
+                options={destinationOptions}
+                onChange={(next) => onDestinationTypeChange(next?.value ?? '')}
+                placeholder="Select location…"
+                disabled={disabled || !isKnownDestination(destinationType)}
+                getOptionId={(o) => o.value}
+                getOptionLabel={(o) => o.label}
+                getOptionGroup={(o) => o.group ?? 'Other'}
+                noOptionsText="No matches."
+              />
+            </Box>
+          </Tooltip>
         </Box>
 
         <Box className={styles.field}>
-          <Typography component="span" variant="inherit" className={styles.label}>
-            Performance goal
-          </Typography>
+          <FieldLabel>Performance goal</FieldLabel>
           <SearchSelect<ConversionOption>
             value={selectedGoal}
             options={goalOptions}
@@ -140,9 +154,7 @@ export default memo(function ConversionSection({
       {showWebsiteFields && (
         <Box className={styles.row}>
           <Box className={styles.field}>
-            <Typography component="span" variant="inherit" className={styles.label}>
-              Dataset (Pixel)
-            </Typography>
+            <FieldLabel>Dataset (Pixel)</FieldLabel>
             <SearchSelect<Pixel>
               value={selectedPixel}
               options={pixelOptions}
@@ -157,9 +169,7 @@ export default memo(function ConversionSection({
           </Box>
 
           <Box className={styles.field}>
-            <Typography component="span" variant="inherit" className={styles.label}>
-              Conversion event
-            </Typography>
+            <FieldLabel>Conversion event</FieldLabel>
             <SearchSelect<ConversionOption>
               value={selectedEvent}
               options={eventOptions}

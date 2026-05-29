@@ -1,14 +1,31 @@
 export interface ConversionOption {
   readonly value: string
   readonly label: string
+  readonly group?: string
 }
 
+// Destination types confirmed by live Meta API responses. Multi-destination
+// labels ("Website and app", "Website, app and in-store") shown in Ads Manager
+// likely have their own enums too, but until we observe them we keep the list
+// honest. The `resolveOption` fallback in ConversionSection shows unknown
+// values as-is, and `isKnownDestination` locks editing for those cases.
+// Order matters: items with the same group are rendered together by MUI
+// Autocomplete in the order they appear here, so list Single first then Multiple.
 export const DESTINATION_TYPE_OPTIONS: readonly ConversionOption[] = [
-  { value: 'WEBSITE', label: 'Website' },
-  { value: 'APP', label: 'App' },
-  { value: 'MESSENGER', label: 'Message destinations' },
-  { value: 'PHONE_CALL', label: 'Calls' },
+  { value: 'WEBSITE', label: 'Website', group: 'Single' },
+  { value: 'APP', label: 'App', group: 'Single' },
+  { value: 'MESSENGER', label: 'Message destinations', group: 'Single' },
+  { value: 'PHONE_CALL', label: 'Calls', group: 'Single' },
+  { value: 'WEBSITE_AND_PHONE_CALL', label: 'Website and calls', group: 'Multiple' },
 ]
+
+const KNOWN_DESTINATION_VALUES: ReadonlySet<string> = new Set(
+  DESTINATION_TYPE_OPTIONS.map((o) => o.value),
+)
+
+export function isKnownDestination(value: string): boolean {
+  return value === '' || value === 'UNDEFINED' || KNOWN_DESTINATION_VALUES.has(value)
+}
 
 export const CUSTOM_EVENT_OPTIONS: readonly ConversionOption[] = [
   { value: 'PURCHASE', label: 'Purchase' },
