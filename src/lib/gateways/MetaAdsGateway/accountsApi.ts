@@ -183,7 +183,9 @@ async function postWithRetry<T extends { error?: { code: number; is_transient?: 
       }
     }
     if (i < attempts - 1) {
-      await new Promise((resolve) => { setTimeout(resolve, 600 * (i + 1)) })
+      await new Promise((resolve) => {
+        setTimeout(resolve, 600 * (i + 1))
+      })
     }
   }
   throw lastErr instanceof Error ? lastErr : new Error('Meta API failed after retries')
@@ -193,11 +195,31 @@ export async function duplicateAdSet(
   token: string,
   adSetId: string,
   newName: string,
+  status: 'PAUSED' | 'ACTIVE' = 'PAUSED',
+  extraUpdateFields?: URLSearchParams,
 ): Promise<{ adSetId: string }> {
   const copyBody = new URLSearchParams({
     status_option: 'PAUSED',
     access_token: token,
   })
+  // Move start_time/end_time from update payload to /copies body — Meta locks
+  // start_time on the copy if it inherits from a source that already started.
+  if (extraUpdateFields) {
+    const inheritedStart = extraUpdateFields.get('start_time')
+    if (inheritedStart) {
+      copyBody.set('start_time', inheritedStart)
+      extraUpdateFields.delete('start_time')
+    }
+    const inheritedEnd = extraUpdateFields.get('end_time')
+    if (inheritedEnd) {
+      copyBody.set('end_time', inheritedEnd)
+      extraUpdateFields.delete('end_time')
+    }
+  }
+
+  // eslint-disable-next-line no-console
+  console.log('[duplicateAdSet COPY PAYLOAD]', Array.from(copyBody.entries()).filter(([k]) => k !== 'access_token'))
+
   const copyJson = await postWithRetry<CopyAdSetResponse>(`/${adSetId}/copies`, copyBody)
   if (copyJson.error) {
     throw new Error(`Meta API error ${copyJson.error.code}: ${copyJson.error.message}`)
@@ -207,11 +229,23 @@ export async function duplicateAdSet(
     throw new Error('Meta API did not return a copied ad set id')
   }
 
-  const renameBody = new URLSearchParams({
+  const updateBody = new URLSearchParams({
     name: newName,
     access_token: token,
   })
-  const renameJson = await postWithRetry<UpdateAdSetResponse>(`/${newId}`, renameBody)
+  if (status === 'ACTIVE') {
+    updateBody.set('status', 'ACTIVE')
+  }
+  if (extraUpdateFields) {
+    extraUpdateFields.forEach((value, key) => {
+      updateBody.set(key, value)
+    })
+  }
+
+  // eslint-disable-next-line no-console
+  console.log('[duplicateAdSet UPDATE PAYLOAD]', Array.from(updateBody.entries()).filter(([k]) => k !== 'access_token'))
+
+  const renameJson = await postWithRetry<UpdateAdSetResponse>(`/${newId}`, updateBody)
   if (renameJson.error) {
     throw new Error(`Meta API error ${renameJson.error.code}: ${renameJson.error.message}`)
   }

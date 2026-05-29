@@ -223,7 +223,7 @@ function buildComponents(mode: Mode): ThemeOptions['components'] {
             padding: '10px 32px 10px 12px',
             minHeight: 0,
           },
-          // Density: dialog input (DuplicateAdSetDialog) — opt in with className="density-dialog"
+          // Density: dialog input (AdSetEditor) — opt in with className="density-dialog"
           '&.density-dialog .MuiOutlinedInput-root': {
             minHeight: 44,
             fontSize: 14,

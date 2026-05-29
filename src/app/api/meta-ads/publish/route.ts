@@ -4,6 +4,7 @@ import {
   createAd,
   createAdCreative,
   CTA_TYPES,
+  fetchInstagramAccountsForPage,
   type CtaType,
   type PublishAdResult,
 } from '@/lib/gateways/MetaAdsGateway'
@@ -24,6 +25,7 @@ interface PublishRequestBody {
   readonly ctaType?: string
   readonly adName?: string
   readonly instagramActorId?: string
+  readonly autoResolveInstagram?: boolean
   readonly imageHash?: string
   readonly videoId?: string
   readonly thumbnailHash?: string
@@ -46,7 +48,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   const {
     adSetId, pageId, headline, bodyText, description, destinationUrl, ctaType, adName,
-    instagramActorId, imageHash, videoId, thumbnailHash,
+    instagramActorId, autoResolveInstagram, imageHash, videoId, thumbnailHash,
   } = body
 
   if (
@@ -77,6 +79,16 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     )
   }
 
+  let resolvedInstagramActorId: string | undefined = instagramActorId || undefined
+  if (!resolvedInstagramActorId && autoResolveInstagram === true) {
+    try {
+      const accounts = await fetchInstagramAccountsForPage(resolved.token, pageId)
+      resolvedInstagramActorId = accounts[0]?.id
+    } catch {
+      resolvedInstagramActorId = undefined
+    }
+  }
+
   let creativeId: string
   try {
     const creative = await createAdCreative(resolved.token, {
@@ -87,7 +99,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       destinationUrl,
       ctaType,
       pageId,
-      instagramActorId: instagramActorId || undefined,
+      instagramActorId: resolvedInstagramActorId,
       imageHash: hasImage ? imageHash : undefined,
       videoId: hasVideo ? videoId : undefined,
       thumbnailHash: hasThumbnail ? thumbnailHash : undefined,

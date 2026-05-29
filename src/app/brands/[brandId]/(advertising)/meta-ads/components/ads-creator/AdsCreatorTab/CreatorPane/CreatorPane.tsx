@@ -14,6 +14,7 @@ import CampaignStep from '../CampaignStep/CampaignStep'
 import ProfilesStep from '../ProfilesStep/ProfilesStep'
 import FilesStep from '../FilesStep/FilesStep'
 import CopyStep from '../CopyStep/CopyStep'
+import CrossPublishInfo from '../CrossPublishInfo/CrossPublishInfo'
 import PreviewDialog from '../PreviewDialog/PreviewDialog'
 import PublishBar from '../PublishBar/PublishBar'
 import QueueLauncher from '../QueueLauncher/QueueLauncher'
@@ -67,16 +68,17 @@ export default memo(function CreatorPane({
     allowedAccountIds,
     accountId: targeting.accountId,
     campaignId: targeting.campaignId,
-    pageId: targeting.pageId,
+    pageIds: targeting.pageIds,
     campaignStatus,
     adSetStatus,
   })
 
+  const isSinglePage = targeting.pageIds.length === 1
   const completion = useMemo<Completion>(() => ({
     account: targeting.accountId !== '',
     campaign: targeting.campaignId !== '' && targeting.adSetId !== '',
-    profiles: targeting.pageId !== ''
-      && (data.instagramAccounts.length === 0 || targeting.instagramId !== ''),
+    profiles: targeting.pageIds.length > 0
+      && (!isSinglePage || data.instagramAccounts.length === 0 || targeting.instagramId !== ''),
     files: files.length > 0,
     copy: copy.name !== ''
       && copy.headlines[0] !== ''
@@ -86,8 +88,9 @@ export default memo(function CreatorPane({
     targeting.accountId,
     targeting.campaignId,
     targeting.adSetId,
-    targeting.pageId,
+    targeting.pageIds,
     targeting.instagramId,
+    isSinglePage,
     data.instagramAccounts.length,
     files.length,
     copy.name,
@@ -136,9 +139,10 @@ export default memo(function CreatorPane({
   }, [])
 
   const [previewOpen, setPreviewOpen] = useState(false)
+  const previewPageId = targeting.pageIds[0] ?? ''
   const selectedPage = useMemo(
-    () => data.pages.find((p) => p.id === targeting.pageId) ?? null,
-    [data.pages, targeting.pageId],
+    () => data.pages.find((p) => p.id === previewPageId) ?? null,
+    [data.pages, previewPageId],
   )
 
   return (
@@ -194,6 +198,7 @@ export default memo(function CreatorPane({
             onCampaignStatusChange={setCampaignStatus}
             adSetStatus={adSetStatus}
             onAdSetStatusChange={setAdSetStatus}
+            refetchAdSets={data.refetchAdSets}
           />
         </StepAccordion>
 
@@ -211,6 +216,8 @@ export default memo(function CreatorPane({
             onChange={onTargetingChange}
           />
         </StepAccordion>
+
+        <CrossPublishInfo pagesCount={targeting.pageIds.length} filesCount={files.length} />
 
         <StepAccordion
           index={4}
@@ -234,7 +241,12 @@ export default memo(function CreatorPane({
       </Box>
 
       <Box className={styles.footer}>
-        <PublishBar filesCount={files.length} canSubmit={canSubmit} onSubmit={onSubmit} />
+        <PublishBar
+          filesCount={files.length}
+          canSubmit={canSubmit}
+          onSubmit={onSubmit}
+          jobs={jobs}
+        />
       </Box>
 
       <PreviewDialog

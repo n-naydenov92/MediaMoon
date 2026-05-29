@@ -1,0 +1,177 @@
+.root {
+  display: flex;
+  flex-direction: column;
+}
+
+.paper {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  overflow: hidden;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  width: max-content;
+  font-size: 13px;
+}
+
+.body :global(.rdp-root) {
+  font-size: 13px;
+
+  --rdp-accent-color: var(--accent);
+  --rdp-accent-background-color: var(--accent-soft);
+  --rdp-day-height: 32px;
+  --rdp-day-width: 32px;
+  --rdp-day_button-height: 28px;
+  --rdp-day_button-width: 28px;
+  --rdp-day_button-border-radius: 6px;
+  --rdp-selected-border: 0;
+  --rdp-today-color: var(--text-primary);
+  --rdp-outside-opacity: 0.4;
+  --rdp-disabled-opacity: 0.3;
+  --rdp-weekday-text-transform: none;
+  --rdp-weekday-opacity: 1;
+  --rdp-nav_button-height: 28px;
+  --rdp-nav_button-width: 28px;
+}
+
+.body :global(.rdp-selected .rdp-day_button) {
+  background: var(--accent);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.body :global(.rdp-selected .rdp-day_button:hover) {
+  background: var(--accent-hover);
+  color: #ffffff;
+}
+
+.body :global(.rdp-today:not(.rdp-selected) .rdp-day_button) {
+  outline: 1px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.body :global(.rdp-month_caption) {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  padding: 4px 0 8px;
+  height: auto;
+}
+
+.body :global(.rdp-nav) {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+}
+
+.body :global(.rdp-button_previous),
+.body :global(.rdp-button_next) {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--hairline);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 80ms ease, color 80ms ease, border-color 80ms ease;
+}
+
+.body :global(.rdp-button_previous:hover),
+.body :global(.rdp-button_next:hover) {
+  background: var(--surface-2);
+  border-color: var(--hairline-strong);
+  color: var(--text-primary);
+}
+
+.body :global(.rdp-button_previous:disabled),
+.body :global(.rdp-button_next:disabled) {
+  opacity: 0.4;
+  cursor: default;
+  background: transparent;
+}
+
+.body :global(.rdp-chevron) {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}
+
+.body :global(.rdp-weekday) {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: none;
+  padding: 4px 0;
+  height: auto;
+}
+
+.body :global(.rdp-day) {
+  width: 32px;
+  height: 32px;
+  font-size: 12px;
+  padding: 0;
+}
+
+.body :global(.rdp-day_button) {
+  width: 28px;
+  height: 28px;
+  font-size: 12px;
+  border-radius: 6px;
+}
+
+.body :global(.rdp-day:not(.rdp-selected) .rdp-day_button:hover) {
+  background: var(--surface-2);
+}
+
+.body :global(.rdp-today .rdp-day_button) {
+  font-weight: 700;
+}
+
+.body :global(.rdp-outside) {
+  opacity: 0.4;
+}
+
+.timeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 8px;
+  border-top: 1px solid var(--hairline);
+}
+
+.timeLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.01em;
+}
+
+.timeInputs {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.timeInputs .MuiOutlinedInput-root {
+  width: 60px;
+}
+
+.timeSep {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}

@@ -1,0 +1,33 @@
+.root {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  margin: 0 2px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface-1));
+  border: 1px solid color-mix(in srgb, var(--accent) 16%, transparent);
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.icon {
+  flex-shrink: 0;
+  color: var(--accent);
+}
+
+.text {
+  display: inline;
+  line-height: 1.4;
+}
+
+.formula {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.total {
+  font-weight: 700;
+  color: var(--accent);
+}

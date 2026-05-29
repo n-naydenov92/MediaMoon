@@ -1,0 +1,165 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.presets {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.presetsLabel {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-right: 4px;
+}
+
+.presetChip.presetChip {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  background: transparent;
+}
+
+.presetChip.presetChip:hover {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  border-color: var(--accent);
+}
+
+.presetChip.presetChip :global(.MuiChip-icon) {
+  color: var(--accent);
+  font-size: 14px;
+}
+
+.chip {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 12px;
+}
+
+.paper {
+  margin-top: 6px;
+  background: var(--bg-surface);
+  border: 1px solid var(--hairline-strong);
+  border-radius: 12px;
+  color: var(--text-primary);
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--text-primary) 8%, transparent),
+    0 16px 40px rgba(0, 0, 0, 0.18),
+    0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.tabsWrap {
+  border-bottom: 1px solid var(--hairline);
+  background: var(--bg-surface);
+}
+
+.tabs :global(.MuiTabs-indicator) {
+  background: var(--accent);
+  height: 2px;
+}
+
+.tab.tab {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: none;
+  color: var(--text-secondary);
+  letter-spacing: 0;
+  min-height: 36px;
+  min-width: auto;
+  padding: 8px 12px;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.tab.tab:hover {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  color: var(--text-primary);
+}
+
+.tab.tab:global(.Mui-selected) {
+  color: var(--accent);
+}
+
+.tabs :global(.MuiTabs-scrollButtons) {
+  color: var(--text-secondary);
+  width: 28px;
+}
+
+.tabs :global(.MuiTabs-scrollButtons.Mui-disabled) {
+  opacity: 0.25;
+}
+
+.listbox {
+  padding: 4px;
+  max-height: 320px;
+}
+
+.group {
+  padding: 0;
+  list-style: none;
+}
+
+.groupHeader {
+  padding: 10px 12px 6px;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--hairline-strong);
+  margin-bottom: 4px;
+}
+
+.groupList {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.listbox .option.option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 34px;
+  padding: 6px 12px;
+  margin: 0;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 100ms ease;
+}
+
+.listbox .option.option:hover,
+.listbox .option.option:global(.Mui-focused) {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.optionCode {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  min-width: 22px;
+  font-variant-numeric: tabular-nums;
+}
+
+.optionName {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

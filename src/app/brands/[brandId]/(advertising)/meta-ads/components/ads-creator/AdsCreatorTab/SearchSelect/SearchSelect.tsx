@@ -4,9 +4,9 @@ import { memo, type ReactNode } from 'react'
 import Autocomplete from '@mui/material/Autocomplete'
 import Box from '@mui/material/Box'
 import TextField from '@mui/material/TextField'
+import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import CheckIcon from '@mui/icons-material/Check'
-import TruncatedLabel from './TruncatedLabel/TruncatedLabel'
 import styles from './SearchSelect.module.css'
 
 export type OptionStatus = 'active' | 'paused'
@@ -23,6 +23,7 @@ interface Props<T> {
   readonly getOptionSecondary?: (option: T) => string
   readonly getOptionStatus?: (option: T) => OptionStatus
   readonly getOptionIcon?: (option: T) => ReactNode
+  readonly renderRowAction?: (option: T) => ReactNode
   readonly noOptionsText?: string
 }
 
@@ -38,12 +39,13 @@ function SearchSelectInner<T>({
   getOptionSecondary,
   getOptionStatus,
   getOptionIcon,
+  renderRowAction,
   noOptionsText = 'No matches.',
 }: Props<T>): JSX.Element {
   const triggerIcon: ReactNode = value && getOptionIcon ? getOptionIcon(value) : leadingIcon
   return (
     <Autocomplete<T>
-      size="medium"
+      size="small"
       value={value}
       options={[...options]}
       disabled={disabled}
@@ -87,22 +89,23 @@ function SearchSelectInner<T>({
       )}
       renderOption={(optionProps, option, { selected }) => {
         const { key: _ignored, ...rest } = optionProps as React.HTMLAttributes<HTMLLIElement> & { key?: string }
+        const label = getOptionLabel(option)
+        const secondary = getOptionSecondary ? getOptionSecondary(option) : null
+        const tooltipText = secondary ? `${label} ${secondary}` : label
+        const icon: ReactNode = getOptionIcon ? getOptionIcon(option) : leadingIcon
         return (
           <Box
-            component="li"
             key={getOptionId(option)}
+            component="li"
             {...rest}
             className={styles.option}
             data-selected={selected ? 'true' : 'false'}
           >
-            {(() => {
-              const icon: ReactNode = getOptionIcon ? getOptionIcon(option) : leadingIcon
-              return icon ? (
-                <Box component="span" className={styles.optionIcon} aria-hidden>
-                  {icon}
-                </Box>
-              ) : null
-            })()}
+            {icon ? (
+              <Box component="span" className={styles.optionIcon} aria-hidden>
+                {icon}
+              </Box>
+            ) : null}
             {getOptionStatus && (
               <Box
                 component="span"
@@ -111,11 +114,28 @@ function SearchSelectInner<T>({
                 aria-hidden
               />
             )}
-            <TruncatedLabel label={getOptionLabel(option)} className={styles.optionName} />
-            {getOptionSecondary && (
-              <Typography component="span" variant="inherit" className={styles.optionSecondary}>
-                {getOptionSecondary(option)}
+            <Tooltip title={tooltipText} placement="top" disableInteractive enterDelay={400}>
+              <Typography component="span" variant="inherit" className={styles.optionName}>
+                {label}
               </Typography>
+            </Tooltip>
+            {secondary && (
+              <Typography component="span" variant="inherit" className={styles.optionSecondary}>
+                {secondary}
+              </Typography>
+            )}
+            {renderRowAction && (
+              <Box
+                component="span"
+                className={styles.optionAction}
+                onMouseDown={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {renderRowAction(option)}
+              </Box>
             )}
             {selected && <CheckIcon className={styles.checkIconTrailing} fontSize="inherit" />}
           </Box>

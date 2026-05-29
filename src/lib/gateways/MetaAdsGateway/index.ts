@@ -3,8 +3,17 @@ export type {
   AdCreativeParams,
   AdInsightsFilter,
   AdSet,
+  AdSetDetail,
   AdWithInsights,
   AccountInsights,
+  AttributionEventType,
+  AttributionWindow,
+  BudgetType,
+  DeviceMode,
+  PlacementSelection,
+  Gender,
+  Pixel,
+  TargetingBasics,
   Campaign,
   CtaType,
   InsightsDailyPoint,
@@ -27,6 +36,8 @@ export {
 } from './accountsApi'
 
 export type { StatusFilter } from './accountsApi'
+
+export { fetchAdSet, fetchPixels } from './targetingApi'
 
 export { fetchAccountInsights } from './insightsApi'
 

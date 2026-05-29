@@ -1,0 +1,144 @@
+.paper {
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.progress {
+  flex-shrink: 0;
+  height: 3px;
+}
+
+.header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 24px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-strong);
+}
+
+.headerTitleWrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.headerIcon {
+  font-size: 20px;
+  color: var(--accent);
+}
+
+.headerTitle {
+  margin: 0;
+  font-family: var(--font-syne), system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+.closeButton {
+  color: var(--text-secondary);
+  border-radius: 8px;
+}
+
+.closeButton:hover {
+  background: var(--surface-2);
+  color: var(--text-primary);
+}
+
+.body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px 24px;
+  background: var(--surface-1);
+}
+
+.sectionCard {
+  background: var(--bg-surface);
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.errorBox {
+  padding: 10px 12px;
+  background: color-mix(in srgb, #ef4444 10%, transparent);
+  border: 1px solid color-mix(in srgb, #ef4444 28%, transparent);
+  border-radius: 8px;
+}
+
+.errorText {
+  margin: 0;
+  font-size: 12px;
+  color: #b91c1c;
+  line-height: 1.4;
+}
+
+.footer {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 14px 24px;
+  background: var(--surface-1);
+  border-top: 1px solid var(--border-strong);
+}
+
+.secondaryButton {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: none;
+  padding: 6px 14px;
+  border-radius: 8px;
+  height: 36px;
+}
+
+.secondaryButton:hover {
+  background: var(--surface-2);
+  color: var(--text-primary);
+}
+
+.primaryButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+  background: var(--accent);
+  text-transform: none;
+  padding: 6px 16px;
+  border-radius: 8px;
+  height: 36px;
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.primaryButton:disabled {
+  background: var(--surface-3);
+  color: var(--text-muted);
+}

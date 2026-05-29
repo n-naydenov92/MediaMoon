@@ -7,6 +7,7 @@ export interface PublishPayload {
   readonly adSetId: string
   readonly pageId: string
   readonly instagramId: string
+  readonly autoResolveInstagram: boolean
   readonly copy: {
     readonly name: string
     readonly headline: string
@@ -146,6 +147,7 @@ export async function publishAd(
       ctaType: payload.copy.cta,
       adName: payload.copy.name,
       instagramActorId: payload.instagramId || undefined,
+      autoResolveInstagram: payload.autoResolveInstagram,
       imageHash: media.imageHash,
       videoId: media.videoId,
       thumbnailHash: media.thumbnailHash,

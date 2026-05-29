@@ -1,0 +1,47 @@
+.group {
+  background: var(--surface-1);
+  border-radius: 8px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.fullWidth {
+  display: flex;
+  width: 100%;
+}
+
+.fullWidth .button {
+  flex: 1 1 0;
+}
+
+.compact {
+  display: inline-flex;
+  width: max-content;
+  align-self: flex-start;
+}
+
+.button {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: none;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  color: var(--text-secondary);
+}
+
+.button:hover {
+  background: var(--surface-2);
+  color: var(--text-primary);
+}
+
+.button.button:global(.Mui-selected) {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.button.button:global(.Mui-selected):hover {
+  background: var(--accent-hover);
+  color: #ffffff;
+}

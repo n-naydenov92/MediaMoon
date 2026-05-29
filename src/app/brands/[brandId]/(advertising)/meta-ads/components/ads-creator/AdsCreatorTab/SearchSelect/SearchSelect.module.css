@@ -22,20 +22,20 @@
 }
 
 .menuList {
-  padding: 6px;
+  padding: 4px;
   max-height: 320px;
 }
 
 .menuList .option.option {
   display: flex;
   align-items: center;
-  gap: 10px;
-  min-height: 44px;
-  padding: 10px 14px;
-  margin: 2px 0;
-  border-radius: 8px;
+  gap: 8px;
+  min-height: 36px;
+  padding: 6px 12px;
+  margin: 1px 0;
+  border-radius: 6px;
   font-family: var(--font-dm-sans), system-ui, sans-serif;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--text-primary);
   cursor: pointer;
@@ -81,23 +81,43 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  flex-shrink: 1;
+  flex: 0 1 auto;
   min-width: 0;
 }
 
 .optionSecondary {
+  font-weight: 500;
   font-size: 12px;
-  font-weight: 400;
   color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.optionAction {
+  display: inline-flex;
+  align-items: center;
   flex-shrink: 0;
-  margin-left: 2px;
+  margin-left: auto;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease;
+}
+
+.menuList .option.option:hover .optionAction,
+.menuList .option.option:global(.Mui-focused) .optionAction {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .checkIconTrailing {
-  margin-left: auto;
-  font-size: 20px;
+  font-size: 18px;
   color: var(--accent);
   flex-shrink: 0;
+  margin-left: 6px;
 }
 
 .empty {

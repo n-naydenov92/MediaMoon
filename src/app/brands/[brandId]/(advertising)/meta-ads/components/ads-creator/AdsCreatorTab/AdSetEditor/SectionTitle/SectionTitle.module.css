@@ -1,0 +1,25 @@
+.root {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.iconWrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  flex-shrink: 0;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.text.text {
+  font-family: var(--font-syne), system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}

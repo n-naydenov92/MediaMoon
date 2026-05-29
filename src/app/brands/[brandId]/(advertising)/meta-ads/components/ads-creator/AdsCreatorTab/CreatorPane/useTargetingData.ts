@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import type { BrandId } from '@/config/brands'
 import type {
   AdAccount,
@@ -15,7 +15,7 @@ export interface TargetingValue {
   readonly accountId: string
   readonly campaignId: string
   readonly adSetId: string
-  readonly pageId: string
+  readonly pageIds: readonly string[]
   readonly instagramId: string
 }
 
@@ -25,6 +25,7 @@ export interface TargetingData {
   readonly adSets: readonly AdSet[]
   readonly pages: readonly Page[]
   readonly instagramAccounts: readonly InstagramAccount[]
+  readonly refetchAdSets: () => void
 }
 
 interface Input {
@@ -32,7 +33,7 @@ interface Input {
   readonly allowedAccountIds: readonly string[]
   readonly accountId: string
   readonly campaignId: string
-  readonly pageId: string
+  readonly pageIds: readonly string[]
   readonly campaignStatus: StatusFilter
   readonly adSetStatus: StatusFilter
 }
@@ -42,15 +43,18 @@ export function useTargetingData({
   allowedAccountIds,
   accountId,
   campaignId,
-  pageId,
+  pageIds,
   campaignStatus,
   adSetStatus,
 }: Input): TargetingData {
+  const singlePageId = pageIds.length === 1 ? pageIds[0] : ''
   const [accounts, setAccounts] = useState<readonly AdAccount[]>([])
   const [campaigns, setCampaigns] = useState<readonly Campaign[]>([])
   const [adSets, setAdSets] = useState<readonly AdSet[]>([])
   const [pages, setPages] = useState<readonly Page[]>([])
   const [instagramAccounts, setInstagramAccounts] = useState<readonly InstagramAccount[]>([])
+  const [adSetsRefetchKey, setAdSetsRefetchKey] = useState(0)
+  const refetchAdSets = useCallback(() => setAdSetsRefetchKey((k) => k + 1), [])
 
   useEffect(() => {
     const ctrl = new AbortController()
@@ -113,7 +117,7 @@ export function useTargetingData({
   }, [accountId, campaignStatus])
 
   useEffect(() => {
-    if (!accountId || !pageId) {
+    if (!accountId || !singlePageId) {
       setInstagramAccounts([])
       return
     }
@@ -121,7 +125,7 @@ export function useTargetingData({
     void (async () => {
       try {
         const response = await fetch(
-          `/api/meta-ads/instagram-accounts?accountId=${accountId}&pageId=${pageId}`,
+          `/api/meta-ads/instagram-accounts?accountId=${accountId}&pageId=${singlePageId}`,
           { signal: ctrl.signal },
         )
         if (!response.ok) {
@@ -141,7 +145,7 @@ export function useTargetingData({
       }
     })()
     return () => ctrl.abort()
-  }, [accountId, pageId])
+  }, [accountId, singlePageId])
 
   useEffect(() => {
     if (!accountId || !campaignId) {
@@ -170,7 +174,7 @@ export function useTargetingData({
       }
     })()
     return () => ctrl.abort()
-  }, [accountId, campaignId, adSetStatus])
+  }, [accountId, campaignId, adSetStatus, adSetsRefetchKey])
 
-  return { accounts, campaigns, adSets, pages, instagramAccounts }
+  return { accounts, campaigns, adSets, pages, instagramAccounts, refetchAdSets }
 }

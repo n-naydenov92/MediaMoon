@@ -1,10 +1,15 @@
 'use client'
 
-import { memo, useMemo } from 'react'
+import { memo, useCallback, useMemo, useState, type ReactNode } from 'react'
+import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
+import IconButton from '@mui/material/IconButton'
+import Snackbar from '@mui/material/Snackbar'
+import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import CampaignOutlinedIcon from '@mui/icons-material/CampaignOutlined'
 import AdsClickOutlinedIcon from '@mui/icons-material/AdsClickOutlined'
+import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import type {
   AdSet,
   Campaign,
@@ -12,9 +17,16 @@ import type {
 } from '@/lib/gateways/MetaAdsGateway'
 import SearchSelect, { type OptionStatus } from '../SearchSelect/SearchSelect'
 import StatusFilterPills from '../StatusFilterPills/StatusFilterPills'
-import DuplicateAdSetTrigger from '../DuplicateAdSetTrigger/DuplicateAdSetTrigger'
+import AdSetEditor from '../AdSetEditor/AdSetEditor'
 import type { TargetingValue } from '../CreatorPane/useTargetingData'
 import styles from './CampaignStep.module.css'
+
+type DuplicateStatus = 'PAUSED' | 'ACTIVE'
+
+interface SuccessToast {
+  readonly message: string
+  readonly severity: 'success' | 'warning'
+}
 
 interface Props {
   readonly campaigns: readonly Campaign[]
@@ -25,6 +37,7 @@ interface Props {
   readonly onCampaignStatusChange: (next: StatusFilter) => void
   readonly adSetStatus: StatusFilter
   readonly onAdSetStatusChange: (next: StatusFilter) => void
+  readonly refetchAdSets: () => void
 }
 
 function effectiveToOptionStatus(effective: string): OptionStatus {
@@ -40,6 +53,7 @@ export default memo(function CampaignStep({
   onCampaignStatusChange,
   adSetStatus,
   onAdSetStatusChange,
+  refetchAdSets,
 }: Props): JSX.Element {
   const selectedCampaign = useMemo(
     () => campaigns.find((c) => c.id === value.campaignId) ?? null,
@@ -50,6 +64,52 @@ export default memo(function CampaignStep({
     () => adSets.find((a) => a.id === value.adSetId) ?? null,
     [adSets, value.adSetId],
   )
+
+  const [duplicateSource, setDuplicateSource] = useState<AdSet | null>(null)
+  const closeDuplicateDialog = useCallback(() => setDuplicateSource(null), [])
+  const [toast, setToast] = useState<SuccessToast | null>(null)
+  const closeToast = useCallback(() => setToast(null), [])
+
+  const openDuplicate = useCallback((adSet: AdSet) => {
+    setDuplicateSource(adSet)
+    if (typeof document !== 'undefined') {
+      const active = document.activeElement
+      if (active instanceof HTMLElement) {
+        active.blur()
+      }
+    }
+  }, [])
+
+  const handleDuplicateSuccess = useCallback((
+    newAdSetId: string,
+    newAdSetName: string,
+    status: DuplicateStatus,
+  ) => {
+    refetchAdSets()
+    onChange({ ...value, adSetId: newAdSetId })
+    const trimmedName = newAdSetName.length > 40
+      ? `${newAdSetName.slice(0, 40).trimEnd()}…`
+      : newAdSetName
+    setToast({
+      message: status === 'ACTIVE'
+        ? `Created "${trimmedName}" — LIVE`
+        : `Created "${trimmedName}" — PAUSED`,
+      severity: 'success',
+    })
+  }, [onChange, refetchAdSets, value])
+
+  const renderAdSetRowAction = useCallback((adSet: AdSet): ReactNode => (
+    <Tooltip title="Duplicate" placement="top" disableInteractive enterDelay={400}>
+      <IconButton
+        size="small"
+        aria-label={`Duplicate ${adSet.name}`}
+        className={styles.duplicateButton}
+        onClick={() => openDuplicate(adSet)}
+      >
+        <ContentCopyIcon fontSize="small" />
+      </IconButton>
+    </Tooltip>
+  ), [openDuplicate])
 
   return (
     <Box className={styles.root}>
@@ -95,18 +155,35 @@ export default memo(function CampaignStep({
           getOptionId={(o) => o.id}
           getOptionLabel={(o) => o.name}
           getOptionStatus={(o) => effectiveToOptionStatus(o.effectiveStatus)}
+          renderRowAction={renderAdSetRowAction}
           noOptionsText="No ad sets match this search."
         />
-        <Box className={styles.adSetActions}>
-          <DuplicateAdSetTrigger
-            disabled={!value.adSetId}
-            accountId={value.accountId}
-            sourceAdSetId={value.adSetId}
-            sourceAdSetName={selectedAdSet?.name ?? ''}
-            sourceCampaignName={selectedCampaign?.name ?? ''}
-          />
-        </Box>
       </Box>
+
+      <AdSetEditor
+        open={duplicateSource !== null}
+        onClose={closeDuplicateDialog}
+        onSuccess={handleDuplicateSuccess}
+        accountId={value.accountId}
+        sourceAdSetId={duplicateSource?.id ?? ''}
+        sourceAdSetName={duplicateSource?.name ?? ''}
+        sourceCampaignName={selectedCampaign?.name ?? ''}
+      />
+
+      <Snackbar
+        open={toast !== null}
+        autoHideDuration={5000}
+        onClose={closeToast}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={closeToast}
+          severity={toast?.severity ?? 'success'}
+          variant="filled"
+        >
+          {toast?.message ?? ''}
+        </Alert>
+      </Snackbar>
     </Box>
   )
 })

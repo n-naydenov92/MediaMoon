@@ -1,8 +1,54 @@
 .root {
   display: flex;
+  flex-direction: column;
+  gap: 10px;
   width: 100%;
   padding: 4px 0;
   background: var(--bg-surface);
+}
+
+.progressBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  background: var(--surface-1);
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+}
+
+.progressLabelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.progressLabel {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.progressPercent {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.progressBar {
+  height: 6px;
+  border-radius: 4px;
+}
+
+.progressFailed {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 12px;
+  color: #b91c1c;
+  margin-top: 2px;
 }
 
 .button {

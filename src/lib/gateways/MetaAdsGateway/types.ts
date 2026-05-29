@@ -20,6 +20,71 @@ export interface AdSet {
   readonly effectiveStatus: string
 }
 
+export type BudgetType = 'DAILY' | 'LIFETIME'
+
+export type Gender = 'ALL' | 'MEN' | 'WOMEN'
+
+export interface TargetingBasics {
+  readonly ageMin: number
+  readonly ageMax: number
+  readonly gender: Gender
+  readonly countries: readonly string[]
+  readonly advantageAudience: boolean
+  readonly advantageAge: boolean
+  readonly advantageGender: boolean
+}
+
+export type AttributionEventType = 'CLICK_THROUGH' | 'VIEW_THROUGH' | 'ENGAGED_VIDEO_VIEW'
+
+export interface AttributionWindow {
+  readonly eventType: AttributionEventType
+  readonly windowDays: number
+}
+
+export type DeviceMode = 'ALL' | 'MOBILE' | 'DESKTOP'
+
+export interface PlacementSelection {
+  readonly mode: 'ADVANTAGE_PLUS' | 'MANUAL'
+  readonly deviceMode: DeviceMode
+  readonly publisherPlatforms: readonly string[]
+  readonly facebookPositions: readonly string[]
+  readonly instagramPositions: readonly string[]
+  readonly audienceNetworkPositions: readonly string[]
+  readonly messengerPositions: readonly string[]
+}
+
+export interface AdSetDetail {
+  readonly id: string
+  readonly name: string
+  readonly status: string
+  readonly effectiveStatus: string
+  readonly budgetType: BudgetType
+  readonly budgetMinorUnits: number
+  readonly startTime: string | null
+  readonly endTime: string | null
+  readonly accountId: string
+  readonly currency: string
+  readonly targeting: TargetingBasics
+  readonly rawTargeting: Readonly<Record<string, unknown>>
+  readonly isDynamicCreative: boolean
+  readonly dsaBeneficiary: string
+  readonly dsaPayor: string
+  readonly optimizationGoal: string
+  readonly bidStrategy: string
+  readonly bidAmountMinorUnits: number
+  readonly destinationType: string
+  readonly pixelId: string
+  readonly customEventType: string
+  readonly rawPromotedObject: Readonly<Record<string, unknown>>
+  readonly attributionSpec: readonly AttributionWindow[]
+  readonly placements: PlacementSelection
+}
+
+export interface Pixel {
+  readonly id: string
+  readonly name: string
+}
+
 export interface Page {
   readonly id: string
   readonly name: string

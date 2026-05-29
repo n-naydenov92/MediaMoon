@@ -25,7 +25,7 @@ const EMPTY_TARGETING: TargetingValue = {
   accountId: '',
   campaignId: '',
   adSetId: '',
-  pageId: '',
+  pageIds: [],
   instagramId: '',
 }
 
@@ -57,7 +57,7 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
     && targeting.accountId !== ''
     && targeting.campaignId !== ''
     && targeting.adSetId !== ''
-    && targeting.pageId !== ''
+    && targeting.pageIds.length > 0
     && copy.name !== ''
     && copy.headlines[0] !== ''
     && copy.primaryTexts[0] !== ''
@@ -72,22 +72,27 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
     if (!headline || !body) {
       return
     }
-    const payload = {
-      accountId: targeting.accountId,
-      adSetId: targeting.adSetId,
-      pageId: targeting.pageId,
-      instagramId: targeting.instagramId,
-      copy: {
-        name: copy.name,
-        headline,
-        body,
-        description: copy.description,
-        url: copy.url,
-        cta: copy.cta,
-      },
+    const isSinglePage = targeting.pageIds.length === 1
+    const copyBlock = {
+      name: copy.name,
+      headline,
+      body,
+      description: copy.description,
+      url: copy.url,
+      cta: copy.cta,
     }
-    for (const file of files) {
-      queue.enqueue(payload, file)
+    for (const pageId of targeting.pageIds) {
+      const payload = {
+        accountId: targeting.accountId,
+        adSetId: targeting.adSetId,
+        pageId,
+        instagramId: isSinglePage ? targeting.instagramId : '',
+        autoResolveInstagram: !isSinglePage,
+        copy: copyBlock,
+      }
+      for (const file of files) {
+        queue.enqueue(payload, file)
+      }
     }
     setFiles([])
   }, [canSubmit, copy, files, queue, targeting, targetMarket])

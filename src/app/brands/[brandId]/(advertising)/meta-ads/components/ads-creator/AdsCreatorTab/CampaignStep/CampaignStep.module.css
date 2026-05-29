@@ -26,8 +26,12 @@
   gap: 8px;
 }
 
-.adSetActions {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 8px;
+.duplicateButton.duplicateButton {
+  padding: 4px;
+  color: var(--text-muted);
+}
+
+.duplicateButton.duplicateButton:hover {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
 }
