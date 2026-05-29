@@ -23,9 +23,11 @@ import styles from './CampaignStep.module.css'
 
 type DuplicateStatus = 'PAUSED' | 'ACTIVE'
 
+// Long ad-set names overflow the Snackbar Alert pill at typical viewport widths.
+const TOAST_NAME_MAX_LENGTH = 40
+
 interface SuccessToast {
   readonly message: string
-  readonly severity: 'success' | 'warning'
 }
 
 interface Props {
@@ -72,6 +74,8 @@ export default memo(function CampaignStep({
 
   const openDuplicate = useCallback((adSet: AdSet) => {
     setDuplicateSource(adSet)
+    // Blur the trigger before MUI Dialog mounts — otherwise the focused element
+    // ends up inside an aria-hidden subtree and React logs a console warning.
     if (typeof document !== 'undefined') {
       const active = document.activeElement
       if (active instanceof HTMLElement) {
@@ -87,14 +91,13 @@ export default memo(function CampaignStep({
   ) => {
     refetchAdSets()
     onChange({ ...value, adSetId: newAdSetId })
-    const trimmedName = newAdSetName.length > 40
-      ? `${newAdSetName.slice(0, 40).trimEnd()}…`
+    const trimmedName = newAdSetName.length > TOAST_NAME_MAX_LENGTH
+      ? `${newAdSetName.slice(0, TOAST_NAME_MAX_LENGTH).trimEnd()}…`
       : newAdSetName
     setToast({
       message: status === 'ACTIVE'
         ? `Created "${trimmedName}" — LIVE`
         : `Created "${trimmedName}" — PAUSED`,
-      severity: 'success',
     })
   }, [onChange, refetchAdSets, value])
 
@@ -106,7 +109,7 @@ export default memo(function CampaignStep({
         className={styles.duplicateButton}
         onClick={() => openDuplicate(adSet)}
       >
-        <ContentCopyIcon fontSize="small" />
+        <ContentCopyIcon fontSize="inherit" />
       </IconButton>
     </Tooltip>
   ), [openDuplicate])
@@ -178,7 +181,7 @@ export default memo(function CampaignStep({
       >
         <Alert
           onClose={closeToast}
-          severity={toast?.severity ?? 'success'}
+          severity="success"
           variant="filled"
         >
           {toast?.message ?? ''}
