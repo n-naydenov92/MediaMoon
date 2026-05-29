@@ -83,7 +83,7 @@ function buildExtraUpdateFields(body: DuplicateRequestBody): URLSearchParams | u
     extra.set('attribution_spec', JSON.stringify(body.attributionSpec))
   }
 
-  return Array.from(extra.keys()).length > 0 ? extra : undefined
+  return extra.size > 0 ? extra : undefined
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse> {

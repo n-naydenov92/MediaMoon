@@ -4,6 +4,7 @@ import type {
   AttributionEventType,
   AttributionWindow,
   BudgetType,
+  CampaignBudget,
   DeviceMode,
   Gender,
   PlacementSelection,
@@ -19,6 +20,12 @@ interface GraphPixelRaw {
 interface GraphListResponse<T> {
   data: T[]
   error?: { code: number; message: string; type: string }
+}
+
+interface GraphCampaignBudgetRaw {
+  id?: string
+  daily_budget?: string
+  lifetime_budget?: string
 }
 
 interface GraphAdSetDetailRaw {
@@ -41,6 +48,7 @@ interface GraphAdSetDetailRaw {
   destination_type?: string
   promoted_object?: Record<string, unknown>
   attribution_spec?: readonly { event_type?: string; window_days?: number }[]
+  campaign?: GraphCampaignBudgetRaw
   error?: { code: number; message: string; type: string }
 }
 
@@ -51,7 +59,7 @@ interface GraphAccountCurrencyRaw {
 
 export async function fetchAdSet(token: string, adSetId: string): Promise<AdSetDetail> {
   const adSetUrl = buildUrl(`/${adSetId}`, token, {
-    fields: 'id,name,status,effective_status,daily_budget,lifetime_budget,start_time,end_time,account_id,targeting,is_dynamic_creative,dsa_beneficiary,dsa_payor,optimization_goal,bid_strategy,bid_amount,destination_type,promoted_object,attribution_spec',
+    fields: 'id,name,status,effective_status,daily_budget,lifetime_budget,start_time,end_time,account_id,targeting,is_dynamic_creative,dsa_beneficiary,dsa_payor,optimization_goal,bid_strategy,bid_amount,destination_type,promoted_object,attribution_spec,campaign{id,daily_budget,lifetime_budget}',
   })
   const adSetJson = await callGraphApi<GraphAdSetDetailRaw>(adSetUrl)
   if (adSetJson.error) {
@@ -181,12 +189,19 @@ function toAttributionSpec(
   for (const item of raw) {
     if (!item || typeof item.event_type !== 'string') continue
     if (typeof item.window_days !== 'number') continue
-    const matched = ATTRIBUTION_EVENT_TYPES.find((t) => t === item.event_type)
-    if (matched) {
-      out.push({ eventType: matched, windowDays: item.window_days })
-    }
+    if (!ATTRIBUTION_EVENT_TYPES.includes(item.event_type as AttributionEventType)) continue
+    out.push({ eventType: item.event_type as AttributionEventType, windowDays: item.window_days })
   }
   return out
+}
+
+function toCampaignBudget(campaign: GraphCampaignBudgetRaw | undefined): CampaignBudget | null {
+  if (!campaign) return null
+  const daily = campaign.daily_budget ? parseInt(campaign.daily_budget, 10) : 0
+  const lifetime = campaign.lifetime_budget ? parseInt(campaign.lifetime_budget, 10) : 0
+  if (daily === 0 && lifetime === 0) return null
+  if (lifetime > 0) return { type: 'LIFETIME', minorUnits: lifetime }
+  return { type: 'DAILY', minorUnits: daily }
 }
 
 function toAdSetDetail(raw: GraphAdSetDetailRaw, currency: string): AdSetDetail {
@@ -202,6 +217,7 @@ function toAdSetDetail(raw: GraphAdSetDetailRaw, currency: string): AdSetDetail 
     effectiveStatus: raw.effective_status,
     budgetType,
     budgetMinorUnits,
+    campaignBudget: toCampaignBudget(raw.campaign),
     startTime: raw.start_time ?? null,
     endTime: raw.end_time ?? null,
     accountId: raw.account_id ?? '',

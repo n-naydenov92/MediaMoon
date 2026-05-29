@@ -9,6 +9,7 @@ export type {
   AttributionEventType,
   AttributionWindow,
   BudgetType,
+  CampaignBudget,
   DeviceMode,
   PlacementSelection,
   Gender,

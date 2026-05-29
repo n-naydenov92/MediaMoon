@@ -1,4 +1,5 @@
-const GRAPH_API_BASE = 'https://graph.facebook.com/v21.0'
+const GRAPH_API_VERSION = process.env.META_GRAPH_VERSION ?? 'v21.0'
+const GRAPH_API_BASE = `https://graph.facebook.com/${GRAPH_API_VERSION}`
 const LIST_FETCH_TIMEOUT_MS = 30_000
 const UPLOAD_FETCH_TIMEOUT_MS = 120_000
 const RATE_LIMIT_ERROR_CODE = 17

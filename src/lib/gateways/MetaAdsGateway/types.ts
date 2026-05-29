@@ -22,6 +22,11 @@ export interface AdSet {
 
 export type BudgetType = 'DAILY' | 'LIFETIME'
 
+export interface CampaignBudget {
+  readonly type: BudgetType
+  readonly minorUnits: number
+}
+
 export type Gender = 'ALL' | 'MEN' | 'WOMEN'
 
 export interface TargetingBasics {
@@ -60,11 +65,18 @@ export interface AdSetDetail {
   readonly effectiveStatus: string
   readonly budgetType: BudgetType
   readonly budgetMinorUnits: number
+  /** Non-null when the parent campaign holds the budget (Campaign Budget Optimization).
+   *  In that case `budgetMinorUnits` will be 0 and budget edits are not applicable
+   *  at the ad-set level. */
+  readonly campaignBudget: CampaignBudget | null
   readonly startTime: string | null
   readonly endTime: string | null
   readonly accountId: string
   readonly currency: string
   readonly targeting: TargetingBasics
+  /** Raw Graph targeting JSON. Exposed so update flows can spread it to preserve
+   *  keys the gateway does not parse; do not read fields from here in UI code — use
+   *  `targeting` instead. */
   readonly rawTargeting: Readonly<Record<string, unknown>>
   readonly isDynamicCreative: boolean
   readonly dsaBeneficiary: string
@@ -75,6 +87,8 @@ export interface AdSetDetail {
   readonly destinationType: string
   readonly pixelId: string
   readonly customEventType: string
+  /** Raw Graph promoted_object JSON. Same intent as `rawTargeting` — used only to
+   *  preserve unparsed keys during update spread. */
   readonly rawPromotedObject: Readonly<Record<string, unknown>>
   readonly attributionSpec: readonly AttributionWindow[]
   readonly placements: PlacementSelection
