@@ -23,9 +23,14 @@
 
 .menuList {
   padding: 4px;
-  height: 320px;
   max-height: 320px;
   overflow-y: auto;
+}
+
+/* Applied alongside .menuList when collapsibleGroups is true so the popper
+   does not reposition when the user expands/collapses a group. */
+.menuListFixed {
+  min-height: 320px;
 }
 
 .group {

@@ -133,7 +133,9 @@ function SearchSelectInner<T>({
       renderGroup={getOptionGroup ? renderGroup : undefined}
       classes={{
         paper: styles.menuPaper,
-        listbox: styles.menuList,
+        listbox: collapsibleGroups
+          ? `${styles.menuList} ${styles.menuListFixed}`
+          : styles.menuList,
         option: styles.option,
       }}
       renderInput={(params) => (
