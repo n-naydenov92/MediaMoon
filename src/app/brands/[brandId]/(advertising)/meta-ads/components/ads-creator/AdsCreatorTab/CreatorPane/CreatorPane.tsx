@@ -14,7 +14,6 @@ import CampaignStep from '../CampaignStep/CampaignStep'
 import ProfilesStep from '../ProfilesStep/ProfilesStep'
 import FilesStep from '../FilesStep/FilesStep'
 import CopyStep from '../CopyStep/CopyStep'
-import CrossPublishInfo from '../CrossPublishInfo/CrossPublishInfo'
 import PreviewDialog from '../PreviewDialog/PreviewDialog'
 import PublishBar from '../PublishBar/PublishBar'
 import QueueLauncher from '../QueueLauncher/QueueLauncher'
@@ -217,8 +216,6 @@ export default memo(function CreatorPane({
           />
         </StepAccordion>
 
-        <CrossPublishInfo pagesCount={targeting.pageIds.length} filesCount={files.length} />
-
         <StepAccordion
           index={4}
           title="Files"
@@ -242,7 +239,7 @@ export default memo(function CreatorPane({
 
       <Box className={styles.footer}>
         <PublishBar
-          filesCount={files.length}
+          adsCount={targeting.pageIds.length * files.length}
           canSubmit={canSubmit}
           onSubmit={onSubmit}
           jobs={jobs}

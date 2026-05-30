@@ -10,7 +10,7 @@ import type { LaunchJob } from '../useLaunchQueue'
 import styles from './PublishBar.module.css'
 
 interface Props {
-  readonly filesCount: number
+  readonly adsCount: number
   readonly canSubmit: boolean
   readonly onSubmit: () => void
   readonly jobs: readonly LaunchJob[]
@@ -39,13 +39,13 @@ function computeStats(jobs: readonly LaunchJob[]): QueueStats {
 }
 
 export default memo(function PublishBar({
-  filesCount, canSubmit, onSubmit, jobs,
+  adsCount, canSubmit, onSubmit, jobs,
 }: Props): JSX.Element {
   const stats = useMemo(() => computeStats(jobs), [jobs])
   const isPublishing = stats.active > 0
-  const label = filesCount === 0
+  const label = adsCount === 0
     ? 'Publish ads'
-    : `Publish ${filesCount} ${filesCount === 1 ? 'ad' : 'ads'}`
+    : `Publish ${adsCount} ${adsCount === 1 ? 'ad' : 'ads'}`
 
   return (
     <Box className={styles.root}>
