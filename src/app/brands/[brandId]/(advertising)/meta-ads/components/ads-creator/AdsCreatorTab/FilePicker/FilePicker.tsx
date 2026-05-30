@@ -12,6 +12,7 @@ import {
 import Box from '@mui/material/Box'
 import ButtonBase from '@mui/material/ButtonBase'
 import IconButton from '@mui/material/IconButton'
+import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import CloseIcon from '@mui/icons-material/Close'
 import SearchIcon from '@mui/icons-material/Search'
@@ -206,18 +207,47 @@ export default function FilePicker({ files, onChange, disabled = false }: Props)
             <Box component="ul" className={styles.list}>
               {filteredPreviews.map(({ file, url, isVideo, index }) => (
                 <Box component="li" key={`${file.name}-${index}`} className={styles.row}>
-                  <Box className={styles.thumbWrap}>
-                    {isVideo ? (
-                      <>
-                        <Box component="video" src={url} className={styles.thumb} muted playsInline />
-                        <Box component="span" className={styles.videoBadge} aria-hidden>
-                          <PlayArrowRoundedIcon fontSize="inherit" />
-                        </Box>
-                      </>
-                    ) : (
-                      <Box component="img" src={url} alt={file.name} className={styles.thumb} />
+                  <Tooltip
+                    placement="right"
+                    enterDelay={250}
+                    leaveDelay={80}
+                    classes={{ tooltip: styles.previewTooltip }}
+                    title={(
+                      <Box className={styles.previewWrap}>
+                        {isVideo ? (
+                          <Box
+                            component="video"
+                            src={url}
+                            className={styles.preview}
+                            autoPlay
+                            muted
+                            loop
+                            playsInline
+                          />
+                        ) : (
+                          <Box
+                            component="img"
+                            src={url}
+                            alt={file.name}
+                            className={styles.preview}
+                          />
+                        )}
+                      </Box>
                     )}
-                  </Box>
+                  >
+                    <Box className={styles.thumbWrap}>
+                      {isVideo ? (
+                        <>
+                          <Box component="video" src={url} className={styles.thumb} muted playsInline />
+                          <Box component="span" className={styles.videoBadge} aria-hidden>
+                            <PlayArrowRoundedIcon fontSize="inherit" />
+                          </Box>
+                        </>
+                      ) : (
+                        <Box component="img" src={url} alt={file.name} className={styles.thumb} />
+                      )}
+                    </Box>
+                  </Tooltip>
                   <Box className={styles.info}>
                     <Box className={styles.nameRow}>
                       {isVideo ? (
