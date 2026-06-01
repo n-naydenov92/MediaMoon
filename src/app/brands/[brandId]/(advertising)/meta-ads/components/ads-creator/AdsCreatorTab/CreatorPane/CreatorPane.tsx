@@ -149,7 +149,7 @@ export default memo(function CreatorPane({
       <Box component="header" className={styles.header}>
         <Box className={styles.headerTitleWrap}>
           <Typography component="span" variant="inherit" className={styles.headerKicker}>Draft</Typography>
-          <Typography component="h2" variant="inherit" className={styles.headerTitle}>New ad batch</Typography>
+          <Typography component="h2" variant="inherit" className={styles.headerTitle}>Launch new ads</Typography>
         </Box>
         <Box className={styles.headerActions}>
           <Box
