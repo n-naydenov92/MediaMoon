@@ -7,6 +7,9 @@
   width: 100%;
   max-width: 1800px;
   margin: 0 auto;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
   font-family: var(--font-dm-sans), system-ui, sans-serif;
   color: var(--text-primary);
 }
@@ -22,6 +25,9 @@
     grid-template-columns: 1fr;
     gap: 16px;
     padding: 16px;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
   }
 }
 

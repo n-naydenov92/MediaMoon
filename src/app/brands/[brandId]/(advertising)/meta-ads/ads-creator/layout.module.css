@@ -1,0 +1,15 @@
+/* 56px = BrandTopbar height (see Topbar.module.css). Hardcoded because the topbar
+   sits outside this route segment, so a CSS var would need global scope. */
+.layout {
+  height: calc(100dvh - 56px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 899px) {
+  .layout {
+    height: auto;
+    overflow: visible;
+  }
+}

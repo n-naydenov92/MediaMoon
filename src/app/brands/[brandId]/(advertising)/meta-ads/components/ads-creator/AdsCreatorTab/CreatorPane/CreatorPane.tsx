@@ -169,7 +169,7 @@ export default memo(function CreatorPane({
         </Box>
       </Box>
 
-      <Box className={styles.steps}>
+      <Box className={styles.steps} tabIndex={0} aria-label="Ad creation steps">
         <StepAccordion
           index={1}
           title="Account"

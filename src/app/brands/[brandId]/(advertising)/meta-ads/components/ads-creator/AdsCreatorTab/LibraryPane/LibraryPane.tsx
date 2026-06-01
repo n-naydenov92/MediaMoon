@@ -8,7 +8,7 @@ import styles from './LibraryPane.module.css'
 
 export default memo(function LibraryPane(): JSX.Element {
   return (
-    <Box component="aside" className={styles.root} aria-label="Library — coming soon">
+    <Box component="aside" className={styles.root} tabIndex={0} aria-label="Creative library">
       <Box className={styles.card}>
         <Box className={styles.iconWrap} aria-hidden>
           <ConstructionIcon className={styles.icon} fontSize="inherit" />
