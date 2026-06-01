@@ -138,10 +138,9 @@ export default memo(function CreatorPane({
   }, [])
 
   const [previewOpen, setPreviewOpen] = useState(false)
-  const previewPageId = targeting.pageIds[0] ?? ''
-  const selectedPage = useMemo(
-    () => data.pages.find((p) => p.id === previewPageId) ?? null,
-    [data.pages, previewPageId],
+  const selectedPages = useMemo(
+    () => data.pages.filter((p) => targeting.pageIds.includes(p.id)),
+    [data.pages, targeting.pageIds],
   )
 
   return (
@@ -251,7 +250,7 @@ export default memo(function CreatorPane({
         onClose={() => setPreviewOpen(false)}
         copy={copy}
         files={files}
-        page={selectedPage}
+        pages={selectedPages}
       />
     </Box>
   )

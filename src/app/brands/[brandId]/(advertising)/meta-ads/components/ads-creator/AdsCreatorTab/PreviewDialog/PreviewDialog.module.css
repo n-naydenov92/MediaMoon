@@ -1,4 +1,8 @@
-.paper {
+.paper.paper {
+  display: flex;
+  flex-direction: column;
+  max-width: 440px;
+  max-height: 90dvh;
   background: var(--bg-surface);
   color: var(--text-primary);
   font-family: var(--font-dm-sans), system-ui, sans-serif;
@@ -47,6 +51,9 @@
 }
 
 .body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -54,41 +61,12 @@
   background: var(--bg-elevated);
 }
 
-.summary {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 12px 14px;
-  border: 1px solid var(--hairline);
-  border-radius: 10px;
-  background: var(--bg-surface);
-}
-
-.summaryRow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  color: var(--text-secondary);
-}
-
-.summaryLabel {
-  font-weight: 600;
-  color: var(--text-secondary);
-  min-width: 96px;
-}
-
-.summaryValue {
-  color: var(--text-primary);
-  font-weight: 500;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .feedCard {
   display: flex;
   flex-direction: column;
+  width: 100%;
+  max-width: 335px;
+  margin: 0 auto;
   background: var(--bg-surface);
   border: 1px solid var(--hairline);
   border-radius: 12px;
@@ -167,7 +145,7 @@
 .feedMedia {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
 }
 

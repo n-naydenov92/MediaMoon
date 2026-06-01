@@ -1,3 +1,5 @@
+import type { Page } from '@/lib/gateways/MetaAdsGateway'
+
 export interface FilePreview {
   readonly url: string
   readonly name: string
@@ -8,9 +10,11 @@ export interface Combo {
   readonly primary: string
   readonly headline: string
   readonly file: FilePreview
+  readonly page: Page | null
   readonly primaryIdx: number
   readonly headlineIdx: number
   readonly fileIdx: number
+  readonly pageIdx: number
 }
 
 export function domainOf(url: string): string {
@@ -29,22 +33,27 @@ export function initialOf(name: string): string {
 export function computeCombo(
   safeIndex: number,
   total: number,
+  pages: readonly Page[],
   filePreviews: readonly FilePreview[],
   filledHeadlines: readonly string[],
   filledPrimary: readonly string[],
 ): Combo | null {
   if (total === 0) return null
+  const pageCount = Math.max(1, pages.length)
   const fileCount = filePreviews.length
   const headlineCount = filledHeadlines.length
-  const fileIdx = safeIndex % fileCount
-  const headlineIdx = Math.floor(safeIndex / fileCount) % headlineCount
-  const primaryIdx = Math.floor(safeIndex / (fileCount * headlineCount))
+  const pageIdx = safeIndex % pageCount
+  const fileIdx = Math.floor(safeIndex / pageCount) % fileCount
+  const headlineIdx = Math.floor(safeIndex / (pageCount * fileCount)) % headlineCount
+  const primaryIdx = Math.floor(safeIndex / (pageCount * fileCount * headlineCount))
   return {
     primary: filledPrimary[primaryIdx]!,
     headline: filledHeadlines[headlineIdx]!,
     file: filePreviews[fileIdx]!,
+    page: pages[pageIdx] ?? null,
     primaryIdx,
     headlineIdx,
     fileIdx,
+    pageIdx,
   }
 }

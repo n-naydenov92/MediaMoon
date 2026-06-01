@@ -21,7 +21,7 @@ interface Props {
   readonly onClose: () => void
   readonly copy: CopyValue
   readonly files: readonly File[]
-  readonly page: Page | null
+  readonly pages: readonly Page[]
 }
 
 const CTA_LABELS: Record<CtaType, string> = {
@@ -35,7 +35,7 @@ export default memo(function PreviewDialog({
   onClose,
   copy,
   files,
-  page,
+  pages,
 }: Props): JSX.Element {
   const fullScreen = useMediaQuery('(max-width: 600px)')
   const [index, setIndex] = useState(0)
@@ -62,7 +62,8 @@ export default memo(function PreviewDialog({
     for (const p of filePreviews) URL.revokeObjectURL(p.url)
   }, [filePreviews])
 
-  const total = filledPrimary.length * filledHeadlines.length * filePreviews.length
+  const pageCount = Math.max(1, pages.length)
+  const total = pageCount * filePreviews.length * filledHeadlines.length * filledPrimary.length
 
   useEffect(() => {
     if (open) setIndex(0)
@@ -71,8 +72,8 @@ export default memo(function PreviewDialog({
   const safeIndex = total === 0 ? 0 : Math.min(index, total - 1)
 
   const combo = useMemo(
-    () => computeCombo(safeIndex, total, filePreviews, filledHeadlines, filledPrimary),
-    [total, safeIndex, filePreviews, filledHeadlines, filledPrimary],
+    () => computeCombo(safeIndex, total, pages, filePreviews, filledHeadlines, filledPrimary),
+    [total, safeIndex, pages, filePreviews, filledHeadlines, filledPrimary],
   )
 
   const handlePrev = (): void => {
@@ -82,15 +83,15 @@ export default memo(function PreviewDialog({
     setIndex((i) => Math.min(total - 1, i + 1))
   }
 
-  const pageName = page?.name ?? 'Your page'
-  const pageAvatar = page?.pictureUrl ?? null
+  const pageName = combo?.page?.name ?? 'Your page'
+  const pageAvatar = combo?.page?.pictureUrl ?? null
 
   return (
     <Dialog
       open={open}
       onClose={onClose}
       fullScreen={fullScreen}
-      maxWidth="sm"
+      maxWidth="xs"
       fullWidth
       aria-labelledby="ad-preview-title"
       classes={{ paper: styles.paper }}
@@ -115,37 +116,6 @@ export default memo(function PreviewDialog({
       <Box className={styles.body}>
         {combo ? (
           <>
-            <Box className={styles.summary}>
-              <Box className={styles.summaryRow}>
-                <Typography component="span" variant="inherit" className={styles.summaryLabel}>
-                  Primary Text
-                </Typography>
-                <Typography component="span" variant="inherit" className={styles.summaryValue}>
-                  {filledPrimary.length === 1
-                    ? 'Main'
-                    : `${combo.primaryIdx === 0 ? 'Main' : `Variation ${combo.primaryIdx}`} (${combo.primaryIdx + 1}/${filledPrimary.length})`}
-                </Typography>
-              </Box>
-              <Box className={styles.summaryRow}>
-                <Typography component="span" variant="inherit" className={styles.summaryLabel}>
-                  Headline
-                </Typography>
-                <Typography component="span" variant="inherit" className={styles.summaryValue}>
-                  {filledHeadlines.length === 1
-                    ? 'Main'
-                    : `${combo.headlineIdx === 0 ? 'Main' : `Variation ${combo.headlineIdx}`} (${combo.headlineIdx + 1}/${filledHeadlines.length})`}
-                </Typography>
-              </Box>
-              <Box className={styles.summaryRow}>
-                <Typography component="span" variant="inherit" className={styles.summaryLabel}>
-                  Creative
-                </Typography>
-                <Typography component="span" variant="inherit" className={styles.summaryValue}>
-                  {`${combo.file.name} (${combo.fileIdx + 1}/${filePreviews.length})`}
-                </Typography>
-              </Box>
-            </Box>
-
             <Box className={styles.feedCard}>
               <Box className={styles.feedHeader}>
                 {pageAvatar ? (
