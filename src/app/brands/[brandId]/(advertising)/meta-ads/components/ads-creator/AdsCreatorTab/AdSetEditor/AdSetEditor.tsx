@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, useCallback, useEffect, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
@@ -8,16 +8,11 @@ import IconButton from '@mui/material/IconButton'
 import LinearProgress from '@mui/material/LinearProgress'
 import Typography from '@mui/material/Typography'
 import useMediaQuery from '@mui/material/useMediaQuery'
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 import CloseIcon from '@mui/icons-material/Close'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
-import type {
-  AdSetDetail,
-  AttributionWindow,
-  BudgetType,
-  Gender,
-  Pixel,
-} from '@/lib/gateways/MetaAdsGateway'
+import type { DsaEntities } from '@/lib/gateways/MetaAdsGateway'
 import SectionTitle from './SectionTitle/SectionTitle'
 import SourceRows from './SourceRows/SourceRows'
 import StatusToggle from './StatusToggle/StatusToggle'
@@ -28,33 +23,37 @@ import DynamicCreativeSection from './DynamicCreativeSection/DynamicCreativeSect
 import EuAdvertiserSection from './EuAdvertiserSection/EuAdvertiserSection'
 import ConversionSection from './ConversionSection/ConversionSection'
 import PlacementsSection from './PlacementsSection/PlacementsSection'
-import { buildDuplicateName, buildDuplicatePayload } from './helpers'
+import {
+  buildCreatePayload,
+  buildDuplicateName,
+  buildDuplicatePayload,
+  computeValidationErrors,
+  DEFAULT_CURRENCY,
+} from './helpers'
+import { postAdSet } from './submitAdSet'
 import { useAdSetDraft } from './useAdSetDraft'
+import { useDraftHandlers } from './useDraftHandlers'
+import { usePixels } from './usePixels'
+import { useAdSetSource } from './useAdSetSource'
 import styles from './AdSetEditor.module.css'
+
+const EMPTY_DSA_ENTITIES: DsaEntities = { beneficiaries: [], payors: [] }
+
+export type AdSetEditorMode = 'create' | 'duplicate'
 
 interface Props {
   readonly open: boolean
   readonly onClose: () => void
   readonly onSuccess?: (newAdSetId: string, newAdSetName: string, status: 'PAUSED' | 'ACTIVE') => void
   readonly accountId: string
-  readonly sourceAdSetId: string
-  readonly sourceAdSetName: string
-  readonly sourceCampaignName: string
-}
-
-interface DuplicateResponse {
-  readonly result?: { readonly adSetId: string }
-  readonly error?: string
-}
-
-interface FetchAdSetResponse {
-  readonly result?: AdSetDetail
-  readonly error?: string
-}
-
-interface FetchPixelsResponse {
-  readonly result?: readonly Pixel[]
-  readonly error?: string
+  readonly mode?: AdSetEditorMode
+  readonly sourceAdSetId?: string
+  readonly sourceAdSetName?: string
+  readonly sourceCampaignName?: string
+  readonly campaignObjective?: string
+  readonly accountCurrency?: string
+  readonly campaignId?: string
+  readonly dsaEntities?: DsaEntities
 }
 
 export default memo(function AdSetEditor({
@@ -62,157 +61,113 @@ export default memo(function AdSetEditor({
   onClose,
   onSuccess,
   accountId,
-  sourceAdSetId,
-  sourceAdSetName,
-  sourceCampaignName,
+  mode = 'duplicate',
+  sourceAdSetId = '',
+  sourceAdSetName = '',
+  sourceCampaignName = '',
+  campaignObjective,
+  accountCurrency = DEFAULT_CURRENCY,
+  campaignId = '',
+  dsaEntities = EMPTY_DSA_ENTITIES,
 }: Props): JSX.Element {
+  const isCreate = mode === 'create'
   const fullScreen = useMediaQuery('(max-width: 600px)')
   const [draft, dispatch] = useAdSetDraft(sourceAdSetName)
-  const [error, setError] = useState<string | null>(null)
+  const [submitError, setSubmitError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState<boolean>(false)
-  const [loading, setLoading] = useState<boolean>(false)
-  const [source, setSource] = useState<AdSetDetail | null>(null)
-  const [currency, setCurrency] = useState<string>('USD')
-  const [pixels, setPixels] = useState<readonly Pixel[]>([])
-  const [pixelsLoading, setPixelsLoading] = useState<boolean>(false)
+  const [submitAttempted, setSubmitAttempted] = useState<boolean>(false)
 
-  // Reset on every open — closing the dialog discards the draft.
+  // Reset on every open — closing the dialog discards the draft. Declared before
+  // useAdSetSource so this effect runs first: reset clears the draft, then the
+  // source hook hydrates it (duplicate mode). Reversing the order would wipe the
+  // hydrated values.
   useEffect(() => {
     if (!open) return
-    dispatch({ type: 'reset', initialName: buildDuplicateName(sourceAdSetName) })
-    setError(null)
+    const initialName = isCreate ? '' : buildDuplicateName(sourceAdSetName)
+    dispatch({ type: 'reset', initialName })
+    if (isCreate) {
+      // When the account has exactly one previously-used DSA entity, prefill
+      // it — this is the only safe inference we can make about a "default".
+      const [onlyBeneficiary] = dsaEntities.beneficiaries
+      if (dsaEntities.beneficiaries.length === 1 && onlyBeneficiary) {
+        dispatch({ type: 'setDsaBeneficiary', value: onlyBeneficiary })
+      }
+      const [onlyPayor] = dsaEntities.payors
+      if (dsaEntities.payors.length === 1 && onlyPayor) {
+        dispatch({ type: 'setDsaPayor', value: onlyPayor })
+      }
+    }
+    setSubmitError(null)
     setSubmitting(false)
-    setSource(null)
-    setCurrency('USD')
-    setPixels([])
-  }, [open, sourceAdSetName, dispatch])
+    setSubmitAttempted(false)
+  }, [open, sourceAdSetName, dispatch, isCreate, dsaEntities])
 
-  // Pixels — fire-and-forget; empty list is acceptable.
-  useEffect(() => {
-    if (!open || !accountId) return undefined
-    const ctrl = new AbortController()
-    setPixelsLoading(true)
-    void (async () => {
-      try {
-        const response = await fetch(
-          `/api/meta-ads/pixels?accountId=${encodeURIComponent(accountId)}`,
-          { signal: ctrl.signal },
-        )
-        const json = (await response.json().catch(() => ({}))) as FetchPixelsResponse
-        if (ctrl.signal.aborted) return
-        setPixels(response.ok && json.result ? json.result : [])
-      } catch {
-        // pixels are optional — silently empty
-      } finally {
-        if (!ctrl.signal.aborted) setPixelsLoading(false)
-      }
-    })()
-    return () => ctrl.abort()
-  }, [open, accountId])
+  const { pixels, pixelsLoading } = usePixels(open, accountId)
+  const { source, loading, error: loadError } = useAdSetSource({
+    open, isCreate, sourceAdSetId, accountId, dispatch,
+  })
+  const handlers = useDraftHandlers(dispatch)
 
-  // Ad set detail + hydrate.
-  useEffect(() => {
-    if (!open || !sourceAdSetId || !accountId) return undefined
-    const ctrl = new AbortController()
-    setLoading(true)
-    void (async () => {
-      try {
-        const response = await fetch(
-          `/api/meta-ads/adsets/${encodeURIComponent(sourceAdSetId)}?accountId=${encodeURIComponent(accountId)}`,
-          { signal: ctrl.signal },
-        )
-        const json = (await response.json().catch(() => ({}))) as FetchAdSetResponse
-        if (ctrl.signal.aborted) return
-        if (!response.ok || !json.result) {
-          throw new Error(json.error ?? `HTTP ${response.status}`)
-        }
-        const detail = json.result
-        // Older ad sets return UNDEFINED for destination_type when conversions
-        // are pixel-driven; coerce to WEBSITE so the UI shows the right fields.
-        const rawDest = detail.destinationType
-        const looksLikeWebsite = (!rawDest || rawDest === 'UNDEFINED')
-          && (detail.pixelId !== '' || detail.customEventType !== '')
-        const normalized: AdSetDetail = {
-          ...detail,
-          destinationType: looksLikeWebsite ? 'WEBSITE' : rawDest,
-          bidStrategy: detail.bidStrategy || 'LOWEST_COST_WITHOUT_CAP',
-        }
-        setSource(normalized)
-        setCurrency(detail.currency)
-        dispatch({ type: 'hydrate', source: normalized })
-      } catch (err: unknown) {
-        if (err instanceof Error && err.name === 'AbortError') return
-        setError(err instanceof Error ? err.message : 'Failed to load ad set')
-      } finally {
-        if (!ctrl.signal.aborted) setLoading(false)
-      }
-    })()
-    return () => ctrl.abort()
-  }, [open, sourceAdSetId, accountId, dispatch])
+  const currency = source?.currency ?? accountCurrency
+  const error = submitError ?? loadError
 
   const handleDuplicate = useCallback(async (): Promise<void> => {
     const trimmed = draft.name.trim()
     if (!trimmed || !sourceAdSetId || !accountId) return
     setSubmitting(true)
-    setError(null)
-
-    const payload = buildDuplicatePayload(draft, source, sourceAdSetId)
-
+    setSubmitError(null)
     try {
-      const response = await fetch(
+      const payload = buildDuplicatePayload(draft, source, sourceAdSetId)
+      const newAdSetId = await postAdSet(
         `/api/meta-ads/adsets/duplicate?accountId=${encodeURIComponent(accountId)}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        },
+        payload,
       )
-      const json = (await response.json().catch(() => ({}))) as DuplicateResponse
-      if (!response.ok || !json.result) {
-        throw new Error(json.error ?? `HTTP ${response.status}`)
-      }
-      onSuccess?.(json.result.adSetId, trimmed, draft.activate ? 'ACTIVE' : 'PAUSED')
+      onSuccess?.(newAdSetId, trimmed, draft.activate ? 'ACTIVE' : 'PAUSED')
       onClose()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error')
+      setSubmitError(err instanceof Error ? err.message : 'Unknown error')
       setSubmitting(false)
     }
   }, [draft, source, sourceAdSetId, accountId, onSuccess, onClose])
 
-  const handleNameChange = useCallback((value: string) => dispatch({ type: 'setName', value }), [dispatch])
-  const handleActivateChange = useCallback((value: boolean) => dispatch({ type: 'setActivate', value }), [dispatch])
-  const handleBudgetTypeChange = useCallback((value: BudgetType) => dispatch({ type: 'setBudgetType', value }), [dispatch])
-  const handleBudgetMajorUnitsChange = useCallback((value: number) => dispatch({ type: 'setBudgetMajorUnits', value }), [dispatch])
-  const handleStartTimeChange = useCallback((value: string) => dispatch({ type: 'setStartTime', value }), [dispatch])
-  const handleEndTimeChange = useCallback((value: string) => dispatch({ type: 'setEndTime', value }), [dispatch])
-  const handleAgeChange = useCallback(
-    (ageMin: number, ageMax: number) => dispatch({ type: 'setAgeRange', ageMin, ageMax }),
-    [dispatch],
-  )
-  const handleGenderChange = useCallback((value: Gender) => dispatch({ type: 'setGender', value }), [dispatch])
-  const handleCountriesChange = useCallback((value: readonly string[]) => dispatch({ type: 'setCountries', value }), [dispatch])
-  const handleAdvantageAudienceChange = useCallback((value: boolean) => dispatch({ type: 'setAdvantageAudience', value }), [dispatch])
-  const handleAdvantageAgeChange = useCallback((value: boolean) => dispatch({ type: 'setAdvantageAge', value }), [dispatch])
-  const handleAdvantageGenderChange = useCallback((value: boolean) => dispatch({ type: 'setAdvantageGender', value }), [dispatch])
-  const handleIsDynamicCreativeChange = useCallback((value: boolean) => dispatch({ type: 'setIsDynamicCreative', value }), [dispatch])
-  const handleDsaBeneficiaryChange = useCallback((value: string) => dispatch({ type: 'setDsaBeneficiary', value }), [dispatch])
-  const handleDsaPayorChange = useCallback((value: string) => dispatch({ type: 'setDsaPayor', value }), [dispatch])
-  const handleOptimizationGoalChange = useCallback((value: string) => dispatch({ type: 'setOptimizationGoal', value }), [dispatch])
-  const handleBidStrategyChange = useCallback((value: string) => dispatch({ type: 'setBidStrategy', value }), [dispatch])
-  const handleBidAmountChange = useCallback((value: number) => dispatch({ type: 'setBidAmountMajorUnits', value }), [dispatch])
-  const handleDestinationTypeChange = useCallback((value: string) => dispatch({ type: 'setDestinationType', value }), [dispatch])
-  const handlePixelIdChange = useCallback((value: string) => dispatch({ type: 'setPixelId', value }), [dispatch])
-  const handleCustomEventTypeChange = useCallback((value: string) => dispatch({ type: 'setCustomEventType', value }), [dispatch])
-  const handleAttributionSpecChange = useCallback(
-    (value: readonly AttributionWindow[]) => dispatch({ type: 'setAttributionSpec', value }),
-    [dispatch],
-  )
+  const handleCreate = useCallback(async (): Promise<void> => {
+    const trimmed = draft.name.trim()
+    if (!trimmed || !accountId || !campaignId) return
+    setSubmitting(true)
+    setSubmitError(null)
+    try {
+      const payload = buildCreatePayload(draft, accountId, campaignId)
+      const newAdSetId = await postAdSet(
+        `/api/meta-ads/adsets/create?accountId=${encodeURIComponent(accountId)}`,
+        payload,
+      )
+      onSuccess?.(newAdSetId, trimmed, 'PAUSED')
+      onClose()
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'Unknown error')
+      setSubmitting(false)
+    }
+  }, [draft, accountId, campaignId, onSuccess, onClose])
 
-  const onDuplicateClick = useCallback(() => {
-    void handleDuplicate()
-  }, [handleDuplicate])
+  const validationErrors = useMemo(() => computeValidationErrors(draft), [draft])
+  const visibleErrors: Readonly<Record<string, string>> = submitAttempted ? validationErrors : {}
+
+  const onSubmitClick = useCallback(() => {
+    if (Object.keys(validationErrors).length > 0) {
+      setSubmitAttempted(true)
+      return
+    }
+    if (isCreate) {
+      void handleCreate()
+    } else {
+      void handleDuplicate()
+    }
+  }, [validationErrors, isCreate, handleCreate, handleDuplicate])
 
   const sectionsDisabled = submitting || loading
+  const submitLabelIdle = isCreate ? 'Create' : 'Duplicate'
+  const submitLabelBusy = isCreate ? 'Creating…' : 'Duplicating…'
+  const submitLabel = submitting ? submitLabelBusy : submitLabelIdle
 
   return (
     <Dialog
@@ -228,14 +183,16 @@ export default memo(function AdSetEditor({
 
       <Box component="header" className={styles.header}>
         <Box className={styles.headerTitleWrap}>
-          <ContentCopyIcon className={styles.headerIcon} fontSize="inherit" />
+          {isCreate
+            ? <AddCircleOutlineIcon className={styles.headerIcon} fontSize="inherit" />
+            : <ContentCopyIcon className={styles.headerIcon} fontSize="inherit" />}
           <Typography
             id="ad-set-editor-title"
             component="h2"
             variant="inherit"
             className={styles.headerTitle}
           >
-            Duplicate ad set
+            {isCreate ? 'Create ad set' : 'Duplicate ad set'}
           </Typography>
         </Box>
         <IconButton
@@ -249,10 +206,12 @@ export default memo(function AdSetEditor({
       </Box>
 
       <Box className={styles.body}>
-        <SourceRows
-          sourceCampaignName={sourceCampaignName}
-          sourceAdSetName={sourceAdSetName}
-        />
+        {!isCreate && (
+          <SourceRows
+            sourceCampaignName={sourceCampaignName}
+            sourceAdSetName={sourceAdSetName}
+          />
+        )}
 
         <Box className={styles.sectionCard}>
           <SectionTitle icon={<InfoOutlinedIcon fontSize="inherit" />}>
@@ -260,13 +219,14 @@ export default memo(function AdSetEditor({
           </SectionTitle>
           <StatusToggle
             activate={draft.activate}
-            onActivateChange={handleActivateChange}
+            onActivateChange={handlers.handleActivateChange}
             disabled={submitting}
           />
           <NameSection
             name={draft.name}
-            onNameChange={handleNameChange}
+            onNameChange={handlers.handleNameChange}
             disabled={submitting}
+            error={visibleErrors.name}
           />
         </Box>
 
@@ -282,13 +242,17 @@ export default memo(function AdSetEditor({
             pixels={pixels}
             pixelsLoading={pixelsLoading}
             attributionSpec={draft.attributionSpec}
-            onDestinationTypeChange={handleDestinationTypeChange}
-            onOptimizationGoalChange={handleOptimizationGoalChange}
-            onPixelIdChange={handlePixelIdChange}
-            onCustomEventTypeChange={handleCustomEventTypeChange}
-            onBidStrategyChange={handleBidStrategyChange}
-            onBidAmountChange={handleBidAmountChange}
-            onAttributionSpecChange={handleAttributionSpecChange}
+            campaignObjective={isCreate ? campaignObjective : undefined}
+            goalError={visibleErrors.optimizationGoal}
+            eventError={visibleErrors.customEventType}
+            pixelError={visibleErrors.pixelId}
+            onDestinationTypeChange={handlers.handleDestinationTypeChange}
+            onOptimizationGoalChange={handlers.handleOptimizationGoalChange}
+            onPixelIdChange={handlers.handlePixelIdChange}
+            onCustomEventTypeChange={handlers.handleCustomEventTypeChange}
+            onBidStrategyChange={handlers.handleBidStrategyChange}
+            onBidAmountChange={handlers.handleBidAmountChange}
+            onAttributionSpecChange={handlers.handleAttributionSpecChange}
             disabled={sectionsDisabled}
           />
         </Box>
@@ -296,7 +260,7 @@ export default memo(function AdSetEditor({
         <Box className={styles.sectionCard}>
           <DynamicCreativeSection
             enabled={draft.isDynamicCreative}
-            onChange={handleIsDynamicCreativeChange}
+            onChange={handlers.handleIsDynamicCreativeChange}
             disabled={sectionsDisabled}
           />
         </Box>
@@ -309,11 +273,12 @@ export default memo(function AdSetEditor({
             endTime={draft.endTime}
             currency={currency}
             isCbo={source?.campaignBudget !== null && source?.budgetMinorUnits === 0}
-            onBudgetTypeChange={handleBudgetTypeChange}
-            onBudgetMajorUnitsChange={handleBudgetMajorUnitsChange}
-            onStartTimeChange={handleStartTimeChange}
-            onEndTimeChange={handleEndTimeChange}
+            onBudgetTypeChange={handlers.handleBudgetTypeChange}
+            onBudgetMajorUnitsChange={handlers.handleBudgetMajorUnitsChange}
+            onStartTimeChange={handlers.handleStartTimeChange}
+            onEndTimeChange={handlers.handleEndTimeChange}
             disabled={sectionsDisabled}
+            budgetError={visibleErrors.budget}
           />
         </Box>
 
@@ -326,13 +291,14 @@ export default memo(function AdSetEditor({
             advantageAudience={draft.advantageAudience}
             advantageAge={draft.advantageAge}
             advantageGender={draft.advantageGender}
-            onAgeChange={handleAgeChange}
-            onGenderChange={handleGenderChange}
-            onCountriesChange={handleCountriesChange}
-            onAdvantageAudienceChange={handleAdvantageAudienceChange}
-            onAdvantageAgeChange={handleAdvantageAgeChange}
-            onAdvantageGenderChange={handleAdvantageGenderChange}
+            onAgeChange={handlers.handleAgeChange}
+            onGenderChange={handlers.handleGenderChange}
+            onCountriesChange={handlers.handleCountriesChange}
+            onAdvantageAudienceChange={handlers.handleAdvantageAudienceChange}
+            onAdvantageAgeChange={handlers.handleAdvantageAgeChange}
+            onAdvantageGenderChange={handlers.handleAdvantageGenderChange}
             disabled={sectionsDisabled}
+            countriesError={visibleErrors.countries}
           />
         </Box>
 
@@ -344,8 +310,10 @@ export default memo(function AdSetEditor({
           <EuAdvertiserSection
             beneficiary={draft.dsaBeneficiary}
             payor={draft.dsaPayor}
-            onBeneficiaryChange={handleDsaBeneficiaryChange}
-            onPayorChange={handleDsaPayorChange}
+            beneficiaryOptions={dsaEntities.beneficiaries}
+            payorOptions={dsaEntities.payors}
+            onBeneficiaryChange={handlers.handleDsaBeneficiaryChange}
+            onPayorChange={handlers.handleDsaPayorChange}
             disabled={sectionsDisabled}
           />
         </Box>
@@ -373,12 +341,12 @@ export default memo(function AdSetEditor({
           type="button"
           variant="contained"
           disableElevation
-          startIcon={<ContentCopyIcon />}
-          onClick={onDuplicateClick}
-          disabled={draft.name.trim().length === 0 || submitting || loading}
+          startIcon={isCreate ? <AddCircleOutlineIcon /> : <ContentCopyIcon />}
+          onClick={onSubmitClick}
+          disabled={submitting || loading}
           className={styles.primaryButton}
         >
-          {submitting ? 'Duplicating…' : 'Duplicate'}
+          {submitLabel}
         </Button>
       </Box>
     </Dialog>

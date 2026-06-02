@@ -9,6 +9,7 @@ import CloseIcon from '@mui/icons-material/Close'
 import type { CtaType } from '@/lib/gateways/MetaAdsGateway'
 import FormField from '../FormField/FormField'
 import SearchSelect from '../SearchSelect/SearchSelect'
+import { isValidDestinationUrl } from './helpers'
 import styles from './CopyForm.module.css'
 
 const MAX_TOTAL = 5
@@ -65,6 +66,7 @@ function removeAt(arr: readonly string[], index: number): readonly string[] {
 export default memo(function CopyForm({ value, onChange }: Props): JSX.Element {
   const primaryRemaining = MAX_TOTAL - value.primaryTexts.length
   const headlineRemaining = MAX_TOTAL - value.headlines.length
+  const urlInvalid = value.url.trim() !== '' && !isValidDestinationUrl(value.url)
 
   return (
     <Box className={styles.root}>
@@ -233,9 +235,11 @@ export default memo(function CopyForm({ value, onChange }: Props): JSX.Element {
             variant="outlined"
             fullWidth
             className="density-form"
-            placeholder="https://"
+            placeholder="https://example.com"
             value={value.url}
             onChange={(e) => onChange({ ...value, url: e.target.value })}
+            error={urlInvalid}
+            helperText={urlInvalid ? 'Enter a full URL, e.g. https://example.com' : undefined}
           />
         </FormField>
 

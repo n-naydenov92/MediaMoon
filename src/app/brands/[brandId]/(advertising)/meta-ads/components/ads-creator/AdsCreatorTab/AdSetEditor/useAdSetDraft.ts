@@ -7,7 +7,7 @@ import type {
   BudgetType,
   Gender,
 } from '@/lib/gateways/MetaAdsGateway'
-import { buildDuplicateName } from './helpers'
+import { buildDuplicateName, DEFAULT_BID_STRATEGY } from './helpers'
 
 export interface DraftState {
   readonly name: string
@@ -61,6 +61,12 @@ export type DraftAction =
   | { type: 'setCustomEventType'; value: string }
   | { type: 'setAttributionSpec'; value: readonly AttributionWindow[] }
 
+const DEFAULT_ATTRIBUTION_SPEC: readonly AttributionWindow[] = [
+  { eventType: 'CLICK_THROUGH', windowDays: 7 },
+  { eventType: 'VIEW_THROUGH', windowDays: 1 },
+  { eventType: 'ENGAGED_VIDEO_VIEW', windowDays: 1 },
+]
+
 function emptyDraft(initialName: string): DraftState {
   return {
     name: initialName,
@@ -73,19 +79,19 @@ function emptyDraft(initialName: string): DraftState {
     ageMax: 65,
     gender: 'ALL',
     countries: [],
-    advantageAudience: false,
+    advantageAudience: true,
     advantageAge: false,
     advantageGender: false,
     isDynamicCreative: false,
     dsaBeneficiary: '',
     dsaPayor: '',
     optimizationGoal: '',
-    bidStrategy: '',
+    bidStrategy: DEFAULT_BID_STRATEGY,
     bidAmountMajorUnits: 0,
     destinationType: '',
     pixelId: '',
     customEventType: '',
-    attributionSpec: [],
+    attributionSpec: DEFAULT_ATTRIBUTION_SPEC,
   }
 }
 

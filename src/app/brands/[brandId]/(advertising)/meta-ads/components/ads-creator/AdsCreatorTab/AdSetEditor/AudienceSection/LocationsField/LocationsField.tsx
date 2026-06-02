@@ -39,6 +39,7 @@ interface Props {
   readonly countries: readonly string[]
   readonly onChange: (next: readonly string[]) => void
   readonly disabled: boolean
+  readonly error?: string
 }
 
 function mergeCodes(existing: readonly string[], add: readonly string[]): readonly string[] {
@@ -137,6 +138,7 @@ export default memo(function LocationsField({
   countries,
   onChange,
   disabled,
+  error,
 }: Props): JSX.Element {
   const [continent, setContinent] = useState<ContinentFilter>('All')
   const [collapsedGroups, setCollapsedGroups] = useState<ReadonlySet<string>>(() => new Set())
@@ -191,64 +193,66 @@ export default memo(function LocationsField({
 
   return (
     <ContinentContext.Provider value={continentCtx}>
-    <Box className={styles.root}>
-      <Box className={styles.presets}>
-        <Typography component="span" variant="inherit" className={styles.presetsLabel}>
-          Quick presets
-        </Typography>
-        {COUNTRY_PRESETS.map((preset) => (
-          <Chip
-            key={preset.id}
-            label={preset.label}
-            size="small"
-            icon={<AddIcon fontSize="inherit" />}
-            onClick={() => handlePreset(preset)}
-            disabled={disabled}
-            variant="outlined"
-            className={styles.presetChip}
-            clickable
-          />
-        ))}
-      </Box>
+      <Box className={styles.root}>
+        <Box className={styles.presets}>
+          <Typography component="span" variant="inherit" className={styles.presetsLabel}>
+            Quick presets
+          </Typography>
+          {COUNTRY_PRESETS.map((preset) => (
+            <Chip
+              key={preset.id}
+              label={preset.label}
+              size="small"
+              icon={<AddIcon fontSize="inherit" />}
+              onClick={() => handlePreset(preset)}
+              disabled={disabled}
+              variant="outlined"
+              className={styles.presetChip}
+              clickable
+            />
+          ))}
+        </Box>
 
-      <Autocomplete<Country, true>
-        multiple
-        options={COUNTRIES_SORTED}
-        value={selected}
-        disabled={disabled}
-        onChange={(_, next) => onChange(next.map((c) => c.code))}
-        getOptionLabel={(option) => option.name}
-        isOptionEqualToValue={(option, value) => option.code === value.code}
-        groupBy={continent === 'All' ? (option) => option.continent : undefined}
-        filterSelectedOptions
-        size="small"
-        PaperComponent={PaperWithTabs}
-        classes={{ listbox: styles.listbox, option: styles.option }}
-        filterOptions={(options, state) => {
-          let filtered = options
-          if (continent !== 'All') {
-            filtered = filtered.filter((o) => o.continent === continent)
-          }
-          const q = state.inputValue.toLowerCase().trim()
-          if (q) {
-            filtered = filtered.filter((o) => (
-              o.name.toLowerCase().includes(q) || o.code.toLowerCase().includes(q)
-            ))
-          }
-          return filtered
-        }}
-        renderOption={renderCountryOption}
-        renderGroup={renderGroup}
-        renderTags={renderCountryTags}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            placeholder={selected.length === 0 ? 'Add country…' : ''}
-            size="small"
-          />
-        )}
-      />
-    </Box>
+        <Autocomplete<Country, true>
+          multiple
+          options={COUNTRIES_SORTED}
+          value={selected}
+          disabled={disabled}
+          onChange={(_, next) => onChange(next.map((c) => c.code))}
+          getOptionLabel={(option) => option.name}
+          isOptionEqualToValue={(option, value) => option.code === value.code}
+          groupBy={continent === 'All' ? (option) => option.continent : undefined}
+          filterSelectedOptions
+          size="small"
+          PaperComponent={PaperWithTabs}
+          classes={{ listbox: styles.listbox, option: styles.option }}
+          filterOptions={(options, state) => {
+            let filtered = options
+            if (continent !== 'All') {
+              filtered = filtered.filter((o) => o.continent === continent)
+            }
+            const q = state.inputValue.toLowerCase().trim()
+            if (q) {
+              filtered = filtered.filter((o) => (
+                o.name.toLowerCase().includes(q) || o.code.toLowerCase().includes(q)
+              ))
+            }
+            return filtered
+          }}
+          renderOption={renderCountryOption}
+          renderGroup={renderGroup}
+          renderTags={renderCountryTags}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              placeholder={selected.length === 0 ? 'Add country…' : ''}
+              size="small"
+              error={Boolean(error)}
+              helperText={error}
+            />
+          )}
+        />
+      </Box>
     </ContinentContext.Provider>
   )
 })

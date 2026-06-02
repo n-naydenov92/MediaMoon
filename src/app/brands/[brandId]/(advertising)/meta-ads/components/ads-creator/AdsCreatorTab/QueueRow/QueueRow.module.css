@@ -1,30 +1,20 @@
 .row {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 10px;
-  padding: 14px 16px;
-  border-radius: 12px;
-  border: 1px solid var(--hairline);
-  background: var(--surface-1);
+  height: 40px;
+  padding: 0 8px 0 12px;
+  border-radius: 8px;
   font-family: var(--font-dm-sans), system-ui, sans-serif;
+  transition: background 80ms ease-out;
 }
 
-.head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.titleCol {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-  flex: 1;
+.row:hover {
+  background: var(--surface-2);
 }
 
 .icon {
+  flex-shrink: 0;
   width: 16px;
   text-align: center;
   font-weight: 600;
@@ -46,6 +36,7 @@
 
 .fileName {
   flex: 1;
+  min-width: 0;
   font-size: 13px;
   font-weight: 500;
   color: var(--text-primary);
@@ -55,44 +46,31 @@
 }
 
 .meta {
+  flex-shrink: 0;
   font-size: 11px;
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
-.status {
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+.statusCol {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  width: 150px;
+  flex-shrink: 0;
 }
 
-.status[data-status='queued'] {
-  background: var(--surface-3);
-  color: var(--text-secondary);
-}
-
-.status[data-status='uploading'],
-.status[data-status='publishing'] {
-  background: var(--accent-soft);
-  color: var(--accent);
-}
-
-.status[data-status='done'] {
-  background: var(--success-soft);
-  color: var(--success);
-}
-
-.status[data-status='failed'] {
-  background: var(--error-soft);
-  color: var(--error);
-}
-
-.bar {
+.activeCell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   width: 100%;
+}
+
+.track {
+  flex: 1;
   height: 6px;
   background: var(--surface-3);
   border-radius: 3px;
@@ -108,55 +86,79 @@
   transition: width 200ms ease-out;
 }
 
-.barFill[data-status='done'] {
-  background: var(--success);
+.pct {
+  min-width: 34px;
+  text-align: right;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
 }
 
-.barFill[data-status='failed'] {
-  background: var(--error);
+.statusLabel {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.error {
-  font-size: 12px;
+.statusLabel[data-status='queued'] {
+  background: var(--surface-3);
+  color: var(--text-secondary);
+}
+
+.statusLabel[data-status='done'] {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.errorText {
+  font-size: 11px;
   color: var(--error);
-  word-break: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.footer {
+.actions {
   display: flex;
   align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  width: 48px;
   justify-content: flex-end;
-  gap: 8px;
+  opacity: 0;
+  transition: opacity 80ms ease-out;
 }
 
-.footer .action {
-  min-width: 0;
-  padding: 4px 10px;
-  font-family: var(--font-dm-sans), system-ui, sans-serif;
-  font-size: 12px;
-  font-weight: 500;
+.row:hover .actions,
+.row:focus-within .actions {
+  opacity: 1;
+}
+
+.actions .actionBtn,
+.openBtn {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  font-size: 16px;
   color: var(--text-secondary);
-  background: transparent;
-  border: 1px solid var(--hairline);
   border-radius: 6px;
-  text-transform: none;
-  transition: border-color 80ms ease-out, color 80ms ease-out;
+  flex-shrink: 0;
 }
 
-.footer .action:hover {
-  border-color: var(--accent);
+.actions .actionBtn:hover {
+  background: var(--surface-3);
   color: var(--accent);
-  background: transparent;
 }
 
-.footer .link {
-  font-size: 12px;
-  font-weight: 500;
+.openBtn {
   color: var(--accent);
-  text-decoration: none;
-  padding: 4px 10px;
 }
 
-.footer .link:hover {
-  text-decoration: underline;
+.openBtn:hover {
+  background: var(--accent-soft);
+  color: var(--accent-hover);
 }

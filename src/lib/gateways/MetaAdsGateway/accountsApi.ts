@@ -1,5 +1,5 @@
 import { buildUrl, callGraphApi, callGraphApiPost } from './http'
-import type { AdAccount, AdSet, Campaign, InstagramAccount, Page } from './types'
+import type { AdAccount, AdSet, Campaign, DsaEntities, InstagramAccount, Page } from './types'
 
 interface GraphListResponse<T> {
   data: T[]
@@ -25,6 +25,7 @@ interface GraphCampaignRaw {
   name: string
   status: string
   effective_status: string
+  objective?: string
 }
 
 interface GraphAdSetRaw {
@@ -69,7 +70,7 @@ export async function fetchCampaigns(
   status: StatusFilter = 'all',
 ): Promise<readonly Campaign[]> {
   const url = buildUrl(`/${accountId}/campaigns`, token, {
-    fields: 'id,name,status,effective_status',
+    fields: 'id,name,status,effective_status,objective',
     limit: '100',
     ...buildStatusParams(status, CAMPAIGN_PAUSED_STATUSES),
   })
@@ -164,6 +165,11 @@ interface UpdateAdSetResponse {
   error?: { code: number; message: string; is_transient?: boolean }
 }
 
+interface CreateAdSetResponse {
+  id?: string
+  error?: { code: number; message: string; is_transient?: boolean }
+}
+
 async function postWithRetry<T extends { error?: { code: number; is_transient?: boolean } }>(
   path: string,
   body: URLSearchParams,
@@ -189,6 +195,26 @@ async function postWithRetry<T extends { error?: { code: number; is_transient?: 
     }
   }
   throw lastErr instanceof Error ? lastErr : new Error('Meta API failed after retries')
+}
+
+export async function createAdSet(
+  token: string,
+  accountId: string,
+  fields: URLSearchParams,
+): Promise<{ adSetId: string }> {
+  const body = new URLSearchParams(fields)
+  // Memory rule: every created Meta entity must be PAUSED — never ACTIVE on create.
+  body.set('status', 'PAUSED')
+  body.set('access_token', token)
+
+  const json = await postWithRetry<CreateAdSetResponse>(`/${accountId}/adsets`, body)
+  if (json.error) {
+    throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
+  }
+  if (!json.id) {
+    throw new Error('Meta API did not return a created ad set id')
+  }
+  return { adSetId: json.id }
 }
 
 export async function duplicateAdSet(
@@ -253,6 +279,37 @@ export async function duplicateAdSet(
   return { adSetId: newId }
 }
 
+interface GraphAdSetDsaRaw {
+  dsa_beneficiary?: string
+  dsa_payor?: string
+}
+
+// Meta does not expose the Business Manager DSA entity list via public Marketing
+// API. Aggregating the account's existing ad-sets is the closest available
+// signal — values that Meta has already accepted in this account, which mirrors
+// what the Ads Manager dropdown shows for "previously used" entries.
+export async function fetchDsaEntities(token: string, accountId: string): Promise<DsaEntities> {
+  const url = buildUrl(`/${accountId}/adsets`, token, {
+    fields: 'dsa_beneficiary,dsa_payor',
+    limit: '200',
+  })
+  const json = await callGraphApi<GraphListResponse<GraphAdSetDsaRaw>>(url)
+  if (json.error) {
+    throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
+  }
+  const beneficiaries = new Set<string>()
+  const payors = new Set<string>()
+  for (const ad of json.data ?? []) {
+    if (ad.dsa_beneficiary) beneficiaries.add(ad.dsa_beneficiary)
+    if (ad.dsa_payor) payors.add(ad.dsa_payor)
+  }
+  const collator = new Intl.Collator(undefined, { sensitivity: 'base' })
+  return {
+    beneficiaries: [...beneficiaries].sort((a, b) => collator.compare(a, b)),
+    payors: [...payors].sort((a, b) => collator.compare(a, b)),
+  }
+}
+
 export async function countActiveAdsInAccount(token: string, accountId: string): Promise<number> {
   const url = buildUrl(`/${accountId}/ads`, token, {
     filtering: JSON.stringify([
@@ -285,6 +342,7 @@ function toCampaign(raw: GraphCampaignRaw): Campaign {
     name: raw.name,
     status: raw.status,
     effectiveStatus: raw.effective_status,
+    objective: raw.objective ?? '',
   }
 }
 

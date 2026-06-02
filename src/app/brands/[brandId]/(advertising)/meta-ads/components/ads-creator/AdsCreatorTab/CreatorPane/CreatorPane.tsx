@@ -7,6 +7,7 @@ import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined'
 import type { BrandId } from '@/config/brands'
 import type { StatusFilter } from '@/lib/gateways/MetaAdsGateway'
 import type { CopyValue } from '../CopyForm/CopyForm'
+import { isValidDestinationUrl } from '../CopyForm/helpers'
 import type { LaunchJob } from '../useLaunchQueue'
 import StepAccordion from '../StepAccordion/StepAccordion'
 import AccountStep from '../AccountStep/AccountStep'
@@ -73,6 +74,11 @@ export default memo(function CreatorPane({
   })
 
   const isSinglePage = targeting.pageIds.length === 1
+  const selectedAccount = useMemo(
+    () => data.accounts.find((a) => a.id === targeting.accountId) ?? null,
+    [data.accounts, targeting.accountId],
+  )
+  const accountCurrency = selectedAccount?.currency ?? 'USD'
   const completion = useMemo<Completion>(() => ({
     account: targeting.accountId !== '',
     campaign: targeting.campaignId !== '' && targeting.adSetId !== '',
@@ -82,7 +88,7 @@ export default memo(function CreatorPane({
     copy: copy.name !== ''
       && copy.headlines[0] !== ''
       && copy.primaryTexts[0] !== ''
-      && copy.url !== '',
+      && isValidDestinationUrl(copy.url),
   }), [
     targeting.accountId,
     targeting.campaignId,
@@ -197,6 +203,8 @@ export default memo(function CreatorPane({
             adSetStatus={adSetStatus}
             onAdSetStatusChange={setAdSetStatus}
             refetchAdSets={data.refetchAdSets}
+            accountCurrency={accountCurrency}
+            dsaEntities={data.dsaEntities}
           />
         </StepAccordion>
 

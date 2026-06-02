@@ -6,11 +6,14 @@ import type {
   AdAccount,
   AdSet,
   Campaign,
+  DsaEntities,
   InstagramAccount,
   Page,
   StatusFilter,
 } from '@/lib/gateways/MetaAdsGateway'
 import { useAbortableFetch } from './useAbortableFetch'
+
+const EMPTY_DSA_ENTITIES: DsaEntities = { beneficiaries: [], payors: [] }
 
 export interface TargetingValue {
   readonly accountId: string
@@ -34,6 +37,7 @@ export interface TargetingData {
   readonly adSets: readonly AdSet[]
   readonly pages: readonly Page[]
   readonly instagramAccounts: readonly InstagramAccount[]
+  readonly dsaEntities: DsaEntities
   readonly refetchAdSets: () => void
 }
 
@@ -52,6 +56,7 @@ interface PagesResponse { pages: readonly Page[] }
 interface CampaignsResponse { campaigns: readonly Campaign[] }
 interface AdSetsResponse { adSets: readonly AdSet[] }
 interface InstagramAccountsResponse { instagramAccounts: readonly InstagramAccount[] }
+interface DsaEntitiesResponse { dsaEntities: DsaEntities }
 
 export function useTargetingData({
   brandId,
@@ -86,6 +91,9 @@ export function useTargetingData({
       ? `/api/meta-ads/instagram-accounts?accountId=${accountId}&pageId=${singlePageId}`
       : null,
   )
+  const dsaResp = useAbortableFetch<DsaEntitiesResponse>(
+    accountId ? `/api/meta-ads/dsa-entities?accountId=${accountId}` : null,
+  )
 
   const accounts = useMemo(
     () => (accountsResp?.accounts ?? []).filter((a) => allowedAccountIds.includes(a.id)),
@@ -95,6 +103,7 @@ export function useTargetingData({
   const campaigns = campaignsResp?.campaigns ?? []
   const adSets = adSetsResp?.adSets ?? []
   const instagramAccounts = igResp?.instagramAccounts ?? []
+  const dsaEntities = dsaResp?.dsaEntities ?? EMPTY_DSA_ENTITIES
 
-  return { accounts, campaigns, adSets, pages, instagramAccounts, refetchAdSets }
+  return { accounts, campaigns, adSets, pages, instagramAccounts, dsaEntities, refetchAdSets }
 }

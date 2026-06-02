@@ -28,6 +28,7 @@ interface Props {
   readonly onAdvantageAgeChange: (next: boolean) => void
   readonly onAdvantageGenderChange: (next: boolean) => void
   readonly disabled: boolean
+  readonly countriesError?: string
 }
 
 const GENDER_OPTIONS: readonly { value: Gender; label: string }[] = [
@@ -51,6 +52,7 @@ export default memo(function AudienceSection({
   onAdvantageAgeChange,
   onAdvantageGenderChange,
   disabled,
+  countriesError,
 }: Props): JSX.Element {
   return (
     <Box className={styles.root}>
@@ -67,6 +69,7 @@ export default memo(function AudienceSection({
           countries={countries}
           onChange={onCountriesChange}
           disabled={disabled}
+          error={countriesError}
         />
       </Box>
 

@@ -6,11 +6,17 @@ export interface AdAccount {
   readonly timezoneName: string
 }
 
+export interface DsaEntities {
+  readonly beneficiaries: readonly string[]
+  readonly payors: readonly string[]
+}
+
 export interface Campaign {
   readonly id: string
   readonly name: string
   readonly status: string
   readonly effectiveStatus: string
+  readonly objective: string
 }
 
 export interface AdSet {

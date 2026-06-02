@@ -10,12 +10,14 @@ interface Props {
   readonly name: string
   readonly onNameChange: (next: string) => void
   readonly disabled: boolean
+  readonly error?: string
 }
 
 export default memo(function NameSection({
   name,
   onNameChange,
   disabled,
+  error,
 }: Props): JSX.Element {
   return (
     <Box className={styles.root}>
@@ -28,6 +30,8 @@ export default memo(function NameSection({
         variant="outlined"
         fullWidth
         disabled={disabled}
+        error={Boolean(error)}
+        helperText={error}
         className="density-dialog"
         placeholder="e.g. Lookalike 1% — 2026-05-22"
       />

@@ -43,7 +43,6 @@ export const CUSTOM_EVENT_OPTIONS: readonly ConversionOption[] = [
   { value: 'DONATE', label: 'Donate' },
   { value: 'SUBMIT_APPLICATION', label: 'Submit application' },
   { value: 'SCHEDULE', label: 'Schedule' },
-  { value: 'OTHER', label: 'Other' },
 ]
 
 export const OPTIMIZATION_GOAL_OPTIONS: readonly ConversionOption[] = [
@@ -78,4 +77,63 @@ export function resolveOption(
 
 export function bidStrategyNeedsAmount(strategy: string): boolean {
   return strategy === 'LOWEST_COST_WITH_BID_CAP' || strategy === 'COST_CAP'
+}
+
+// Performance goals valid per campaign objective. Covers both modern OUTCOME_*
+// objectives (post-ODAX 2022) and legacy enum values still present on older
+// campaigns. Unknown objectives fall back to ALL goals (open list).
+const OBJECTIVE_GOALS: Readonly<Record<string, readonly string[]>> = {
+  OUTCOME_SALES: ['OFFSITE_CONVERSIONS', 'VALUE', 'LINK_CLICKS', 'LANDING_PAGE_VIEWS', 'IMPRESSIONS', 'REACH'],
+  OUTCOME_LEADS: ['LEAD_GENERATION', 'OFFSITE_CONVERSIONS', 'LINK_CLICKS', 'IMPRESSIONS', 'REACH'],
+  OUTCOME_ENGAGEMENT: ['POST_ENGAGEMENT', 'LINK_CLICKS', 'IMPRESSIONS', 'REACH', 'THRUPLAY'],
+  OUTCOME_TRAFFIC: ['LINK_CLICKS', 'LANDING_PAGE_VIEWS', 'IMPRESSIONS', 'REACH'],
+  OUTCOME_AWARENESS: ['REACH', 'IMPRESSIONS', 'THRUPLAY'],
+  OUTCOME_APP_PROMOTION: ['APP_INSTALLS', 'OFFSITE_CONVERSIONS', 'LINK_CLICKS', 'IMPRESSIONS', 'REACH'],
+  CONVERSIONS: ['OFFSITE_CONVERSIONS', 'VALUE', 'LINK_CLICKS', 'LANDING_PAGE_VIEWS', 'IMPRESSIONS', 'REACH'],
+  LINK_CLICKS: ['LINK_CLICKS', 'LANDING_PAGE_VIEWS', 'IMPRESSIONS', 'REACH'],
+  POST_ENGAGEMENT: ['POST_ENGAGEMENT', 'LINK_CLICKS', 'IMPRESSIONS', 'REACH'],
+  PAGE_LIKES: ['POST_ENGAGEMENT', 'IMPRESSIONS', 'REACH'],
+  REACH: ['REACH', 'IMPRESSIONS'],
+  BRAND_AWARENESS: ['REACH', 'IMPRESSIONS', 'THRUPLAY'],
+  VIDEO_VIEWS: ['THRUPLAY', 'IMPRESSIONS', 'REACH'],
+  LEAD_GENERATION: ['LEAD_GENERATION', 'OFFSITE_CONVERSIONS', 'IMPRESSIONS', 'REACH'],
+  APP_INSTALLS: ['APP_INSTALLS', 'LINK_CLICKS', 'IMPRESSIONS', 'REACH'],
+  MESSAGES: ['CONVERSATIONS', 'LINK_CLICKS', 'IMPRESSIONS', 'REACH'],
+}
+
+export function goalsForObjective(objective: string): readonly ConversionOption[] {
+  const allowed = OBJECTIVE_GOALS[objective]
+  if (!allowed) {
+    return OPTIMIZATION_GOAL_OPTIONS
+  }
+  const set = new Set(allowed)
+  return OPTIMIZATION_GOAL_OPTIONS.filter((o) => set.has(o.value))
+}
+
+// Goals that require a custom conversion event (pixel-tracked). Others — like
+// LINK_CLICKS or REACH — have no event concept and the field should be hidden.
+const GOALS_NEEDING_EVENT: ReadonlySet<string> = new Set(['OFFSITE_CONVERSIONS', 'VALUE'])
+
+export function goalRequiresCustomEvent(goal: string): boolean {
+  return GOALS_NEEDING_EVENT.has(goal)
+}
+
+// Events valid per goal. VALUE only accepts money-bearing events (Meta uses
+// the event's reported value for bid optimization). OFFSITE_CONVERSIONS
+// accepts the full list. Unknown goals fall back to all events.
+const VALUE_GOAL_EVENTS: readonly string[] = [
+  'PURCHASE',
+  'INITIATE_CHECKOUT',
+  'ADD_PAYMENT_INFO',
+  'ADD_TO_CART',
+  'SUBSCRIBE',
+  'START_TRIAL',
+]
+
+export function eventsForGoal(goal: string): readonly ConversionOption[] {
+  if (goal === 'VALUE') {
+    const allowed = new Set(VALUE_GOAL_EVENTS)
+    return CUSTOM_EVENT_OPTIONS.filter((o) => allowed.has(o.value))
+  }
+  return CUSTOM_EVENT_OPTIONS
 }

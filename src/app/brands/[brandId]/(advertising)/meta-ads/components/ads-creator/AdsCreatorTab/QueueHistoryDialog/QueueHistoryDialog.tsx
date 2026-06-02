@@ -1,18 +1,18 @@
 'use client'
 
-import { memo, useMemo, useState } from 'react'
+import { memo, useCallback, useMemo, useState } from 'react'
 import Box from '@mui/material/Box'
-import Chip from '@mui/material/Chip'
 import Dialog from '@mui/material/Dialog'
 import IconButton from '@mui/material/IconButton'
-import List from '@mui/material/List'
 import Typography from '@mui/material/Typography'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import CloseIcon from '@mui/icons-material/Close'
 import HistoryIcon from '@mui/icons-material/History'
+import RefreshIcon from '@mui/icons-material/Refresh'
+import DeleteSweepOutlinedIcon from '@mui/icons-material/DeleteSweepOutlined'
 import type { LaunchJob } from '../useLaunchQueue'
-import QueueRow from '../QueueRow/QueueRow'
-import { QUEUE_FILTERS, filterJobs, type QueueFilter } from './helpers'
+import QueueSection, { type SectionBulkAction } from './QueueSection/QueueSection'
+import { groupJobs } from './helpers'
 import styles from './QueueHistoryDialog.module.css'
 
 interface Props {
@@ -33,15 +33,48 @@ export default memo(function QueueHistoryDialog({
   onDismiss,
 }: Props): JSX.Element {
   const fullScreen = useMediaQuery('(max-width: 600px)')
-  const [filter, setFilter] = useState<QueueFilter>('all')
-  const filtered = useMemo(() => filterJobs(jobs, filter), [jobs, filter])
+  const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(() => new Set(['done']))
+  const grouped = useMemo(() => groupJobs(jobs), [jobs])
+
+  const toggleSection = useCallback((id: string) => {
+    setCollapsed((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
+  }, [])
+
+  const handleToggleActive = useCallback(() => toggleSection('active'), [toggleSection])
+  const handleToggleFailed = useCallback(() => toggleSection('failed'), [toggleSection])
+  const handleToggleDone = useCallback(() => toggleSection('done'), [toggleSection])
+
+  const handleRetryAll = useCallback(() => {
+    grouped.failed.forEach((job) => onRetry(job.id))
+  }, [grouped.failed, onRetry])
+
+  const handleClearDone = useCallback(() => {
+    grouped.done.forEach((job) => onDismiss(job.id))
+  }, [grouped.done, onDismiss])
+
+  const retryAllAction = useMemo<SectionBulkAction>(
+    () => ({ label: 'Retry all', icon: <RefreshIcon fontSize="inherit" />, onClick: handleRetryAll }),
+    [handleRetryAll],
+  )
+  const clearDoneAction = useMemo<SectionBulkAction>(
+    () => ({ label: 'Clear all', icon: <DeleteSweepOutlinedIcon fontSize="inherit" />, onClick: handleClearDone }),
+    [handleClearDone],
+  )
 
   return (
     <Dialog
       open={open}
       onClose={onClose}
       fullScreen={fullScreen}
-      maxWidth="md"
+      maxWidth="sm"
       fullWidth
       aria-labelledby="queue-history-title"
       classes={{ paper: styles.paper }}
@@ -61,38 +94,45 @@ export default memo(function QueueHistoryDialog({
         </IconButton>
       </Box>
 
-      <Box component="nav" className={styles.filters} aria-label="Filter queue by status">
-        {QUEUE_FILTERS.map((f) => (
-          <Chip
-            key={f.id}
-            label={f.label}
-            clickable
-            onClick={() => setFilter(f.id)}
-            className={styles.chip}
-            data-active={filter === f.id ? 'true' : 'false'}
-          />
-        ))}
-      </Box>
-
       <Box className={styles.body}>
-        {filtered.length === 0 ? (
+        {jobs.length === 0 ? (
           <Box className={styles.empty}>
             <Typography component="p" variant="inherit" className={styles.emptyText}>
-              No jobs match this filter.
+              The queue is empty.
             </Typography>
           </Box>
         ) : (
-          <List disablePadding className={styles.list}>
-            {filtered.map((job) => (
-              <QueueRow
-                key={job.id}
-                job={job}
-                accountId={accountId}
-                onRetry={onRetry}
-                onDismiss={onDismiss}
-              />
-            ))}
-          </List>
+          <>
+            <QueueSection
+              title="Active"
+              jobs={grouped.active}
+              collapsed={collapsed.has('active')}
+              onToggle={handleToggleActive}
+              accountId={accountId}
+              onRetry={onRetry}
+              onDismiss={onDismiss}
+            />
+            <QueueSection
+              title="Failed"
+              jobs={grouped.failed}
+              collapsed={collapsed.has('failed')}
+              onToggle={handleToggleFailed}
+              accountId={accountId}
+              onRetry={onRetry}
+              onDismiss={onDismiss}
+              bulkAction={retryAllAction}
+            />
+            <QueueSection
+              title="Done"
+              jobs={grouped.done}
+              collapsed={collapsed.has('done')}
+              onToggle={handleToggleDone}
+              accountId={accountId}
+              onRetry={onRetry}
+              onDismiss={onDismiss}
+              bulkAction={clearDoneAction}
+            />
+          </>
         )}
       </Box>
     </Dialog>

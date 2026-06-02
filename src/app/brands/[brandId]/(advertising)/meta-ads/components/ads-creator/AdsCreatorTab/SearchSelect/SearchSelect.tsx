@@ -1,17 +1,67 @@
 'use client'
 
-import { memo, useCallback, useState, type ReactNode } from 'react'
+import {
+  createContext,
+  forwardRef,
+  memo,
+  useCallback,
+  useContext,
+  useState,
+  type ReactNode,
+} from 'react'
 import Autocomplete, { type AutocompleteRenderGroupParams } from '@mui/material/Autocomplete'
 import Box from '@mui/material/Box'
 import Collapse from '@mui/material/Collapse'
 import TextField from '@mui/material/TextField'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 import CheckIcon from '@mui/icons-material/Check'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import styles from './SearchSelect.module.css'
 
 export type OptionStatus = 'active' | 'paused'
+
+export interface SearchSelectCreateAction {
+  readonly label: string
+  readonly onClick: () => void
+}
+
+const CreateActionContext = createContext<SearchSelectCreateAction | null>(null)
+
+const ListboxWithCreate = forwardRef<HTMLUListElement, React.HTMLAttributes<HTMLUListElement>>(
+  function ListboxWithCreate({ children, ...rest }, ref) {
+    const action = useContext(CreateActionContext)
+    if (!action) {
+      return <Box component="ul" {...rest} ref={ref}>{children}</Box>
+    }
+    return (
+      <Box component="ul" {...rest} ref={ref}>
+        <Box
+          component="li"
+          className={`${styles.option} ${styles.createOption}`}
+          onMouseDown={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+          }}
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            action.onClick()
+          }}
+        >
+          <Box component="span" className={styles.optionIcon} aria-hidden>
+            <AddCircleOutlineIcon fontSize="small" />
+          </Box>
+          <Typography component="span" variant="inherit" className={styles.createOptionLabel}>
+            {action.label}
+          </Typography>
+        </Box>
+        {children}
+      </Box>
+    )
+  },
+)
 
 interface Props<T> {
   readonly value: T | null
@@ -29,8 +79,10 @@ interface Props<T> {
   readonly collapsibleGroups?: boolean
   readonly renderRowAction?: (option: T) => ReactNode
   readonly noOptionsText?: string
+  readonly createAction?: SearchSelectCreateAction
+  readonly error?: boolean
+  readonly errorText?: string
 }
-
 
 function SearchSelectInner<T>({
   value,
@@ -48,6 +100,9 @@ function SearchSelectInner<T>({
   collapsibleGroups = false,
   renderRowAction,
   noOptionsText = 'No matches.',
+  createAction,
+  error = false,
+  errorText,
 }: Props<T>): JSX.Element {
   // The trigger always prefers leadingIcon when provided so the picker shows
   // a stable brand/category mark; getOptionIcon stays for dropdown rows where
@@ -105,113 +160,120 @@ function SearchSelectInner<T>({
   ), [])
 
   const renderGroup = collapsibleGroups ? renderGroupCollapsible : renderGroupStatic
+
   return (
-    <Autocomplete<T>
-      size="small"
-      value={value}
-      options={[...options]}
-      disabled={disabled}
-      getOptionLabel={(option) => getOptionLabel(option)}
-      getOptionKey={(option) => getOptionId(option)}
-      isOptionEqualToValue={(a, b) => getOptionId(a) === getOptionId(b)}
-      filterOptions={(opts, state) => {
-        const q = state.inputValue.toLowerCase().trim()
-        if (q === '') return opts
-        return opts.filter((o) => {
-          const label = getOptionLabel(o).toLowerCase()
-          const id = getOptionId(o).toLowerCase()
-          const sec = getOptionSecondary ? getOptionSecondary(o).toLowerCase() : ''
-          return label.includes(q) || id.includes(q) || sec.includes(q)
-        })
-      }}
-      onChange={(_, next) => onChange(next)}
-      openOnFocus
-      selectOnFocus
-      clearOnBlur
-      handleHomeEndKeys
-      groupBy={getOptionGroup ? (option) => getOptionGroup(option) : undefined}
-      renderGroup={getOptionGroup ? renderGroup : undefined}
-      classes={{
-        paper: styles.menuPaper,
-        listbox: collapsibleGroups
-          ? `${styles.menuList} ${styles.menuListFixed}`
-          : styles.menuList,
-        option: styles.option,
-      }}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          placeholder={placeholder}
-          InputProps={{
-            ...params.InputProps,
-            startAdornment: triggerIcon ? (
-              <Box component="span" className={styles.triggerIconWrap} aria-hidden>
-                {triggerIcon}
-              </Box>
-            ) : undefined,
-          }}
-        />
-      )}
-      renderOption={(optionProps, option, { selected }) => {
-        const { key: _ignored, ...rest } = optionProps as React.HTMLAttributes<HTMLLIElement> & { key?: string }
-        const label = getOptionLabel(option)
-        const secondary = getOptionSecondary ? getOptionSecondary(option) : null
-        const tooltipText = secondary ? `${label} ${secondary}` : label
-        const icon: ReactNode = getOptionIcon ? getOptionIcon(option) : leadingIcon
-        return (
-          <Box
-            key={getOptionId(option)}
-            component="li"
-            {...rest}
-            className={styles.option}
-            data-selected={selected ? 'true' : 'false'}
-          >
-            {icon ? (
-              <Box component="span" className={styles.optionIcon} aria-hidden>
-                {icon}
-              </Box>
-            ) : null}
-            {getOptionStatus && (
-              <Box
-                component="span"
-                className={styles.statusDot}
-                data-status={getOptionStatus(option)}
-                aria-hidden
-              />
-            )}
-            <Tooltip title={tooltipText} placement="top" disableInteractive enterDelay={400}>
-              <Typography component="span" variant="inherit" className={styles.optionName}>
-                {label}
-              </Typography>
-            </Tooltip>
-            {secondary && (
-              <Typography component="span" variant="inherit" className={styles.optionSecondary}>
-                {secondary}
-              </Typography>
-            )}
-            {renderRowAction && (
-              <Box
-                component="span"
-                className={styles.optionAction}
-                onMouseDown={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                }}
-                onClick={(e) => e.stopPropagation()}
-              >
-                {renderRowAction(option)}
-              </Box>
-            )}
-            {selected && <CheckIcon className={styles.checkIconTrailing} fontSize="inherit" />}
-          </Box>
-        )
-      }}
-      noOptionsText={(
-        <Typography component="span" variant="inherit" className={styles.empty}>
-          {noOptionsText}
-        </Typography>
-      )}
-    />
+    <CreateActionContext.Provider value={createAction ?? null}>
+      <Autocomplete<T>
+        size="small"
+        value={value}
+        options={[...options]}
+        disabled={disabled}
+        getOptionLabel={(option) => getOptionLabel(option)}
+        getOptionKey={(option) => getOptionId(option)}
+        isOptionEqualToValue={(a, b) => getOptionId(a) === getOptionId(b)}
+        filterOptions={(opts, state) => {
+          const q = state.inputValue.toLowerCase().trim()
+          if (q === '') return opts
+          return opts.filter((o) => {
+            const label = getOptionLabel(o).toLowerCase()
+            const id = getOptionId(o).toLowerCase()
+            const sec = getOptionSecondary ? getOptionSecondary(o).toLowerCase() : ''
+            return label.includes(q) || id.includes(q) || sec.includes(q)
+          })
+        }}
+        onChange={(_, next) => onChange(next)}
+        openOnFocus
+        selectOnFocus
+        clearOnBlur
+        handleHomeEndKeys
+        groupBy={getOptionGroup ? (option) => getOptionGroup(option) : undefined}
+        renderGroup={getOptionGroup ? renderGroup : undefined}
+        classes={{
+          paper: styles.menuPaper,
+          listbox: collapsibleGroups
+            ? `${styles.menuList} ${styles.menuListFixed}`
+            : styles.menuList,
+          option: styles.option,
+        }}
+        ListboxComponent={createAction ? ListboxWithCreate : undefined}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            placeholder={placeholder}
+            error={error}
+            helperText={error ? errorText : undefined}
+            InputProps={{
+              ...params.InputProps,
+              startAdornment: triggerIcon ? (
+                <Box component="span" className={styles.triggerIconWrap} aria-hidden>
+                  {triggerIcon}
+                </Box>
+              ) : undefined,
+            }}
+          />
+        )}
+        renderOption={(optionProps, option, { selected }) => {
+          const { key: keyToOmit, ...rest } = optionProps as React.HTMLAttributes<HTMLLIElement> & { key?: string }
+          void keyToOmit
+          const label = getOptionLabel(option)
+          const secondary = getOptionSecondary ? getOptionSecondary(option) : null
+          const tooltipText = secondary ? `${label} ${secondary}` : label
+          const icon: ReactNode = getOptionIcon ? getOptionIcon(option) : leadingIcon
+          return (
+            <Box
+              key={getOptionId(option)}
+              component="li"
+              {...rest}
+              className={styles.option}
+              data-selected={selected ? 'true' : 'false'}
+            >
+              {icon ? (
+                <Box component="span" className={styles.optionIcon} aria-hidden>
+                  {icon}
+                </Box>
+              ) : null}
+              {getOptionStatus && (
+                <Box
+                  component="span"
+                  className={styles.statusDot}
+                  data-status={getOptionStatus(option)}
+                  aria-hidden
+                />
+              )}
+              <Tooltip title={tooltipText} placement="top" disableInteractive enterDelay={400}>
+                <Typography component="span" variant="inherit" className={styles.optionName}>
+                  {label}
+                </Typography>
+              </Tooltip>
+              {secondary && (
+                <Typography component="span" variant="inherit" className={styles.optionSecondary}>
+                  {secondary}
+                </Typography>
+              )}
+              {renderRowAction && (
+                <Box
+                  component="span"
+                  className={styles.optionAction}
+                  onMouseDown={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {renderRowAction(option)}
+                </Box>
+              )}
+              {selected && <CheckIcon className={styles.checkIconTrailing} fontSize="inherit" />}
+            </Box>
+          )
+        }}
+        noOptionsText={(
+          <Typography component="span" variant="inherit" className={styles.empty}>
+            {noOptionsText}
+          </Typography>
+        )}
+      />
+    </CreateActionContext.Provider>
   )
 }
 

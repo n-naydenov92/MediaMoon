@@ -27,6 +27,7 @@ interface Props {
   readonly onStartTimeChange: (nextIso: string) => void
   readonly onEndTimeChange: (nextIso: string) => void
   readonly disabled: boolean
+  readonly budgetError?: string
 }
 
 const BUDGET_OPTIONS: readonly { value: BudgetType; label: string }[] = [
@@ -46,6 +47,7 @@ export default memo(function BudgetScheduleSection({
   onStartTimeChange,
   onEndTimeChange,
   disabled,
+  budgetError,
 }: Props): JSX.Element {
   return (
     <Box className={styles.root}>
@@ -88,6 +90,7 @@ export default memo(function BudgetScheduleSection({
             onChange={onBudgetMajorUnitsChange}
             currency={currency}
             disabled={disabled || isCbo}
+            error={budgetError}
           />
         </Box>
       </Box>

@@ -13,6 +13,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import type {
   AdSet,
   Campaign,
+  DsaEntities,
   StatusFilter,
 } from '@/lib/gateways/MetaAdsGateway'
 import SearchSelect, { type OptionStatus } from '../SearchSelect/SearchSelect'
@@ -40,6 +41,8 @@ interface Props {
   readonly adSetStatus: StatusFilter
   readonly onAdSetStatusChange: (next: StatusFilter) => void
   readonly refetchAdSets: () => void
+  readonly accountCurrency: string
+  readonly dsaEntities: DsaEntities
 }
 
 function effectiveToOptionStatus(effective: string): OptionStatus {
@@ -56,6 +59,8 @@ export default memo(function CampaignStep({
   adSetStatus,
   onAdSetStatusChange,
   refetchAdSets,
+  accountCurrency,
+  dsaEntities,
 }: Props): JSX.Element {
   const selectedCampaign = useMemo(
     () => campaigns.find((c) => c.id === value.campaignId) ?? null,
@@ -68,21 +73,30 @@ export default memo(function CampaignStep({
   )
 
   const [duplicateSource, setDuplicateSource] = useState<AdSet | null>(null)
-  const closeDuplicateDialog = useCallback(() => setDuplicateSource(null), [])
+  const [createOpen, setCreateOpen] = useState<boolean>(false)
+  const closeEditor = useCallback(() => {
+    setDuplicateSource(null)
+    setCreateOpen(false)
+  }, [])
   const [toast, setToast] = useState<SuccessToast | null>(null)
   const closeToast = useCallback(() => setToast(null), [])
 
-  const openDuplicate = useCallback((adSet: AdSet) => {
-    setDuplicateSource(adSet)
-    // Blur the trigger before MUI Dialog mounts — otherwise the focused element
-    // ends up inside an aria-hidden subtree and React logs a console warning.
-    if (typeof document !== 'undefined') {
-      const active = document.activeElement
-      if (active instanceof HTMLElement) {
-        active.blur()
-      }
+  // Blur the trigger before MUI Dialog mounts — otherwise the focused element
+  // ends up inside an aria-hidden subtree and React logs a console warning.
+  const blurActiveElement = useCallback(() => {
+    if (typeof document === 'undefined') {
+      return
+    }
+    const active = document.activeElement
+    if (active instanceof HTMLElement) {
+      active.blur()
     }
   }, [])
+
+  const openDuplicate = useCallback((adSet: AdSet) => {
+    setDuplicateSource(adSet)
+    blurActiveElement()
+  }, [blurActiveElement])
 
   const handleDuplicateSuccess = useCallback((
     newAdSetId: string,
@@ -113,6 +127,16 @@ export default memo(function CampaignStep({
       </IconButton>
     </Tooltip>
   ), [openDuplicate])
+
+  const openCreateAdSet = useCallback(() => {
+    setCreateOpen(true)
+    blurActiveElement()
+  }, [blurActiveElement])
+
+  const adSetCreateAction = useMemo(
+    () => ({ label: 'Create new ad set', onClick: openCreateAdSet }),
+    [openCreateAdSet],
+  )
 
   return (
     <Box className={styles.root}>
@@ -154,23 +178,29 @@ export default memo(function CampaignStep({
           onChange={(next) => onChange({ ...value, adSetId: next?.id ?? '' })}
           placeholder="Select ad set…"
           leadingIcon={<AdsClickOutlinedIcon fontSize="small" />}
-          disabled={!value.campaignId || adSets.length === 0}
+          disabled={!value.campaignId}
           getOptionId={(o) => o.id}
           getOptionLabel={(o) => o.name}
           getOptionStatus={(o) => effectiveToOptionStatus(o.effectiveStatus)}
           renderRowAction={renderAdSetRowAction}
+          createAction={adSetCreateAction}
           noOptionsText="No ad sets match this search."
         />
       </Box>
 
       <AdSetEditor
-        open={duplicateSource !== null}
-        onClose={closeDuplicateDialog}
+        open={duplicateSource !== null || createOpen}
+        onClose={closeEditor}
         onSuccess={handleDuplicateSuccess}
         accountId={value.accountId}
+        mode={createOpen ? 'create' : 'duplicate'}
         sourceAdSetId={duplicateSource?.id ?? ''}
         sourceAdSetName={duplicateSource?.name ?? ''}
         sourceCampaignName={selectedCampaign?.name ?? ''}
+        campaignObjective={selectedCampaign?.objective}
+        accountCurrency={accountCurrency}
+        campaignId={value.campaignId}
+        dsaEntities={dsaEntities}
       />
 
       <Snackbar

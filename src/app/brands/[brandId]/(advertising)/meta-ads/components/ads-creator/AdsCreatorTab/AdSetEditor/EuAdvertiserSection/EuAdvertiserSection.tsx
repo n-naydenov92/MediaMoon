@@ -2,15 +2,16 @@
 
 import { memo } from 'react'
 import Box from '@mui/material/Box'
-import TextField from '@mui/material/TextField'
 import GavelOutlinedIcon from '@mui/icons-material/GavelOutlined'
-import FieldLabel from '../FieldLabel/FieldLabel'
 import SectionTitle from '../SectionTitle/SectionTitle'
+import DsaField from './DsaField/DsaField'
 import styles from './EuAdvertiserSection.module.css'
 
 interface Props {
   readonly beneficiary: string
   readonly payor: string
+  readonly beneficiaryOptions: readonly string[]
+  readonly payorOptions: readonly string[]
   readonly onBeneficiaryChange: (next: string) => void
   readonly onPayorChange: (next: string) => void
   readonly disabled: boolean
@@ -19,6 +20,8 @@ interface Props {
 export default memo(function EuAdvertiserSection({
   beneficiary,
   payor,
+  beneficiaryOptions,
+  payorOptions,
   onBeneficiaryChange,
   onPayorChange,
   disabled,
@@ -30,35 +33,24 @@ export default memo(function EuAdvertiserSection({
       </SectionTitle>
 
       <Box className={styles.row}>
-        <Box className={styles.field}>
-          <FieldLabel htmlFor="ad-set-editor-beneficiary">Beneficiary</FieldLabel>
-          <TextField
-            id="ad-set-editor-beneficiary"
-            value={beneficiary}
-            onChange={(e) => onBeneficiaryChange(e.target.value)}
-            size="small"
-            variant="outlined"
-            fullWidth
-            disabled={disabled}
-            className="density-dialog"
-            placeholder="Legal name of beneficiary"
-          />
-        </Box>
-
-        <Box className={styles.field}>
-          <FieldLabel htmlFor="ad-set-editor-payor">Payer</FieldLabel>
-          <TextField
-            id="ad-set-editor-payor"
-            value={payor}
-            onChange={(e) => onPayorChange(e.target.value)}
-            size="small"
-            variant="outlined"
-            fullWidth
-            disabled={disabled}
-            className="density-dialog"
-            placeholder="Legal name of payer"
-          />
-        </Box>
+        <DsaField
+          label="Beneficiary"
+          fieldId="ad-set-editor-beneficiary"
+          value={beneficiary}
+          options={beneficiaryOptions}
+          onChange={onBeneficiaryChange}
+          disabled={disabled}
+          placeholder="Legal name of beneficiary"
+        />
+        <DsaField
+          label="Payer"
+          fieldId="ad-set-editor-payor"
+          value={payor}
+          options={payorOptions}
+          onChange={onPayorChange}
+          disabled={disabled}
+          placeholder="Legal name of payer"
+        />
       </Box>
     </Box>
   )

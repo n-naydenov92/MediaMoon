@@ -7,9 +7,53 @@ import type {
   PlacementSelection,
 } from '@/lib/gateways/MetaAdsGateway'
 import type { DraftState } from './useAdSetDraft'
+import { goalRequiresCustomEvent } from './ConversionSection/options'
 
 // Meta refuses start_time<=now; small buffer covers clock skew + request travel.
 const START_TIME_GRACE_MS = 60_000
+
+export const FIELD_REQUIRED = 'Field required'
+export const DEFAULT_BID_STRATEGY = 'LOWEST_COST_WITHOUT_CAP'
+export const DEFAULT_CURRENCY = 'USD'
+
+// Older ad sets return UNDEFINED for destination_type when conversions are
+// pixel-driven; coerce to WEBSITE so the UI shows the right fields. Also backfill
+// the bid strategy default Meta omits on legacy ad sets.
+export function normalizeAdSetDetail(detail: AdSetDetail): AdSetDetail {
+  const rawDest = detail.destinationType
+  const looksLikeWebsite = (!rawDest || rawDest === 'UNDEFINED')
+    && (detail.pixelId !== '' || detail.customEventType !== '')
+  return {
+    ...detail,
+    destinationType: looksLikeWebsite ? 'WEBSITE' : rawDest,
+    bidStrategy: detail.bidStrategy || DEFAULT_BID_STRATEGY,
+  }
+}
+
+export function computeValidationErrors(draft: DraftState): Readonly<Record<string, string>> {
+  const errs: Record<string, string> = {}
+  if (draft.name.trim().length === 0) {
+    errs.name = FIELD_REQUIRED
+  }
+  if (draft.budgetMajorUnits <= 0) {
+    errs.budget = FIELD_REQUIRED
+  }
+  if (draft.optimizationGoal === '') {
+    errs.optimizationGoal = FIELD_REQUIRED
+  }
+  const needsEvent = goalRequiresCustomEvent(draft.optimizationGoal)
+  if (needsEvent && draft.customEventType === '') {
+    errs.customEventType = FIELD_REQUIRED
+  }
+  const destIsWebsite = draft.destinationType === '' || draft.destinationType.includes('WEBSITE')
+  if (needsEvent && destIsWebsite && draft.pixelId === '') {
+    errs.pixelId = FIELD_REQUIRED
+  }
+  if (draft.countries.length === 0) {
+    errs.countries = FIELD_REQUIRED
+  }
+  return errs
+}
 
 export interface DuplicateRequestPayload {
   readonly adSetId: string
@@ -24,6 +68,27 @@ export interface DuplicateRequestPayload {
   dsaBeneficiary?: string
   dsaPayor?: string
   optimizationGoal?: string
+  bidStrategy?: string
+  bidAmountMinorUnits?: number
+  destinationType?: string
+  promotedObject?: Record<string, unknown>
+  attributionSpec?: readonly { event_type: string; window_days: number }[]
+}
+
+export interface CreateRequestPayload {
+  readonly accountId: string
+  readonly campaignId: string
+  readonly name: string
+  readonly budgetType: BudgetType
+  readonly budgetMinorUnits: number
+  readonly optimizationGoal: string
+  readonly billingEvent: string
+  readonly targeting: Record<string, unknown>
+  readonly isDynamicCreative: boolean
+  startTime?: string
+  endTime?: string
+  dsaBeneficiary?: string
+  dsaPayor?: string
   bidStrategy?: string
   bidAmountMinorUnits?: number
   destinationType?: string
@@ -148,6 +213,84 @@ const ADVANTAGE_PLUS_PLACEMENT: PlacementSelection = {
   instagramPositions: [],
   audienceNetworkPositions: [],
   messengerPositions: [],
+}
+
+export function buildCreatePayload(
+  draft: DraftState,
+  accountId: string,
+  campaignId: string,
+  now: number = Date.now(),
+): CreateRequestPayload {
+  const trimmedName = draft.name.trim()
+  const budgetMinorUnits = Math.round(draft.budgetMajorUnits * 100)
+
+  const targeting: Record<string, unknown> = {
+    age_min: draft.ageMin,
+    age_max: draft.ageMax,
+    genders: genderToMetaArray(draft.gender),
+    geo_locations: {
+      countries: [...draft.countries],
+      location_types: ['home', 'recent'],
+    },
+    targeting_automation: {
+      advantage_audience: draft.advantageAudience ? 1 : 0,
+      individual_setting: {
+        age: draft.advantageAge ? 1 : 0,
+        gender: draft.advantageGender ? 1 : 0,
+      },
+    },
+    ...buildPlacementsForTargeting(ADVANTAGE_PLUS_PLACEMENT),
+  }
+
+  const payload: CreateRequestPayload = {
+    accountId,
+    campaignId,
+    name: trimmedName,
+    budgetType: draft.budgetType,
+    budgetMinorUnits,
+    optimizationGoal: draft.optimizationGoal,
+    billingEvent: 'IMPRESSIONS',
+    targeting,
+    isDynamicCreative: draft.isDynamicCreative,
+  }
+
+  const stateStartTs = Date.parse(draft.startTime)
+  payload.startTime = Number.isFinite(stateStartTs) && stateStartTs > now
+    ? draft.startTime
+    : new Date(now + START_TIME_GRACE_MS).toISOString()
+
+  const endTs = Date.parse(draft.endTime)
+  if (Number.isFinite(endTs) && endTs > now) {
+    payload.endTime = draft.endTime
+  }
+
+  if (draft.dsaBeneficiary) {
+    payload.dsaBeneficiary = draft.dsaBeneficiary
+  }
+  if (draft.dsaPayor) {
+    payload.dsaPayor = draft.dsaPayor
+  }
+  if (draft.bidStrategy) {
+    payload.bidStrategy = draft.bidStrategy
+  }
+  const bidAmountMinorUnits = Math.round(draft.bidAmountMajorUnits * 100)
+  if (bidAmountMinorUnits > 0) {
+    payload.bidAmountMinorUnits = bidAmountMinorUnits
+  }
+  if (draft.destinationType) {
+    payload.destinationType = draft.destinationType
+  }
+  if (draft.pixelId || draft.customEventType) {
+    payload.promotedObject = {
+      pixel_id: draft.pixelId,
+      custom_event_type: draft.customEventType,
+    }
+  }
+  if (draft.attributionSpec.length > 0) {
+    payload.attributionSpec = attributionSpecToPayload(draft.attributionSpec)
+  }
+
+  return payload
 }
 
 export function buildDuplicatePayload(

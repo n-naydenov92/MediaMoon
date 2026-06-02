@@ -13,6 +13,7 @@ import Notice from '../../Notice/Notice'
 import CreatorPane from './CreatorPane/CreatorPane'
 import LibraryPane from './LibraryPane/LibraryPane'
 import { EMPTY_COPY, type CopyValue } from './CopyForm/CopyForm'
+import { isValidDestinationUrl } from './CopyForm/helpers'
 import { EMPTY_TARGETING, type TargetingValue } from './CreatorPane/useTargetingData'
 import { useLaunchQueue } from './useLaunchQueue'
 import styles from './AdsCreatorTab.module.css'
@@ -53,7 +54,7 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
     && copy.name !== ''
     && copy.headlines[0] !== ''
     && copy.primaryTexts[0] !== ''
-    && copy.url !== ''
+    && isValidDestinationUrl(copy.url)
 
   const handleSubmit = useCallback(() => {
     if (!canSubmit || !targetMarket) {

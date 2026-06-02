@@ -11,6 +11,7 @@ export type {
   BudgetType,
   CampaignBudget,
   DeviceMode,
+  DsaEntities,
   PlacementSelection,
   Gender,
   Pixel,
@@ -28,10 +29,12 @@ export { CTA_TYPES } from './types'
 
 export {
   countActiveAdsInAccount,
+  createAdSet,
   duplicateAdSet,
   fetchAdAccounts,
   fetchAdSets,
   fetchCampaigns,
+  fetchDsaEntities,
   fetchInstagramAccountsForPage,
   fetchPages,
 } from './accountsApi'

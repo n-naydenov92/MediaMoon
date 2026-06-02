@@ -142,6 +142,24 @@
   background: color-mix(in srgb, var(--accent) 20%, var(--surface-1));
 }
 
+.menuList .option.option.createOption {
+  color: var(--accent);
+  border-bottom: 1px solid var(--hairline);
+  border-radius: 6px 6px 0 0;
+  margin-bottom: 4px;
+  padding-bottom: 8px;
+}
+
+.menuList .option.option.createOption:hover,
+.menuList .option.option.createOption:global(.Mui-focused) {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.createOptionLabel {
+  font-weight: 700;
+  color: var(--accent);
+}
+
 .optionIcon {
   display: inline-flex;
   align-items: center;

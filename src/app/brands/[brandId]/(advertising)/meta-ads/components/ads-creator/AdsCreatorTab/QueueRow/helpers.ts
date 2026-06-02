@@ -16,12 +16,6 @@ export const STATUS_LABELS: Record<JobStatus, string> = {
   failed: 'FAILED',
 }
 
-export function adsManagerUrl(accountIdRaw: string | null): string {
-  if (!accountIdRaw) return 'https://business.facebook.com/adsmanager/manage/ads'
-  const id = accountIdRaw.replace('act_', '')
-  return `https://business.facebook.com/adsmanager/manage/ads?act=${id}`
-}
-
 export function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`

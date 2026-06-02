@@ -12,6 +12,7 @@ interface Props {
   readonly currency: string
   readonly disabled?: boolean
   readonly id: string
+  readonly error?: string
 }
 
 export default memo(function BudgetField({
@@ -20,6 +21,7 @@ export default memo(function BudgetField({
   currency,
   disabled,
   id,
+  error,
 }: Props): JSX.Element {
   return (
     <TextField
@@ -41,6 +43,8 @@ export default memo(function BudgetField({
       variant="outlined"
       fullWidth
       disabled={disabled}
+      error={Boolean(error)}
+      helperText={error}
       className="density-dialog"
       inputProps={{ min: 0, step: 0.01 }}
       // eslint-disable-next-line react/jsx-no-duplicate-props

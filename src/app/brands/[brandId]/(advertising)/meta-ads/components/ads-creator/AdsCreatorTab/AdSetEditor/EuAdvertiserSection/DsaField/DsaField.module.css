@@ -1,0 +1,22 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.switchBack {
+  align-self: flex-start;
+  margin-top: 2px;
+  padding-left: 6px;
+  padding-right: 6px;
+  text-transform: none;
+  font-size: 12px;
+  line-height: 1.2;
+  color: var(--text-secondary);
+}
+
+.switchBack:hover {
+  background: transparent;
+  color: var(--accent);
+}

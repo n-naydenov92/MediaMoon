@@ -10,9 +10,11 @@ import FieldLabel from '../FieldLabel/FieldLabel'
 import SectionTitle from '../SectionTitle/SectionTitle'
 import AttributionBidAccordion from './AttributionBidAccordion/AttributionBidAccordion'
 import {
-  CUSTOM_EVENT_OPTIONS,
   DESTINATION_TYPE_OPTIONS,
   OPTIMIZATION_GOAL_OPTIONS,
+  eventsForGoal,
+  goalRequiresCustomEvent,
+  goalsForObjective,
   isKnownDestination,
   resolveOption,
   type ConversionOption,
@@ -30,6 +32,10 @@ interface Props {
   readonly pixels: readonly Pixel[]
   readonly pixelsLoading: boolean
   readonly attributionSpec: readonly AttributionWindow[]
+  readonly campaignObjective?: string
+  readonly goalError?: string
+  readonly eventError?: string
+  readonly pixelError?: string
   readonly onDestinationTypeChange: (next: string) => void
   readonly onOptimizationGoalChange: (next: string) => void
   readonly onPixelIdChange: (next: string) => void
@@ -51,6 +57,10 @@ export default memo(function ConversionSection({
   pixels,
   pixelsLoading,
   attributionSpec,
+  campaignObjective,
+  goalError,
+  eventError,
+  pixelError,
   onDestinationTypeChange,
   onOptimizationGoalChange,
   onPixelIdChange,
@@ -64,13 +74,15 @@ export default memo(function ConversionSection({
     () => resolveOption(DESTINATION_TYPE_OPTIONS, destinationType),
     [destinationType],
   )
-  const goalOptions = useMemo(
-    () => resolveOption(OPTIMIZATION_GOAL_OPTIONS, optimizationGoal),
-    [optimizationGoal],
-  )
+  const goalOptions = useMemo(() => {
+    const filtered = campaignObjective
+      ? goalsForObjective(campaignObjective)
+      : OPTIMIZATION_GOAL_OPTIONS
+    return resolveOption(filtered, optimizationGoal)
+  }, [campaignObjective, optimizationGoal])
   const eventOptions = useMemo(
-    () => resolveOption(CUSTOM_EVENT_OPTIONS, customEventType),
-    [customEventType],
+    () => resolveOption(eventsForGoal(optimizationGoal), customEventType),
+    [optimizationGoal, customEventType],
   )
 
   const selectedDestination = useMemo(
@@ -147,6 +159,8 @@ export default memo(function ConversionSection({
             getOptionId={(o) => o.value}
             getOptionLabel={(o) => o.label}
             noOptionsText="No matches."
+            error={Boolean(goalError)}
+            errorText={goalError}
           />
         </Box>
       </Box>
@@ -165,22 +179,28 @@ export default memo(function ConversionSection({
               getOptionLabel={(o) => o.name}
               getOptionSecondary={(o) => o.id}
               noOptionsText="No pixels found."
+              error={Boolean(pixelError)}
+              errorText={pixelError}
             />
           </Box>
 
-          <Box className={styles.field}>
-            <FieldLabel>Conversion event</FieldLabel>
-            <SearchSelect<ConversionOption>
-              value={selectedEvent}
-              options={eventOptions}
-              onChange={(next) => onCustomEventTypeChange(next?.value ?? '')}
-              placeholder="Select event…"
-              disabled={disabled}
-              getOptionId={(o) => o.value}
-              getOptionLabel={(o) => o.label}
-              noOptionsText="No matches."
-            />
-          </Box>
+          {goalRequiresCustomEvent(optimizationGoal) && (
+            <Box className={styles.field}>
+              <FieldLabel>Conversion event</FieldLabel>
+              <SearchSelect<ConversionOption>
+                value={selectedEvent}
+                options={eventOptions}
+                onChange={(next) => onCustomEventTypeChange(next?.value ?? '')}
+                placeholder="Select event…"
+                disabled={disabled}
+                getOptionId={(o) => o.value}
+                getOptionLabel={(o) => o.label}
+                noOptionsText="No matches."
+                error={Boolean(eventError)}
+                errorText={eventError}
+              />
+            </Box>
+          )}
         </Box>
       )}
 
