@@ -1,6 +1,6 @@
 import type { BrandConfig } from '@/types'
 
-export type BrandId = 'stoitchkov' | 'thegreenbear' | 'sapphire'
+export type BrandId = 'stoitchkov' | 'thegreenbear' | 'sapphire' | 'bubullincas'
 
 export const BRAND_REGISTRY: readonly (BrandConfig & { readonly id: BrandId })[] = [
   {
@@ -25,6 +25,14 @@ export const BRAND_REGISTRY: readonly (BrandConfig & { readonly id: BrandId })[]
     emoji: '💎',
     color: '#1877F2',
     description: 'Luxury jewellery brand',
+    markets: ['BG'],
+  },
+  {
+    id: 'bubullincas',
+    label: 'Bubullincas',
+    emoji: '🐞',
+    color: '#E63946',
+    description: 'Bubullincas brand',
     markets: ['BG'],
   },
 ]

@@ -37,6 +37,13 @@ export const BUSINESS_MANAGERS: readonly MetaBusinessManager[] = [
     tokenEnvVar: 'META_TOKEN_THEGREENBEAR_2',
     accountIds: ['act_639771789949515'],
   },
+  {
+    id: 'bubullincas-bm',
+    label: 'Bubullincas BM',
+    brandId: 'bubullincas',
+    tokenEnvVar: 'META_TOKEN_BUBULLINCAS',
+    accountIds: ['act_1073479967115320'],
+  },
 ]
 
 export function getBusinessManagerForAccount(accountId: string): MetaBusinessManager | null {

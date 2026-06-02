@@ -9,6 +9,7 @@ export const BRAND_MARKET_GOOGLE_ADS_CUSTOMERS: Record<BrandId, BrandMarketCusto
   stoitchkov: { BG: ['1666622745'] },
   thegreenbear: { BG: ['5547703003'] },
   sapphire: { BG: ['7797859280'] },
+  bubullincas: {},
 }
 
 export interface GoogleAdsCredentials {

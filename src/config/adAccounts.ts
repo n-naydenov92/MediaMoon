@@ -14,6 +14,9 @@ export const BRAND_MARKET_AD_ACCOUNTS: Record<BrandId, BrandMarketAccounts> = {
   sapphire: {
     BG: ['act_734480455547742', 'act_1578892512968195'],
   },
+  bubullincas: {
+    BG: ['act_1073479967115320'],
+  },
 }
 
 export function getAdAccountIds(brandId: BrandId, market: Market): readonly string[] {
