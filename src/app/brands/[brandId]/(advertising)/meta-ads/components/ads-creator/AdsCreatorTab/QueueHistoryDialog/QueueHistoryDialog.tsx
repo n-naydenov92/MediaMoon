@@ -105,14 +105,6 @@ export default memo(function QueueHistoryDialog({
           </Box>
         ) : (
           <>
-            <Box className={styles.tableHeader} aria-hidden>
-              <Box component="span" />
-              <Typography component="span" variant="inherit" className={styles.th}>Name</Typography>
-              <Typography component="span" variant="inherit" className={styles.th}>Type</Typography>
-              <Typography component="span" variant="inherit" className={styles.th}>Status</Typography>
-              <Typography component="span" variant="inherit" className={`${styles.th} ${styles.thCenter}`}>Open</Typography>
-              <Typography component="span" variant="inherit" className={`${styles.th} ${styles.thCenter}`}>Actions</Typography>
-            </Box>
             <QueueSection
               title="Active"
               jobs={grouped.active}

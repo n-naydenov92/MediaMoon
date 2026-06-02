@@ -69,6 +69,12 @@ export default memo(function BulkNamingSection({
             value={tags.textType}
             onChange={(e) => onTagsChange({ ...tags, textType: e.target.value })}
           />
+          <FormTextField
+            label="Destination"
+            className={styles.tagField}
+            value={tags.destination}
+            onChange={(e) => onTagsChange({ ...tags, destination: e.target.value })}
+          />
           <Button
             type="button"
             size="small"
@@ -88,6 +94,7 @@ export default memo(function BulkNamingSection({
         <Box className={`${styles.bulkFields} ${styles.bulkFieldsLast}`}>
           <FormTextField
             label="Full name for all ads"
+            fullWidth={false}
             className={styles.fullNameField}
             value={fullName}
             onChange={(e) => onFullNameChange(e.target.value)}

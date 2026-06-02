@@ -75,6 +75,27 @@
   color: var(--accent);
 }
 
+.columns {
+  display: grid;
+  grid-template-columns: var(--queue-grid);
+  align-items: center;
+  gap: 10px;
+  padding: 4px 8px 4px 12px;
+}
+
+.col {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.colCenter {
+  text-align: center;
+}
+
 .rows {
   display: flex;
   flex-direction: column;

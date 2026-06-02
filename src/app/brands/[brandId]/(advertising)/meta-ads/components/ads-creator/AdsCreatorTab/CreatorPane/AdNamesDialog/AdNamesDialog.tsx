@@ -18,6 +18,7 @@ import {
   buildAdNameFromTags,
   mapWith,
   resolvePageToken,
+  restampPageToken,
 } from '../helpers'
 import BulkNamingSection from './BulkNamingSection/BulkNamingSection'
 import PageTokensSection from './PageTokensSection/PageTokensSection'
@@ -54,7 +55,8 @@ export default memo(function AdNamesDialog({
   const [pageNamesOpen, setPageNamesOpen] = useState(false)
   const togglePageNames = useCallback(() => setPageNamesOpen((v) => !v), [])
   const [tags, setTags] = useState<AdNameTags>(EMPTY_AD_NAME_TAGS)
-  const tagsEmpty = tags.product === '' && tags.creativeInfo === '' && tags.textType === ''
+  const tagsEmpty = tags.product === '' && tags.creativeInfo === ''
+    && tags.textType === '' && tags.destination === ''
   const [fullName, setFullName] = useState('')
 
   const combos = useMemo(
@@ -96,12 +98,14 @@ export default memo(function AdNamesDialog({
     for (const file of files) {
       const key = adNameMapKey(page.id, file)
       const current = names.get(key)
-      if (current === undefined || !oldTok || !current.endsWith(`-${oldTok}`)) {
+      if (current === undefined) {
         continue
       }
-      const base = current.slice(0, -(oldTok.length + 1))
-      nextNames.set(key, value ? `${base}-${value}` : base)
-      changed = true
+      const updated = restampPageToken(current, oldTok, value)
+      if (updated !== current) {
+        nextNames.set(key, updated)
+        changed = true
+      }
     }
     if (changed) {
       onChange(nextNames)
@@ -113,7 +117,7 @@ export default memo(function AdNamesDialog({
       open={open}
       onClose={onClose}
       fullScreen={fullScreen}
-      maxWidth="sm"
+      maxWidth="md"
       fullWidth
       aria-labelledby="ad-names-title"
       classes={{ paper: styles.paper }}

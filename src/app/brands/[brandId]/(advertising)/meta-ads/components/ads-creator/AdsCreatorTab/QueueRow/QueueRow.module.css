@@ -24,16 +24,16 @@
   color: var(--text-secondary);
 }
 
-.kindIcon[data-status='done'] {
+.row[data-status='done'] .kindIcon {
   color: var(--success);
 }
 
-.kindIcon[data-status='failed'] {
+.row[data-status='failed'] .kindIcon {
   color: var(--error);
 }
 
-.kindIcon[data-status='uploading'],
-.kindIcon[data-status='publishing'] {
+.row[data-status='uploading'] .kindIcon,
+.row[data-status='publishing'] .kindIcon {
   color: var(--accent);
 }
 

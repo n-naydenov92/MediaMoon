@@ -33,12 +33,21 @@ export interface AdNameTags {
   readonly product: string
   readonly creativeInfo: string
   readonly textType: string
+  readonly destination: string
 }
 
-export const EMPTY_AD_NAME_TAGS: AdNameTags = { product: '', creativeInfo: '', textType: '' }
+export const EMPTY_AD_NAME_TAGS: AdNameTags = {
+  product: '',
+  creativeInfo: '',
+  textType: '',
+  destination: '',
+}
 
-// The free fields the operator overwrites in the generated name string.
+// The free fields the operator overwrites in the generated name string. The
+// destination (e.g. PP/HP) is appended after the page token, so it is its own
+// trailing placeholder rather than part of this list.
 const PLACEHOLDER_PARTS = ['Product', 'CreativeInfo', 'TextType'] as const
+const DESTINATION_PLACEHOLDER = 'Dest'
 
 // Free text shares the "-" field separator, so collapse internal whitespace to
 // "-" and trim — keeps each authored value as one readable token.
@@ -59,6 +68,7 @@ export function buildAutoAdName(
     monthToken(now),
     ...PLACEHOLDER_PARTS,
     pageTok,
+    DESTINATION_PLACEHOLDER,
   ]
     .filter(Boolean)
     .join('-')
@@ -78,6 +88,7 @@ export function buildAdNameFromTags(
     sanitizeTag(tags.creativeInfo),
     sanitizeTag(tags.textType),
     pageTok,
+    sanitizeTag(tags.destination),
   ]
     .filter(Boolean)
     .join('-')
@@ -95,6 +106,29 @@ export function resolvePageToken(
 
 export function adNameMapKey(pageId: string, file: File): string {
   return `${pageId}::${fileKey(file)}`
+}
+
+// Swap the page-token segment in a built name when the page token changes,
+// preserving any trailing destination segment (the name is `…-{page}` or
+// `…-{page}-{dest}`). An empty newTok drops the page segment but keeps the tail.
+// Returns the name untouched when the old token isn't present — manual edits and
+// names from other pages are left alone.
+export function restampPageToken(name: string, oldTok: string, newTok: string): string {
+  if (!oldTok) {
+    return name
+  }
+  if (name.endsWith(`-${oldTok}`)) {
+    const base = name.slice(0, -(oldTok.length + 1))
+    return newTok ? `${base}-${newTok}` : base
+  }
+  const marker = `-${oldTok}-`
+  const idx = name.lastIndexOf(marker)
+  if (idx === -1) {
+    return name
+  }
+  const before = name.slice(0, idx)
+  const tail = name.slice(idx + marker.length)
+  return newTok ? `${before}-${newTok}-${tail}` : `${before}-${tail}`
 }
 
 // One ad per (page × file). Each combo carries its resolved page token so callers

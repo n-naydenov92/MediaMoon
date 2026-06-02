@@ -156,8 +156,8 @@
 }
 
 .bulkFields .tagField {
-  flex: 1 1 110px;
-  min-width: 0;
+  flex: 1 1 0;
+  min-width: 84px;
 }
 
 .bulkFields .applyButton {
@@ -281,7 +281,7 @@
 .list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 20px;
 }
 
 .fileRow {

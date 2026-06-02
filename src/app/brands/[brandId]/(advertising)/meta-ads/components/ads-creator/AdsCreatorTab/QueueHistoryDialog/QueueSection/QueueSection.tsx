@@ -78,6 +78,14 @@ export default memo(function QueueSection({
       </Box>
 
       <Collapse in={!collapsed} timeout={200} unmountOnExit>
+        <Box className={styles.columns} aria-hidden>
+          <Box component="span" />
+          <Typography component="span" variant="inherit" className={styles.col}>Name</Typography>
+          <Typography component="span" variant="inherit" className={styles.col}>Type</Typography>
+          <Typography component="span" variant="inherit" className={styles.col}>Status</Typography>
+          <Typography component="span" variant="inherit" className={`${styles.col} ${styles.colCenter}`}>Open</Typography>
+          <Typography component="span" variant="inherit" className={`${styles.col} ${styles.colCenter}`}>Actions</Typography>
+        </Box>
         <Box className={styles.rows}>
           {jobs.map((job) => (
             <QueueRow
