@@ -30,7 +30,7 @@ export default memo(function QueueRow({ job, accountId, onRetry, onStop, onDismi
   if (job.kind === 'adSet') {
     return (
       <Box className={styles.row} data-status={job.status}>
-        <Box component="span" className={`${styles.kindIcon} ${styles.kindIconBrand}`} aria-hidden>
+        <Box component="span" className={styles.kindIcon} data-status={job.status} aria-hidden>
           <LayersOutlinedIcon fontSize="inherit" />
         </Box>
         <Typography component="span" variant="inherit" className={styles.title}>
@@ -44,18 +44,20 @@ export default memo(function QueueRow({ job, accountId, onRetry, onStop, onDismi
             {STATUS_LABELS.done}
           </Typography>
         </Box>
-        <Tooltip title="Open in Ads Manager" placement="top" disableInteractive>
-          <IconButton
-            component="a"
-            aria-label="Open in Ads Manager"
-            className={styles.openBtn}
-            href={buildAdSetHref(job.accountId, job.adSetId)}
-            target="_blank"
-            rel="noreferrer"
-          >
-            <OpenInNewIcon fontSize="inherit" />
-          </IconButton>
-        </Tooltip>
+        <Box className={styles.openCell}>
+          <Tooltip title="Open in Ads Manager" placement="top" disableInteractive>
+            <IconButton
+              component="a"
+              aria-label="Open in Ads Manager"
+              className={styles.openBtn}
+              href={buildAdSetHref(job.accountId, job.adSetId)}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <OpenInNewIcon fontSize="inherit" />
+            </IconButton>
+          </Tooltip>
+        </Box>
         <Box className={styles.actions}>
           <Tooltip title="Dismiss" placement="top" disableInteractive>
             <IconButton aria-label="Dismiss" className={styles.actionBtn} onClick={() => onDismiss(job.id)}>
@@ -114,20 +116,22 @@ export default memo(function QueueRow({ job, accountId, onRetry, onStop, onDismi
 
       <Box className={styles.statusCol}>{statusCell}</Box>
 
-      {isDone && job.adId && (
-        <Tooltip title="Open in Ads Manager" placement="top" disableInteractive>
-          <IconButton
-            component="a"
-            aria-label="Open in Ads Manager"
-            className={styles.openBtn}
-            href={buildAdsManagerHref(accountId, job.adId)}
-            target="_blank"
-            rel="noreferrer"
-          >
-            <OpenInNewIcon fontSize="inherit" />
-          </IconButton>
-        </Tooltip>
-      )}
+      <Box className={styles.openCell}>
+        {isDone && job.adId && (
+          <Tooltip title="Open in Ads Manager" placement="top" disableInteractive>
+            <IconButton
+              component="a"
+              aria-label="Open in Ads Manager"
+              className={styles.openBtn}
+              href={buildAdsManagerHref(accountId, job.adId)}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <OpenInNewIcon fontSize="inherit" />
+            </IconButton>
+          </Tooltip>
+        )}
+      </Box>
 
       <Box className={styles.actions}>
         {isActive && (

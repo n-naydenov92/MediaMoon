@@ -11,8 +11,8 @@
 
 @media (min-width: 601px) {
   .paper {
-    height: 70vh;
-    max-height: 640px;
+    height: 80vh;
+    max-height: 740px;
   }
 }
 
