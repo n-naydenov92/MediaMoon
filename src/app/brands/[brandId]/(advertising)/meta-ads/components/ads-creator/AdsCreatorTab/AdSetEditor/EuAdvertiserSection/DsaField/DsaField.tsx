@@ -19,6 +19,7 @@ interface Props {
   readonly onChange: (next: string) => void
   readonly disabled: boolean
   readonly placeholder: string
+  readonly error?: string
 }
 
 function resolveInitialMode(value: string, options: readonly string[]): Mode {
@@ -34,6 +35,7 @@ export default memo(function DsaField({
   onChange,
   disabled,
   placeholder,
+  error,
 }: Props): JSX.Element {
   const [mode, setMode] = useState<Mode>(() => resolveInitialMode(value, options))
 
@@ -69,6 +71,8 @@ export default memo(function DsaField({
           disabled={disabled}
           className="density-dialog"
           placeholder={placeholder}
+          error={Boolean(error)}
+          helperText={error}
         />
         {options.length > 0 && (
           <Button
@@ -103,6 +107,8 @@ export default memo(function DsaField({
         getOptionLabel={(o) => o}
         noOptionsText="No saved entities. Click 'New name' to enter one."
         createAction={createAction}
+        error={Boolean(error)}
+        errorText={error}
       />
     </Box>
   )

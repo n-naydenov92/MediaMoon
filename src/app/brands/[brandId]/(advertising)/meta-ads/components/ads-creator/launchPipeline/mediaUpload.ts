@@ -8,6 +8,7 @@ export interface PublishPayload {
   readonly pageId: string
   readonly instagramId: string
   readonly autoResolveInstagram: boolean
+  readonly status: 'ACTIVE' | 'PAUSED'
   readonly copy: {
     readonly name: string
     readonly headline: string
@@ -146,6 +147,7 @@ export async function publishAd(
       destinationUrl: payload.copy.url,
       ctaType: payload.copy.cta,
       adName: payload.copy.name,
+      status: payload.status,
       instagramActorId: payload.instagramId || undefined,
       autoResolveInstagram: payload.autoResolveInstagram,
       imageHash: media.imageHash,

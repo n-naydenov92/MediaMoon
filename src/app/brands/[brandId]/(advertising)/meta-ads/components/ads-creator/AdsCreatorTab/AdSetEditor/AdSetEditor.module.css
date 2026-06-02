@@ -78,18 +78,11 @@
   gap: 12px;
 }
 
-.errorBox {
-  padding: 10px 12px;
-  background: color-mix(in srgb, var(--error) 10%, transparent);
-  border: 1px solid color-mix(in srgb, var(--error) 28%, transparent);
+.errorAlert {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 13px;
   border-radius: 8px;
-}
-
-.errorText {
-  margin: 0;
-  font-size: 12px;
-  color: var(--error-strong);
-  line-height: 1.4;
+  align-items: center;
 }
 
 .footer {

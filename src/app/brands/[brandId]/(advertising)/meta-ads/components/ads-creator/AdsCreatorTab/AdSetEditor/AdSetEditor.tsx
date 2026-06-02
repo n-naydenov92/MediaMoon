@@ -1,6 +1,7 @@
 'use client'
 
-import { memo, useCallback, useEffect, useMemo, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
@@ -13,9 +14,10 @@ import CloseIcon from '@mui/icons-material/Close'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import type { DsaEntities } from '@/lib/gateways/MetaAdsGateway'
+import type { BrandId } from '@/config/brands'
 import SectionTitle from './SectionTitle/SectionTitle'
 import SourceRows from './SourceRows/SourceRows'
-import StatusToggle from './StatusToggle/StatusToggle'
+import StatusToggle from '../StatusToggle/StatusToggle'
 import NameSection from './NameSection/NameSection'
 import BudgetScheduleSection from './BudgetScheduleSection/BudgetScheduleSection'
 import AudienceSection from './AudienceSection/AudienceSection'
@@ -24,6 +26,7 @@ import EuAdvertiserSection from './EuAdvertiserSection/EuAdvertiserSection'
 import ConversionSection from './ConversionSection/ConversionSection'
 import PlacementsSection from './PlacementsSection/PlacementsSection'
 import {
+  buildAdSetName,
   buildCreatePayload,
   buildDuplicateName,
   buildDuplicatePayload,
@@ -39,6 +42,15 @@ import styles from './AdSetEditor.module.css'
 
 const EMPTY_DSA_ENTITIES: DsaEntities = { beneficiaries: [], payors: [] }
 
+// Sales campaigns get a ready-made conversion setup so the operator doesn't
+// re-pick it every time. Pixel is filled separately once datasets load.
+const SALES_OBJECTIVES: ReadonlySet<string> = new Set(['OUTCOME_SALES', 'CONVERSIONS'])
+const SALES_DEFAULTS = {
+  destinationType: 'WEBSITE',
+  optimizationGoal: 'OFFSITE_CONVERSIONS',
+  customEventType: 'PURCHASE',
+} as const
+
 export type AdSetEditorMode = 'create' | 'duplicate'
 
 interface Props {
@@ -46,6 +58,7 @@ interface Props {
   readonly onClose: () => void
   readonly onSuccess?: (newAdSetId: string, newAdSetName: string, status: 'PAUSED' | 'ACTIVE') => void
   readonly accountId: string
+  readonly brandId: BrandId
   readonly mode?: AdSetEditorMode
   readonly sourceAdSetId?: string
   readonly sourceAdSetName?: string
@@ -61,6 +74,7 @@ export default memo(function AdSetEditor({
   onClose,
   onSuccess,
   accountId,
+  brandId,
   mode = 'duplicate',
   sourceAdSetId = '',
   sourceAdSetName = '',
@@ -76,6 +90,8 @@ export default memo(function AdSetEditor({
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState<boolean>(false)
   const [submitAttempted, setSubmitAttempted] = useState<boolean>(false)
+  const isSales = isCreate && SALES_OBJECTIVES.has(campaignObjective ?? '')
+  const salesPixelAppliedRef = useRef(false)
 
   // Reset on every open — closing the dialog discards the draft. Declared before
   // useAdSetSource so this effect runs first: reset clears the draft, then the
@@ -86,21 +102,26 @@ export default memo(function AdSetEditor({
     const initialName = isCreate ? '' : buildDuplicateName(sourceAdSetName)
     dispatch({ type: 'reset', initialName })
     if (isCreate) {
-      // When the account has exactly one previously-used DSA entity, prefill
-      // it — this is the only safe inference we can make about a "default".
-      const [onlyBeneficiary] = dsaEntities.beneficiaries
-      if (dsaEntities.beneficiaries.length === 1 && onlyBeneficiary) {
-        dispatch({ type: 'setDsaBeneficiary', value: onlyBeneficiary })
+      // Prefill the first previously-used DSA entity as the default choice.
+      const [firstBeneficiary] = dsaEntities.beneficiaries
+      if (firstBeneficiary) {
+        dispatch({ type: 'setDsaBeneficiary', value: firstBeneficiary })
       }
-      const [onlyPayor] = dsaEntities.payors
-      if (dsaEntities.payors.length === 1 && onlyPayor) {
-        dispatch({ type: 'setDsaPayor', value: onlyPayor })
+      const [firstPayor] = dsaEntities.payors
+      if (firstPayor) {
+        dispatch({ type: 'setDsaPayor', value: firstPayor })
       }
     }
+    if (isSales) {
+      dispatch({ type: 'setDestinationType', value: SALES_DEFAULTS.destinationType })
+      dispatch({ type: 'setOptimizationGoal', value: SALES_DEFAULTS.optimizationGoal })
+      dispatch({ type: 'setCustomEventType', value: SALES_DEFAULTS.customEventType })
+    }
+    salesPixelAppliedRef.current = false
     setSubmitError(null)
     setSubmitting(false)
     setSubmitAttempted(false)
-  }, [open, sourceAdSetName, dispatch, isCreate, dsaEntities])
+  }, [open, sourceAdSetName, dispatch, isCreate, isSales, dsaEntities])
 
   const { pixels, pixelsLoading } = usePixels(open, accountId)
   const { source, loading, error: loadError } = useAdSetSource({
@@ -110,6 +131,15 @@ export default memo(function AdSetEditor({
 
   const currency = source?.currency ?? accountCurrency
   const error = submitError ?? loadError
+
+  // Sales default: select the first available pixel once datasets finish loading.
+  useEffect(() => {
+    if (!open || !isSales || salesPixelAppliedRef.current) return
+    const [firstPixel] = pixels
+    if (!firstPixel) return
+    dispatch({ type: 'setPixelId', value: firstPixel.id })
+    salesPixelAppliedRef.current = true
+  }, [open, isSales, pixels, dispatch])
 
   const handleDuplicate = useCallback(async (): Promise<void> => {
     const trimmed = draft.name.trim()
@@ -148,6 +178,30 @@ export default memo(function AdSetEditor({
       setSubmitting(false)
     }
   }, [draft, accountId, campaignId, onSuccess, onClose])
+
+  const handleAutofillName = useCallback(() => {
+    dispatch({
+      type: 'setName',
+      value: buildAdSetName({
+        brandId,
+        countries: draft.countries,
+        ageMin: draft.ageMin,
+        ageMax: draft.ageMax,
+        gender: draft.gender,
+        advantageAudience: draft.advantageAudience,
+        objective: campaignObjective,
+      }),
+    })
+  }, [
+    dispatch,
+    brandId,
+    draft.countries,
+    draft.ageMin,
+    draft.ageMax,
+    draft.gender,
+    draft.advantageAudience,
+    campaignObjective,
+  ])
 
   const validationErrors = useMemo(() => computeValidationErrors(draft), [draft])
   const visibleErrors: Readonly<Record<string, string>> = submitAttempted ? validationErrors : {}
@@ -227,6 +281,7 @@ export default memo(function AdSetEditor({
             onNameChange={handlers.handleNameChange}
             disabled={submitting}
             error={visibleErrors.name}
+            onAutofill={handleAutofillName}
           />
         </Box>
 
@@ -243,6 +298,7 @@ export default memo(function AdSetEditor({
             pixelsLoading={pixelsLoading}
             attributionSpec={draft.attributionSpec}
             campaignObjective={isCreate ? campaignObjective : undefined}
+            locationError={visibleErrors.destinationType}
             goalError={visibleErrors.optimizationGoal}
             eventError={visibleErrors.customEventType}
             pixelError={visibleErrors.pixelId}
@@ -315,15 +371,15 @@ export default memo(function AdSetEditor({
             onBeneficiaryChange={handlers.handleDsaBeneficiaryChange}
             onPayorChange={handlers.handleDsaPayorChange}
             disabled={sectionsDisabled}
+            beneficiaryError={visibleErrors.dsaBeneficiary}
+            payorError={visibleErrors.dsaPayor}
           />
         </Box>
 
         {error && (
-          <Box className={styles.errorBox} role="alert">
-            <Typography component="p" variant="inherit" className={styles.errorText}>
-              {error}
-            </Typography>
-          </Box>
+          <Alert severity="error" variant="outlined" className={styles.errorAlert}>
+            {error}
+          </Alert>
         )}
       </Box>
 

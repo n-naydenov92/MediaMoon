@@ -11,6 +11,7 @@ interface Props {
   readonly ageMax: number
   readonly onChange: (ageMin: number, ageMax: number) => void
   readonly disabled: boolean
+  readonly maxLocked?: boolean
 }
 
 const MIN = 13
@@ -25,7 +26,11 @@ export default memo(function AgeRangeSlider({
   ageMax,
   onChange,
   disabled,
+  maxLocked = false,
 }: Props): JSX.Element {
+  // Advantage+ audience forbids a maximum age below 65 — pin the upper thumb.
+  const effectiveMax = maxLocked ? MAX : ageMax
+
   const handleChange = (_: Event, next: number | number[]): void => {
     if (!Array.isArray(next) || next.length !== 2) {
       return
@@ -35,7 +40,7 @@ export default memo(function AgeRangeSlider({
     if (typeof min !== 'number' || typeof max !== 'number') {
       return
     }
-    onChange(min, max)
+    onChange(min, maxLocked ? MAX : max)
   }
 
   return (
@@ -48,11 +53,11 @@ export default memo(function AgeRangeSlider({
           —
         </Typography>
         <Typography component="span" variant="inherit">
-          {formatLabel(ageMax)}
+          {formatLabel(effectiveMax)}
         </Typography>
       </Box>
       <Slider
-        value={[ageMin, ageMax]}
+        value={[ageMin, effectiveMax]}
         onChange={handleChange}
         min={MIN}
         max={MAX}

@@ -8,7 +8,7 @@ import type { BrandId } from '@/config/brands'
 import type { StatusFilter } from '@/lib/gateways/MetaAdsGateway'
 import type { CopyValue } from '../CopyForm/CopyForm'
 import { isValidDestinationUrl } from '../CopyForm/helpers'
-import type { LaunchJob } from '../useLaunchQueue'
+import type { AdSetRecord, LaunchJob } from '../useLaunchQueue'
 import StepAccordion from '../StepAccordion/StepAccordion'
 import AccountStep from '../AccountStep/AccountStep'
 import CampaignStep from '../CampaignStep/CampaignStep'
@@ -18,6 +18,8 @@ import CopyStep from '../CopyStep/CopyStep'
 import PreviewDialog from '../PreviewDialog/PreviewDialog'
 import PublishBar from '../PublishBar/PublishBar'
 import QueueLauncher from '../QueueLauncher/QueueLauncher'
+import AdNamesDialog from './AdNamesDialog/AdNamesDialog'
+import { adNameMapKey, buildAutoAdName, resolvePageToken } from './helpers'
 import { type TargetingValue, useTargetingData } from './useTargetingData'
 import styles from './CreatorPane.module.css'
 
@@ -30,11 +32,17 @@ interface Props {
   readonly onFilesChange: (next: readonly File[]) => void
   readonly copy: CopyValue
   readonly onCopyChange: (next: CopyValue) => void
+  readonly adNames: ReadonlyMap<string, string>
+  readonly onAdNamesChange: (next: ReadonlyMap<string, string>) => void
+  readonly pageTokens: ReadonlyMap<string, string>
+  readonly onPageTokensChange: (next: ReadonlyMap<string, string>) => void
   readonly jobs: readonly LaunchJob[]
   readonly onRetry: (jobId: string) => void
+  readonly onStop: (jobId: string) => void
   readonly onDismiss: (jobId: string) => void
+  readonly onAdSetCreated: (record: AdSetRecord) => void
   readonly canSubmit: boolean
-  readonly onSubmit: () => void
+  readonly onSubmit: (adNames: ReadonlyMap<string, string>) => void
 }
 
 const STEP_IDS = ['account', 'campaign', 'profiles', 'files', 'copy'] as const
@@ -54,9 +62,15 @@ export default memo(function CreatorPane({
   onFilesChange,
   copy,
   onCopyChange,
+  adNames,
+  onAdNamesChange,
+  pageTokens,
+  onPageTokensChange,
   jobs,
   onRetry,
+  onStop,
   onDismiss,
+  onAdSetCreated,
   canSubmit,
   onSubmit,
 }: Props): JSX.Element {
@@ -85,7 +99,7 @@ export default memo(function CreatorPane({
     profiles: targeting.pageIds.length > 0
       && (!isSinglePage || data.instagramAccounts.length === 0 || targeting.instagramId !== ''),
     files: files.length > 0,
-    copy: copy.name !== ''
+    copy: (targeting.pageIds.length * files.length >= 2 || copy.name !== '')
       && copy.headlines[0] !== ''
       && copy.primaryTexts[0] !== ''
       && isValidDestinationUrl(copy.url),
@@ -144,10 +158,41 @@ export default memo(function CreatorPane({
   }, [])
 
   const [previewOpen, setPreviewOpen] = useState(false)
+  const [adNamesOpen, setAdNamesOpen] = useState(false)
   const selectedPages = useMemo(
     () => data.pages.filter((p) => targeting.pageIds.includes(p.id)),
     [data.pages, targeting.pageIds],
   )
+
+  const openAdNames = useCallback(() => setAdNamesOpen(true), [])
+  const closeAdNames = useCallback(() => setAdNamesOpen(false), [])
+  const adsCount = (targeting.pageIds.length || 1) * files.length
+  const isSingleAd = adsCount === 1
+
+  // Single ad: fill the shared Ad name field with the structured template
+  // (page token baked in, since there is exactly one page).
+  const handleAutoNameSingle = useCallback(() => {
+    const [file] = files
+    const [page] = selectedPages
+    if (!file) {
+      return
+    }
+    const tok = page ? resolvePageToken(pageTokens, page.id, page.name) : ''
+    onCopyChange({ ...copy, name: buildAutoAdName(file, tok) })
+  }, [copy, files, onCopyChange, pageTokens, selectedPages])
+
+  const handleSubmit = useCallback(() => {
+    const names = new Map<string, string>()
+    for (const page of selectedPages) {
+      const tok = resolvePageToken(pageTokens, page.id, page.name)
+      for (const file of files) {
+        const key = adNameMapKey(page.id, file)
+        const authored = (isSingleAd ? copy.name : adNames.get(key)) || ''
+        names.set(key, authored || buildAutoAdName(file, tok))
+      }
+    }
+    onSubmit(names)
+  }, [adNames, copy.name, files, isSingleAd, onSubmit, pageTokens, selectedPages])
 
   return (
     <Box className={styles.root}>
@@ -170,6 +215,7 @@ export default memo(function CreatorPane({
             jobs={jobs}
             accountId={targeting.accountId}
             onRetry={onRetry}
+            onStop={onStop}
             onDismiss={onDismiss}
           />
         </Box>
@@ -205,6 +251,8 @@ export default memo(function CreatorPane({
             refetchAdSets={data.refetchAdSets}
             accountCurrency={accountCurrency}
             dsaEntities={data.dsaEntities}
+            onAdSetCreated={onAdSetCreated}
+            brandId={brandId}
           />
         </StepAccordion>
 
@@ -240,7 +288,13 @@ export default memo(function CreatorPane({
           expanded={expanded.has('copy')}
           onToggle={() => toggle('copy')}
         >
-          <CopyStep value={copy} onChange={onCopyChange} />
+          <CopyStep
+            value={copy}
+            onChange={onCopyChange}
+            adsCount={adsCount}
+            onAutoName={isSingleAd ? handleAutoNameSingle : undefined}
+            onNameEach={adsCount >= 2 ? openAdNames : undefined}
+          />
         </StepAccordion>
       </Box>
 
@@ -248,7 +302,7 @@ export default memo(function CreatorPane({
         <PublishBar
           adsCount={targeting.pageIds.length * files.length}
           canSubmit={canSubmit}
-          onSubmit={onSubmit}
+          onSubmit={handleSubmit}
           jobs={jobs}
         />
       </Box>
@@ -259,6 +313,17 @@ export default memo(function CreatorPane({
         copy={copy}
         files={files}
         pages={selectedPages}
+      />
+
+      <AdNamesDialog
+        open={adNamesOpen}
+        onClose={closeAdNames}
+        files={files}
+        selectedPages={selectedPages}
+        names={adNames}
+        onChange={onAdNamesChange}
+        pageTokens={pageTokens}
+        onPageTokensChange={onPageTokensChange}
       />
     </Box>
   )

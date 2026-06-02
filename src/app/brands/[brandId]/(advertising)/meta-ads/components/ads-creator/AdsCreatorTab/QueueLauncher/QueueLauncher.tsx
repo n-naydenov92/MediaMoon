@@ -14,6 +14,7 @@ interface Props {
   readonly jobs: readonly LaunchJob[]
   readonly accountId: string
   readonly onRetry: (jobId: string) => void
+  readonly onStop: (jobId: string) => void
   readonly onDismiss: (jobId: string) => void
 }
 
@@ -21,6 +22,7 @@ export default memo(function QueueLauncher({
   jobs,
   accountId,
   onRetry,
+  onStop,
   onDismiss,
 }: Props): JSX.Element {
   const [open, setOpen] = useState(false)
@@ -56,6 +58,7 @@ export default memo(function QueueLauncher({
         jobs={jobs}
         accountId={accountId}
         onRetry={onRetry}
+        onStop={onStop}
         onDismiss={onDismiss}
       />
     </>

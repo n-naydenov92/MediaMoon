@@ -16,9 +16,11 @@ import type {
   DsaEntities,
   StatusFilter,
 } from '@/lib/gateways/MetaAdsGateway'
+import type { BrandId } from '@/config/brands'
 import SearchSelect, { type OptionStatus } from '../SearchSelect/SearchSelect'
 import StatusFilterPills from '../StatusFilterPills/StatusFilterPills'
 import AdSetEditor from '../AdSetEditor/AdSetEditor'
+import type { AdSetRecord } from '../useLaunchQueue'
 import type { TargetingValue } from '../CreatorPane/useTargetingData'
 import styles from './CampaignStep.module.css'
 
@@ -43,6 +45,8 @@ interface Props {
   readonly refetchAdSets: () => void
   readonly accountCurrency: string
   readonly dsaEntities: DsaEntities
+  readonly onAdSetCreated: (record: AdSetRecord) => void
+  readonly brandId: BrandId
 }
 
 function effectiveToOptionStatus(effective: string): OptionStatus {
@@ -61,6 +65,8 @@ export default memo(function CampaignStep({
   refetchAdSets,
   accountCurrency,
   dsaEntities,
+  onAdSetCreated,
+  brandId,
 }: Props): JSX.Element {
   const selectedCampaign = useMemo(
     () => campaigns.find((c) => c.id === value.campaignId) ?? null,
@@ -105,6 +111,7 @@ export default memo(function CampaignStep({
   ) => {
     refetchAdSets()
     onChange({ ...value, adSetId: newAdSetId })
+    onAdSetCreated({ name: newAdSetName, adSetId: newAdSetId, accountId: value.accountId })
     const trimmedName = newAdSetName.length > TOAST_NAME_MAX_LENGTH
       ? `${newAdSetName.slice(0, TOAST_NAME_MAX_LENGTH).trimEnd()}…`
       : newAdSetName
@@ -113,7 +120,7 @@ export default memo(function CampaignStep({
         ? `Created "${trimmedName}" — LIVE`
         : `Created "${trimmedName}" — PAUSED`,
     })
-  }, [onChange, refetchAdSets, value])
+  }, [onChange, refetchAdSets, value, onAdSetCreated])
 
   const renderAdSetRowAction = useCallback((adSet: AdSet): ReactNode => (
     <Tooltip title="Duplicate" placement="top" disableInteractive enterDelay={400}>
@@ -193,6 +200,7 @@ export default memo(function CampaignStep({
         onClose={closeEditor}
         onSuccess={handleDuplicateSuccess}
         accountId={value.accountId}
+        brandId={brandId}
         mode={createOpen ? 'create' : 'duplicate'}
         sourceAdSetId={duplicateSource?.id ?? ''}
         sourceAdSetName={duplicateSource?.name ?? ''}

@@ -13,28 +13,34 @@
   background: var(--surface-2);
 }
 
-.icon {
+.kindIcon {
   flex-shrink: 0;
-  width: 16px;
-  text-align: center;
-  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  font-size: 19px;
   color: var(--text-secondary);
 }
 
-.icon[data-status='done'] {
+.kindIcon[data-status='done'] {
   color: var(--success);
 }
 
-.icon[data-status='failed'] {
+.kindIcon[data-status='failed'] {
   color: var(--error);
 }
 
-.icon[data-status='uploading'],
-.icon[data-status='publishing'] {
+.kindIcon[data-status='uploading'],
+.kindIcon[data-status='publishing'] {
   color: var(--accent);
 }
 
-.fileName {
+.kindIconBrand {
+  color: var(--accent);
+}
+
+.title {
   flex: 1;
   min-width: 0;
   font-size: 13px;
@@ -45,11 +51,10 @@
   white-space: nowrap;
 }
 
-.meta {
+.kindLabel {
   flex-shrink: 0;
   font-size: 11px;
   color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
@@ -99,9 +104,9 @@
   padding: 2px 8px;
   border-radius: 999px;
   font-size: 10px;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
 }
 
 .statusLabel[data-status='queued'] {
@@ -140,10 +145,10 @@
 
 .actions .actionBtn,
 .openBtn {
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   padding: 0;
-  font-size: 16px;
+  font-size: 15px;
   color: var(--text-secondary);
   border-radius: 6px;
   flex-shrink: 0;
@@ -152,6 +157,10 @@
 .actions .actionBtn:hover {
   background: var(--surface-3);
   color: var(--accent);
+}
+
+.actions .stopBtn:hover {
+  color: var(--error);
 }
 
 .openBtn {

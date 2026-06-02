@@ -6,8 +6,25 @@ import CopyForm, { type CopyValue } from '../CopyForm/CopyForm'
 interface Props {
   readonly value: CopyValue
   readonly onChange: (next: CopyValue) => void
+  readonly adsCount: number
+  readonly onAutoName?: () => void
+  readonly onNameEach?: () => void
 }
 
-export default memo(function CopyStep({ value, onChange }: Props): JSX.Element {
-  return <CopyForm value={value} onChange={onChange} />
+export default memo(function CopyStep({
+  value,
+  onChange,
+  adsCount,
+  onAutoName,
+  onNameEach,
+}: Props): JSX.Element {
+  return (
+    <CopyForm
+      value={value}
+      onChange={onChange}
+      adsCount={adsCount}
+      onAutoName={onAutoName}
+      onNameEach={onNameEach}
+    />
+  )
 })

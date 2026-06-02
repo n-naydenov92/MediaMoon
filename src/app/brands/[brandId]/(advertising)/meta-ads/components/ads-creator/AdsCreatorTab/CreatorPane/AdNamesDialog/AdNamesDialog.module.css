@@ -1,0 +1,330 @@
+.paper {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+@media (min-width: 601px) {
+  .paper {
+    height: 70vh;
+    max-height: 640px;
+  }
+}
+
+.header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.headerTitleWrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.headerIcon {
+  font-size: 20px;
+  color: var(--accent);
+}
+
+.headerTitle {
+  margin: 0;
+  font-family: var(--font-syne), system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+.headerCount {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.closeButton {
+  color: var(--text-secondary);
+  border-radius: 8px;
+}
+
+.closeButton:hover {
+  background: var(--surface-2);
+  color: var(--text-primary);
+}
+
+.body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 16px 16px;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+.footer {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 16px;
+  border-top: 1px solid var(--hairline);
+}
+
+.footer .saveButton {
+  text-transform: none;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 6px 20px;
+}
+
+.bulk {
+  flex-shrink: 0;
+  padding: 0 14px;
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+
+/* White fields pop against the tinted card (background only — density-form owns
+   padding/height/font). */
+.tagField :global(.MuiOutlinedInput-root),
+.fullNameField :global(.MuiOutlinedInput-root),
+.pageTokenField :global(.MuiOutlinedInput-root) {
+  background: var(--bg-surface);
+}
+
+.bulkToggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+}
+
+.bulkIcon {
+  font-size: 16px;
+  color: var(--text-muted);
+}
+
+.bulkTitle {
+  flex: 1 1 auto;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-secondary);
+}
+
+.chevron {
+  font-size: 18px;
+  color: var(--text-muted);
+  transition: transform 0.18s ease;
+}
+
+.chevron[data-open='true'] {
+  transform: rotate(180deg);
+}
+
+.bulkFields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.bulkFieldsLast {
+  margin-bottom: 16px;
+}
+
+.bulkFields .tagField {
+  flex: 1 1 110px;
+  min-width: 0;
+}
+
+.bulkFields .applyButton {
+  flex-shrink: 0;
+  text-transform: none;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  border-radius: 6px;
+}
+
+.bulkFields .applyButton:hover {
+  background: var(--accent-soft);
+}
+
+.fullNameField {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.bulkDivider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.bulkDivider::before,
+.bulkDivider::after {
+  content: '';
+  flex: 1 1 auto;
+  height: 1px;
+  background: var(--hairline);
+}
+
+.bulkOr {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.pageRows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.pageRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pageAvatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--hairline);
+  background: var(--surface-2);
+}
+
+.pageAvatarFallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 1px solid var(--hairline);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.pageRowName {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pageTokenField {
+  flex: 0 0 150px;
+}
+
+.listHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: -4px;
+}
+
+.listHeaderLabel {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.listHeaderCount {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--surface-2);
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fileRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fileHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.mediaIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  font-size: 16px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.fileName {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pageChip {
+  flex-shrink: 0;
+  padding: 1px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 999px;
+  white-space: nowrap;
+}

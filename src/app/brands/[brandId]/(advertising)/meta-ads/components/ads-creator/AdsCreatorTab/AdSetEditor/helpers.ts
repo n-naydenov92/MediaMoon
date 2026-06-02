@@ -6,6 +6,7 @@ import type {
   Gender,
   PlacementSelection,
 } from '@/lib/gateways/MetaAdsGateway'
+import { findBrandById, type BrandId } from '@/config/brands'
 import type { DraftState } from './useAdSetDraft'
 import { goalRequiresCustomEvent } from './ConversionSection/options'
 
@@ -15,6 +16,15 @@ const START_TIME_GRACE_MS = 60_000
 export const FIELD_REQUIRED = 'Field required'
 export const DEFAULT_BID_STRATEGY = 'LOWEST_COST_WITHOUT_CAP'
 export const DEFAULT_CURRENCY = 'USD'
+
+// Meta forbids a maximum age below 65 when Advantage+ audience is on — it only
+// accepts a lower max age as a non-binding "suggestion". Send 65 to avoid the
+// hard rejection.
+export const MAX_AGE = 65
+
+function effectiveAgeMax(draft: DraftState): number {
+  return draft.advantageAudience ? MAX_AGE : draft.ageMax
+}
 
 // Older ad sets return UNDEFINED for destination_type when conversions are
 // pixel-driven; coerce to WEBSITE so the UI shows the right fields. Also backfill
@@ -30,6 +40,68 @@ export function normalizeAdSetDetail(detail: AdSetDetail): AdSetDetail {
   }
 }
 
+const MONTHS: readonly string[] = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+]
+
+// Maps Meta objective enums (modern OUTCOME_* and legacy) to a short tag.
+const OBJECTIVE_LABELS: Readonly<Record<string, string>> = {
+  OUTCOME_SALES: 'Sales',
+  CONVERSIONS: 'Sales',
+  OUTCOME_LEADS: 'Leads',
+  LEAD_GENERATION: 'Leads',
+  OUTCOME_TRAFFIC: 'Traffic',
+  LINK_CLICKS: 'Traffic',
+  OUTCOME_ENGAGEMENT: 'Engagement',
+  POST_ENGAGEMENT: 'Engagement',
+  OUTCOME_AWARENESS: 'Awareness',
+  BRAND_AWARENESS: 'Awareness',
+  REACH: 'Awareness',
+  OUTCOME_APP_PROMOTION: 'App',
+  APP_INSTALLS: 'App',
+  VIDEO_VIEWS: 'Video',
+  MESSAGES: 'Messages',
+}
+
+function genderToken(gender: Gender): string {
+  if (gender === 'MEN') return 'M'
+  if (gender === 'WOMEN') return 'W'
+  return 'All'
+}
+
+export interface AdSetNameInput {
+  readonly brandId: BrandId
+  readonly countries: readonly string[]
+  readonly ageMin: number
+  readonly ageMax: number
+  readonly gender: Gender
+  readonly advantageAudience: boolean
+  readonly objective?: string
+}
+
+// Builds a structured ad set name for consistent later filtering. Shape:
+//   {market}-{ageMin_ageMax}-{gender} | {audience}-{month}-{objective}
+// e.g. BG-18_65+-All | Adv+-Jun-Sales. The brand is implied by the section, so
+// it is omitted; the market comes from the app's market setup. A free-text block
+// can be appended manually after a third " | ". Fields are joined with "-";
+// ranges/lists inside a field use "_" so the field separator stays parseable.
+export function buildAdSetName(input: AdSetNameInput, now: Date = new Date()): string {
+  const market = input.countries.length > 0
+    ? input.countries.join('_').toUpperCase()
+    : (findBrandById(input.brandId)?.markets[0] ?? 'XX')
+  const maxAge = input.advantageAudience || input.ageMax >= MAX_AGE ? '65+' : String(input.ageMax)
+  const age = `${input.ageMin}_${maxAge}`
+  const audience = input.advantageAudience ? 'Adv+' : 'Broad'
+  const month = MONTHS[now.getMonth()] ?? ''
+  const objective = input.objective ? OBJECTIVE_LABELS[input.objective] ?? '' : ''
+
+  const block1 = `${market}-${age}-${genderToken(input.gender)}`
+  const block2 = [audience, month, objective].filter(Boolean).join('-')
+  // Trailing free-text block — a placeholder prompt the operator replaces.
+  return `${block1} | ${block2} | AddCreativeInfo`
+}
+
 export function computeValidationErrors(draft: DraftState): Readonly<Record<string, string>> {
   const errs: Record<string, string> = {}
   if (draft.name.trim().length === 0) {
@@ -40,6 +112,15 @@ export function computeValidationErrors(draft: DraftState): Readonly<Record<stri
   }
   if (draft.optimizationGoal === '') {
     errs.optimizationGoal = FIELD_REQUIRED
+  }
+  if (draft.destinationType === '') {
+    errs.destinationType = FIELD_REQUIRED
+  }
+  if (draft.dsaBeneficiary.trim() === '') {
+    errs.dsaBeneficiary = FIELD_REQUIRED
+  }
+  if (draft.dsaPayor.trim() === '') {
+    errs.dsaPayor = FIELD_REQUIRED
   }
   const needsEvent = goalRequiresCustomEvent(draft.optimizationGoal)
   if (needsEvent && draft.customEventType === '') {
@@ -226,7 +307,7 @@ export function buildCreatePayload(
 
   const targeting: Record<string, unknown> = {
     age_min: draft.ageMin,
-    age_max: draft.ageMax,
+    age_max: effectiveAgeMax(draft),
     genders: genderToMetaArray(draft.gender),
     geo_locations: {
       countries: [...draft.countries],
@@ -345,7 +426,7 @@ export function buildDuplicatePayload(
     const targetingPayload: Record<string, unknown> = {
       ...source.rawTargeting,
       age_min: draft.ageMin,
-      age_max: draft.ageMax,
+      age_max: effectiveAgeMax(draft),
       genders: genderToMetaArray(draft.gender),
       geo_locations: buildGeoLocations(source.rawTargeting, draft.countries),
       targeting_automation: buildTargetingAutomation(

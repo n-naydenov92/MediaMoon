@@ -94,12 +94,13 @@ export async function createAd(
   adSetId: string,
   creativeId: string,
   name: string,
+  status: 'ACTIVE' | 'PAUSED' = 'PAUSED',
 ): Promise<{ id: string }> {
   const body = new URLSearchParams({
     name,
     adset_id: adSetId,
     creative: JSON.stringify({ creative_id: creativeId }),
-    status: 'PAUSED',
+    status,
     access_token: token,
   })
   const json = await callGraphApiPost<GraphAdResponse>(`/${accountId}/ads`, body)

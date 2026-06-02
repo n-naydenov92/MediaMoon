@@ -24,6 +24,7 @@ interface PublishRequestBody {
   readonly destinationUrl?: string
   readonly ctaType?: string
   readonly adName?: string
+  readonly status?: string
   readonly instagramActorId?: string
   readonly autoResolveInstagram?: boolean
   readonly imageHash?: string
@@ -47,9 +48,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
 
   const {
-    adSetId, pageId, headline, bodyText, description, destinationUrl, ctaType, adName,
+    adSetId, pageId, headline, bodyText, description, destinationUrl, ctaType, adName, status,
     instagramActorId, autoResolveInstagram, imageHash, videoId, thumbnailHash,
   } = body
+
+  // Default to PAUSED; only go live when the client explicitly asks for ACTIVE.
+  const adStatus: 'ACTIVE' | 'PAUSED' = status === 'ACTIVE' ? 'ACTIVE' : 'PAUSED'
 
   if (
     typeof adSetId !== 'string' || !adSetId
@@ -111,7 +115,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   let adId: string
   try {
-    const ad = await createAd(resolved.token, resolved.accountId, adSetId, creativeId, adName)
+    const ad = await createAd(resolved.token, resolved.accountId, adSetId, creativeId, adName, adStatus)
     adId = ad.id
   } catch (err) {
     return errorResponse(err, 'ad')

@@ -15,6 +15,8 @@ interface Props {
   readonly onBeneficiaryChange: (next: string) => void
   readonly onPayorChange: (next: string) => void
   readonly disabled: boolean
+  readonly beneficiaryError?: string
+  readonly payorError?: string
 }
 
 export default memo(function EuAdvertiserSection({
@@ -25,6 +27,8 @@ export default memo(function EuAdvertiserSection({
   onBeneficiaryChange,
   onPayorChange,
   disabled,
+  beneficiaryError,
+  payorError,
 }: Props): JSX.Element {
   return (
     <Box className={styles.root}>
@@ -41,6 +45,7 @@ export default memo(function EuAdvertiserSection({
           onChange={onBeneficiaryChange}
           disabled={disabled}
           placeholder="Legal name of beneficiary"
+          error={beneficiaryError}
         />
         <DsaField
           label="Payer"
@@ -50,6 +55,7 @@ export default memo(function EuAdvertiserSection({
           onChange={onPayorChange}
           disabled={disabled}
           placeholder="Legal name of payer"
+          error={payorError}
         />
       </Box>
     </Box>

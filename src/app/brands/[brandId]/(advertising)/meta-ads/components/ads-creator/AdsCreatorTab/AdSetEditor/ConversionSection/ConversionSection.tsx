@@ -33,6 +33,7 @@ interface Props {
   readonly pixelsLoading: boolean
   readonly attributionSpec: readonly AttributionWindow[]
   readonly campaignObjective?: string
+  readonly locationError?: string
   readonly goalError?: string
   readonly eventError?: string
   readonly pixelError?: string
@@ -58,6 +59,7 @@ export default memo(function ConversionSection({
   pixelsLoading,
   attributionSpec,
   campaignObjective,
+  locationError,
   goalError,
   eventError,
   pixelError,
@@ -143,6 +145,8 @@ export default memo(function ConversionSection({
                 getOptionLabel={(o) => o.label}
                 getOptionGroup={(o) => o.group ?? 'Other'}
                 noOptionsText="No matches."
+                error={Boolean(locationError)}
+                errorText={locationError}
               />
             </Box>
           </Tooltip>

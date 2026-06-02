@@ -24,16 +24,27 @@ interface QueueStats {
   readonly percent: number
 }
 
-function computeStats(jobs: readonly LaunchJob[]): QueueStats {
+function latestBatchId(jobs: readonly LaunchJob[]): string | null {
+  for (let i = jobs.length - 1; i >= 0; i -= 1) {
+    const j = jobs[i]
+    if (j?.kind === 'ad') return j.batchId
+  }
+  return null
+}
+
+function computeStats(jobs: readonly LaunchJob[], batchId: string | null): QueueStats {
   let active = 0
   let done = 0
   let failed = 0
   for (const j of jobs) {
+    // Progress reflects only the current Publish batch's creatives — ads from
+    // earlier batches (and ad set records) don't count.
+    if (j.kind !== 'ad' || j.batchId !== batchId) continue
     if (j.status === 'done') done += 1
     else if (j.status === 'failed') failed += 1
     else active += 1
   }
-  const total = jobs.length
+  const total = active + done + failed
   const percent = total === 0 ? 0 : Math.round(((done + failed) / total) * 100)
   return { active, done, failed, total, percent }
 }
@@ -41,7 +52,7 @@ function computeStats(jobs: readonly LaunchJob[]): QueueStats {
 export default memo(function PublishBar({
   adsCount, canSubmit, onSubmit, jobs,
 }: Props): JSX.Element {
-  const stats = useMemo(() => computeStats(jobs), [jobs])
+  const stats = useMemo(() => computeStats(jobs, latestBatchId(jobs)), [jobs])
   const isPublishing = stats.active > 0
   const label = adsCount === 0
     ? 'Publish ads'

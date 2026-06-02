@@ -31,6 +31,26 @@
   min-width: 0;
 }
 
+.labelRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.infoIcon {
+  display: inline-flex;
+  align-items: center;
+  font-size: 16px;
+  color: var(--error);
+  cursor: help;
+  border-radius: 4px;
+}
+
+.infoIcon:focus-visible {
+  outline: 2px solid var(--error);
+  outline-offset: 2px;
+}
+
 /* Age column has an extra "18 — 65+" line above the slider, which makes it
    taller than Gender. Push each row child's primary control to the bottom so
    the SegmentedControl aligns visually with the slider's bar. */

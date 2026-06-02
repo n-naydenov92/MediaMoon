@@ -23,6 +23,7 @@ interface Props {
   readonly onToggle: () => void
   readonly accountId: string
   readonly onRetry: (jobId: string) => void
+  readonly onStop: (jobId: string) => void
   readonly onDismiss: (jobId: string) => void
   readonly bulkAction?: SectionBulkAction
 }
@@ -34,6 +35,7 @@ export default memo(function QueueSection({
   onToggle,
   accountId,
   onRetry,
+  onStop,
   onDismiss,
   bulkAction,
 }: Props): JSX.Element | null {
@@ -83,6 +85,7 @@ export default memo(function QueueSection({
               job={job}
               accountId={accountId}
               onRetry={onRetry}
+              onStop={onStop}
               onDismiss={onDismiss}
             />
           ))}

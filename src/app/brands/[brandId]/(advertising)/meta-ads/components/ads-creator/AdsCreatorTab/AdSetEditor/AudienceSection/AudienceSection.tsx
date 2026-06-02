@@ -2,7 +2,9 @@
 
 import { memo } from 'react'
 import Box from '@mui/material/Box'
+import Tooltip from '@mui/material/Tooltip'
 import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined'
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import type { Gender } from '@/lib/gateways/MetaAdsGateway'
 import AdvantageBadge from '../AdvantageBadge/AdvantageBadge'
 import AgeRangeSlider from './AgeRangeSlider/AgeRangeSlider'
@@ -75,12 +77,26 @@ export default memo(function AudienceSection({
 
       <Box className={styles.row}>
         <Box className={styles.field}>
-          <FieldLabel>Age</FieldLabel>
+          <Box className={styles.labelRow}>
+            <FieldLabel>Age</FieldLabel>
+            {advantageAudience && (
+              <Tooltip
+                title="With Advantage+ audience on, Meta locks the maximum age at 65. Turn it off to set a lower maximum age."
+                placement="top"
+                arrow
+              >
+                <Box component="span" className={styles.infoIcon} tabIndex={0} aria-label="Why is max age locked?">
+                  <InfoOutlinedIcon fontSize="inherit" />
+                </Box>
+              </Tooltip>
+            )}
+          </Box>
           <AgeRangeSlider
             ageMin={ageMin}
             ageMax={ageMax}
             onChange={onAgeChange}
             disabled={disabled}
+            maxLocked={advantageAudience}
           />
         </Box>
 

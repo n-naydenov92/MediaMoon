@@ -21,6 +21,7 @@ interface Props {
   readonly jobs: readonly LaunchJob[]
   readonly accountId: string
   readonly onRetry: (jobId: string) => void
+  readonly onStop: (jobId: string) => void
   readonly onDismiss: (jobId: string) => void
 }
 
@@ -30,10 +31,11 @@ export default memo(function QueueHistoryDialog({
   jobs,
   accountId,
   onRetry,
+  onStop,
   onDismiss,
 }: Props): JSX.Element {
   const fullScreen = useMediaQuery('(max-width: 600px)')
-  const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(() => new Set(['done']))
+  const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(() => new Set())
   const grouped = useMemo(() => groupJobs(jobs), [jobs])
 
   const toggleSection = useCallback((id: string) => {
@@ -110,6 +112,7 @@ export default memo(function QueueHistoryDialog({
               onToggle={handleToggleActive}
               accountId={accountId}
               onRetry={onRetry}
+              onStop={onStop}
               onDismiss={onDismiss}
             />
             <QueueSection
@@ -119,6 +122,7 @@ export default memo(function QueueHistoryDialog({
               onToggle={handleToggleFailed}
               accountId={accountId}
               onRetry={onRetry}
+              onStop={onStop}
               onDismiss={onDismiss}
               bulkAction={retryAllAction}
             />
@@ -129,6 +133,7 @@ export default memo(function QueueHistoryDialog({
               onToggle={handleToggleDone}
               accountId={accountId}
               onRetry={onRetry}
+              onStop={onStop}
               onDismiss={onDismiss}
               bulkAction={clearDoneAction}
             />

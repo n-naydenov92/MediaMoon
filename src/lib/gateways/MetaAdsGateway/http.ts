@@ -5,7 +5,13 @@ const UPLOAD_FETCH_TIMEOUT_MS = 120_000
 const RATE_LIMIT_ERROR_CODE = 17
 
 export interface GraphErrorBody {
-  error?: { message?: string; type?: string; code?: number }
+  error?: {
+    message?: string
+    type?: string
+    code?: number
+    error_user_title?: string
+    error_user_msg?: string
+  }
 }
 
 export function buildUrl(path: string, token: string, params: Record<string, string>): string {
@@ -40,8 +46,9 @@ export async function callGraphApiPost<T>(path: string, body: URLSearchParams): 
       signal: controller.signal,
     })
     if (!response.ok) {
-      const text = await response.text()
-      throw new Error(`Graph API HTTP ${response.status}: ${text}`)
+      const text = await response.text().catch(() => '')
+      const parsed = parseGraphApiError(text)
+      throw new Error(parsed ?? `Graph API HTTP ${response.status}: ${response.statusText}`)
     }
     return await (response.json() as Promise<T>)
   } finally {
@@ -59,8 +66,9 @@ export async function callGraphApiMultipart<T>(path: string, form: FormData): Pr
       signal: controller.signal,
     })
     if (!response.ok) {
-      const text = await response.text()
-      throw new Error(`Graph API HTTP ${response.status}: ${text}`)
+      const text = await response.text().catch(() => '')
+      const parsed = parseGraphApiError(text)
+      throw new Error(parsed ?? `Graph API HTTP ${response.status}: ${response.statusText}`)
     }
     return await (response.json() as Promise<T>)
   } finally {
@@ -81,8 +89,16 @@ function parseGraphApiError(body: string): string | null {
     if (err.code === RATE_LIMIT_ERROR_CODE) {
       return 'Meta is rate-limiting this ad account. Wait ~1-2 minutes and try again.'
     }
+    // error_user_msg is Meta's human-readable explanation (and error_user_title
+    // its short heading) — far clearer than the generic "Invalid parameter"
+    // message. Prefer it, falling back to message only when absent.
+    if (err.error_user_msg) {
+      return err.error_user_title
+        ? `${err.error_user_title}: ${err.error_user_msg}`
+        : err.error_user_msg
+    }
     if (err.message) {
-      return err.code !== undefined ? `Meta API error ${err.code}: ${err.message}` : err.message
+      return err.message
     }
     return null
   } catch {

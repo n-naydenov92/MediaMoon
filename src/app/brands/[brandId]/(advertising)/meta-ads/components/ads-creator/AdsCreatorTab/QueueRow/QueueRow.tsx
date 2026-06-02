@@ -7,24 +7,70 @@ import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import CloseIcon from '@mui/icons-material/Close'
+import StopCircleOutlinedIcon from '@mui/icons-material/StopCircleOutlined'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
+import LayersOutlinedIcon from '@mui/icons-material/LayersOutlined'
+import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined'
+import MovieOutlinedIcon from '@mui/icons-material/MovieOutlined'
 import { cssVars } from '@/lib/css'
 import type { LaunchJob } from '../useLaunchQueue'
-import { buildAdsManagerHref } from '../../../shared/adsManagerHref'
-import { STATUS_ICONS, STATUS_LABELS, formatFileSize } from './helpers'
+import { buildAdsManagerHref, buildAdSetHref } from '../../../shared/adsManagerHref'
+import { STATUS_LABELS } from './helpers'
 import styles from './QueueRow.module.css'
 
 interface Props {
   readonly job: LaunchJob
   readonly accountId: string
   readonly onRetry: (jobId: string) => void
+  readonly onStop: (jobId: string) => void
   readonly onDismiss: (jobId: string) => void
 }
 
-export default memo(function QueueRow({ job, accountId, onRetry, onDismiss }: Props): JSX.Element {
+export default memo(function QueueRow({ job, accountId, onRetry, onStop, onDismiss }: Props): JSX.Element {
+  if (job.kind === 'adSet') {
+    return (
+      <Box className={styles.row} data-status={job.status}>
+        <Box component="span" className={`${styles.kindIcon} ${styles.kindIconBrand}`} aria-hidden>
+          <LayersOutlinedIcon fontSize="inherit" />
+        </Box>
+        <Typography component="span" variant="inherit" className={styles.title}>
+          {job.name}
+        </Typography>
+        <Typography component="span" variant="inherit" className={styles.kindLabel}>
+          Ad set
+        </Typography>
+        <Box className={styles.statusCol}>
+          <Typography component="span" variant="inherit" className={styles.statusLabel} data-status="done">
+            {STATUS_LABELS.done}
+          </Typography>
+        </Box>
+        <Tooltip title="Open in Ads Manager" placement="top" disableInteractive>
+          <IconButton
+            component="a"
+            aria-label="Open in Ads Manager"
+            className={styles.openBtn}
+            href={buildAdSetHref(job.accountId, job.adSetId)}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <OpenInNewIcon fontSize="inherit" />
+          </IconButton>
+        </Tooltip>
+        <Box className={styles.actions}>
+          <Tooltip title="Dismiss" placement="top" disableInteractive>
+            <IconButton aria-label="Dismiss" className={styles.actionBtn} onClick={() => onDismiss(job.id)}>
+              <CloseIcon fontSize="inherit" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      </Box>
+    )
+  }
+
   const isActive = job.status === 'uploading' || job.status === 'publishing'
   const isDone = job.status === 'done'
   const isFailed = job.status === 'failed'
+  const MediaIcon = job.mediaType === 'video' ? MovieOutlinedIcon : ImageOutlinedIcon
 
   let statusCell: ReactNode
   if (isActive) {
@@ -56,14 +102,14 @@ export default memo(function QueueRow({ job, accountId, onRetry, onDismiss }: Pr
 
   return (
     <Box className={styles.row} data-status={job.status}>
-      <Typography component="span" variant="inherit" className={styles.icon} data-status={job.status}>
-        {STATUS_ICONS[job.status]}
+      <Box component="span" className={styles.kindIcon} data-status={job.status} aria-hidden>
+        <MediaIcon fontSize="inherit" />
+      </Box>
+      <Typography component="span" variant="inherit" className={styles.title}>
+        {job.name || job.fileName}
       </Typography>
-      <Typography component="span" variant="inherit" className={styles.fileName}>
-        {job.fileName}
-      </Typography>
-      <Typography component="span" variant="inherit" className={styles.meta}>
-        {formatFileSize(job.fileSize)} · {job.mediaType}
+      <Typography component="span" variant="inherit" className={styles.kindLabel}>
+        Ad
       </Typography>
 
       <Box className={styles.statusCol}>{statusCell}</Box>
@@ -84,6 +130,17 @@ export default memo(function QueueRow({ job, accountId, onRetry, onDismiss }: Pr
       )}
 
       <Box className={styles.actions}>
+        {isActive && (
+          <Tooltip title="Stop — mark as failed" placement="top" disableInteractive>
+            <IconButton
+              aria-label="Stop"
+              className={`${styles.actionBtn} ${styles.stopBtn}`}
+              onClick={() => onStop(job.id)}
+            >
+              <StopCircleOutlinedIcon fontSize="inherit" />
+            </IconButton>
+          </Tooltip>
+        )}
         {isFailed && (
           <Tooltip title="Retry" placement="top" disableInteractive>
             <IconButton aria-label="Retry" className={styles.actionBtn} onClick={() => onRetry(job.id)}>

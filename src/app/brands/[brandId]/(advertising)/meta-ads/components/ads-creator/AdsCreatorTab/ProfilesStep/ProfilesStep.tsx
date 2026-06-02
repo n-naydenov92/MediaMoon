@@ -75,7 +75,7 @@ export default memo(function ProfilesStep({
             value={selectedIg}
             options={instagramAccounts}
             onChange={(next) => onChange({ ...value, instagramId: next?.id ?? '' })}
-            placeholder="Select Instagram…"
+            placeholder={instagramAccounts.length === 0 ? 'No Instagram pages available' : 'Select Instagram…'}
             leadingIcon={<InstagramIcon fontSize="small" />}
             disabled={!isSinglePage || instagramAccounts.length === 0}
             getOptionId={(o) => o.id}

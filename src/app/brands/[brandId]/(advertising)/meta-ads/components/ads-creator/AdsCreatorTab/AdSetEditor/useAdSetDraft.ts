@@ -67,12 +67,15 @@ const DEFAULT_ATTRIBUTION_SPEC: readonly AttributionWindow[] = [
   { eventType: 'ENGAGED_VIDEO_VIEW', windowDays: 1 },
 ]
 
+// New ad sets start with a sensible budget so the field is never left at 0.
+const DEFAULT_BUDGET_MAJOR_UNITS = 20
+
 function emptyDraft(initialName: string): DraftState {
   return {
     name: initialName,
     activate: false,
     budgetType: 'DAILY',
-    budgetMajorUnits: 0,
+    budgetMajorUnits: DEFAULT_BUDGET_MAJOR_UNITS,
     startTime: '',
     endTime: '',
     ageMin: 18,

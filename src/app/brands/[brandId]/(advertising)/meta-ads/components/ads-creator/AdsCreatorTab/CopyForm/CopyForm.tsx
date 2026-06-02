@@ -2,13 +2,18 @@
 
 import { memo } from 'react'
 import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
 import TextField from '@mui/material/TextField'
+import Typography from '@mui/material/Typography'
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 import CloseIcon from '@mui/icons-material/Close'
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
+import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline'
 import type { CtaType } from '@/lib/gateways/MetaAdsGateway'
 import FormField from '../FormField/FormField'
 import SearchSelect from '../SearchSelect/SearchSelect'
+import StatusToggle from '../StatusToggle/StatusToggle'
 import { isValidDestinationUrl } from './helpers'
 import styles from './CopyForm.module.css'
 
@@ -21,6 +26,7 @@ export interface CopyValue {
   readonly description: string
   readonly url: string
   readonly cta: CtaType
+  readonly activate: boolean
 }
 
 export const EMPTY_COPY: CopyValue = {
@@ -30,11 +36,15 @@ export const EMPTY_COPY: CopyValue = {
   description: '',
   url: '',
   cta: 'SHOP_NOW',
+  activate: false,
 }
 
 interface Props {
   readonly value: CopyValue
   readonly onChange: (next: CopyValue) => void
+  readonly adsCount: number
+  readonly onAutoName?: () => void
+  readonly onNameEach?: () => void
 }
 
 interface CtaOption {
@@ -63,24 +73,69 @@ function removeAt(arr: readonly string[], index: number): readonly string[] {
   return arr.filter((_, i) => i !== index)
 }
 
-export default memo(function CopyForm({ value, onChange }: Props): JSX.Element {
+export default memo(function CopyForm({
+  value,
+  onChange,
+  adsCount,
+  onAutoName,
+  onNameEach,
+}: Props): JSX.Element {
   const primaryRemaining = MAX_TOTAL - value.primaryTexts.length
   const headlineRemaining = MAX_TOTAL - value.headlines.length
   const urlInvalid = value.url.trim() !== '' && !isValidDestinationUrl(value.url)
 
   return (
     <Box className={styles.root}>
-      <FormField label="Ad name">
+      <Box className={styles.statusRow}>
+        <StatusToggle
+          activate={value.activate}
+          onActivateChange={(next) => onChange({ ...value, activate: next })}
+          disabled={false}
+        />
+      </Box>
+
+      <Box className={styles.nameBlock}>
+        <Box className={styles.nameHeader}>
+          <Typography component="span" variant="inherit" className={styles.nameLabel}>
+            Ad name
+          </Typography>
+          {onAutoName && (
+            <Button
+              type="button"
+              size="small"
+              variant="text"
+              startIcon={<AutoAwesomeIcon fontSize="inherit" />}
+              onClick={onAutoName}
+              className={styles.nameButton}
+            >
+              Auto-name
+            </Button>
+          )}
+          {onNameEach && (
+            <Button
+              type="button"
+              size="small"
+              variant="text"
+              startIcon={<DriveFileRenameOutlineIcon fontSize="inherit" />}
+              onClick={onNameEach}
+              className={styles.nameButton}
+            >
+              {`Name each ad (${adsCount})`}
+            </Button>
+          )}
+        </Box>
         <TextField
           type="text"
           size="small"
           variant="outlined"
           fullWidth
           className="density-form"
-          value={value.name}
+          value={onNameEach ? '' : value.name}
+          placeholder={onNameEach ? 'Edit each ad name through the “Name each ad” button' : undefined}
+          disabled={Boolean(onNameEach)}
           onChange={(e) => onChange({ ...value, name: e.target.value })}
         />
-      </FormField>
+      </Box>
 
       <Box className={styles.fieldGroup}>
         <FormField label="Primary Text">
