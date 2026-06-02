@@ -13,9 +13,13 @@ import Notice from '../../Notice/Notice'
 import CreatorPane from './CreatorPane/CreatorPane'
 import LibraryPane from './LibraryPane/LibraryPane'
 import { EMPTY_COPY, type CopyValue } from './CopyForm/CopyForm'
-import { isValidDestinationUrl } from './CopyForm/helpers'
 import { EMPTY_TARGETING, type TargetingValue } from './CreatorPane/useTargetingData'
-import { adNameMapKey } from './CreatorPane/helpers'
+import {
+  adKeyCombos,
+  adNameMapKey,
+  buildPublishPayload,
+  canSubmitCreator,
+} from './CreatorPane/helpers'
 import { useLaunchQueue } from './useLaunchQueue'
 import styles from './AdsCreatorTab.module.css'
 
@@ -89,50 +93,17 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
     [brandId, targetMarket],
   )
 
-  const canSubmit =
-    files.length > 0
-    && targeting.accountId !== ''
-    && targeting.campaignId !== ''
-    && targeting.adSetId !== ''
-    && targeting.pageIds.length > 0
-    && (targeting.pageIds.length * files.length >= 2 || copy.name !== '')
-    && copy.headlines[0] !== ''
-    && copy.primaryTexts[0] !== ''
-    && isValidDestinationUrl(copy.url)
+  const canSubmit = canSubmitCreator(targeting, copy, files)
 
   const handleSubmit = useCallback((resolvedNames: ReadonlyMap<string, string>) => {
-    if (!canSubmit || !targetMarket) {
-      return
-    }
-    const headline = copy.headlines[0]
-    const body = copy.primaryTexts[0]
-    if (!headline || !body) {
+    if (!canSubmit || !targetMarket || !copy.headlines[0] || !copy.primaryTexts[0]) {
       return
     }
     const isSinglePage = targeting.pageIds.length === 1
     const batchId = crypto.randomUUID()
-    const baseCopy = {
-      headline,
-      body,
-      description: copy.description,
-      url: copy.url,
-      cta: copy.cta,
-    }
-    for (const pageId of targeting.pageIds) {
-      for (const file of files) {
-        const resolved = resolvedNames.get(adNameMapKey(pageId, file))
-        const name = resolved || copy.name || file.name
-        const payload = {
-          accountId: targeting.accountId,
-          adSetId: targeting.adSetId,
-          pageId,
-          instagramId: isSinglePage ? targeting.instagramId : '',
-          autoResolveInstagram: !isSinglePage,
-          status: copy.activate ? ('ACTIVE' as const) : ('PAUSED' as const),
-          copy: { name, ...baseCopy },
-        }
-        queue.enqueue(payload, file, batchId)
-      }
+    for (const { pageId, file, key } of adKeyCombos(targeting.pageIds, files)) {
+      const name = resolvedNames.get(key) || copy.name || file.name
+      queue.enqueue(buildPublishPayload({ targeting, copy, pageId, name, isSinglePage }), file, batchId)
     }
     setFiles([])
     setAdNames(new Map())

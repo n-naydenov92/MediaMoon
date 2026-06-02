@@ -19,7 +19,7 @@ import PreviewDialog from '../PreviewDialog/PreviewDialog'
 import PublishBar from '../PublishBar/PublishBar'
 import QueueLauncher from '../QueueLauncher/QueueLauncher'
 import AdNamesDialog from './AdNamesDialog/AdNamesDialog'
-import { adNameMapKey, buildAutoAdName, resolvePageToken } from './helpers'
+import { buildAdNameMap, buildAutoAdName, resolvePageToken } from './helpers'
 import { type TargetingValue, useTargetingData } from './useTargetingData'
 import styles from './CreatorPane.module.css'
 
@@ -182,17 +182,8 @@ export default memo(function CreatorPane({
   }, [copy, files, onCopyChange, pageTokens, selectedPages])
 
   const handleSubmit = useCallback(() => {
-    const names = new Map<string, string>()
-    for (const page of selectedPages) {
-      const tok = resolvePageToken(pageTokens, page.id, page.name)
-      for (const file of files) {
-        const key = adNameMapKey(page.id, file)
-        const authored = (isSingleAd ? copy.name : adNames.get(key)) || ''
-        names.set(key, authored || buildAutoAdName(file, tok))
-      }
-    }
-    onSubmit(names)
-  }, [adNames, copy.name, files, isSingleAd, onSubmit, pageTokens, selectedPages])
+    onSubmit(buildAdNameMap({ pages: selectedPages, files, pageTokens, copy, adNames, isSingleAd }))
+  }, [adNames, copy, files, isSingleAd, onSubmit, pageTokens, selectedPages])
 
   return (
     <Box className={styles.root}>

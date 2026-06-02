@@ -41,13 +41,13 @@
   display: inline-flex;
   align-items: center;
   font-size: 16px;
-  color: var(--error);
+  color: var(--text-muted);
   cursor: help;
   border-radius: 4px;
 }
 
 .infoIcon:focus-visible {
-  outline: 2px solid var(--error);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 

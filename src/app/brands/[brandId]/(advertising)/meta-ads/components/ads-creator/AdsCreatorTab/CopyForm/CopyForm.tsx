@@ -3,21 +3,19 @@
 import { memo } from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
-import IconButton from '@mui/material/IconButton'
-import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
-import CloseIcon from '@mui/icons-material/Close'
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline'
 import type { CtaType } from '@/lib/gateways/MetaAdsGateway'
 import FormField from '../FormField/FormField'
+import FormTextField from '../FormTextField/FormTextField'
 import SearchSelect from '../SearchSelect/SearchSelect'
 import StatusToggle from '../StatusToggle/StatusToggle'
+import VariationList from './VariationList/VariationList'
 import { isValidDestinationUrl } from './helpers'
 import styles from './CopyForm.module.css'
 
-const MAX_TOTAL = 5
+const PRIMARY_TEXT_ROWS = 4
 
 export interface CopyValue {
   readonly name: string
@@ -58,21 +56,6 @@ const CTA_OPTIONS: readonly CtaOption[] = [
   { id: 'SIGN_UP', label: 'Sign up' },
 ]
 
-function setAt(arr: readonly string[], index: number, next: string): readonly string[] {
-  const copy = [...arr]
-  copy[index] = next
-  return copy
-}
-
-function addAt(arr: readonly string[]): readonly string[] {
-  if (arr.length >= MAX_TOTAL) return arr
-  return [...arr, '']
-}
-
-function removeAt(arr: readonly string[], index: number): readonly string[] {
-  return arr.filter((_, i) => i !== index)
-}
-
 export default memo(function CopyForm({
   value,
   onChange,
@@ -80,8 +63,6 @@ export default memo(function CopyForm({
   onAutoName,
   onNameEach,
 }: Props): JSX.Element {
-  const primaryRemaining = MAX_TOTAL - value.primaryTexts.length
-  const headlineRemaining = MAX_TOTAL - value.headlines.length
   const urlInvalid = value.url.trim() !== '' && !isValidDestinationUrl(value.url)
 
   return (
@@ -124,12 +105,8 @@ export default memo(function CopyForm({
             </Button>
           )}
         </Box>
-        <TextField
+        <FormTextField
           type="text"
-          size="small"
-          variant="outlined"
-          fullWidth
-          className="density-form"
           value={onNameEach ? '' : value.name}
           placeholder={onNameEach ? 'Edit each ad name through the “Name each ad” button' : undefined}
           disabled={Boolean(onNameEach)}
@@ -137,145 +114,27 @@ export default memo(function CopyForm({
         />
       </Box>
 
-      <Box className={styles.fieldGroup}>
-        <FormField label="Primary Text">
-          <TextField
-            multiline
-            rows={4}
-            size="small"
-            variant="outlined"
-            fullWidth
-            className="density-form"
-            placeholder="Enter your ad primary text here"
-            value={value.primaryTexts[0]}
-            onChange={(e) => onChange({
-              ...value,
-              primaryTexts: setAt(value.primaryTexts, 0, e.target.value),
-            })}
-          />
-        </FormField>
+      <VariationList
+        label="Primary Text"
+        values={value.primaryTexts}
+        onChange={(next) => onChange({ ...value, primaryTexts: next })}
+        placeholder="Enter your ad primary text here"
+        addNoun="primary text"
+        multiline
+        firstRows={PRIMARY_TEXT_ROWS}
+      />
 
-        {value.primaryTexts.slice(1).map((text, idx) => {
-          const index = idx + 1
-          return (
-            <Box key={`primary-var-${index}`} className={styles.variationRow}>
-              <TextField
-                multiline
-                rows={2}
-                size="small"
-                variant="outlined"
-                fullWidth
-                className="density-form"
-                placeholder={`Variation ${index}`}
-                value={text}
-                onChange={(e) => onChange({
-                  ...value,
-                  primaryTexts: setAt(value.primaryTexts, index, e.target.value),
-                })}
-              />
-              <IconButton
-                size="small"
-                className={styles.removeVariation}
-                onClick={() => onChange({
-                  ...value,
-                  primaryTexts: removeAt(value.primaryTexts, index),
-                })}
-                aria-label={`Remove primary text variation ${index}`}
-              >
-                <CloseIcon fontSize="inherit" />
-              </IconButton>
-            </Box>
-          )
-        })}
-
-        {primaryRemaining > 0 && (
-          <Box
-            component="button"
-            type="button"
-            className={styles.addVariation}
-            onClick={() => onChange({
-              ...value,
-              primaryTexts: addAt(value.primaryTexts),
-            })}
-          >
-            <AddCircleOutlineIcon fontSize="small" />
-            {`Add primary text variation (${value.primaryTexts.length - 1}/${MAX_TOTAL - 1})`}
-          </Box>
-        )}
-      </Box>
-
-      <Box className={styles.fieldGroup}>
-        <FormField label="Headline">
-          <TextField
-            type="text"
-            size="small"
-            variant="outlined"
-            fullWidth
-            className="density-form"
-            placeholder="Enter your ad title here"
-            value={value.headlines[0]}
-            onChange={(e) => onChange({
-              ...value,
-              headlines: setAt(value.headlines, 0, e.target.value),
-            })}
-          />
-        </FormField>
-
-        {value.headlines.slice(1).map((text, idx) => {
-          const index = idx + 1
-          return (
-            <Box key={`headline-var-${index}`} className={styles.variationRow}>
-              <TextField
-                type="text"
-                size="small"
-                variant="outlined"
-                fullWidth
-                className="density-form"
-                placeholder={`Variation ${index}`}
-                value={text}
-                onChange={(e) => onChange({
-                  ...value,
-                  headlines: setAt(value.headlines, index, e.target.value),
-                })}
-              />
-              <IconButton
-                size="small"
-                className={styles.removeVariation}
-                onClick={() => onChange({
-                  ...value,
-                  headlines: removeAt(value.headlines, index),
-                })}
-                aria-label={`Remove headline variation ${index}`}
-              >
-                <CloseIcon fontSize="inherit" />
-              </IconButton>
-            </Box>
-          )
-        })}
-
-        {headlineRemaining > 0 && (
-          <Box
-            component="button"
-            type="button"
-            className={styles.addVariation}
-            onClick={() => onChange({
-              ...value,
-              headlines: addAt(value.headlines),
-            })}
-          >
-            <AddCircleOutlineIcon fontSize="small" />
-            {`Add headline variation (${value.headlines.length - 1}/${MAX_TOTAL - 1})`}
-          </Box>
-        )}
-      </Box>
+      <VariationList
+        label="Headline"
+        values={value.headlines}
+        onChange={(next) => onChange({ ...value, headlines: next })}
+        placeholder="Enter your ad title here"
+        addNoun="headline"
+      />
 
       <FormField label="Description">
-        <TextField
+        <FormTextField
           type="text"
-          size="small"
-          variant="outlined"
-          fullWidth
-          className="density-form"
           placeholder="Enter your ad description here"
           value={value.description}
           onChange={(e) => onChange({ ...value, description: e.target.value })}
@@ -284,12 +143,8 @@ export default memo(function CopyForm({
 
       <Box className={styles.actionRow}>
         <FormField label="Destination URL">
-          <TextField
+          <FormTextField
             type="url"
-            size="small"
-            variant="outlined"
-            fullWidth
-            className="density-form"
             placeholder="https://example.com"
             value={value.url}
             onChange={(e) => onChange({ ...value, url: e.target.value })}

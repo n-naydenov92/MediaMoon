@@ -1,3 +1,9 @@
+import type { Page } from '@/lib/gateways/MetaAdsGateway'
+import type { PublishPayload } from '../../launchPipeline/mediaUpload'
+import type { CopyValue } from '../CopyForm/CopyForm'
+import { isValidDestinationUrl } from '../CopyForm/helpers'
+import type { TargetingValue } from './useTargetingData'
+
 // Stable identity for a File across re-renders (the FilePicker list key uses
 // name+index, which is fine for React but reorders break it for naming state).
 export function fileKey(file: File): string {
@@ -89,4 +95,131 @@ export function resolvePageToken(
 
 export function adNameMapKey(pageId: string, file: File): string {
   return `${pageId}::${fileKey(file)}`
+}
+
+// One ad per (page × file). Each combo carries its resolved page token so callers
+// that build names don't re-resolve it per file.
+export interface AdCombo {
+  readonly page: Page
+  readonly file: File
+  readonly key: string
+  readonly pageTok: string
+}
+
+export function adCombos(
+  pages: readonly Page[],
+  files: readonly File[],
+  pageTokens: ReadonlyMap<string, string>,
+): readonly AdCombo[] {
+  return pages.flatMap((page) => {
+    const pageTok = resolvePageToken(pageTokens, page.id, page.name)
+    return files.map((file) => ({ page, file, key: adNameMapKey(page.id, file), pageTok }))
+  })
+}
+
+// Id-keyed enumeration for the publish step, where names are already resolved and
+// page objects aren't on hand — only the selected page ids.
+export interface AdKeyCombo {
+  readonly pageId: string
+  readonly file: File
+  readonly key: string
+}
+
+export function adKeyCombos(
+  pageIds: readonly string[],
+  files: readonly File[],
+): readonly AdKeyCombo[] {
+  return pageIds.flatMap((pageId) => files.map((file) => ({ pageId, file, key: adNameMapKey(pageId, file) })))
+}
+
+// Immutable Map set/delete — `null` removes the key. Replaces the
+// `new Map(prev); set/delete; onChange(next)` pattern repeated across naming UI.
+export function mapWith<K, V>(map: ReadonlyMap<K, V>, key: K, value: V | null): Map<K, V> {
+  const next = new Map(map)
+  if (value === null) {
+    next.delete(key)
+  } else {
+    next.set(key, value)
+  }
+  return next
+}
+
+interface BuildAdNameMapInput {
+  readonly pages: readonly Page[]
+  readonly files: readonly File[]
+  readonly pageTokens: ReadonlyMap<string, string>
+  readonly copy: CopyValue
+  readonly adNames: ReadonlyMap<string, string>
+  readonly isSingleAd: boolean
+}
+
+// Final name per ad: the operator's authored value (the shared field for a single
+// ad, else the per-ad entry), falling back to the structured auto name.
+export function buildAdNameMap({
+  pages,
+  files,
+  pageTokens,
+  copy,
+  adNames,
+  isSingleAd,
+}: BuildAdNameMapInput): Map<string, string> {
+  const names = new Map<string, string>()
+  for (const { file, key, pageTok } of adCombos(pages, files, pageTokens)) {
+    const authored = (isSingleAd ? copy.name : adNames.get(key)) || ''
+    names.set(key, authored || buildAutoAdName(file, pageTok))
+  }
+  return names
+}
+
+interface BuildPublishPayloadInput {
+  readonly targeting: TargetingValue
+  readonly copy: CopyValue
+  readonly pageId: string
+  readonly name: string
+  readonly isSinglePage: boolean
+}
+
+// Single page keeps its explicit Instagram actor; multi-page lets the backend
+// resolve each page's linked IG account.
+export function buildPublishPayload({
+  targeting,
+  copy,
+  pageId,
+  name,
+  isSinglePage,
+}: BuildPublishPayloadInput): PublishPayload {
+  return {
+    accountId: targeting.accountId,
+    adSetId: targeting.adSetId,
+    pageId,
+    instagramId: isSinglePage ? targeting.instagramId : '',
+    autoResolveInstagram: !isSinglePage,
+    status: copy.activate ? 'ACTIVE' : 'PAUSED',
+    copy: {
+      name,
+      headline: copy.headlines[0] ?? '',
+      body: copy.primaryTexts[0] ?? '',
+      description: copy.description,
+      url: copy.url,
+      cta: copy.cta,
+    },
+  }
+}
+
+export function canSubmitCreator(
+  targeting: TargetingValue,
+  copy: CopyValue,
+  files: readonly File[],
+): boolean {
+  return (
+    files.length > 0
+    && targeting.accountId !== ''
+    && targeting.campaignId !== ''
+    && targeting.adSetId !== ''
+    && targeting.pageIds.length > 0
+    && (targeting.pageIds.length * files.length >= 2 || copy.name !== '')
+    && copy.headlines[0] !== ''
+    && copy.primaryTexts[0] !== ''
+    && isValidDestinationUrl(copy.url)
+  )
 }
