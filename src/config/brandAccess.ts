@@ -1,24 +1,37 @@
 import type { BrandConfig, UserRole } from '@/types'
-import type { BrandId } from './brands'
+import { isBrandId, type BrandId } from './brands'
 
 /**
- * Per-brand access control.
+ * Per-brand access control. A role may see a brand only when BOTH sides agree:
  *
- * Roles NOT present in this allowlist see every brand (current default for
- * admin/team and the topic-scoped roles). A role that IS listed is restricted
- * to exactly the brands in its array — used for single-brand operators.
+ * - Role side: roles NOT in `ROLE_BRAND_ALLOWLIST` see every brand; a listed
+ *   role is restricted to exactly the brands in its array (single-brand operators).
+ * - Brand side: brands NOT in `BRAND_ROLE_ALLOWLIST` are visible to every role;
+ *   a listed brand is visible ONLY to the roles in its array (private brands).
  */
 const ROLE_BRAND_ALLOWLIST: Partial<Record<UserRole, readonly BrandId[]>> = {
   bubullincas: ['bubullincas'],
 }
 
-export function isBrandRestrictedRole(role: UserRole): boolean {
-  return role in ROLE_BRAND_ALLOWLIST
+const BRAND_ROLE_ALLOWLIST: Partial<Record<BrandId, readonly UserRole[]>> = {
+  bubullincas: ['admin', 'bubullincas'],
 }
 
 export function canRoleAccessBrand(role: UserRole, brandId: string): boolean {
+  return roleAllowsBrand(role, brandId) && brandAllowsRole(brandId, role)
+}
+
+function roleAllowsBrand(role: UserRole, brandId: string): boolean {
   const allowed = ROLE_BRAND_ALLOWLIST[role]
   return allowed ? allowed.some((id) => id === brandId) : true
+}
+
+function brandAllowsRole(brandId: string, role: UserRole): boolean {
+  if (!isBrandId(brandId)) {
+    return true
+  }
+  const allowed = BRAND_ROLE_ALLOWLIST[brandId]
+  return allowed ? allowed.includes(role) : true
 }
 
 export function getAccessibleBrands(

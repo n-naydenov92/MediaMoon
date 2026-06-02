@@ -1,7 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse, type NextRequest } from 'next/server'
 import { findModuleById } from '@/config/modules'
-import { canRoleAccessBrand, isBrandRestrictedRole } from '@/config/brandAccess'
+import { canRoleAccessBrand } from '@/config/brandAccess'
 import { getBusinessManagerForAccount } from '@/config/metaBusinessManagers'
 import { parseRole } from '@/lib/roles'
 import type { UserRole } from '@/types'
@@ -35,15 +35,15 @@ export default clerkMiddleware(async (auth, req) => {
 
   const role = roleFromClaims(session.sessionClaims)
 
-  if (role === 'creative_analyst') {
-    return restrictCreativeAnalyst(req)
-  }
-
-  if (role && isBrandRestrictedRole(role)) {
+  if (role) {
     const denial = enforceBrandAccess(req, role)
     if (denial) {
       return denial
     }
+  }
+
+  if (role === 'creative_analyst') {
+    return restrictCreativeAnalyst(req)
   }
 
   if (isModuleRoute(req) || isBrandRoute(req)) {
