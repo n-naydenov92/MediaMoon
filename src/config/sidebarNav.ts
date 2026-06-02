@@ -1,8 +1,10 @@
 import type { NavPanel, NavItem, UserRole } from '@/types'
 
 const ROLES_ALL: readonly UserRole[] = ['admin', 'team', 'stoichkov_only', 'shtonova_only']
+const ROLES_DASHBOARD: readonly UserRole[] = [...ROLES_ALL, 'bubullincas']
 const ROLES_TEAM: readonly UserRole[] = ['admin', 'team']
-const ROLES_ADS_PERFORMANCE: readonly UserRole[] = ['admin', 'team', 'creative_analyst']
+const ROLES_META_ADS: readonly UserRole[] = ['admin', 'team', 'bubullincas']
+const ROLES_ADS_PERFORMANCE: readonly UserRole[] = ['admin', 'team', 'creative_analyst', 'bubullincas']
 
 const ADVERTISING_PANEL: NavPanel = {
   id: 'advertising',
@@ -18,7 +20,7 @@ const ADVERTISING_PANEL: NavPanel = {
           label: 'Overview',
           icon: 'Dashboard',
           pathSuffix: 'meta-ads/overview',
-          roles: ROLES_TEAM,
+          roles: ROLES_META_ADS,
         },
         {
           kind: 'link',
@@ -34,7 +36,7 @@ const ADVERTISING_PANEL: NavPanel = {
           label: 'Ads Creator',
           icon: 'AddCircleOutline',
           pathSuffix: 'meta-ads/ads-creator',
-          roles: ROLES_TEAM,
+          roles: ROLES_META_ADS,
         },
         {
           kind: 'link',
@@ -79,7 +81,7 @@ export const MAIN_PANEL: NavPanel = {
           label: 'Dashboard',
           icon: 'SpaceDashboard',
           pathSuffix: '',
-          roles: ROLES_ALL,
+          roles: ROLES_DASHBOARD,
         },
       ],
     },

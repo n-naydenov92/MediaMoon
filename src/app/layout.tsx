@@ -6,6 +6,7 @@ import { ThemeModeProvider } from '@/styles/ThemeModeProvider'
 import AppShell from '@/components/layout/AppShell/AppShell'
 import { getCurrentUserRole } from '@/lib/currentUserRole'
 import { BRAND_REGISTRY } from '@/config/brands'
+import { getAccessibleBrands } from '@/config/brandAccess'
 import '@/styles/globals.css'
 
 const syne = Syne({
@@ -37,13 +38,14 @@ interface Props {
 
 export default async function RootLayout({ children }: Props): Promise<JSX.Element> {
   const role = await getCurrentUserRole()
+  const brands = role ? getAccessibleBrands(role, BRAND_REGISTRY) : BRAND_REGISTRY
 
   return (
     <ClerkProvider>
       <html lang="en" className={`${syne.variable} ${dmSans.variable}`} suppressHydrationWarning>
         <body>
           <ThemeModeProvider>
-            <AppShell brands={BRAND_REGISTRY} role={role}>{children}</AppShell>
+            <AppShell brands={brands} role={role}>{children}</AppShell>
           </ThemeModeProvider>
         </body>
       </html>

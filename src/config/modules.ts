@@ -20,7 +20,7 @@ export const MODULE_REGISTRY: readonly ModuleConfig[] = [
     label: 'Advertising',
     icon: 'Campaign',
     path: '',
-    roles: ['admin', 'team', 'creative_analyst'],
+    roles: ['admin', 'team', 'creative_analyst', 'bubullincas'],
     color: '#F97316',
     children: [
       {
@@ -28,7 +28,7 @@ export const MODULE_REGISTRY: readonly ModuleConfig[] = [
         label: 'Meta Ads',
         icon: 'Facebook',
         path: '/modules/meta-ads',
-        roles: ['admin', 'team', 'creative_analyst'],
+        roles: ['admin', 'team', 'creative_analyst', 'bubullincas'],
         color: '#1877F2',
       },
       {

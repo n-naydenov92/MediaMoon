@@ -11,6 +11,7 @@ export type UserRole =
   | 'stoichkov_only'
   | 'shtonova_only'
   | 'creative_analyst'
+  | 'bubullincas'
 
 export const ALL_ROLES: readonly UserRole[] = [
   'admin',
@@ -18,6 +19,7 @@ export const ALL_ROLES: readonly UserRole[] = [
   'stoichkov_only',
   'shtonova_only',
   'creative_analyst',
+  'bubullincas',
 ] as const
 
 // ─── Markets ────────────────────────────────────────────────────────────────

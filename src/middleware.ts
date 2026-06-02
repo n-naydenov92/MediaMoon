@@ -1,6 +1,8 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse, type NextRequest } from 'next/server'
 import { findModuleById } from '@/config/modules'
+import { canRoleAccessBrand, isBrandRestrictedRole } from '@/config/brandAccess'
+import { getBusinessManagerForAccount } from '@/config/metaBusinessManagers'
 import { parseRole } from '@/lib/roles'
 import type { UserRole } from '@/types'
 
@@ -37,15 +39,15 @@ export default clerkMiddleware(async (auth, req) => {
     return restrictCreativeAnalyst(req)
   }
 
-  if (isModuleRoute(req)) {
-    const moduleId = extractModuleId(req.nextUrl.pathname)
-    if (!isRoleAllowed(role, moduleId)) {
-      return NextResponse.redirect(new URL('/unauthorized', req.url))
+  if (role && isBrandRestrictedRole(role)) {
+    const denial = enforceBrandAccess(req, role)
+    if (denial) {
+      return denial
     }
   }
 
-  if (isBrandRoute(req)) {
-    const moduleId = req.nextUrl.pathname.match(/^\/brands\/[^/]+\/([^/]+)/)?.[1] ?? null
+  if (isModuleRoute(req) || isBrandRoute(req)) {
+    const moduleId = moduleIdFromRequest(req)
     if (!isRoleAllowed(role, moduleId)) {
       return NextResponse.redirect(new URL('/unauthorized', req.url))
     }
@@ -58,6 +60,37 @@ function roleFromClaims(
   claims: Record<string, unknown> | null | undefined,
 ): UserRole | null {
   return parseRole(claims?.role ?? (claims?.publicMetadata as { role?: unknown } | undefined)?.role)
+}
+
+// Brand-restricted roles (e.g. a single-brand operator) may only touch their own
+// brand. The target brand is read from the request — directly via `brandId`, or
+// indirectly via the `accountId` of a Meta ad account — and access is denied with
+// a 403 for API calls or a redirect to the brand picker for page navigations.
+function enforceBrandAccess(req: NextRequest, role: UserRole): NextResponse | null {
+  const targetBrandId = resolveTargetBrandId(req)
+  if (!targetBrandId || canRoleAccessBrand(role, targetBrandId)) {
+    return null
+  }
+  if (req.nextUrl.pathname.startsWith('/api/')) {
+    return NextResponse.json({ error: 'Forbidden: brand not accessible for your role' }, { status: 403 })
+  }
+  return NextResponse.redirect(new URL('/brands', req.url))
+}
+
+function resolveTargetBrandId(req: NextRequest): string | null {
+  const { pathname, searchParams } = req.nextUrl
+
+  const brandParam = searchParams.get('brandId')
+  if (brandParam) {
+    return brandParam
+  }
+
+  const accountId = searchParams.get('accountId')
+  if (accountId) {
+    return getBusinessManagerForAccount(accountId)?.brandId ?? null
+  }
+
+  return pathname.match(/^\/brands\/([^/]+)/)?.[1] ?? null
 }
 
 function restrictCreativeAnalyst(req: NextRequest): NextResponse {
@@ -83,9 +116,15 @@ function restrictCreativeAnalyst(req: NextRequest): NextResponse {
   return NextResponse.redirect(new URL('/brands', req.url))
 }
 
-function extractModuleId(pathname: string): string | null {
-  const match = pathname.match(/^\/modules\/([^/]+)/)
-  return match?.[1] ?? null
+// Resolves the moduleId for both gated route shapes: /modules/:id and
+// /brands/:brandId/:id. Returns null when neither pattern matches.
+function moduleIdFromRequest(req: NextRequest): string | null {
+  const { pathname } = req.nextUrl
+  return (
+    pathname.match(/^\/modules\/([^/]+)/)?.[1]
+    ?? pathname.match(/^\/brands\/[^/]+\/([^/]+)/)?.[1]
+    ?? null
+  )
 }
 
 function isRoleAllowed(role: UserRole | null, moduleId: string | null): boolean {
