@@ -4,10 +4,13 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { extractVideoThumbnail } from '../launchPipeline/imageProcessing'
 import {
   publishAd,
+  reuploadCreativeFromSource,
   uploadImageSingleShot,
   uploadVideoChunked,
+  type MediaRef,
   type PublishPayload,
 } from '../launchPipeline/mediaUpload'
+import type { AssetCreative } from './assetCreative'
 
 export type JobStatus = 'queued' | 'uploading' | 'publishing' | 'done' | 'failed'
 
@@ -52,15 +55,20 @@ export interface AdSetRecord {
 export interface UseLaunchQueueResult {
   readonly jobs: readonly LaunchJob[]
   readonly enqueue: (payload: PublishPayload, file: File, batchId: string) => void
+  readonly enqueueAsset: (payload: PublishPayload, asset: AssetCreative, batchId: string) => void
   readonly retry: (jobId: string) => void
   readonly stop: (jobId: string) => void
   readonly dismiss: (jobId: string) => void
   readonly recordAdSet: (record: AdSetRecord) => void
 }
 
+type JobSource =
+  | { readonly kind: 'file'; readonly file: File }
+  | { readonly kind: 'asset'; readonly asset: AssetCreative }
+
 interface PendingJob {
   readonly job: AdJob
-  readonly file: File
+  readonly source: JobSource
   readonly payload: PublishPayload
 }
 
@@ -78,14 +86,18 @@ export function useLaunchQueue(): UseLaunchQueueResult {
   }, [])
 
   const runJob = useCallback(async (pending: PendingJob): Promise<void> => {
-    const { job, file, payload } = pending
+    const { job, source, payload } = pending
     const controller = new AbortController()
     controllersRef.current.set(job.id, controller)
     const { signal } = controller
     try {
       updateJob(job.id, { status: 'uploading', progress: 0 })
-      let mediaRef: { imageHash?: string; videoId?: string; thumbnailHash?: string }
-      if (job.mediaType === 'video') {
+      let mediaRef: MediaRef
+      if (source.kind === 'asset') {
+        updateJob(job.id, { progress: 50 })
+        mediaRef = await reuploadCreativeFromSource(source.asset, payload.accountId, signal)
+      } else if (job.mediaType === 'video') {
+        const { file } = source
         const thumbnailFile = await extractVideoThumbnail(file)
         const [videoId, thumbnailHash] = await Promise.all([
           uploadVideoChunked(file, payload.accountId, (pct: number) => {
@@ -96,7 +108,7 @@ export function useLaunchQueue(): UseLaunchQueueResult {
         mediaRef = { videoId, thumbnailHash }
       } else {
         mediaRef = {
-          imageHash: await uploadImageSingleShot(file, payload.accountId, (pct: number) => {
+          imageHash: await uploadImageSingleShot(source.file, payload.accountId, (pct: number) => {
             updateJob(job.id, { progress: pct })
           }, signal),
         }
@@ -147,9 +159,31 @@ export function useLaunchQueue(): UseLaunchQueueResult {
       error: null,
       adId: null,
     }
-    pendingRef.current.set(id, { job, file, payload })
+    pendingRef.current.set(id, { job, source: { kind: 'file', file }, payload })
     setJobs((prev) => [...prev, job])
   }, [])
+
+  const enqueueAsset = useCallback(
+    (payload: PublishPayload, asset: AssetCreative, batchId: string): void => {
+      const id = crypto.randomUUID()
+      const job: AdJob = {
+        id,
+        kind: 'ad',
+        batchId,
+        name: payload.copy.name.trim() || asset.name,
+        fileName: asset.name,
+        fileSize: 0,
+        mediaType: asset.mediaType,
+        status: 'queued',
+        progress: 0,
+        error: null,
+        adId: null,
+      }
+      pendingRef.current.set(id, { job, source: { kind: 'asset', asset }, payload })
+      setJobs((prev) => [...prev, job])
+    },
+    [],
+  )
 
   const recordAdSet = useCallback(({ name, adSetId, accountId }: AdSetRecord): void => {
     const job: AdSetJob = {
@@ -194,5 +228,5 @@ export function useLaunchQueue(): UseLaunchQueueResult {
     setJobs((prev) => prev.filter((j) => j.id !== jobId))
   }, [])
 
-  return { jobs, enqueue, retry, stop, dismiss, recordAdSet }
+  return { jobs, enqueue, enqueueAsset, retry, stop, dismiss, recordAdSet }
 }

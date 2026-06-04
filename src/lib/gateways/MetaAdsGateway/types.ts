@@ -176,8 +176,30 @@ export interface AdWithInsights {
   readonly insights: InsightsTotals
 }
 
+/** The reusable copy/asset pieces extracted from one ad's creative. `bodies`
+ *  and `titles` cover dynamic-creative ads (asset_feed_spec) and collapse to the
+ *  single body/title for classic creatives. */
+export interface AdCreativeElements {
+  readonly bodies: readonly string[]
+  readonly titles: readonly string[]
+  readonly urls: readonly string[]
+  readonly imageHash: string | null
+  readonly imageUrl: string | null
+  readonly videoId: string | null
+}
+
+export interface AdWithCreativeElements extends AdWithInsights {
+  readonly elements: AdCreativeElements
+}
+
 export interface AdInsightsFilter {
   readonly field: string
-  readonly operator: 'GREATER_THAN' | 'LESS_THAN' | 'EQUAL' | 'IN'
+  readonly operator:
+    | 'GREATER_THAN'
+    | 'GREATER_THAN_OR_EQUAL'
+    | 'LESS_THAN'
+    | 'LESS_THAN_OR_EQUAL'
+    | 'EQUAL'
+    | 'IN'
   readonly value: number | string | readonly string[]
 }

@@ -1,0 +1,173 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chipRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+}
+
+.presetChip.presetChip {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  height: 30px;
+}
+
+.presetChip.presetChip[data-active='true'] {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+
+.chipIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-left: 2px;
+}
+
+.presetChip[data-key='winners'] .chipIcon,
+.presetChip[data-key='video'] .chipIcon,
+.presetChip[data-key='image'] .chipIcon {
+  color: var(--success);
+}
+
+.presetChip[data-key='underperformers'] .chipIcon {
+  color: var(--error);
+}
+
+.presetChip[data-key='all'] .chipIcon,
+.presetChip[data-active='true'] .chipIcon {
+  color: var(--accent);
+}
+
+.menuIcon {
+  font-size: 16px;
+  min-width: 28px;
+  color: var(--text-muted);
+}
+
+.menuIcon[data-key='winners'],
+.menuIcon[data-key='video'],
+.menuIcon[data-key='image'] {
+  color: var(--success);
+}
+
+.menuIcon[data-key='underperformers'] {
+  color: var(--error);
+}
+
+.menuIcon[data-key='all'] {
+  color: var(--accent);
+}
+
+.addFilter.addFilter {
+  margin-left: auto;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  height: 30px;
+  border-style: dashed;
+}
+
+.mobileBar {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+}
+
+.mobileTrigger.mobileTrigger {
+  flex: 1 1 auto;
+  min-width: 0;
+  justify-content: space-between;
+  text-transform: none;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-primary);
+  border-color: var(--hairline);
+  border-radius: 999px;
+  height: 32px;
+  padding: 0 14px;
+}
+
+.mobileTrigger.mobileTrigger:hover {
+  background: var(--surface-2);
+  border-color: var(--hairline-strong);
+}
+
+.mobileTriggerLabel {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.mobileAddFilter.mobileAddFilter {
+  flex: 0 0 auto;
+  text-transform: none;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-primary);
+  border-color: var(--hairline);
+  border-style: dashed;
+  border-radius: 999px;
+  height: 32px;
+  padding: 0 12px;
+}
+
+.mobileAddFilter.mobileAddFilter:hover {
+  background: var(--surface-2);
+  border-color: var(--hairline-strong);
+}
+
+.mobileMenuPaper.mobileMenuPaper {
+  min-width: 220px;
+  margin-top: 4px;
+  background: var(--bg-surface);
+  border: 1px solid var(--hairline);
+  color: var(--text-primary);
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+}
+
+.mobileMenuPaper.mobileMenuPaper :global(.MuiMenuItem-root) {
+  min-height: 36px;
+  padding: 0 14px;
+  font-size: var(--text-sm);
+}
+
+.ruleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+}
+
+.ruleLabel {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin-right: 4px;
+}
+
+@media (max-width: 640px) {
+  .root .chipRow {
+    display: none;
+  }
+
+  .root .mobileBar {
+    display: flex;
+  }
+}

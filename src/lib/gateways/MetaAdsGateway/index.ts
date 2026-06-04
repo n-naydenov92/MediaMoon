@@ -1,9 +1,11 @@
 export type {
   AdAccount,
+  AdCreativeElements,
   AdCreativeParams,
   AdInsightsFilter,
   AdSet,
   AdSetDetail,
+  AdWithCreativeElements,
   AdWithInsights,
   AccountInsights,
   AttributionEventType,
@@ -45,7 +47,14 @@ export { fetchAdSet, fetchPixels } from './targetingApi'
 
 export { fetchAccountInsights } from './insightsApi'
 
-export { fetchAdsWithInsights } from './adsApi'
+export {
+  fetchAdsWithInsights,
+  fetchAdElementsWithInsights,
+  fetchRankedAdInsights,
+  fetchElementsForAdIds,
+} from './adsApi'
+
+export type { RankedAdInsightsRow } from './adsApi'
 
 export {
   createAd,
@@ -58,6 +67,7 @@ export {
   startVideoUpload,
   transferVideoChunk,
   finishVideoUpload,
+  fetchVideoSource,
 } from './videoUploadApi'
 
 export type {

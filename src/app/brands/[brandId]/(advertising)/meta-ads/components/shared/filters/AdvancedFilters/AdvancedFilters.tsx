@@ -20,17 +20,16 @@ import {
   type ComparisonOperator,
   type FilterField,
   type FilterRule,
-} from '../../filterRules'
-import { fieldLabel, operatorLabel } from '../../ruleLabels'
+} from '@/lib/meta/filterRules'
+import { fieldLabel, operatorLabel } from '@/lib/meta/ruleLabels'
 import styles from './AdvancedFilters.module.css'
 
 interface Props {
   readonly open: boolean
   readonly onClose: () => void
   readonly onAdd: (rule: FilterRule) => void
+  readonly fields?: readonly FilterField[]
 }
-
-const DEFAULT_FIELD: FilterField = 'spend'
 
 const SELECT_PROPS = {
   MenuProps: {
@@ -39,8 +38,14 @@ const SELECT_PROPS = {
   },
 } as const
 
-export default function AdvancedFilters({ open, onClose, onAdd }: Props): JSX.Element {
-  const [field, setField] = useState<FilterField>(DEFAULT_FIELD)
+export default function AdvancedFilters({
+  open,
+  onClose,
+  onAdd,
+  fields = FILTER_FIELDS,
+}: Props): JSX.Element {
+  const defaultField = fields[0] ?? 'spend'
+  const [field, setField] = useState<FilterField>(defaultField)
   const [operator, setOperator] = useState<ComparisonOperator>('gt')
   const [valueText, setValueText] = useState<string>('')
 
@@ -49,10 +54,10 @@ export default function AdvancedFilters({ open, onClose, onAdd }: Props): JSX.El
       return
     }
 
-    setField(DEFAULT_FIELD)
+    setField(defaultField)
     setOperator('gt')
     setValueText('')
-  }, [open])
+  }, [open, defaultField])
 
   const kind = getFieldKind(field)
   const ops = operatorsFor(field)
@@ -102,7 +107,7 @@ export default function AdvancedFilters({ open, onClose, onAdd }: Props): JSX.El
           onChange={(e) => handleFieldChange(e.target.value as FilterField)}
           SelectProps={SELECT_PROPS}
         >
-          {FILTER_FIELDS.map((f) => (
+          {fields.map((f) => (
             <MenuItem key={f} value={f} dense>
               {fieldLabel(f)}
             </MenuItem>

@@ -150,3 +150,24 @@ function parseValueForField(field: FilterField, raw: string): FilterValue | null
 }
 
 export const parseFilterValue = parseValueForField
+
+// Shared numeric comparison so client predicates (Ads Creator library) and the
+// server filter (api/meta-ads/ads) apply identical operator semantics.
+export function compareNumeric(
+  operator: ComparisonOperator,
+  value: number,
+  target: number,
+): boolean {
+  switch (operator) {
+    case 'gt':
+      return value > target
+    case 'gte':
+      return value >= target
+    case 'lt':
+      return value < target
+    case 'lte':
+      return value <= target
+    case 'eq':
+      return value === target
+  }
+}

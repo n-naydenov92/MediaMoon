@@ -12,7 +12,9 @@ import { getAdAccountIds } from '@/config/adAccounts'
 import Notice from '../../Notice/Notice'
 import CreatorPane from './CreatorPane/CreatorPane'
 import LibraryPane from './LibraryPane/LibraryPane'
+import { addTextVariation } from './CopyForm/VariationList/helpers'
 import { EMPTY_COPY, type CopyValue } from './CopyForm/CopyForm'
+import { addAsset, type AssetCreative } from './assetCreative'
 import { EMPTY_TARGETING, type TargetingValue } from './CreatorPane/useTargetingData'
 import {
   adKeyCombos,
@@ -31,6 +33,7 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
   const brand = findBrandById(brandId)
   const { selectedMarket } = useBrandShellContext()
   const [files, setFiles] = useState<readonly File[]>([])
+  const [assets, setAssets] = useState<readonly AssetCreative[]>([])
   const [targeting, setTargeting] = useState<TargetingValue>(EMPTY_TARGETING)
   const [copy, setCopy] = useState<CopyValue>(EMPTY_COPY)
   const [adNames, setAdNames] = useState<ReadonlyMap<string, string>>(() => new Map())
@@ -93,22 +96,49 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
     [brandId, targetMarket],
   )
 
-  const canSubmit = canSubmitCreator(targeting, copy, files)
+  const creativeCount = files.length + assets.length
+  const canSubmit = canSubmitCreator(targeting, copy, creativeCount)
+
+  const handleAddPrimaryText = useCallback((value: string) => {
+    setCopy((prev) => ({ ...prev, primaryTexts: addTextVariation(prev.primaryTexts, value) }))
+  }, [])
+
+  const handleAddHeadline = useCallback((value: string) => {
+    setCopy((prev) => ({ ...prev, headlines: addTextVariation(prev.headlines, value) }))
+  }, [])
+
+  const handleAddUrl = useCallback((value: string) => {
+    setCopy((prev) => ({ ...prev, url: value }))
+  }, [])
+
+  const handleAddCreative = useCallback((asset: AssetCreative) => {
+    setAssets((prev) => addAsset(prev, asset))
+  }, [])
+
+  const addedAssetKeys = useMemo(() => new Set(assets.map((a) => a.assetKey)), [assets])
 
   const handleSubmit = useCallback((resolvedNames: ReadonlyMap<string, string>) => {
     if (!canSubmit || !targetMarket || !copy.headlines[0] || !copy.primaryTexts[0]) {
       return
     }
     const isSinglePage = targeting.pageIds.length === 1
+    const isSingleAd = targeting.pageIds.length * (files.length + assets.length) === 1
     const batchId = crypto.randomUUID()
     for (const { pageId, file, key } of adKeyCombos(targeting.pageIds, files)) {
       const name = resolvedNames.get(key) || copy.name || file.name
       queue.enqueue(buildPublishPayload({ targeting, copy, pageId, name, isSinglePage }), file, batchId)
     }
+    for (const pageId of targeting.pageIds) {
+      for (const asset of assets) {
+        const name = (isSingleAd ? copy.name.trim() : '') || asset.name
+        queue.enqueueAsset(buildPublishPayload({ targeting, copy, pageId, name, isSinglePage }), asset, batchId)
+      }
+    }
     setFiles([])
+    setAssets([])
     setAdNames(new Map())
     setPageTokens(new Map())
-  }, [canSubmit, copy, files, queue, targeting, targetMarket])
+  }, [assets, canSubmit, copy, files, queue, targeting, targetMarket])
 
   if (!brand || !targetMarket) {
     return (
@@ -140,6 +170,8 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
         onTargetingChange={setTargeting}
         files={files}
         onFilesChange={setFiles}
+        assets={assets}
+        onAssetsChange={setAssets}
         copy={copy}
         onCopyChange={setCopy}
         adNames={adNames}
@@ -154,7 +186,18 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
         canSubmit={canSubmit}
         onSubmit={handleSubmit}
       />
-      <LibraryPane />
+      <LibraryPane
+        brandId={brandId}
+        market={selectedMarket}
+        primaryTexts={copy.primaryTexts}
+        headlines={copy.headlines}
+        url={copy.url}
+        addedAssetKeys={addedAssetKeys}
+        onAddPrimaryText={handleAddPrimaryText}
+        onAddHeadline={handleAddHeadline}
+        onAddUrl={handleAddUrl}
+        onAddCreative={handleAddCreative}
+      />
     </Box>
   )
 }

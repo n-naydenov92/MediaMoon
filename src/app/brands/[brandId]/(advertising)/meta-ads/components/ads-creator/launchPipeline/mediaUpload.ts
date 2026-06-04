@@ -127,6 +127,41 @@ export async function uploadImageSingleShot(
   return response.imageHash
 }
 
+export interface MediaRef {
+  readonly imageHash?: string
+  readonly videoId?: string
+  readonly thumbnailHash?: string
+}
+
+// Re-uploads an existing library creative into the target account (server-side
+// download + upload), returning the account-local media reference to publish with.
+export async function reuploadCreativeFromSource(
+  asset: {
+    readonly mediaType: 'image' | 'video'
+    readonly imageUrl: string | null
+    readonly videoId: string | null
+    readonly thumbnailUrl: string | null
+  },
+  accountId: string,
+  signal?: AbortSignal,
+): Promise<MediaRef> {
+  const url = `/api/meta-ads/reupload?accountId=${encodeURIComponent(accountId)}`
+  if (asset.mediaType === 'image') {
+    const res = await postJson<{ imageHash: string }>(
+      url,
+      { kind: 'image', imageUrl: asset.imageUrl },
+      signal,
+    )
+    return { imageHash: res.imageHash }
+  }
+  const res = await postJson<{ videoId: string; thumbnailHash: string }>(
+    url,
+    { kind: 'video', videoId: asset.videoId, thumbnailUrl: asset.thumbnailUrl },
+    signal,
+  )
+  return { videoId: res.videoId, thumbnailHash: res.thumbnailHash }
+}
+
 export async function publishAd(
   payload: PublishPayload,
   media: {

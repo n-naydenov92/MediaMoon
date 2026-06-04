@@ -6,6 +6,7 @@ import Typography from '@mui/material/Typography'
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined'
 import type { BrandId } from '@/config/brands'
 import type { StatusFilter } from '@/lib/gateways/MetaAdsGateway'
+import type { AssetCreative } from '../assetCreative'
 import type { CopyValue } from '../CopyForm/CopyForm'
 import { isValidDestinationUrl } from '../CopyForm/helpers'
 import type { AdSetRecord, LaunchJob } from '../useLaunchQueue'
@@ -30,6 +31,8 @@ interface Props {
   readonly onTargetingChange: (next: TargetingValue) => void
   readonly files: readonly File[]
   readonly onFilesChange: (next: readonly File[]) => void
+  readonly assets: readonly AssetCreative[]
+  readonly onAssetsChange: (next: readonly AssetCreative[]) => void
   readonly copy: CopyValue
   readonly onCopyChange: (next: CopyValue) => void
   readonly adNames: ReadonlyMap<string, string>
@@ -60,6 +63,8 @@ export default memo(function CreatorPane({
   onTargetingChange,
   files,
   onFilesChange,
+  assets,
+  onAssetsChange,
   copy,
   onCopyChange,
   adNames,
@@ -88,6 +93,7 @@ export default memo(function CreatorPane({
   })
 
   const isSinglePage = targeting.pageIds.length === 1
+  const creativeCount = files.length + assets.length
   const selectedAccount = useMemo(
     () => data.accounts.find((a) => a.id === targeting.accountId) ?? null,
     [data.accounts, targeting.accountId],
@@ -98,8 +104,8 @@ export default memo(function CreatorPane({
     campaign: targeting.campaignId !== '' && targeting.adSetId !== '',
     profiles: targeting.pageIds.length > 0
       && (!isSinglePage || data.instagramAccounts.length === 0 || targeting.instagramId !== ''),
-    files: files.length > 0,
-    copy: (targeting.pageIds.length * files.length >= 2 || copy.name !== '')
+    files: creativeCount > 0,
+    copy: (targeting.pageIds.length * creativeCount >= 2 || copy.name !== '')
       && copy.headlines[0] !== ''
       && copy.primaryTexts[0] !== ''
       && isValidDestinationUrl(copy.url),
@@ -111,7 +117,7 @@ export default memo(function CreatorPane({
     targeting.instagramId,
     isSinglePage,
     data.instagramAccounts.length,
-    files.length,
+    creativeCount,
     copy.name,
     copy.headlines,
     copy.primaryTexts,
@@ -166,7 +172,7 @@ export default memo(function CreatorPane({
 
   const openAdNames = useCallback(() => setAdNamesOpen(true), [])
   const closeAdNames = useCallback(() => setAdNamesOpen(false), [])
-  const adsCount = (targeting.pageIds.length || 1) * files.length
+  const adsCount = (targeting.pageIds.length || 1) * creativeCount
   const isSingleAd = adsCount === 1
 
   // Single ad: fill the shared Ad name field with the structured template
@@ -269,7 +275,12 @@ export default memo(function CreatorPane({
           expanded={expanded.has('files')}
           onToggle={() => toggle('files')}
         >
-          <FilesStep files={files} onChange={onFilesChange} />
+          <FilesStep
+            files={files}
+            onChange={onFilesChange}
+            assets={assets}
+            onAssetsChange={onAssetsChange}
+          />
         </StepAccordion>
 
         <StepAccordion
@@ -291,7 +302,7 @@ export default memo(function CreatorPane({
 
       <Box className={styles.footer}>
         <PublishBar
-          adsCount={targeting.pageIds.length * files.length}
+          adsCount={targeting.pageIds.length * creativeCount}
           canSubmit={canSubmit}
           onSubmit={handleSubmit}
           jobs={jobs}

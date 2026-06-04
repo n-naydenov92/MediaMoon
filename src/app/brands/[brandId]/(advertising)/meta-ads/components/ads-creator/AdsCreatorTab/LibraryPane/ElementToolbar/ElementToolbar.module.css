@@ -1,0 +1,79 @@
+.root {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.count {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.search {
+  flex: 1 1 200px;
+  min-width: 160px;
+}
+
+/* Match the 30px pill height of the Sort/Today buttons. Scoped to this toolbar
+   only — shared DebouncedSearchInput stays at its default size elsewhere. */
+.search :global(.MuiOutlinedInput-root) {
+  height: 30px;
+  border-radius: 999px;
+}
+
+.search :global(.MuiOutlinedInput-input) {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.sortBtn.sortBtn {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border-color: var(--hairline);
+  text-transform: none;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.sortBtn.sortBtn:hover {
+  background: var(--surface-2);
+  border-color: var(--hairline-strong);
+}
+
+.sortLabelMuted {
+  color: var(--text-muted);
+}
+
+.dirArrow {
+  margin-left: 16px;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* On phones the count + search + sort cram onto wrapping lines. Give the search
+   its own full-width row, then put the count (left) and Sort (right) on one clean
+   row below it. */
+@media (max-width: 640px) {
+  .root {
+    gap: 10px;
+  }
+
+  .search {
+    order: -1;
+    flex-basis: 100%;
+    max-width: none;
+  }
+
+  .sortBtn.sortBtn {
+    margin-left: auto;
+  }
+}

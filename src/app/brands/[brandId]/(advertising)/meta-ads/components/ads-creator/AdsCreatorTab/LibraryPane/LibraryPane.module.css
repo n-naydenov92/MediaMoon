@@ -1,67 +1,130 @@
 .root {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
   width: 100%;
   height: 100%;
   min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding: 24px;
-  background: var(--library-bg, color-mix(in srgb, var(--surface-1) 70%, var(--accent) 6%));
-  border: 1.5px dashed var(--hairline-strong);
+  padding: 16px;
+  background: var(--bg-surface);
+  border: 1px solid var(--hairline);
   border-radius: 16px;
   font-family: var(--font-dm-sans), system-ui, sans-serif;
-  color: var(--text-secondary);
+  color: var(--text-primary);
 }
 
 @media (max-width: 899px) {
   .root {
     height: auto;
-    min-height: 360px;
-    overflow-y: visible;
-    overscroll-behavior: auto;
+    min-height: 420px;
   }
 }
 
-.card {
+.header {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  text-align: center;
+  justify-content: space-between;
   gap: 12px;
-  max-width: 380px;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
 }
 
-.iconWrap {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 56px;
-  height: 56px;
-  border-radius: 16px;
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
-  color: var(--accent);
-  font-size: 28px;
-  margin-bottom: 4px;
-}
-
-.icon {
-  font-size: 28px;
-}
-
-.title {
+.title.title {
   margin: 0;
-  font-family: var(--font-syne), system-ui, sans-serif;
-  font-size: 18px;
-  font-weight: 600;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   color: var(--text-primary);
+}
+
+.headerControls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.tabs {
+  flex: 0 0 auto;
+  border-bottom: 1px solid var(--hairline);
+}
+
+/* Collapse the inactive scroll arrow so it never leaves an empty reserved slot;
+   the arrow on the opposite side stays visible to signal more tabs off-screen. */
+.tabs :global(.MuiTabs-scrollButtons.Mui-disabled) {
+  width: 0;
+  overflow: hidden;
+}
+
+.tab.tab {
+  min-height: 40px;
+  min-width: auto;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: none;
   letter-spacing: -0.01em;
 }
 
-.body {
-  margin: 0;
-  font-size: 13px;
-  line-height: 1.5;
-  color: var(--text-secondary);
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+/* More breathing room on phones so the filter pills don't read as glued to the
+   search/sort row below them. */
+@media (max-width: 640px) {
+  .controls {
+    gap: 16px;
+  }
+}
+
+/* Hairline under the filter section, mirroring the tabs' divider, so filters and
+   search/sort read as two distinct sections. */
+.filterSection {
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  padding-right: 6px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.message {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+
+.loadMoreWrap {
+  display: flex;
+  justify-content: center;
+  padding: 16px 0 4px;
+}
+
+.loadMore {
+  min-width: 180px;
 }

@@ -12,7 +12,7 @@ import {
   parseFilterRules,
   stringifyFilterRules,
   type FilterRule,
-} from './filterRules'
+} from '@/lib/meta/filterRules'
 import {
   DEFAULT_SORT,
   defaultCriteriaFor,

@@ -13,8 +13,8 @@ import {
   getFieldKind,
   parseFilterValue,
   type FilterRule,
-} from '../../filterRules'
-import { fieldLabel, formatRuleValue, operatorLabel } from '../../ruleLabels'
+} from '@/lib/meta/filterRules'
+import { fieldLabel, formatRuleValue, operatorLabel } from '@/lib/meta/ruleLabels'
 import styles from './RuleChip.module.css'
 
 interface Props {

@@ -1,7 +1,7 @@
 export type RoasTier = 'good' | 'warning' | 'bad' | 'idle'
 
 const ROAS_GOOD_THRESHOLD = 3.5
-const ROAS_WARNING_THRESHOLD = 3.0
+export const ROAS_WARNING_THRESHOLD = 3.0
 
 export function classifyRoas(roas: number): RoasTier {
   if (roas <= 0) {

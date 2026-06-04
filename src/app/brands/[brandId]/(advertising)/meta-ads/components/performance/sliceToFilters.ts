@@ -6,7 +6,7 @@ import {
   ROAS_GOOD_MIN,
 } from '@/lib/meta/metricThresholds'
 import type { LeaderboardSlice } from '../overview/performanceHref'
-import type { FilterRule } from './filterRules'
+import type { FilterRule } from '@/lib/meta/filterRules'
 
 export type SortDirection = 'asc' | 'desc'
 

@@ -18,8 +18,8 @@ import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded'
 import ImageRoundedIcon from '@mui/icons-material/ImageRounded'
 import TrendingUpRoundedIcon from '@mui/icons-material/TrendingUpRounded'
 import TrendingDownRoundedIcon from '@mui/icons-material/TrendingDownRounded'
-import RuleChip from '../RuleChip/RuleChip'
-import type { FilterRule } from '../../filterRules'
+import RuleChip from '../../../shared/filters/RuleChip/RuleChip'
+import type { FilterRule } from '@/lib/meta/filterRules'
 import styles from './FilterChips.module.css'
 
 export type ChipKey =

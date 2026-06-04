@@ -1,4 +1,4 @@
-import { callGraphApiMultipart } from './http'
+import { buildUrl, callGraphApi, callGraphApiMultipart } from './http'
 
 interface GraphStartResponse {
   readonly upload_session_id?: string
@@ -89,6 +89,22 @@ export async function transferVideoChunk(
     endOffset: nextEnd,
     complete: nextStart === nextEnd,
   }
+}
+
+interface GraphVideoSourceResponse {
+  readonly source?: string
+  readonly error?: { message: string; type: string; code: number }
+}
+
+// The downloadable CDN URL for an existing ad video, used to re-upload it into a
+// different ad account (video ids are not portable across accounts).
+export async function fetchVideoSource(token: string, videoId: string): Promise<string | null> {
+  const url = buildUrl(`/${videoId}`, token, { fields: 'source' })
+  const json = await callGraphApi<GraphVideoSourceResponse>(url)
+  if (json.error) {
+    throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
+  }
+  return json.source ?? null
 }
 
 export async function finishVideoUpload(

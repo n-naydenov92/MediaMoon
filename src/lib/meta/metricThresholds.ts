@@ -8,11 +8,11 @@ export const CPP_GOOD_MAX = 5
 export const CPLPV_GOOD_MAX = 0.5
 
 const CTR_GOOD = CTR_GOOD_MIN
-const CTR_WARNING = 0.01
+export const CTR_WARNING_MIN = 0.01
 
-const CPP_WARNING_MAX = 7
+export const CPP_WARNING_MAX = 7
 
-const CPLPV_WARNING_MAX = 0.8
+export const CPLPV_WARNING_MAX = 0.8
 
 export function classifyCtr(ctr: number): MetricTier {
   if (ctr <= 0) {
@@ -21,7 +21,7 @@ export function classifyCtr(ctr: number): MetricTier {
   if (ctr >= CTR_GOOD) {
     return 'good'
   }
-  if (ctr >= CTR_WARNING) {
+  if (ctr >= CTR_WARNING_MIN) {
     return 'warning'
   }
   return 'bad'

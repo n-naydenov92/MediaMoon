@@ -243,15 +243,15 @@ export function buildPublishPayload({
 export function canSubmitCreator(
   targeting: TargetingValue,
   copy: CopyValue,
-  files: readonly File[],
+  creativeCount: number,
 ): boolean {
   return (
-    files.length > 0
+    creativeCount > 0
     && targeting.accountId !== ''
     && targeting.campaignId !== ''
     && targeting.adSetId !== ''
     && targeting.pageIds.length > 0
-    && (targeting.pageIds.length * files.length >= 2 || copy.name !== '')
+    && (targeting.pageIds.length * creativeCount >= 2 || copy.name !== '')
     && copy.headlines[0] !== ''
     && copy.primaryTexts[0] !== ''
     && isValidDestinationUrl(copy.url)

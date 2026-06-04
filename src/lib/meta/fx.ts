@@ -14,6 +14,17 @@ export function convertToEur(amount: number, currency: string): number {
   return amount * rate
 }
 
+// Inverse of convertToEur: take a EUR amount (e.g. a user-typed spend threshold,
+// which the UI always shows in EUR) back to the account's native currency so it
+// can be pushed into Meta's `filtering`, which compares in native currency.
+export function convertFromEur(amountEur: number, currency: string): number {
+  const rate = RATES_TO_EUR[currency.toUpperCase()]
+  if (rate === undefined || rate === 0) {
+    return amountEur
+  }
+  return amountEur / rate
+}
+
 export function isSupportedCurrency(currency: string): boolean {
   return RATES_TO_EUR[currency.toUpperCase()] !== undefined
 }

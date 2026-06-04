@@ -1,0 +1,55 @@
+.root {
+  display: flex;
+}
+
+/* Card: one metric per row, label left / value right. */
+.root[data-variant='stack'] {
+  flex-direction: column;
+  gap: 4px;
+}
+
+.root[data-variant='stack'] .row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* Text/URL rows: compact wrapping "Label value" pairs so the row stays short. */
+.root[data-variant='inline'] {
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+}
+
+.root[data-variant='inline'] .row {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--text-muted);
+}
+
+.value {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.value[data-tier='good'] {
+  color: var(--success);
+}
+
+.value[data-tier='warning'] {
+  color: var(--warning);
+}
+
+.value[data-tier='bad'] {
+  color: var(--error);
+}

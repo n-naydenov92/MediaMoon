@@ -4,7 +4,7 @@ import type { BrandId } from '@/config/brands'
 import { ALL_MARKETS } from '@/lib/markets'
 import type { DateRangeSelection } from '@/lib/meta/dateRange'
 import type { AdRow } from './columnSpecs'
-import { stringifyFilterRules, type FilterRule } from './filterRules'
+import { stringifyFilterRules, type FilterRule } from '@/lib/meta/filterRules'
 import { stringifySort, type SortSpec } from './sliceToFilters'
 
 const NO_TOKEN_STATUS = 503
