@@ -19,6 +19,10 @@ import SearchIcon from '@mui/icons-material/Search'
 import PhotoOutlinedIcon from '@mui/icons-material/PhotoOutlined'
 import MovieOutlinedIcon from '@mui/icons-material/MovieOutlined'
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded'
+import type { CopyValue } from '../CopyForm/CopyForm'
+import { fileKey } from '../CreatorPane/helpers'
+import { type CopyOverride } from '../perCreativeCopy'
+import CreativeStatusBadges from '../CreativeStatusBadges/CreativeStatusBadges'
 import styles from './FilePicker.module.css'
 
 type TypeFilter = 'all' | 'image' | 'video'
@@ -27,6 +31,8 @@ interface Props {
   readonly files: readonly File[]
   readonly onChange: (next: readonly File[]) => void
   readonly disabled?: boolean
+  readonly copy?: CopyValue
+  readonly overrides?: ReadonlyMap<string, CopyOverride>
 }
 
 interface FilePreview {
@@ -38,7 +44,7 @@ interface FilePreview {
 
 const ACCEPT = 'image/*,video/*'
 
-const TYPE_PILLS: ReadonlyArray<{ key: TypeFilter; label: string }> = [
+const TYPE_PILLS: readonly { key: TypeFilter; label: string }[] = [
   { key: 'all', label: 'All' },
   { key: 'image', label: 'Images' },
   { key: 'video', label: 'Videos' },
@@ -50,7 +56,13 @@ function formatBytes(n: number): string {
   return `${(n / (1024 * 1024)).toFixed(1)} MB`
 }
 
-export default function FilePicker({ files, onChange, disabled = false }: Props): JSX.Element {
+export default function FilePicker({
+  files,
+  onChange,
+  disabled = false,
+  copy,
+  overrides,
+}: Props): JSX.Element {
   const inputRef = useRef<HTMLInputElement>(null)
   const [previews, setPreviews] = useState<readonly FilePreview[]>([])
   const [dragging, setDragging] = useState(false)
@@ -262,6 +274,9 @@ export default function FilePicker({ files, onChange, disabled = false }: Props)
                     <Typography component="span" variant="inherit" className={styles.size}>
                       {formatBytes(file.size)}
                     </Typography>
+                    {copy && overrides?.has(fileKey(file)) && (
+                      <CreativeStatusBadges base={copy} override={overrides.get(fileKey(file))} />
+                    )}
                   </Box>
                   <IconButton
                     size="small"

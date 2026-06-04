@@ -15,6 +15,7 @@ import LibraryPane from './LibraryPane/LibraryPane'
 import { addTextVariation } from './CopyForm/VariationList/helpers'
 import { EMPTY_COPY, type CopyValue } from './CopyForm/CopyForm'
 import { addAsset, type AssetCreative } from './assetCreative'
+import { creativeKey, resolveCopy, type CopyOverride } from './perCreativeCopy'
 import { EMPTY_TARGETING, type TargetingValue } from './CreatorPane/useTargetingData'
 import {
   adKeyCombos,
@@ -37,6 +38,7 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
   const [targeting, setTargeting] = useState<TargetingValue>(EMPTY_TARGETING)
   const [copy, setCopy] = useState<CopyValue>(EMPTY_COPY)
   const [adNames, setAdNames] = useState<ReadonlyMap<string, string>>(() => new Map())
+  const [copyOverrides, setCopyOverrides] = useState<ReadonlyMap<string, CopyOverride>>(() => new Map())
   const [pageTokens, setPageTokens] = useState<ReadonlyMap<string, string>>(() => new Map())
   const queue = useLaunchQueue()
 
@@ -80,6 +82,30 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
       return next.size === prev.size ? prev : next
     })
   }, [files, targeting.pageIds])
+
+  // Drop per-creative copy overrides for creatives no longer present, so a
+  // removed file/asset can't leak its copy into a later submit.
+  useEffect(() => {
+    setCopyOverrides((prev) => {
+      if (prev.size === 0) {
+        return prev
+      }
+      const valid = new Set<string>()
+      for (const file of files) {
+        valid.add(creativeKey(file))
+      }
+      for (const asset of assets) {
+        valid.add(asset.assetKey)
+      }
+      const next = new Map<string, CopyOverride>()
+      for (const [key, value] of prev) {
+        if (valid.has(key)) {
+          next.set(key, value)
+        }
+      }
+      return next.size === prev.size ? prev : next
+    })
+  }, [files, assets])
 
   const targetMarket = useMemo<Market | null>(() => {
     if (!brand) {
@@ -126,19 +152,21 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
     const batchId = crypto.randomUUID()
     for (const { pageId, file, key } of adKeyCombos(targeting.pageIds, files)) {
       const name = resolvedNames.get(key) || copy.name || file.name
-      queue.enqueue(buildPublishPayload({ targeting, copy, pageId, name, isSinglePage }), file, batchId)
+      const adCopy = resolveCopy(copy, copyOverrides.get(creativeKey(file)))
+      queue.enqueue(buildPublishPayload({ targeting, copy: adCopy, pageId, name, isSinglePage }), file, batchId)
     }
     for (const pageId of targeting.pageIds) {
       for (const asset of assets) {
         const name = (isSingleAd ? copy.name.trim() : '') || asset.name
-        queue.enqueueAsset(buildPublishPayload({ targeting, copy, pageId, name, isSinglePage }), asset, batchId)
+        const adCopy = resolveCopy(copy, copyOverrides.get(asset.assetKey))
+        queue.enqueueAsset(buildPublishPayload({ targeting, copy: adCopy, pageId, name, isSinglePage }), asset, batchId)
       }
     }
     setFiles([])
     setAssets([])
     setAdNames(new Map())
     setPageTokens(new Map())
-  }, [assets, canSubmit, copy, files, queue, targeting, targetMarket])
+  }, [assets, canSubmit, copy, copyOverrides, files, queue, targeting, targetMarket])
 
   if (!brand || !targetMarket) {
     return (
@@ -165,6 +193,7 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
     <Box component="section" className={styles.root}>
       <CreatorPane
         brandId={brandId}
+        market={selectedMarket}
         allowedAccountIds={allowedAccountIds}
         targeting={targeting}
         onTargetingChange={setTargeting}
@@ -172,8 +201,12 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
         onFilesChange={setFiles}
         assets={assets}
         onAssetsChange={setAssets}
+        addedAssetKeys={addedAssetKeys}
+        onAddCreative={handleAddCreative}
         copy={copy}
         onCopyChange={setCopy}
+        copyOverrides={copyOverrides}
+        onCopyOverridesChange={setCopyOverrides}
         adNames={adNames}
         onAdNamesChange={setAdNames}
         pageTokens={pageTokens}

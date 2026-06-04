@@ -1,0 +1,40 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 200px;
+  padding: 40px 16px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.actionButton {
+  text-transform: none;
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+.actionRow {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.actionRow > * {
+  flex: 1 1 240px;
+  min-width: 0;
+}

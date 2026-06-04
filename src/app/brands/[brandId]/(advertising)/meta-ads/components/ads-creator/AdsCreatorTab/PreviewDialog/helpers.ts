@@ -1,15 +1,10 @@
 import type { Page } from '@/lib/gateways/MetaAdsGateway'
-
-export interface FilePreview {
-  readonly url: string
-  readonly name: string
-  readonly isVideo: boolean
-}
+import type { FeedMedia } from '../AdFeedCard/helpers'
 
 export interface Combo {
   readonly primary: string
   readonly headline: string
-  readonly file: FilePreview
+  readonly file: FeedMedia
   readonly page: Page | null
   readonly primaryIdx: number
   readonly headlineIdx: number
@@ -17,24 +12,11 @@ export interface Combo {
   readonly pageIdx: number
 }
 
-export function domainOf(url: string): string {
-  try {
-    return new URL(url).hostname.replace(/^www\./, '')
-  } catch {
-    return url
-  }
-}
-
-export function initialOf(name: string): string {
-  const trimmed = name.trim()
-  return trimmed.length > 0 ? trimmed[0]!.toUpperCase() : '?'
-}
-
 export function computeCombo(
   safeIndex: number,
   total: number,
   pages: readonly Page[],
-  filePreviews: readonly FilePreview[],
+  filePreviews: readonly FeedMedia[],
   filledHeadlines: readonly string[],
   filledPrimary: readonly string[],
 ): Combo | null {

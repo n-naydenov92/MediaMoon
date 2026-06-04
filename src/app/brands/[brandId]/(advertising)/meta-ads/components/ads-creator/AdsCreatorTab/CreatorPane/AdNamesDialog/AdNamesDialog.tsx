@@ -3,11 +3,6 @@
 import { memo, useCallback, useMemo, useState } from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
-import Dialog from '@mui/material/Dialog'
-import IconButton from '@mui/material/IconButton'
-import Typography from '@mui/material/Typography'
-import useMediaQuery from '@mui/material/useMediaQuery'
-import CloseIcon from '@mui/icons-material/Close'
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline'
 import type { Page } from '@/lib/gateways/MetaAdsGateway'
 import {
@@ -20,6 +15,7 @@ import {
   resolvePageToken,
   restampPageToken,
 } from '../helpers'
+import CreatorDialog from '../../CreatorDialog/CreatorDialog'
 import BulkNamingSection from './BulkNamingSection/BulkNamingSection'
 import PageTokensSection from './PageTokensSection/PageTokensSection'
 import AdNamesList from './AdNamesList/AdNamesList'
@@ -46,7 +42,6 @@ export default memo(function AdNamesDialog({
   pageTokens,
   onPageTokensChange,
 }: Props): JSX.Element {
-  const fullScreen = useMediaQuery('(max-width: 600px)')
   const multiPage = selectedPages.length > 1
   const adsCount = files.length * Math.max(selectedPages.length, 1)
 
@@ -112,33 +107,31 @@ export default memo(function AdNamesDialog({
     }
   }, [files, names, onChange, onPageTokensChange, pageTokens])
 
+  const countLabel = `${files.length} ${files.length === 1 ? 'creative' : 'creatives'}`
+    + ` · ${adsCount} ${adsCount === 1 ? 'ad' : 'ads'}`
+
   return (
-    <Dialog
+    <CreatorDialog
       open={open}
       onClose={onClose}
-      fullScreen={fullScreen}
+      icon={<DriveFileRenameOutlineIcon fontSize="inherit" />}
+      title="Name each ad"
+      titleId="ad-names-title"
+      count={countLabel}
       maxWidth="md"
-      fullWidth
-      aria-labelledby="ad-names-title"
-      classes={{ paper: styles.paper }}
+      paperClassName={styles.paper}
+      footer={(
+        <Button
+          type="button"
+          variant="contained"
+          disableElevation
+          className={styles.saveButton}
+          onClick={onClose}
+        >
+          Save
+        </Button>
+      )}
     >
-      <Box component="header" className={styles.header}>
-        <Box className={styles.headerTitleWrap}>
-          <DriveFileRenameOutlineIcon className={styles.headerIcon} fontSize="inherit" />
-          <Typography id="ad-names-title" component="h2" variant="inherit" className={styles.headerTitle}>
-            Name each ad
-          </Typography>
-          <Typography component="span" variant="inherit" className={styles.headerCount}>
-            {files.length} {files.length === 1 ? 'creative' : 'creatives'}
-            {' · '}
-            {adsCount} {adsCount === 1 ? 'ad' : 'ads'}
-          </Typography>
-        </Box>
-        <IconButton aria-label="Close" onClick={onClose} className={styles.closeButton}>
-          <CloseIcon />
-        </IconButton>
-      </Box>
-
       <Box className={styles.body}>
         <BulkNamingSection
           open={bulkOpen}
@@ -168,18 +161,6 @@ export default memo(function AdNamesDialog({
           onNameChange={setName}
         />
       </Box>
-
-      <Box className={styles.footer}>
-        <Button
-          type="button"
-          variant="contained"
-          disableElevation
-          className={styles.saveButton}
-          onClick={onClose}
-        >
-          Save
-        </Button>
-      </Box>
-    </Dialog>
+    </CreatorDialog>
   )
 })

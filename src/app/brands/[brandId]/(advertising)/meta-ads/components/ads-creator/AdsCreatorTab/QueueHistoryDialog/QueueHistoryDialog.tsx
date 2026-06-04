@@ -2,15 +2,12 @@
 
 import { memo, useCallback, useMemo, useState } from 'react'
 import Box from '@mui/material/Box'
-import Dialog from '@mui/material/Dialog'
-import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
-import useMediaQuery from '@mui/material/useMediaQuery'
-import CloseIcon from '@mui/icons-material/Close'
 import HistoryIcon from '@mui/icons-material/History'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import DeleteSweepOutlinedIcon from '@mui/icons-material/DeleteSweepOutlined'
 import type { LaunchJob } from '../useLaunchQueue'
+import CreatorDialog from '../CreatorDialog/CreatorDialog'
 import QueueSection, { type SectionBulkAction } from './QueueSection/QueueSection'
 import { groupJobs } from './helpers'
 import styles from './QueueHistoryDialog.module.css'
@@ -34,7 +31,6 @@ export default memo(function QueueHistoryDialog({
   onStop,
   onDismiss,
 }: Props): JSX.Element {
-  const fullScreen = useMediaQuery('(max-width: 600px)')
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(() => new Set())
   const grouped = useMemo(() => groupJobs(jobs), [jobs])
 
@@ -72,30 +68,16 @@ export default memo(function QueueHistoryDialog({
   )
 
   return (
-    <Dialog
+    <CreatorDialog
       open={open}
       onClose={onClose}
-      fullScreen={fullScreen}
+      icon={<HistoryIcon fontSize="inherit" />}
+      title="Queue history"
+      titleId="queue-history-title"
+      count={`${jobs.length} total`}
       maxWidth="sm"
-      fullWidth
-      aria-labelledby="queue-history-title"
-      classes={{ paper: styles.paper }}
+      paperClassName={styles.paper}
     >
-      <Box component="header" className={styles.header}>
-        <Box className={styles.headerTitleWrap}>
-          <HistoryIcon className={styles.headerIcon} fontSize="inherit" />
-          <Typography id="queue-history-title" component="h2" variant="inherit" className={styles.headerTitle}>
-            Queue history
-          </Typography>
-          <Typography component="span" variant="inherit" className={styles.headerCount}>
-            {jobs.length} total
-          </Typography>
-        </Box>
-        <IconButton aria-label="Close" onClick={onClose} className={styles.closeButton}>
-          <CloseIcon />
-        </IconButton>
-      </Box>
-
       <Box className={styles.body}>
         {jobs.length === 0 ? (
           <Box className={styles.empty}>
@@ -140,6 +122,6 @@ export default memo(function QueueHistoryDialog({
           </>
         )}
       </Box>
-    </Dialog>
+    </CreatorDialog>
   )
 })

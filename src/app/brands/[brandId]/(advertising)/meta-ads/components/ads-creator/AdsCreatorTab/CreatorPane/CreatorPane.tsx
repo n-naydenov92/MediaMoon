@@ -5,9 +5,11 @@ import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined'
 import type { BrandId } from '@/config/brands'
+import type { MarketSelection } from '@/lib/markets'
 import type { StatusFilter } from '@/lib/gateways/MetaAdsGateway'
 import type { AssetCreative } from '../assetCreative'
 import type { CopyValue } from '../CopyForm/CopyForm'
+import type { CopyOverride } from '../perCreativeCopy'
 import { isValidDestinationUrl } from '../CopyForm/helpers'
 import type { AdSetRecord, LaunchJob } from '../useLaunchQueue'
 import StepAccordion from '../StepAccordion/StepAccordion'
@@ -20,12 +22,14 @@ import PreviewDialog from '../PreviewDialog/PreviewDialog'
 import PublishBar from '../PublishBar/PublishBar'
 import QueueLauncher from '../QueueLauncher/QueueLauncher'
 import AdNamesDialog from './AdNamesDialog/AdNamesDialog'
+import CopyEachDialog from './CopyEachDialog/CopyEachDialog'
 import { buildAdNameMap, buildAutoAdName, resolvePageToken } from './helpers'
 import { type TargetingValue, useTargetingData } from './useTargetingData'
 import styles from './CreatorPane.module.css'
 
 interface Props {
   readonly brandId: BrandId
+  readonly market: MarketSelection
   readonly allowedAccountIds: readonly string[]
   readonly targeting: TargetingValue
   readonly onTargetingChange: (next: TargetingValue) => void
@@ -33,8 +37,12 @@ interface Props {
   readonly onFilesChange: (next: readonly File[]) => void
   readonly assets: readonly AssetCreative[]
   readonly onAssetsChange: (next: readonly AssetCreative[]) => void
+  readonly addedAssetKeys: ReadonlySet<string>
+  readonly onAddCreative: (asset: AssetCreative) => void
   readonly copy: CopyValue
   readonly onCopyChange: (next: CopyValue) => void
+  readonly copyOverrides: ReadonlyMap<string, CopyOverride>
+  readonly onCopyOverridesChange: (next: ReadonlyMap<string, CopyOverride>) => void
   readonly adNames: ReadonlyMap<string, string>
   readonly onAdNamesChange: (next: ReadonlyMap<string, string>) => void
   readonly pageTokens: ReadonlyMap<string, string>
@@ -58,6 +66,7 @@ function firstIncomplete(c: Completion): StepId | null {
 
 export default memo(function CreatorPane({
   brandId,
+  market,
   allowedAccountIds,
   targeting,
   onTargetingChange,
@@ -65,8 +74,12 @@ export default memo(function CreatorPane({
   onFilesChange,
   assets,
   onAssetsChange,
+  addedAssetKeys,
+  onAddCreative,
   copy,
   onCopyChange,
+  copyOverrides,
+  onCopyOverridesChange,
   adNames,
   onAdNamesChange,
   pageTokens,
@@ -165,6 +178,7 @@ export default memo(function CreatorPane({
 
   const [previewOpen, setPreviewOpen] = useState(false)
   const [adNamesOpen, setAdNamesOpen] = useState(false)
+  const [copyEachOpen, setCopyEachOpen] = useState(false)
   const selectedPages = useMemo(
     () => data.pages.filter((p) => targeting.pageIds.includes(p.id)),
     [data.pages, targeting.pageIds],
@@ -172,6 +186,8 @@ export default memo(function CreatorPane({
 
   const openAdNames = useCallback(() => setAdNamesOpen(true), [])
   const closeAdNames = useCallback(() => setAdNamesOpen(false), [])
+  const openCopyEach = useCallback(() => setCopyEachOpen(true), [])
+  const closeCopyEach = useCallback(() => setCopyEachOpen(false), [])
   const adsCount = (targeting.pageIds.length || 1) * creativeCount
   const isSingleAd = adsCount === 1
 
@@ -280,6 +296,8 @@ export default memo(function CreatorPane({
             onChange={onFilesChange}
             assets={assets}
             onAssetsChange={onAssetsChange}
+            copy={copy}
+            copyOverrides={copyOverrides}
           />
         </StepAccordion>
 
@@ -296,6 +314,7 @@ export default memo(function CreatorPane({
             adsCount={adsCount}
             onAutoName={isSingleAd ? handleAutoNameSingle : undefined}
             onNameEach={adsCount >= 2 ? openAdNames : undefined}
+            onEditEach={creativeCount >= 2 ? openCopyEach : undefined}
           />
         </StepAccordion>
       </Box>
@@ -326,6 +345,21 @@ export default memo(function CreatorPane({
         onChange={onAdNamesChange}
         pageTokens={pageTokens}
         onPageTokensChange={onPageTokensChange}
+      />
+
+      <CopyEachDialog
+        open={copyEachOpen}
+        onClose={closeCopyEach}
+        brandId={brandId}
+        market={market}
+        files={files}
+        assets={assets}
+        baseCopy={copy}
+        overrides={copyOverrides}
+        onOverridesChange={onCopyOverridesChange}
+        selectedPages={selectedPages}
+        addedAssetKeys={addedAssetKeys}
+        onAddCreative={onAddCreative}
       />
     </Box>
   )

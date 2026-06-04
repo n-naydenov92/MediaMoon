@@ -1,0 +1,40 @@
+.root {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border: 1px solid transparent;
+  user-select: none;
+}
+
+/* Inherits shared copy, field has a value. */
+.set {
+  background: color-mix(in srgb, var(--accent) 16%, var(--surface-2));
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+/* Inherits shared copy, field still blank. */
+.empty {
+  background: var(--surface-2);
+  color: var(--text-muted);
+  border-color: var(--hairline);
+}
+
+/* Creative carries its own value for this field. */
+.override {
+  background: color-mix(in srgb, var(--warning) 18%, var(--surface-2));
+  color: var(--warning);
+  border-color: color-mix(in srgb, var(--warning) 38%, transparent);
+}

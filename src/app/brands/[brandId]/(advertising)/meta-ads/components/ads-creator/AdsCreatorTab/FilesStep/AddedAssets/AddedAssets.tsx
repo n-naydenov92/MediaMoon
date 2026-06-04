@@ -9,14 +9,24 @@ import MovieOutlinedIcon from '@mui/icons-material/MovieOutlined'
 import PhotoOutlinedIcon from '@mui/icons-material/PhotoOutlined'
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded'
 import type { AssetCreative } from '../../assetCreative'
+import type { CopyValue } from '../../CopyForm/CopyForm'
+import { type CopyOverride } from '../../perCreativeCopy'
+import CreativeStatusBadges from '../../CreativeStatusBadges/CreativeStatusBadges'
 import styles from './AddedAssets.module.css'
 
 interface Props {
   readonly assets: readonly AssetCreative[]
   readonly onRemove: (assetKey: string) => void
+  readonly copy?: CopyValue
+  readonly overrides?: ReadonlyMap<string, CopyOverride>
 }
 
-export default memo(function AddedAssets({ assets, onRemove }: Props): JSX.Element | null {
+export default memo(function AddedAssets({
+  assets,
+  onRemove,
+  copy,
+  overrides,
+}: Props): JSX.Element | null {
   if (assets.length === 0) {
     return null
   }
@@ -64,6 +74,9 @@ export default memo(function AddedAssets({ assets, onRemove }: Props): JSX.Eleme
                 <Typography component="span" variant="inherit" className={styles.tag}>
                   Re-uploaded on publish
                 </Typography>
+                {copy && overrides?.has(asset.assetKey) && (
+                  <CreativeStatusBadges base={copy} override={overrides.get(asset.assetKey)} />
+                )}
               </Box>
               <IconButton
                 size="small"

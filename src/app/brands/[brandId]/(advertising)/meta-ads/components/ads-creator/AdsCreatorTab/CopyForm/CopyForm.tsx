@@ -6,7 +6,9 @@ import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline'
+import EditNoteOutlinedIcon from '@mui/icons-material/EditNoteOutlined'
 import type { CtaType } from '@/lib/gateways/MetaAdsGateway'
+import { CTA_OPTIONS, type CtaOption } from '../ctaOptions'
 import FormField from '../FormField/FormField'
 import FormTextField from '../FormTextField/FormTextField'
 import SearchSelect from '../SearchSelect/SearchSelect'
@@ -43,18 +45,8 @@ interface Props {
   readonly adsCount: number
   readonly onAutoName?: () => void
   readonly onNameEach?: () => void
+  readonly onEditEach?: () => void
 }
-
-interface CtaOption {
-  readonly id: CtaType
-  readonly label: string
-}
-
-const CTA_OPTIONS: readonly CtaOption[] = [
-  { id: 'LEARN_MORE', label: 'Learn more' },
-  { id: 'SHOP_NOW', label: 'Shop now' },
-  { id: 'SIGN_UP', label: 'Sign up' },
-]
 
 export default memo(function CopyForm({
   value,
@@ -62,6 +54,7 @@ export default memo(function CopyForm({
   adsCount,
   onAutoName,
   onNameEach,
+  onEditEach,
 }: Props): JSX.Element {
   const urlInvalid = value.url.trim() !== '' && !isValidDestinationUrl(value.url)
 
@@ -73,6 +66,18 @@ export default memo(function CopyForm({
           onActivateChange={(next) => onChange({ ...value, activate: next })}
           disabled={false}
         />
+        {onEditEach && (
+          <Button
+            type="button"
+            size="small"
+            variant="text"
+            startIcon={<EditNoteOutlinedIcon fontSize="inherit" />}
+            onClick={onEditEach}
+            className={styles.editEachButton}
+          >
+            Edit copy per creative
+          </Button>
+        )}
       </Box>
 
       <Box className={styles.nameBlock}>

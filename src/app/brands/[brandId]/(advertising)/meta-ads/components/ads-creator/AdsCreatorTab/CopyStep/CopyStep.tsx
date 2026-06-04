@@ -9,6 +9,7 @@ interface Props {
   readonly adsCount: number
   readonly onAutoName?: () => void
   readonly onNameEach?: () => void
+  readonly onEditEach?: () => void
 }
 
 export default memo(function CopyStep({
@@ -17,6 +18,7 @@ export default memo(function CopyStep({
   adsCount,
   onAutoName,
   onNameEach,
+  onEditEach,
 }: Props): JSX.Element {
   return (
     <CopyForm
@@ -25,6 +27,7 @@ export default memo(function CopyStep({
       adsCount={adsCount}
       onAutoName={onAutoName}
       onNameEach={onNameEach}
+      onEditEach={onEditEach}
     />
   )
 })
