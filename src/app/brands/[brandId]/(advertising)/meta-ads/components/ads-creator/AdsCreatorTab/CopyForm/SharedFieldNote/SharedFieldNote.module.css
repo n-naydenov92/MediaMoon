@@ -1,0 +1,32 @@
+.root {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.icon {
+  font-size: 14px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.text {
+  font-weight: 500;
+}
+
+.root .action {
+  padding: 0 6px;
+  min-width: 0;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: none;
+  color: var(--accent);
+  border-radius: 6px;
+}
+
+.root .action:hover {
+  background: var(--accent-soft);
+}

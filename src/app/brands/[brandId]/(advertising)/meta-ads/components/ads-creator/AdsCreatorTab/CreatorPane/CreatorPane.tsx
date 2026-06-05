@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined'
@@ -10,6 +10,7 @@ import type { StatusFilter } from '@/lib/gateways/MetaAdsGateway'
 import type { AssetCreative } from '../assetCreative'
 import type { CopyValue } from '../CopyForm/CopyForm'
 import type { CopyOverride } from '../perCreativeCopy'
+import { useBaseFilled } from '../useBaseFilled'
 import { isValidDestinationUrl } from '../CopyForm/helpers'
 import type { AdSetRecord, LaunchJob } from '../useLaunchQueue'
 import StepAccordion from '../StepAccordion/StepAccordion'
@@ -23,7 +24,13 @@ import PublishBar from '../PublishBar/PublishBar'
 import QueueLauncher from '../QueueLauncher/QueueLauncher'
 import AdNamesDialog from './AdNamesDialog/AdNamesDialog'
 import CopyEachDialog from './CopyEachDialog/CopyEachDialog'
-import { buildAdNameMap, buildAutoAdName, resolvePageToken } from './helpers'
+import {
+  assetNameable,
+  buildAdNameMap,
+  buildAutoAdName,
+  fileNameable,
+  resolvePageToken,
+} from './helpers'
 import { type TargetingValue, useTargetingData } from './useTargetingData'
 import styles from './CreatorPane.module.css'
 
@@ -107,6 +114,14 @@ export default memo(function CreatorPane({
 
   const isSinglePage = targeting.pageIds.length === 1
   const creativeCount = files.length + assets.length
+  const baseFilled = useBaseFilled(copy)
+
+  // The per-creative editor (CopyEachDialog) writes overrides on every keystroke.
+  // The Files and Copy steps behind the dialog only need overrides for their badge
+  // counts — non-urgent — so they read a deferred copy. The dialog itself keeps the
+  // live map so the edited field stays instant. Without this, each keystroke in the
+  // dialog synchronously re-renders the whole creative list behind it (the lag).
+  const deferredOverrides = useDeferredValue(copyOverrides)
   const selectedAccount = useMemo(
     () => data.accounts.find((a) => a.id === targeting.accountId) ?? null,
     [data.accounts, targeting.accountId],
@@ -176,6 +191,16 @@ export default memo(function CreatorPane({
     })
   }, [])
 
+  // One stable handler per step so the memoized StepAccordions don't re-render on
+  // every keystroke (an inline `() => toggle(id)` would break their memo each time).
+  const toggleHandlers = useMemo(() => {
+    const map = {} as Record<StepId, () => void>
+    for (const id of STEP_IDS) {
+      map[id] = () => toggle(id)
+    }
+    return map
+  }, [toggle])
+
   const [previewOpen, setPreviewOpen] = useState(false)
   const [adNamesOpen, setAdNamesOpen] = useState(false)
   const [copyEachOpen, setCopyEachOpen] = useState(false)
@@ -184,6 +209,8 @@ export default memo(function CreatorPane({
     [data.pages, targeting.pageIds],
   )
 
+  const openPreview = useCallback(() => setPreviewOpen(true), [])
+  const closePreview = useCallback(() => setPreviewOpen(false), [])
   const openAdNames = useCallback(() => setAdNamesOpen(true), [])
   const closeAdNames = useCallback(() => setAdNamesOpen(false), [])
   const openCopyEach = useCallback(() => setCopyEachOpen(true), [])
@@ -191,21 +218,95 @@ export default memo(function CreatorPane({
   const adsCount = (targeting.pageIds.length || 1) * creativeCount
   const isSingleAd = adsCount === 1
 
+  // Every nameable ad creative — uploaded files and library assets alike — so the
+  // naming UI and submit cover both, not just the manual uploads.
+  const nameableCreatives = useMemo(
+    () => [...files.map(fileNameable), ...assets.map(assetNameable)],
+    [files, assets],
+  )
+
   // Single ad: fill the shared Ad name field with the structured template
   // (page token baked in, since there is exactly one page).
   const handleAutoNameSingle = useCallback(() => {
-    const [file] = files
+    const [creative] = nameableCreatives
     const [page] = selectedPages
-    if (!file) {
+    if (!creative) {
       return
     }
     const tok = page ? resolvePageToken(pageTokens, page.id, page.name) : ''
-    onCopyChange({ ...copy, name: buildAutoAdName(file, tok) })
-  }, [copy, files, onCopyChange, pageTokens, selectedPages])
+    onCopyChange({ ...copy, name: buildAutoAdName(creative, tok) })
+  }, [copy, nameableCreatives, onCopyChange, pageTokens, selectedPages])
 
   const handleSubmit = useCallback(() => {
-    onSubmit(buildAdNameMap({ pages: selectedPages, files, pageTokens, copy, adNames, isSingleAd }))
-  }, [adNames, copy, files, isSingleAd, onSubmit, pageTokens, selectedPages])
+    onSubmit(buildAdNameMap({
+      pages: selectedPages, creatives: nameableCreatives, pageTokens, copy, adNames, isSingleAd,
+    }))
+  }, [adNames, copy, nameableCreatives, isSingleAd, onSubmit, pageTokens, selectedPages])
+
+  // Each step's body is memoized so its element keeps a stable identity. StepAccordion
+  // is memo'd, but `children` is a prop — a fresh element every render would re-render
+  // all five MUI accordions on each copy keystroke. With stable children, only the step
+  // whose inputs actually changed re-renders.
+  const accountStepEl = useMemo(() => (
+    <AccountStep accounts={data.accounts} value={targeting} onChange={onTargetingChange} />
+  ), [data.accounts, targeting, onTargetingChange])
+
+  const campaignStepEl = useMemo(() => (
+    <CampaignStep
+      campaigns={data.campaigns}
+      adSets={data.adSets}
+      value={targeting}
+      onChange={onTargetingChange}
+      campaignStatus={campaignStatus}
+      onCampaignStatusChange={setCampaignStatus}
+      adSetStatus={adSetStatus}
+      onAdSetStatusChange={setAdSetStatus}
+      refetchAdSets={data.refetchAdSets}
+      accountCurrency={accountCurrency}
+      dsaEntities={data.dsaEntities}
+      onAdSetCreated={onAdSetCreated}
+      brandId={brandId}
+    />
+  ), [
+    data.campaigns, data.adSets, targeting, onTargetingChange, campaignStatus, setCampaignStatus,
+    adSetStatus, setAdSetStatus, data.refetchAdSets, accountCurrency, data.dsaEntities,
+    onAdSetCreated, brandId,
+  ])
+
+  const profilesStepEl = useMemo(() => (
+    <ProfilesStep
+      pages={data.pages}
+      instagramAccounts={data.instagramAccounts}
+      value={targeting}
+      onChange={onTargetingChange}
+    />
+  ), [data.pages, data.instagramAccounts, targeting, onTargetingChange])
+
+  const filesStepEl = useMemo(() => (
+    <FilesStep
+      files={files}
+      onChange={onFilesChange}
+      assets={assets}
+      onAssetsChange={onAssetsChange}
+      baseFilled={baseFilled}
+      copyOverrides={deferredOverrides}
+    />
+  ), [files, onFilesChange, assets, onAssetsChange, baseFilled, deferredOverrides])
+
+  const copyStepEl = useMemo(() => (
+    <CopyStep
+      value={copy}
+      onChange={onCopyChange}
+      adsCount={adsCount}
+      overrides={deferredOverrides}
+      onAutoName={isSingleAd ? handleAutoNameSingle : undefined}
+      onNameEach={adsCount >= 2 ? openAdNames : undefined}
+      onEditEach={creativeCount >= 2 ? openCopyEach : undefined}
+    />
+  ), [
+    copy, onCopyChange, adsCount, deferredOverrides, isSingleAd, handleAutoNameSingle,
+    openAdNames, openCopyEach, creativeCount,
+  ])
 
   return (
     <Box className={styles.root}>
@@ -219,7 +320,7 @@ export default memo(function CreatorPane({
             component="button"
             type="button"
             className={styles.previewButton}
-            onClick={() => setPreviewOpen(true)}
+            onClick={openPreview}
           >
             <VisibilityOutlinedIcon fontSize="small" />
             Preview
@@ -240,9 +341,9 @@ export default memo(function CreatorPane({
           title="Account"
           complete={completion.account}
           expanded={expanded.has('account')}
-          onToggle={() => toggle('account')}
+          onToggle={toggleHandlers.account}
         >
-          <AccountStep accounts={data.accounts} value={targeting} onChange={onTargetingChange} />
+          {accountStepEl}
         </StepAccordion>
 
         <StepAccordion
@@ -250,23 +351,9 @@ export default memo(function CreatorPane({
           title="Campaign"
           complete={completion.campaign}
           expanded={expanded.has('campaign')}
-          onToggle={() => toggle('campaign')}
+          onToggle={toggleHandlers.campaign}
         >
-          <CampaignStep
-            campaigns={data.campaigns}
-            adSets={data.adSets}
-            value={targeting}
-            onChange={onTargetingChange}
-            campaignStatus={campaignStatus}
-            onCampaignStatusChange={setCampaignStatus}
-            adSetStatus={adSetStatus}
-            onAdSetStatusChange={setAdSetStatus}
-            refetchAdSets={data.refetchAdSets}
-            accountCurrency={accountCurrency}
-            dsaEntities={data.dsaEntities}
-            onAdSetCreated={onAdSetCreated}
-            brandId={brandId}
-          />
+          {campaignStepEl}
         </StepAccordion>
 
         <StepAccordion
@@ -274,14 +361,9 @@ export default memo(function CreatorPane({
           title="Profiles"
           complete={completion.profiles}
           expanded={expanded.has('profiles')}
-          onToggle={() => toggle('profiles')}
+          onToggle={toggleHandlers.profiles}
         >
-          <ProfilesStep
-            pages={data.pages}
-            instagramAccounts={data.instagramAccounts}
-            value={targeting}
-            onChange={onTargetingChange}
-          />
+          {profilesStepEl}
         </StepAccordion>
 
         <StepAccordion
@@ -289,16 +371,9 @@ export default memo(function CreatorPane({
           title="Files"
           complete={completion.files}
           expanded={expanded.has('files')}
-          onToggle={() => toggle('files')}
+          onToggle={toggleHandlers.files}
         >
-          <FilesStep
-            files={files}
-            onChange={onFilesChange}
-            assets={assets}
-            onAssetsChange={onAssetsChange}
-            copy={copy}
-            copyOverrides={copyOverrides}
-          />
+          {filesStepEl}
         </StepAccordion>
 
         <StepAccordion
@@ -306,16 +381,9 @@ export default memo(function CreatorPane({
           title="Copy"
           complete={completion.copy}
           expanded={expanded.has('copy')}
-          onToggle={() => toggle('copy')}
+          onToggle={toggleHandlers.copy}
         >
-          <CopyStep
-            value={copy}
-            onChange={onCopyChange}
-            adsCount={adsCount}
-            onAutoName={isSingleAd ? handleAutoNameSingle : undefined}
-            onNameEach={adsCount >= 2 ? openAdNames : undefined}
-            onEditEach={creativeCount >= 2 ? openCopyEach : undefined}
-          />
+          {copyStepEl}
         </StepAccordion>
       </Box>
 
@@ -330,7 +398,7 @@ export default memo(function CreatorPane({
 
       <PreviewDialog
         open={previewOpen}
-        onClose={() => setPreviewOpen(false)}
+        onClose={closePreview}
         copy={copy}
         files={files}
         pages={selectedPages}
@@ -339,7 +407,7 @@ export default memo(function CreatorPane({
       <AdNamesDialog
         open={adNamesOpen}
         onClose={closeAdNames}
-        files={files}
+        creatives={nameableCreatives}
         selectedPages={selectedPages}
         names={adNames}
         onChange={onAdNamesChange}

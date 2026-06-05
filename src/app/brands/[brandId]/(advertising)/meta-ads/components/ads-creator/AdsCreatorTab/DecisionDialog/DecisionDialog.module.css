@@ -1,0 +1,29 @@
+.paper.paper {
+  border-radius: 14px;
+  max-width: 420px;
+  background: var(--bg-surface);
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  padding-bottom: 4px;
+}
+
+.message {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.actions {
+  padding: 8px 16px 16px;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.actions .button {
+  text-transform: none;
+  font-weight: 600;
+  border-radius: 8px;
+}

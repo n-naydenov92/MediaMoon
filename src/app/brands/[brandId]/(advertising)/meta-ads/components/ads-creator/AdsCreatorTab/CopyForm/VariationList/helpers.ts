@@ -44,6 +44,19 @@ export function hasTextVariation(arr: readonly string[], value: string): boolean
   return arr.some((v) => v.trim() === trimmed)
 }
 
+// Apply a library text to a field. With variations capped to one (max ≤ 1) this
+// replaces the single value; otherwise it falls back to variation-appending.
+export function applyLibraryText(
+  arr: readonly string[],
+  value: string,
+  max: number = VARIATION_MAX,
+): readonly string[] {
+  if (max <= 1) {
+    return value.trim() === '' ? arr : [value]
+  }
+  return addTextVariation(arr, value, max)
+}
+
 export function isVariationListFull(arr: readonly string[], max: number = VARIATION_MAX): boolean {
   return arr.length >= max && arr.every((v) => v.trim() !== '')
 }

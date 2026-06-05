@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, useEffect, useMemo, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Tab from '@mui/material/Tab'
@@ -50,7 +50,6 @@ import { useLibrarySort } from './useLibrarySort'
 import styles from './LibraryPane.module.css'
 
 const NO_SOURCE_REASON = 'No re-usable source media for this creative'
-const NOOP = (): void => { }
 const EMPTY_ROWS: readonly AdElementRow[] = []
 
 const NOUN_BY_KIND: Record<'creative' | 'primary' | 'headline' | 'url', string> = {
@@ -123,6 +122,15 @@ export default memo(function LibraryPane({
   )
 
   const creatives = useMemo(() => toCreativeElements(rows), [rows])
+  // Reusable, stable assets keyed by creative — so the cards' onAdd target doesn't
+  // change identity each render (which would defeat their memo while typing).
+  const assetByKey = useMemo(() => {
+    const map = new Map<string, AssetCreative | null>()
+    for (const item of creatives) {
+      map.set(item.key, creativeToAsset(item))
+    }
+    return map
+  }, [creatives])
   const primaries = useMemo(() => toTextElements(rows, 'primary'), [rows])
   const headlinesList = useMemo(() => toTextElements(rows, 'headline'), [rows])
   const urlsList = useMemo(() => toUrlElements(rows), [rows])
@@ -172,18 +180,22 @@ export default memo(function LibraryPane({
 
   const variationList = activeTab === 'headline' ? headlines : primaryTexts
   const variationFull = isVariationListFull(variationList)
-  const onAddVariation = activeTab === 'headline' ? onAddHeadline : onAddPrimaryText
 
   function isTextAdded(text: string): boolean {
     return isUrls ? url.trim() === text.trim() : hasTextVariation(variationList, text)
   }
-  function addText(text: string): void {
-    if (isUrls) {
+
+  // Stable across keystrokes so the memoized rows below skip re-render while the
+  // operator types in the copy fields.
+  const handleAddText = useCallback((text: string): void => {
+    if (tabKind(activeTab) === 'url') {
       onAddUrl(text)
+    } else if (activeTab === 'headline') {
+      onAddHeadline(text)
     } else {
-      onAddVariation(text)
+      onAddPrimaryText(text)
     }
-  }
+  }, [activeTab, onAddUrl, onAddHeadline, onAddPrimaryText])
 
   // Two levels: reveal more of the already-loaded set first; once it is exhausted
   // and the server has more pages, fetch the next page (and reveal a step of it).
@@ -313,7 +325,7 @@ export default memo(function LibraryPane({
               {totalShown > 0 && isCreatives && (
                 <Box className={styles.grid}>
                   {rankedCreatives.slice(0, visibleCount).map(({ item }) => {
-                    const asset = creativeToAsset(item)
+                    const asset = assetByKey.get(item.key) ?? null
                     return (
                       <CreativeCard
                         key={item.key}
@@ -325,10 +337,11 @@ export default memo(function LibraryPane({
                         label={item.label}
                         metrics={item.metrics}
                         metricFields={filters.cardFields}
+                        asset={asset}
                         added={asset !== null && addedAssetKeys.has(asset.assetKey)}
                         disabled={asset === null}
                         disabledReason={asset === null ? NO_SOURCE_REASON : undefined}
-                        onAdd={asset ? () => onAddCreative(asset) : NOOP}
+                        onAdd={onAddCreative}
                       />
                     )
                   })}
@@ -346,7 +359,7 @@ export default memo(function LibraryPane({
                       metricFields={filters.cardFields}
                       added={isTextAdded(item.text)}
                       disabled={!isUrls && variationFull}
-                      onAdd={() => addText(item.text)}
+                      onAdd={handleAddText}
                     />
                   ))}
                 </Box>

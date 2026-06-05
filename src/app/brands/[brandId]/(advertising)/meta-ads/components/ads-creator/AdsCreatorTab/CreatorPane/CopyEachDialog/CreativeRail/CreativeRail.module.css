@@ -1,5 +1,6 @@
 .root {
-  flex: 0 0 248px;
+  flex: 0 0 264px;
+  max-width: 264px;
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -33,6 +34,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
+  min-width: 0;
 }
 
 .selectButton {
@@ -64,6 +66,11 @@
 .selectButtonActive.selectButtonActive {
   background: color-mix(in srgb, var(--accent) 12%, var(--surface-2));
   border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+.checkWrap {
+  display: inline-flex;
+  flex-shrink: 0;
 }
 
 .check {

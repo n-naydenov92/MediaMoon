@@ -1,17 +1,17 @@
 'use client'
 
-import { memo } from 'react'
+import { memo, useCallback, type ChangeEvent } from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
-import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined'
-import AutoFixHighOutlinedIcon from '@mui/icons-material/AutoFixHighOutlined'
+import RestartAltOutlinedIcon from '@mui/icons-material/RestartAltOutlined'
 import FormField from '../../../FormField/FormField'
 import FormTextField from '../../../FormTextField/FormTextField'
 import SearchSelect from '../../../SearchSelect/SearchSelect'
 import VariationList from '../../../CopyForm/VariationList/VariationList'
 import { type CopyValue } from '../../../CopyForm/CopyForm'
 import { CTA_OPTIONS, type CtaOption } from '../../../ctaOptions'
+import { MAX_COPY_VARIATIONS } from '../../../copyFeatureFlags'
 import { isValidDestinationUrl } from '../../../CopyForm/helpers'
 import type { OverridableField } from '../../../perCreativeCopy'
 import styles from './CopyDetail.module.css'
@@ -20,11 +20,37 @@ const PRIMARY_TEXT_ROWS = 4
 
 interface Props {
   readonly value: CopyValue | null
+  readonly creativeName: string | null
   readonly onFieldChange: <F extends OverridableField>(field: F, next: CopyValue[F]) => void
-  readonly onImport: (anchor: HTMLElement) => void
+  readonly onReset: () => void
+  readonly canReset: boolean
 }
 
-export default memo(function CopyDetail({ value, onFieldChange, onImport }: Props): JSX.Element {
+export default memo(function CopyDetail({
+  value,
+  creativeName,
+  onFieldChange,
+  onReset,
+  canReset,
+}: Props): JSX.Element {
+  // onFieldChange is already stable; wrapping each field keeps the per-field
+  // callbacks stable too, so the untouched fields skip re-render while typing.
+  const handlePrimaryChange = useCallback((next: readonly string[]) => {
+    onFieldChange('primaryTexts', next)
+  }, [onFieldChange])
+  const handleHeadlineChange = useCallback((next: readonly string[]) => {
+    onFieldChange('headlines', next)
+  }, [onFieldChange])
+  const handleDescriptionChange = useCallback((e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    onFieldChange('description', e.target.value)
+  }, [onFieldChange])
+  const handleUrlChange = useCallback((e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    onFieldChange('url', e.target.value)
+  }, [onFieldChange])
+  const handleCtaChange = useCallback((next: CtaOption | null) => {
+    if (next) onFieldChange('cta', next.id)
+  }, [onFieldChange])
+
   if (!value) {
     return (
       <Box className={styles.empty}>
@@ -39,47 +65,42 @@ export default memo(function CopyDetail({ value, onFieldChange, onImport }: Prop
 
   return (
     <Box className={styles.root}>
-      <Box className={styles.actions}>
-        <Button
-          type="button"
-          size="small"
-          variant="outlined"
-          color="inherit"
-          startIcon={<DownloadOutlinedIcon fontSize="inherit" />}
-          onClick={(e) => onImport(e.currentTarget)}
-          className={styles.actionButton}
-        >
-          Import
-        </Button>
+      <Box className={styles.header}>
+        <Typography component="span" variant="inherit" className={styles.editing}>
+          {creativeName ? `Editing: ${creativeName}` : 'Editing copy'}
+        </Typography>
         <Button
           type="button"
           size="small"
           variant="text"
           color="inherit"
-          disabled
-          startIcon={<AutoFixHighOutlinedIcon fontSize="inherit" />}
-          className={styles.actionButton}
+          startIcon={<RestartAltOutlinedIcon fontSize="inherit" />}
+          disabled={!canReset}
+          onClick={onReset}
+          className={styles.resetButton}
         >
-          Generate
+          Reset to shared
         </Button>
       </Box>
 
       <VariationList
         label="Primary Text"
         values={value.primaryTexts}
-        onChange={(next) => onFieldChange('primaryTexts', next)}
+        onChange={handlePrimaryChange}
         placeholder="Enter your ad primary text here"
         addNoun="primary text"
         multiline
         firstRows={PRIMARY_TEXT_ROWS}
+        max={MAX_COPY_VARIATIONS}
       />
 
       <VariationList
         label="Headline"
         values={value.headlines}
-        onChange={(next) => onFieldChange('headlines', next)}
+        onChange={handleHeadlineChange}
         placeholder="Enter your ad title here"
         addNoun="headline"
+        max={MAX_COPY_VARIATIONS}
       />
 
       <FormField label="Description">
@@ -87,7 +108,7 @@ export default memo(function CopyDetail({ value, onFieldChange, onImport }: Prop
           type="text"
           placeholder="Enter your ad description here"
           value={value.description}
-          onChange={(e) => onFieldChange('description', e.target.value)}
+          onChange={handleDescriptionChange}
         />
       </FormField>
 
@@ -97,7 +118,7 @@ export default memo(function CopyDetail({ value, onFieldChange, onImport }: Prop
             type="url"
             placeholder="https://example.com"
             value={value.url}
-            onChange={(e) => onFieldChange('url', e.target.value)}
+            onChange={handleUrlChange}
             error={urlInvalid}
             helperText={urlInvalid ? 'Enter a full URL, e.g. https://example.com' : undefined}
           />
@@ -107,9 +128,7 @@ export default memo(function CopyDetail({ value, onFieldChange, onImport }: Prop
           <SearchSelect<CtaOption>
             value={CTA_OPTIONS.find((o) => o.id === value.cta) ?? null}
             options={CTA_OPTIONS}
-            onChange={(next) => {
-              if (next) onFieldChange('cta', next.id)
-            }}
+            onChange={handleCtaChange}
             placeholder="Select call to action…"
             getOptionId={(o) => o.id}
             getOptionLabel={(o) => o.label}

@@ -1,6 +1,7 @@
 'use client'
 
 import {
+  memo,
   useCallback,
   useEffect,
   useMemo,
@@ -19,9 +20,8 @@ import SearchIcon from '@mui/icons-material/Search'
 import PhotoOutlinedIcon from '@mui/icons-material/PhotoOutlined'
 import MovieOutlinedIcon from '@mui/icons-material/MovieOutlined'
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded'
-import type { CopyValue } from '../CopyForm/CopyForm'
 import { fileKey } from '../CreatorPane/helpers'
-import { type CopyOverride } from '../perCreativeCopy'
+import { type CopyOverride, type OverridableField } from '../perCreativeCopy'
 import CreativeStatusBadges from '../CreativeStatusBadges/CreativeStatusBadges'
 import styles from './FilePicker.module.css'
 
@@ -31,7 +31,7 @@ interface Props {
   readonly files: readonly File[]
   readonly onChange: (next: readonly File[]) => void
   readonly disabled?: boolean
-  readonly copy?: CopyValue
+  readonly baseFilled?: ReadonlySet<OverridableField>
   readonly overrides?: ReadonlyMap<string, CopyOverride>
 }
 
@@ -56,11 +56,11 @@ function formatBytes(n: number): string {
   return `${(n / (1024 * 1024)).toFixed(1)} MB`
 }
 
-export default function FilePicker({
+export default memo(function FilePicker({
   files,
   onChange,
   disabled = false,
-  copy,
+  baseFilled,
   overrides,
 }: Props): JSX.Element {
   const inputRef = useRef<HTMLInputElement>(null)
@@ -274,8 +274,8 @@ export default function FilePicker({
                     <Typography component="span" variant="inherit" className={styles.size}>
                       {formatBytes(file.size)}
                     </Typography>
-                    {copy && overrides?.has(fileKey(file)) && (
-                      <CreativeStatusBadges base={copy} override={overrides.get(fileKey(file))} />
+                    {baseFilled && overrides?.has(fileKey(file)) && (
+                      <CreativeStatusBadges baseFilled={baseFilled} override={overrides.get(fileKey(file))} />
                     )}
                   </Box>
                   <IconButton
@@ -309,4 +309,4 @@ export default function FilePicker({
       )}
     </Box>
   )
-}
+})

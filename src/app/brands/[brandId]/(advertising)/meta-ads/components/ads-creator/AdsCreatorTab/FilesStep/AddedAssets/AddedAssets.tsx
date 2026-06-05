@@ -9,22 +9,21 @@ import MovieOutlinedIcon from '@mui/icons-material/MovieOutlined'
 import PhotoOutlinedIcon from '@mui/icons-material/PhotoOutlined'
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded'
 import type { AssetCreative } from '../../assetCreative'
-import type { CopyValue } from '../../CopyForm/CopyForm'
-import { type CopyOverride } from '../../perCreativeCopy'
+import { type CopyOverride, type OverridableField } from '../../perCreativeCopy'
 import CreativeStatusBadges from '../../CreativeStatusBadges/CreativeStatusBadges'
 import styles from './AddedAssets.module.css'
 
 interface Props {
   readonly assets: readonly AssetCreative[]
   readonly onRemove: (assetKey: string) => void
-  readonly copy?: CopyValue
+  readonly baseFilled?: ReadonlySet<OverridableField>
   readonly overrides?: ReadonlyMap<string, CopyOverride>
 }
 
 export default memo(function AddedAssets({
   assets,
   onRemove,
-  copy,
+  baseFilled,
   overrides,
 }: Props): JSX.Element | null {
   if (assets.length === 0) {
@@ -74,8 +73,8 @@ export default memo(function AddedAssets({
                 <Typography component="span" variant="inherit" className={styles.tag}>
                   Re-uploaded on publish
                 </Typography>
-                {copy && overrides?.has(asset.assetKey) && (
-                  <CreativeStatusBadges base={copy} override={overrides.get(asset.assetKey)} />
+                {baseFilled && overrides?.has(asset.assetKey) && (
+                  <CreativeStatusBadges baseFilled={baseFilled} override={overrides.get(asset.assetKey)} />
                 )}
               </Box>
               <IconButton

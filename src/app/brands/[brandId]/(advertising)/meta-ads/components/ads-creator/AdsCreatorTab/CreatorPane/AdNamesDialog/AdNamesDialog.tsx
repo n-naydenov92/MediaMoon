@@ -1,12 +1,13 @@
 'use client'
 
-import { memo, useCallback, useMemo, useState } from 'react'
+import { memo, useCallback, useMemo, useRef, useState } from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline'
 import type { Page } from '@/lib/gateways/MetaAdsGateway'
 import {
   type AdNameTags,
+  type NameableCreative,
   EMPTY_AD_NAME_TAGS,
   adCombos,
   adNameMapKey,
@@ -24,7 +25,7 @@ import styles from './AdNamesDialog.module.css'
 interface Props {
   readonly open: boolean
   readonly onClose: () => void
-  readonly files: readonly File[]
+  readonly creatives: readonly NameableCreative[]
   readonly selectedPages: readonly Page[]
   readonly names: ReadonlyMap<string, string>
   readonly onChange: (next: ReadonlyMap<string, string>) => void
@@ -35,7 +36,7 @@ interface Props {
 export default memo(function AdNamesDialog({
   open,
   onClose,
-  files,
+  creatives,
   selectedPages,
   names,
   onChange,
@@ -43,7 +44,7 @@ export default memo(function AdNamesDialog({
   onPageTokensChange,
 }: Props): JSX.Element {
   const multiPage = selectedPages.length > 1
-  const adsCount = files.length * Math.max(selectedPages.length, 1)
+  const adsCount = creatives.length * Math.max(selectedPages.length, 1)
 
   const [bulkOpen, setBulkOpen] = useState(false)
   const toggleBulk = useCallback(() => setBulkOpen((v) => !v), [])
@@ -55,12 +56,18 @@ export default memo(function AdNamesDialog({
   const [fullName, setFullName] = useState('')
 
   const combos = useMemo(
-    () => adCombos(selectedPages, files, pageTokens),
-    [selectedPages, files, pageTokens],
+    () => adCombos(selectedPages, creatives, pageTokens),
+    [selectedPages, creatives, pageTokens],
   )
 
+  // The name and token maps change on every keystroke. Reading them through a ref
+  // keeps `setName`/`setPageTok` stable, so the memoized rows below only re-render
+  // the field actually being edited instead of the whole list each keystroke.
+  const liveRef = useRef({ names, pageTokens })
+  liveRef.current = { names, pageTokens }
+
   const handleApplyTags = useCallback(() => {
-    onChange(new Map(combos.map((c) => [c.key, buildAdNameFromTags(c.file, c.pageTok, tags)])))
+    onChange(new Map(combos.map((c) => [c.key, buildAdNameFromTags(c.creative, c.pageTok, tags)])))
   }, [combos, onChange, tags])
 
   // Apply one full name to every ad; the page token is always appended last.
@@ -73,8 +80,8 @@ export default memo(function AdNamesDialog({
   }, [combos, fullName, onChange])
 
   const setName = useCallback((key: string, value: string, fallback: string) => {
-    onChange(mapWith(names, key, value === '' || value === fallback ? null : value))
-  }, [names, onChange])
+    onChange(mapWith(liveRef.current.names, key, value === '' || value === fallback ? null : value))
+  }, [onChange])
 
   // Store the raw value (including empty) once touched, so the field is freely
   // editable — page naming is optional, an empty token just omits it. Also
@@ -82,17 +89,18 @@ export default memo(function AdNamesDialog({
   // applies live (only on names that still carry the old token — manual edits
   // are left alone).
   const setPageTok = useCallback((page: Page, value: string) => {
-    const oldTok = resolvePageToken(pageTokens, page.id, page.name)
-    onPageTokensChange(mapWith(pageTokens, page.id, value))
+    const { names: currNames, pageTokens: currTokens } = liveRef.current
+    const oldTok = resolvePageToken(currTokens, page.id, page.name)
+    onPageTokensChange(mapWith(currTokens, page.id, value))
 
     if (oldTok === value) {
       return
     }
     let changed = false
-    const nextNames = new Map(names)
-    for (const file of files) {
-      const key = adNameMapKey(page.id, file)
-      const current = names.get(key)
+    const nextNames = new Map(currNames)
+    for (const creative of creatives) {
+      const key = adNameMapKey(page.id, creative.key)
+      const current = currNames.get(key)
       if (current === undefined) {
         continue
       }
@@ -105,9 +113,9 @@ export default memo(function AdNamesDialog({
     if (changed) {
       onChange(nextNames)
     }
-  }, [files, names, onChange, onPageTokensChange, pageTokens])
+  }, [creatives, onChange, onPageTokensChange])
 
-  const countLabel = `${files.length} ${files.length === 1 ? 'creative' : 'creatives'}`
+  const countLabel = `${creatives.length} ${creatives.length === 1 ? 'creative' : 'creatives'}`
     + ` · ${adsCount} ${adsCount === 1 ? 'ad' : 'ads'}`
 
   return (

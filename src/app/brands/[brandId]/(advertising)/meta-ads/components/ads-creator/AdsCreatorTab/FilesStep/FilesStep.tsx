@@ -1,12 +1,11 @@
 'use client'
 
-import { memo } from 'react'
+import { memo, useCallback } from 'react'
 import Box from '@mui/material/Box'
 import FilePicker from '../FilePicker/FilePicker'
 import AddedAssets from './AddedAssets/AddedAssets'
 import { removeAsset, type AssetCreative } from '../assetCreative'
-import type { CopyValue } from '../CopyForm/CopyForm'
-import type { CopyOverride } from '../perCreativeCopy'
+import type { CopyOverride, OverridableField } from '../perCreativeCopy'
 import styles from './FilesStep.module.css'
 
 interface Props {
@@ -14,7 +13,7 @@ interface Props {
   readonly onChange: (next: readonly File[]) => void
   readonly assets: readonly AssetCreative[]
   readonly onAssetsChange: (next: readonly AssetCreative[]) => void
-  readonly copy: CopyValue
+  readonly baseFilled: ReadonlySet<OverridableField>
   readonly copyOverrides: ReadonlyMap<string, CopyOverride>
 }
 
@@ -23,16 +22,21 @@ export default memo(function FilesStep({
   onChange,
   assets,
   onAssetsChange,
-  copy,
+  baseFilled,
   copyOverrides,
 }: Props): JSX.Element {
+  const handleRemove = useCallback(
+    (assetKey: string) => onAssetsChange(removeAsset(assets, assetKey)),
+    [assets, onAssetsChange],
+  )
+
   return (
     <Box className={styles.root}>
-      <FilePicker files={files} onChange={onChange} copy={copy} overrides={copyOverrides} />
+      <FilePicker files={files} onChange={onChange} baseFilled={baseFilled} overrides={copyOverrides} />
       <AddedAssets
         assets={assets}
-        onRemove={(assetKey) => onAssetsChange(removeAsset(assets, assetKey))}
-        copy={copy}
+        onRemove={handleRemove}
+        baseFilled={baseFilled}
         overrides={copyOverrides}
       />
     </Box>

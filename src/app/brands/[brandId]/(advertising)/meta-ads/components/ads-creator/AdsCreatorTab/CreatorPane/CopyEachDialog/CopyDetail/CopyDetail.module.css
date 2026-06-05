@@ -16,13 +16,27 @@
   font-size: 13px;
 }
 
-.actions {
+.header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
+  min-height: 28px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--hairline);
 }
 
-.actionButton {
+.editing {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.resetButton {
+  flex-shrink: 0;
   text-transform: none;
   font-weight: 600;
   border-radius: 8px;

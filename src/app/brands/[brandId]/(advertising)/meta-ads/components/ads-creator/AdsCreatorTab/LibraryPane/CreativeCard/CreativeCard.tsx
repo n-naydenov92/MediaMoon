@@ -10,6 +10,7 @@ import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded'
 import VideocamOutlinedIcon from '@mui/icons-material/VideocamOutlined'
 import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined'
 import { useCreativePreviewTrigger } from '../../../../shared/CreativePreview/useCreativePreviewTrigger'
+import type { AssetCreative } from '../../assetCreative'
 import type { ElementMetrics } from '../decompose'
 import MetricList from '../MetricList/MetricList'
 import type { CardMetricField } from '../MetricList/helpers'
@@ -24,10 +25,11 @@ interface Props {
   readonly label: string
   readonly metrics: ElementMetrics
   readonly metricFields: readonly CardMetricField[]
+  readonly asset: AssetCreative | null
   readonly added: boolean
   readonly disabled: boolean
   readonly disabledReason?: string
-  readonly onAdd: () => void
+  readonly onAdd: (asset: AssetCreative) => void
 }
 
 export default memo(function CreativeCard({
@@ -39,6 +41,7 @@ export default memo(function CreativeCard({
   label,
   metrics,
   metricFields,
+  asset,
   added,
   disabled,
   disabledReason,
@@ -91,7 +94,7 @@ export default memo(function CreativeCard({
         color={added ? 'success' : 'primary'}
         disabled={disabled && !added}
         startIcon={added ? <CheckIcon fontSize="inherit" /> : <AddIcon fontSize="inherit" />}
-        onClick={added ? undefined : onAdd}
+        onClick={added || !asset ? undefined : () => onAdd(asset)}
         className={styles.addBtn}
         aria-label={added ? 'Already added' : 'Add to ad'}
       >

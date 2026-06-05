@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useDeferredValue, useEffect, useMemo, useState } from 'react'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import type { BrandId } from '@/config/brands'
@@ -12,10 +12,19 @@ import { getAdAccountIds } from '@/config/adAccounts'
 import Notice from '../../Notice/Notice'
 import CreatorPane from './CreatorPane/CreatorPane'
 import LibraryPane from './LibraryPane/LibraryPane'
-import { addTextVariation } from './CopyForm/VariationList/helpers'
+import DecisionDialog from './DecisionDialog/DecisionDialog'
+import { applyLibraryText } from './CopyForm/VariationList/helpers'
+import { MAX_COPY_VARIATIONS } from './copyFeatureFlags'
 import { EMPTY_COPY, type CopyValue } from './CopyForm/CopyForm'
 import { addAsset, type AssetCreative } from './assetCreative'
-import { creativeKey, resolveCopy, type CopyOverride } from './perCreativeCopy'
+import {
+  clearFieldOverrides,
+  creativeKey,
+  overrideCount,
+  resolveCopy,
+  type CopyOverride,
+  type OverridableField,
+} from './perCreativeCopy'
 import { EMPTY_TARGETING, type TargetingValue } from './CreatorPane/useTargetingData'
 import {
   adKeyCombos,
@@ -40,6 +49,11 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
   const [adNames, setAdNames] = useState<ReadonlyMap<string, string>>(() => new Map())
   const [copyOverrides, setCopyOverrides] = useState<ReadonlyMap<string, CopyOverride>>(() => new Map())
   const [pageTokens, setPageTokens] = useState<ReadonlyMap<string, string>>(() => new Map())
+  const [sharedConflict, setSharedConflict] = useState<{
+    readonly message: string
+    readonly onlyShared: () => void
+    readonly setOnAll: () => void
+  } | null>(null)
   const queue = useLaunchQueue()
 
   // Drop custom page tokens for pages no longer selected.
@@ -70,7 +84,10 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
       const valid = new Set<string>()
       for (const pageId of targeting.pageIds) {
         for (const file of files) {
-          valid.add(adNameMapKey(pageId, file))
+          valid.add(adNameMapKey(pageId, creativeKey(file)))
+        }
+        for (const asset of assets) {
+          valid.add(adNameMapKey(pageId, asset.assetKey))
         }
       }
       const next = new Map<string, string>()
@@ -81,7 +98,7 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
       }
       return next.size === prev.size ? prev : next
     })
-  }, [files, targeting.pageIds])
+  }, [files, assets, targeting.pageIds])
 
   // Drop per-creative copy overrides for creatives no longer present, so a
   // removed file/asset can't leak its copy into a later submit.
@@ -125,17 +142,56 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
   const creativeCount = files.length + assets.length
   const canSubmit = canSubmitCreator(targeting, copy, creativeCount)
 
+  // The library only consumes copy to flag which texts/URL are already added —
+  // a non-urgent highlight. Deferring it keeps the heavy library tree off the
+  // keystroke critical path so the copy fields stay responsive while typing.
+  const deferredCopy = useDeferredValue(copy)
+
+  // Library "Add" writes the shared copy. When some creatives carry their own
+  // value for that field, ask first (hybrid): keep the divergence and only update
+  // the rest, or force the value onto everyone by clearing those overrides.
+  const requestSharedAdd = useCallback((
+    field: OverridableField,
+    label: string,
+    setShared: () => void,
+  ) => {
+    const customized = overrideCount(copyOverrides, field)
+    if (customized === 0) {
+      setShared()
+      return
+    }
+    setSharedConflict({
+      message: `${customized} ${customized === 1 ? 'creative uses' : 'creatives use'} a custom ${label}.`
+        + ' Update the rest only, or set this on all of them?',
+      onlyShared: () => {
+        setShared()
+        setSharedConflict(null)
+      },
+      setOnAll: () => {
+        setShared()
+        setCopyOverrides((prev) => clearFieldOverrides(prev, field))
+        setSharedConflict(null)
+      },
+    })
+  }, [copyOverrides])
+
   const handleAddPrimaryText = useCallback((value: string) => {
-    setCopy((prev) => ({ ...prev, primaryTexts: addTextVariation(prev.primaryTexts, value) }))
-  }, [])
+    requestSharedAdd('primaryTexts', 'primary text', () => {
+      setCopy((prev) => ({ ...prev, primaryTexts: applyLibraryText(prev.primaryTexts, value, MAX_COPY_VARIATIONS) }))
+    })
+  }, [requestSharedAdd])
 
   const handleAddHeadline = useCallback((value: string) => {
-    setCopy((prev) => ({ ...prev, headlines: addTextVariation(prev.headlines, value) }))
-  }, [])
+    requestSharedAdd('headlines', 'headline', () => {
+      setCopy((prev) => ({ ...prev, headlines: applyLibraryText(prev.headlines, value, MAX_COPY_VARIATIONS) }))
+    })
+  }, [requestSharedAdd])
 
   const handleAddUrl = useCallback((value: string) => {
-    setCopy((prev) => ({ ...prev, url: value }))
-  }, [])
+    requestSharedAdd('url', 'destination URL', () => {
+      setCopy((prev) => ({ ...prev, url: value }))
+    })
+  }, [requestSharedAdd])
 
   const handleAddCreative = useCallback((asset: AssetCreative) => {
     setAssets((prev) => addAsset(prev, asset))
@@ -157,7 +213,9 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
     }
     for (const pageId of targeting.pageIds) {
       for (const asset of assets) {
-        const name = (isSingleAd ? copy.name.trim() : '') || asset.name
+        const name = resolvedNames.get(adNameMapKey(pageId, asset.assetKey))
+          || (isSingleAd ? copy.name.trim() : '')
+          || asset.name
         const adCopy = resolveCopy(copy, copyOverrides.get(asset.assetKey))
         queue.enqueueAsset(buildPublishPayload({ targeting, copy: adCopy, pageId, name, isSinglePage }), asset, batchId)
       }
@@ -222,14 +280,26 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
       <LibraryPane
         brandId={brandId}
         market={selectedMarket}
-        primaryTexts={copy.primaryTexts}
-        headlines={copy.headlines}
-        url={copy.url}
+        primaryTexts={deferredCopy.primaryTexts}
+        headlines={deferredCopy.headlines}
+        url={deferredCopy.url}
         addedAssetKeys={addedAssetKeys}
         onAddPrimaryText={handleAddPrimaryText}
         onAddHeadline={handleAddHeadline}
         onAddUrl={handleAddUrl}
         onAddCreative={handleAddCreative}
+      />
+
+      <DecisionDialog
+        open={sharedConflict !== null}
+        title="Some creatives use custom copy"
+        message={sharedConflict?.message ?? ''}
+        onClose={() => setSharedConflict(null)}
+        actions={[
+          { label: 'Cancel', onClick: () => setSharedConflict(null) },
+          { label: 'Set on all', onClick: () => sharedConflict?.setOnAll() },
+          { label: 'Update the rest only', onClick: () => sharedConflict?.onlyShared(), emphasis: true },
+        ]}
       />
     </Box>
   )

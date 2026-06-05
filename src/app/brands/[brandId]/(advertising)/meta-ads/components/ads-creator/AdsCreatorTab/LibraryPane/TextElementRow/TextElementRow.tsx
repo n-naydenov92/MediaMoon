@@ -19,7 +19,7 @@ interface Props {
   readonly metricFields: readonly CardMetricField[]
   readonly added: boolean
   readonly disabled: boolean
-  readonly onAdd: () => void
+  readonly onAdd: (text: string) => void
 }
 
 export default memo(function TextElementRow({
@@ -55,7 +55,7 @@ export default memo(function TextElementRow({
         color={added ? 'success' : 'primary'}
         disabled={disabled && !added}
         startIcon={added ? <CheckIcon fontSize="inherit" /> : <AddIcon fontSize="inherit" />}
-        onClick={added ? undefined : onAdd}
+        onClick={added ? undefined : () => onAdd(text)}
         className={styles.addBtn}
         aria-label={added ? 'Already added' : 'Add to ad'}
       >

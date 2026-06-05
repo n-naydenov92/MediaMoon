@@ -2,8 +2,8 @@
 
 import { memo } from 'react'
 import Box from '@mui/material/Box'
+import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
-import type { CopyValue } from '../CopyForm/CopyForm'
 import { fieldStatus, type CopyOverride, type OverridableField } from '../perCreativeCopy'
 import styles from './CreativeStatusBadges.module.css'
 
@@ -34,27 +34,32 @@ const STATUS_NOTE = {
 } as const
 
 interface Props {
-  readonly base: CopyValue
+  readonly baseFilled: ReadonlySet<OverridableField>
   readonly override?: CopyOverride
 }
 
 // Compact P·H·D·U·C row showing, per field, whether the creative inherits the
 // shared copy (filled or empty) or carries its own overridden value.
-export default memo(function CreativeStatusBadges({ base, override }: Props): JSX.Element {
+export default memo(function CreativeStatusBadges({ baseFilled, override }: Props): JSX.Element {
   return (
     <Box className={styles.root} aria-label="Copy fields status">
       {FIELDS.map((field) => {
-        const status = fieldStatus(base, override, field.key)
+        const status = fieldStatus(baseFilled, override, field.key)
         return (
-          <Typography
+          <Tooltip
             key={field.key}
-            component="span"
-            variant="inherit"
-            className={`${styles.badge} ${STATUS_CLASS[status]}`}
             title={`${field.name}: ${STATUS_NOTE[status]}`}
+            placement="top"
+            disableInteractive
           >
-            {field.label}
-          </Typography>
+            <Typography
+              component="span"
+              variant="inherit"
+              className={`${styles.badge} ${STATUS_CLASS[status]}`}
+            >
+              {field.label}
+            </Typography>
+          </Tooltip>
         )
       })}
     </Box>

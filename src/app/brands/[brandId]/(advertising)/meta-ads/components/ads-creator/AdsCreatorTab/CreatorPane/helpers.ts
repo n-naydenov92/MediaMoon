@@ -2,6 +2,7 @@ import type { Page } from '@/lib/gateways/MetaAdsGateway'
 import type { PublishPayload } from '../../launchPipeline/mediaUpload'
 import type { CopyValue } from '../CopyForm/CopyForm'
 import { isValidDestinationUrl } from '../CopyForm/helpers'
+import { assetMediaToken, type AssetCreative } from '../assetCreative'
 import type { TargetingValue } from './useTargetingData'
 
 // Stable identity for a File across re-renders (the FilePicker list key uses
@@ -55,16 +56,39 @@ function sanitizeTag(value: string): string {
   return value.trim().replace(/\s+/g, '-')
 }
 
-// {Media}-{Month}-Product-CreativeInfo-TextType[-{Page}] with placeholder words —
-// the pre-filled, editable default each ad shows. `pageTok` is the already-resolved
-// page token (custom or auto), or '' to omit.
+// A creative the operator can name per ad — a freshly uploaded file or a library
+// asset. Both reduce to a stable key, a display name, a media token, and (for
+// assets) the descriptive name to use as the editable default.
+export interface NameableCreative {
+  readonly key: string
+  readonly name: string
+  readonly media: 'Video' | 'IMG'
+  readonly baseName: string | null
+}
+
+export function fileNameable(file: File): NameableCreative {
+  return { key: fileKey(file), name: file.name, media: mediaToken(file), baseName: null }
+}
+
+export function assetNameable(asset: AssetCreative): NameableCreative {
+  return { key: asset.assetKey, name: asset.name, media: assetMediaToken(asset), baseName: asset.name }
+}
+
+// The pre-filled, editable default each ad shows. Library assets already carry a
+// descriptive name, so they default to it (with the page token appended to keep
+// per-page ads distinct). Uploaded files get the structured placeholder skeleton
+// {Media}-{Month}-Product-CreativeInfo-TextType[-{Page}]-Dest. `pageTok` is the
+// already-resolved page token (custom or auto), or '' to omit.
 export function buildAutoAdName(
-  file: File,
+  creative: NameableCreative,
   pageTok: string,
   now: Date = new Date(),
 ): string {
+  if (creative.baseName !== null) {
+    return pageTok ? `${creative.baseName}-${pageTok}` : creative.baseName
+  }
   return [
-    mediaToken(file),
+    creative.media,
     monthToken(now),
     ...PLACEHOLDER_PARTS,
     pageTok,
@@ -74,15 +98,15 @@ export function buildAutoAdName(
     .join('-')
 }
 
-// Same shape, but from explicit bulk tag values; empty tags are dropped.
+// Same structured shape, but from explicit bulk tag values; empty tags are dropped.
 export function buildAdNameFromTags(
-  file: File,
+  creative: NameableCreative,
   pageTok: string,
   tags: AdNameTags,
   now: Date = new Date(),
 ): string {
   return [
-    mediaToken(file),
+    creative.media,
     monthToken(now),
     sanitizeTag(tags.product),
     sanitizeTag(tags.creativeInfo),
@@ -104,8 +128,8 @@ export function resolvePageToken(
   return pageTokens.has(pageId) ? (pageTokens.get(pageId) ?? '') : pageToken(pageName)
 }
 
-export function adNameMapKey(pageId: string, file: File): string {
-  return `${pageId}::${fileKey(file)}`
+export function adNameMapKey(pageId: string, creativeKey: string): string {
+  return `${pageId}::${creativeKey}`
 }
 
 // Swap the page-token segment in a built name when the page token changes,
@@ -131,23 +155,28 @@ export function restampPageToken(name: string, oldTok: string, newTok: string): 
   return newTok ? `${before}-${newTok}-${tail}` : `${before}-${tail}`
 }
 
-// One ad per (page × file). Each combo carries its resolved page token so callers
-// that build names don't re-resolve it per file.
+// One ad per (page × creative). Each combo carries its resolved page token so
+// callers that build names don't re-resolve it per creative.
 export interface AdCombo {
   readonly page: Page
-  readonly file: File
+  readonly creative: NameableCreative
   readonly key: string
   readonly pageTok: string
 }
 
 export function adCombos(
   pages: readonly Page[],
-  files: readonly File[],
+  creatives: readonly NameableCreative[],
   pageTokens: ReadonlyMap<string, string>,
 ): readonly AdCombo[] {
   return pages.flatMap((page) => {
     const pageTok = resolvePageToken(pageTokens, page.id, page.name)
-    return files.map((file) => ({ page, file, key: adNameMapKey(page.id, file), pageTok }))
+    return creatives.map((creative) => ({
+      page,
+      creative,
+      key: adNameMapKey(page.id, creative.key),
+      pageTok,
+    }))
   })
 }
 
@@ -163,7 +192,9 @@ export function adKeyCombos(
   pageIds: readonly string[],
   files: readonly File[],
 ): readonly AdKeyCombo[] {
-  return pageIds.flatMap((pageId) => files.map((file) => ({ pageId, file, key: adNameMapKey(pageId, file) })))
+  return pageIds.flatMap(
+    (pageId) => files.map((file) => ({ pageId, file, key: adNameMapKey(pageId, fileKey(file)) })),
+  )
 }
 
 // Immutable Map set/delete — `null` removes the key. Replaces the
@@ -180,7 +211,7 @@ export function mapWith<K, V>(map: ReadonlyMap<K, V>, key: K, value: V | null): 
 
 interface BuildAdNameMapInput {
   readonly pages: readonly Page[]
-  readonly files: readonly File[]
+  readonly creatives: readonly NameableCreative[]
   readonly pageTokens: ReadonlyMap<string, string>
   readonly copy: CopyValue
   readonly adNames: ReadonlyMap<string, string>
@@ -191,16 +222,16 @@ interface BuildAdNameMapInput {
 // ad, else the per-ad entry), falling back to the structured auto name.
 export function buildAdNameMap({
   pages,
-  files,
+  creatives,
   pageTokens,
   copy,
   adNames,
   isSingleAd,
 }: BuildAdNameMapInput): Map<string, string> {
   const names = new Map<string, string>()
-  for (const { file, key, pageTok } of adCombos(pages, files, pageTokens)) {
+  for (const { creative, key, pageTok } of adCombos(pages, creatives, pageTokens)) {
     const authored = (isSingleAd ? copy.name : adNames.get(key)) || ''
-    names.set(key, authored || buildAutoAdName(file, pageTok))
+    names.set(key, authored || buildAutoAdName(creative, pageTok))
   }
   return names
 }
