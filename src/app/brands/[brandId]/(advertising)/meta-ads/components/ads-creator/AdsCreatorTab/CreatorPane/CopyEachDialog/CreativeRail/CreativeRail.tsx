@@ -26,6 +26,9 @@ interface Props {
   readonly onSelect: (key: string) => void
   readonly onToggleCheck: (key: string) => void
   readonly onApplyToChecked: () => void
+  // 'rail' (default) is the fixed-width desktop column; 'sheet' spans full width
+  // for use inside the mobile bottom-sheet drawer.
+  readonly variant?: 'rail' | 'sheet'
 }
 
 export default memo(function CreativeRail({
@@ -37,13 +40,14 @@ export default memo(function CreativeRail({
   onSelect,
   onToggleCheck,
   onApplyToChecked,
+  variant = 'rail',
 }: Props): JSX.Element {
   // The active creative is the source of a bulk apply, so it reads as a locked
   // checked row; "selected" then means the *other* creatives to copy onto.
   const othersChecked = [...checkedKeys].filter((key) => key !== activeKey).length
 
   return (
-    <Box className={styles.root}>
+    <Box className={`${styles.root} ${variant === 'sheet' ? styles.sheet : ''}`}>
       <Typography component="h3" variant="inherit" className={styles.heading}>
         {`Creatives (${items.length})`}
       </Typography>

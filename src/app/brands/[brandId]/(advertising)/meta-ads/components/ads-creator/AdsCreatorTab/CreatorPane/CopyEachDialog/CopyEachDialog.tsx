@@ -3,7 +3,9 @@
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
+import Drawer from '@mui/material/Drawer'
 import Typography from '@mui/material/Typography'
+import useMediaQuery from '@mui/material/useMediaQuery'
 import EditNoteOutlinedIcon from '@mui/icons-material/EditNoteOutlined'
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined'
 import CollectionsBookmarkOutlinedIcon from '@mui/icons-material/CollectionsBookmarkOutlined'
@@ -25,6 +27,7 @@ import DecisionDialog from '../../DecisionDialog/DecisionDialog'
 import { useBaseFilled } from '../../useBaseFilled'
 import { mapWith } from '../helpers'
 import CreativeRail from './CreativeRail/CreativeRail'
+import CreativePicker from './CreativePicker/CreativePicker'
 import CopyDetail from './CopyDetail/CopyDetail'
 import { applyOverrideToKeys, assetItem, fileItem, type CreativeItem } from './helpers'
 import styles from './CopyEachDialog.module.css'
@@ -80,6 +83,12 @@ export default memo(function CopyEachDialog({
   const [checkedKeys, setCheckedKeys] = useState<ReadonlySet<string>>(() => new Set())
   const [rightTab, setRightTab] = useState<RightTab>('preview')
   const [pending, setPending] = useState<{ message: string; commit: () => void } | null>(null)
+  const [listOpen, setListOpen] = useState(false)
+
+  // Below the breakpoint the 3-pane rail can't fit, so the rail collapses into a
+  // top picker bar and the full list moves into a bottom sheet (same width as the
+  // fullscreen switch in CreatorDialog).
+  const isMobile = useMediaQuery(`(max-width:${FULLSCREEN_BELOW}px)`)
 
   const fileUrls = useMemo(() => files.map((f) => URL.createObjectURL(f)), [files])
   useEffect(() => () => {
@@ -110,6 +119,7 @@ export default memo(function CopyEachDialog({
   // the edited field and live preview responsive while typing in the detail pane.
   const deferredOverrides = useDeferredValue(overrides)
   const deferredActiveValue = activeKey ? resolveCopy(baseCopy, deferredOverrides.get(activeKey)) : null
+  const deferredActiveOverride = activeKey ? deferredOverrides.get(activeKey) : undefined
 
   // The active creative is always a target (it's the one on screen); checked
   // others extend the set. Library "Add" writes to all of them.
@@ -120,15 +130,17 @@ export default memo(function CopyEachDialog({
     return [activeKey, ...[...checkedKeys].filter((k) => k !== activeKey)]
   }, [activeKey, checkedKeys])
 
-  // Edit context read through a ref so `updateField` keeps a stable identity. Its
-  // inputs (`overrides`, `activeKey`, …) change on every keystroke; without the ref
-  // the callback would be reborn each time, re-rendering the whole detail pane.
-  const editRef = useRef({ activeKey, baseCopy, overrides, onOverridesChange })
-  editRef.current = { activeKey, baseCopy, overrides, onOverridesChange }
+  // Latest render values read through a ref so every mutation callback below keeps a
+  // stable identity. Their natural inputs (`overrides`, `checkedKeys`, …) change on
+  // every keystroke; without the ref each callback would be reborn each time, which
+  // would re-render the rail and the library pane on every character typed (defeating
+  // the deferred-overrides work above).
+  const liveRef = useRef({ activeKey, baseCopy, overrides, onOverridesChange, checkedKeys, addTargets })
+  liveRef.current = { activeKey, baseCopy, overrides, onOverridesChange, checkedKeys, addTargets }
 
   const updateField = useCallback(
     <F extends OverridableField>(field: F, next: CopyValue[F]): void => {
-      const { activeKey: key, baseCopy: base, overrides: curr, onOverridesChange: change } = editRef.current
+      const { activeKey: key, baseCopy: base, overrides: curr, onOverridesChange: change } = liveRef.current
       if (!key) {
         return
       }
@@ -150,47 +162,60 @@ export default memo(function CopyEachDialog({
     })
   }, [])
 
+  // Picking from the mobile sheet both switches the active creative and dismisses
+  // the sheet; the picker bar's prev/next reuse the same selector.
+  const selectCreative = useCallback((key: string): void => {
+    setSelectedKey(key)
+    setListOpen(false)
+  }, [])
+
+  const openList = useCallback((): void => setListOpen(true), [])
+  const closeList = useCallback((): void => setListOpen(false), [])
+
   const applyToChecked = useCallback((): void => {
-    if (!activeKey) {
+    const { activeKey: key, checkedKeys: checked, overrides: curr, onOverridesChange: change } = liveRef.current
+    if (!key) {
       return
     }
-    const targets = [...checkedKeys].filter((k) => k !== activeKey)
+    const targets = [...checked].filter((k) => k !== key)
     if (targets.length === 0) {
       return
     }
-    onOverridesChange(applyOverrideToKeys(overrides, overrides.get(activeKey), targets))
-  }, [activeKey, checkedKeys, overrides, onOverridesChange])
+    change(applyOverrideToKeys(curr, curr.get(key), targets))
+  }, [])
 
   const resetActive = useCallback((): void => {
-    if (!activeKey) {
+    const { activeKey: key, overrides: curr, onOverridesChange: change } = liveRef.current
+    if (!key) {
       return
     }
-    onOverridesChange(mapWith(overrides, activeKey, null))
-  }, [activeKey, overrides, onOverridesChange])
+    change(mapWith(curr, key, null))
+  }, [])
 
   // Apply a library value to every target. With >1 target that already carries a
   // value for the field, ask first so a bulk add can't silently wipe custom copy.
   const requestAddText = useCallback(
     <F extends OverridableField>(field: F, applied: CopyValue[F], label: string): void => {
-      if (addTargets.length === 0) {
+      const { baseCopy: base, overrides: curr, onOverridesChange: change, addTargets: targets } = liveRef.current
+      if (targets.length === 0) {
         return
       }
       const commit = (): void => {
-        let next = overrides
-        for (const key of addTargets) {
-          next = mapWith(next, key, withOverrideField(baseCopy, next.get(key), field, applied))
+        let next = curr
+        for (const key of targets) {
+          next = mapWith(next, key, withOverrideField(base, next.get(key), field, applied))
         }
-        onOverridesChange(next)
+        change(next)
         setPending(null)
       }
-      const replacing = addTargets.filter((key) => hasValue(resolveCopy(baseCopy, overrides.get(key))[field])).length
-      if (addTargets.length > 1 && replacing > 0) {
-        setPending({ message: `This replaces the ${label} on ${addTargets.length} creatives.`, commit })
+      const replacing = targets.filter((key) => hasValue(resolveCopy(base, curr.get(key))[field])).length
+      if (targets.length > 1 && replacing > 0) {
+        setPending({ message: `This replaces the ${label} on ${targets.length} creatives.`, commit })
       } else {
         commit()
       }
     },
-    [addTargets, baseCopy, overrides, onOverridesChange],
+    [],
   )
 
   const addPrimaryToTargets = useCallback((value: string): void => {
@@ -225,16 +250,27 @@ export default memo(function CopyEachDialog({
       )}
     >
       <Box className={styles.body}>
-        <CreativeRail
-          items={items}
-          baseFilled={baseFilled}
-          overrides={deferredOverrides}
-          activeKey={activeKey}
-          checkedKeys={checkedKeys}
-          onSelect={setSelectedKey}
-          onToggleCheck={toggleCheck}
-          onApplyToChecked={applyToChecked}
-        />
+        {isMobile ? (
+          <CreativePicker
+            items={items}
+            baseFilled={baseFilled}
+            activeKey={activeKey}
+            activeOverride={deferredActiveOverride}
+            onSelect={selectCreative}
+            onOpenList={openList}
+          />
+        ) : (
+          <CreativeRail
+            items={items}
+            baseFilled={baseFilled}
+            overrides={deferredOverrides}
+            activeKey={activeKey}
+            checkedKeys={checkedKeys}
+            onSelect={setSelectedKey}
+            onToggleCheck={toggleCheck}
+            onApplyToChecked={applyToChecked}
+          />
+        )}
 
         <Box className={styles.detailCol}>
           <CopyDetail
@@ -305,6 +341,27 @@ export default memo(function CopyEachDialog({
           </Box>
         </Box>
       </Box>
+
+      {isMobile && (
+        <Drawer
+          anchor="bottom"
+          open={listOpen}
+          onClose={closeList}
+          classes={{ paper: styles.sheetPaper }}
+        >
+          <CreativeRail
+            variant="sheet"
+            items={items}
+            baseFilled={baseFilled}
+            overrides={deferredOverrides}
+            activeKey={activeKey}
+            checkedKeys={checkedKeys}
+            onSelect={selectCreative}
+            onToggleCheck={toggleCheck}
+            onApplyToChecked={applyToChecked}
+          />
+        </Drawer>
+      )}
 
       <DecisionDialog
         open={pending !== null}

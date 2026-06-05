@@ -90,15 +90,33 @@
   border-radius: 8px;
 }
 
+.sheetPaper {
+  max-height: 72dvh;
+  background: var(--bg-surface);
+  border-top-left-radius: 14px;
+  border-top-right-radius: 14px;
+}
+
 @media (max-width: 900px) {
   .body {
     flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .detailCol {
+    flex: 0 0 auto;
+    overflow-y: visible;
   }
 
   .rightCol {
     flex: 0 0 auto;
     border-left: none;
     border-top: 1px solid var(--hairline);
+  }
+
+  .panel {
+    flex: 0 0 auto;
+    overflow-y: visible;
   }
 
   .libraryPanel > :global(aside) {

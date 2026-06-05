@@ -8,6 +8,15 @@
   background: var(--surface-1);
 }
 
+/* Full-width variant for the mobile bottom-sheet drawer — drop the fixed width
+   and the column divider so the list fills the sheet. */
+.sheet.sheet {
+  flex: 1 1 auto;
+  max-width: none;
+  width: 100%;
+  border-right: none;
+}
+
 .heading {
   margin: 0;
   padding: 16px 16px 8px;
