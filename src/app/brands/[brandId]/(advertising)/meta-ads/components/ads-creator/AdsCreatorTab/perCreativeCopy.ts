@@ -11,10 +11,25 @@ export type CopyOverride = Partial<
 
 export type OverridableField = keyof CopyOverride
 
+// Copy fields Meta rejects when blank, so an empty resolved value here is a publish
+// blocker rather than a stylistic choice.
+export const REQUIRED_FIELDS = ['primaryTexts', 'headlines'] as const
+const REQUIRED_FIELD_SET: ReadonlySet<OverridableField> = new Set(REQUIRED_FIELDS)
+
 // 'set'   → inherits the shared copy and that field has a value
-// 'empty' → inherits the shared copy but the field is still blank
+// 'empty' → inherits the shared copy but the field is still blank (optional field)
 // 'override' → the creative carries its own value for this field
-export type FieldStatus = 'set' | 'empty' | 'override'
+// 'missing' → a REQUIRED field resolves blank (empty shared inherited, or an empty
+//             override) — this creative would publish without it
+export type FieldStatus = 'set' | 'empty' | 'override' | 'missing'
+
+function firstFilled(values: readonly string[] | undefined): boolean {
+  return (values?.[0] ?? '').trim() !== ''
+}
+
+function fieldHasValue(value: CopyValue[OverridableField]): boolean {
+  return Array.isArray(value) ? firstFilled(value) : String(value).trim() !== ''
+}
 
 // Stable per-creative identity. Files reuse the same key as ad naming so the two
 // per-creative maps stay consistent; library assets already carry a stable key.
@@ -36,10 +51,45 @@ export function fieldStatus(
   override: CopyOverride | undefined,
   field: OverridableField,
 ): FieldStatus {
-  if (override && override[field] !== undefined) {
+  const required = REQUIRED_FIELD_SET.has(field)
+  const overrideValue = override?.[field]
+  if (overrideValue !== undefined) {
+    if (required && !fieldHasValue(overrideValue)) {
+      return 'missing'
+    }
     return 'override'
   }
-  return baseFilled.has(field) ? 'set' : 'empty'
+  if (baseFilled.has(field)) {
+    return 'set'
+  }
+  return required ? 'missing' : 'empty'
+}
+
+export interface EmptyRequiredCounts {
+  readonly primary: number
+  readonly headline: number
+}
+
+// How many creatives would publish with a blank required field, counting the
+// resolved value (its own override if present, otherwise the shared base). Drives
+// the publish block and the "N creatives have an empty …" warnings.
+export function countEmptyRequired(
+  base: CopyValue,
+  overrides: ReadonlyMap<string, CopyOverride>,
+  creativeKeys: readonly string[],
+): EmptyRequiredCounts {
+  let primary = 0
+  let headline = 0
+  for (const key of creativeKeys) {
+    const override = overrides.get(key)
+    if (!firstFilled(override?.primaryTexts ?? base.primaryTexts)) {
+      primary += 1
+    }
+    if (!firstFilled(override?.headlines ?? base.headlines)) {
+      headline += 1
+    }
+  }
+  return { primary, headline }
 }
 
 // How many creatives carry their own value for a field. Drives the shared form's

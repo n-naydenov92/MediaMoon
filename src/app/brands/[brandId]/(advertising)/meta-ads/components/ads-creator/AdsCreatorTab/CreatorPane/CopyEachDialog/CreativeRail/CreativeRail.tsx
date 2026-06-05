@@ -7,7 +7,12 @@ import Checkbox from '@mui/material/Checkbox'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded'
-import type { CopyOverride, OverridableField } from '../../../perCreativeCopy'
+import {
+  REQUIRED_FIELDS,
+  fieldStatus,
+  type CopyOverride,
+  type OverridableField,
+} from '../../../perCreativeCopy'
 import CreativeStatusBadges from '../../../CreativeStatusBadges/CreativeStatusBadges'
 import type { CreativeItem } from '../helpers'
 import styles from './CreativeRail.module.css'
@@ -46,6 +51,8 @@ export default memo(function CreativeRail({
       <Box component="ul" className={styles.list}>
         {items.map((item) => {
           const isActive = item.key === activeKey
+          const override = overrides.get(item.key)
+          const missing = REQUIRED_FIELDS.some((f) => fieldStatus(baseFilled, override, f) === 'missing')
           return (
             <Box component="li" key={item.key} className={styles.row}>
               <Tooltip title={isActive ? 'Editing now' : ''} placement="top" disableInteractive>
@@ -67,7 +74,7 @@ export default memo(function CreativeRail({
               <Box
                 component="button"
                 type="button"
-                className={`${styles.selectButton} ${isActive ? styles.selectButtonActive : ''}`}
+                className={`${styles.selectButton} ${isActive ? styles.selectButtonActive : ''} ${missing ? styles.selectButtonMissing : ''}`}
                 aria-pressed={isActive}
                 onClick={() => onSelect(item.key)}
               >
@@ -86,7 +93,7 @@ export default memo(function CreativeRail({
                       {item.name}
                     </Typography>
                   </Tooltip>
-                  <CreativeStatusBadges baseFilled={baseFilled} override={overrides.get(item.key)} />
+                  <CreativeStatusBadges baseFilled={baseFilled} override={override} />
                 </Box>
               </Box>
             </Box>

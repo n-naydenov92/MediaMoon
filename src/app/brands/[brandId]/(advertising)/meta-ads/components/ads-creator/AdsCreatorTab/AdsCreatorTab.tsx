@@ -19,6 +19,7 @@ import { EMPTY_COPY, type CopyValue } from './CopyForm/CopyForm'
 import { addAsset, type AssetCreative } from './assetCreative'
 import {
   clearFieldOverrides,
+  countEmptyRequired,
   creativeKey,
   overrideCount,
   resolveCopy,
@@ -140,7 +141,21 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
   )
 
   const creativeCount = files.length + assets.length
+  const creativeKeys = useMemo(
+    () => [...files.map((f) => creativeKey(f)), ...assets.map((a) => a.assetKey)],
+    [files, assets],
+  )
+  // Validate the copy each ad would actually publish (its own override, else the
+  // shared base) — not just the shared field. This blocks ads that would go out with
+  // an empty primary text / headline, and stops falsely blocking when every creative
+  // overrides an (empty) shared field.
+  const emptyRequired = useMemo(
+    () => countEmptyRequired(copy, copyOverrides, creativeKeys),
+    [copy, copyOverrides, creativeKeys],
+  )
   const canSubmit = canSubmitCreator(targeting, copy, creativeCount)
+    && emptyRequired.primary === 0
+    && emptyRequired.headline === 0
 
   // The library only consumes copy to flag which texts/URL are already added —
   // a non-urgent highlight. Deferring it keeps the heavy library tree off the
@@ -200,7 +215,7 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
   const addedAssetKeys = useMemo(() => new Set(assets.map((a) => a.assetKey)), [assets])
 
   const handleSubmit = useCallback((resolvedNames: ReadonlyMap<string, string>) => {
-    if (!canSubmit || !targetMarket || !copy.headlines[0] || !copy.primaryTexts[0]) {
+    if (!canSubmit || !targetMarket) {
       return
     }
     const isSinglePage = targeting.pageIds.length === 1
@@ -275,6 +290,7 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
         onDismiss={queue.dismiss}
         onAdSetCreated={queue.recordAdSet}
         canSubmit={canSubmit}
+        emptyRequired={emptyRequired}
         onSubmit={handleSubmit}
       />
       <LibraryPane

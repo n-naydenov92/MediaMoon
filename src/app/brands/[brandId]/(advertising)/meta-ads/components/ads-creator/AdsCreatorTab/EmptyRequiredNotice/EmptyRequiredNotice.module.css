@@ -1,0 +1,21 @@
+.root {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--error-soft);
+  color: var(--error-strong);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.icon {
+  font-size: 16px;
+  color: var(--error);
+  flex-shrink: 0;
+}
+
+.text {
+  line-height: 1.35;
+}

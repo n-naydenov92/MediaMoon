@@ -22,6 +22,8 @@ interface Props {
   readonly multiline?: boolean
   readonly firstRows?: number
   readonly max?: number
+  readonly invalid?: boolean
+  readonly errorText?: string
 }
 
 export default memo(function VariationList({
@@ -33,6 +35,8 @@ export default memo(function VariationList({
   multiline = false,
   firstRows,
   max = DEFAULT_MAX,
+  invalid = false,
+  errorText,
 }: Props): JSX.Element {
   const remaining = max - values.length
 
@@ -46,6 +50,8 @@ export default memo(function VariationList({
           placeholder={placeholder}
           value={values[0]}
           onChange={(e) => onChange(setAt(values, 0, e.target.value))}
+          error={invalid}
+          helperText={invalid ? errorText : undefined}
         />
       </FormField>
 

@@ -25,12 +25,14 @@ const STATUS_CLASS = {
   set: styles.set,
   empty: styles.empty,
   override: styles.override,
+  missing: styles.missing,
 } as const
 
 const STATUS_NOTE = {
   set: 'shared',
   empty: 'empty',
   override: 'overridden',
+  missing: 'empty · required',
 } as const
 
 interface Props {

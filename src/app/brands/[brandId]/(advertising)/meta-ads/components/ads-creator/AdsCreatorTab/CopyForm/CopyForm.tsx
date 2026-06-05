@@ -46,6 +46,7 @@ interface Props {
   readonly value: CopyValue
   readonly onChange: (next: CopyValue) => void
   readonly adsCount: number
+  readonly totalCreatives: number
   readonly overrides: ReadonlyMap<string, CopyOverride>
   readonly onAutoName?: () => void
   readonly onNameEach?: () => void
@@ -56,6 +57,7 @@ export default memo(function CopyForm({
   value,
   onChange,
   adsCount,
+  totalCreatives,
   overrides,
   onAutoName,
   onNameEach,
@@ -98,6 +100,14 @@ export default memo(function CopyForm({
   const headlineCustomized = overrideCount(overrides, 'headlines')
   const descriptionCustomized = overrideCount(overrides, 'description')
   const urlCustomized = overrideCount(overrides, 'url')
+
+  // Required-field error: the shared value is blank AND at least one creative still
+  // inherits it (so that ad would publish empty). When every creative overrides the
+  // field, an empty shared base is harmless and we don't flag it here.
+  const primaryInvalid = (value.primaryTexts[0] ?? '').trim() === ''
+    && totalCreatives - primaryCustomized > 0
+  const headlineInvalid = (value.headlines[0] ?? '').trim() === ''
+    && totalCreatives - headlineCustomized > 0
 
   return (
     <Box className={styles.root}>
@@ -185,9 +195,11 @@ export default memo(function CopyForm({
               multiline
               firstRows={PRIMARY_TEXT_ROWS}
               max={MAX_COPY_VARIATIONS}
+              invalid={primaryInvalid}
+              errorText="Primary text is required — fill it here or per creative"
             />
             {onEditEach && primaryCustomized > 0 && (
-              <SharedFieldNote count={primaryCustomized} onManage={onEditEach} />
+              <SharedFieldNote customized={primaryCustomized} total={totalCreatives} />
             )}
           </Box>
 
@@ -199,9 +211,11 @@ export default memo(function CopyForm({
               placeholder="Enter your ad title here"
               addNoun="headline"
               max={MAX_COPY_VARIATIONS}
+              invalid={headlineInvalid}
+              errorText="Headline is required — fill it here or per creative"
             />
             {onEditEach && headlineCustomized > 0 && (
-              <SharedFieldNote count={headlineCustomized} onManage={onEditEach} />
+              <SharedFieldNote customized={headlineCustomized} total={totalCreatives} />
             )}
           </Box>
 
@@ -215,7 +229,7 @@ export default memo(function CopyForm({
               />
             </FormField>
             {onEditEach && descriptionCustomized > 0 && (
-              <SharedFieldNote count={descriptionCustomized} onManage={onEditEach} />
+              <SharedFieldNote customized={descriptionCustomized} total={totalCreatives} />
             )}
           </Box>
 
@@ -232,7 +246,7 @@ export default memo(function CopyForm({
                 />
               </FormField>
               {onEditEach && urlCustomized > 0 && (
-                <SharedFieldNote count={urlCustomized} onManage={onEditEach} />
+                <SharedFieldNote customized={urlCustomized} total={totalCreatives} />
               )}
             </Box>
 

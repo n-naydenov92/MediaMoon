@@ -283,8 +283,6 @@ export function canSubmitCreator(
     && targeting.adSetId !== ''
     && targeting.pageIds.length > 0
     && (targeting.pageIds.length * creativeCount >= 2 || copy.name !== '')
-    && copy.headlines[0] !== ''
-    && copy.primaryTexts[0] !== ''
     && isValidDestinationUrl(copy.url)
   )
 }

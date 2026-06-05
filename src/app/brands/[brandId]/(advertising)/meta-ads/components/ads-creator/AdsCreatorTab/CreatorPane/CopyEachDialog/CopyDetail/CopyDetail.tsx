@@ -62,6 +62,8 @@ export default memo(function CopyDetail({
   }
 
   const urlInvalid = value.url.trim() !== '' && !isValidDestinationUrl(value.url)
+  const primaryInvalid = (value.primaryTexts[0] ?? '').trim() === ''
+  const headlineInvalid = (value.headlines[0] ?? '').trim() === ''
 
   return (
     <Box className={styles.root}>
@@ -92,6 +94,8 @@ export default memo(function CopyDetail({
         multiline
         firstRows={PRIMARY_TEXT_ROWS}
         max={MAX_COPY_VARIATIONS}
+        invalid={primaryInvalid}
+        errorText="Primary text is required"
       />
 
       <VariationList
@@ -101,6 +105,8 @@ export default memo(function CopyDetail({
         placeholder="Enter your ad title here"
         addNoun="headline"
         max={MAX_COPY_VARIATIONS}
+        invalid={headlineInvalid}
+        errorText="Headline is required"
       />
 
       <FormField label="Description">

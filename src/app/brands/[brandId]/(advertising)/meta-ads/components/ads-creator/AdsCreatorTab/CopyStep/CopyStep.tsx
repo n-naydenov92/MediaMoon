@@ -8,6 +8,7 @@ interface Props {
   readonly value: CopyValue
   readonly onChange: (next: CopyValue) => void
   readonly adsCount: number
+  readonly totalCreatives: number
   readonly overrides: ReadonlyMap<string, CopyOverride>
   readonly onAutoName?: () => void
   readonly onNameEach?: () => void
@@ -18,6 +19,7 @@ export default memo(function CopyStep({
   value,
   onChange,
   adsCount,
+  totalCreatives,
   overrides,
   onAutoName,
   onNameEach,
@@ -28,6 +30,7 @@ export default memo(function CopyStep({
       value={value}
       onChange={onChange}
       adsCount={adsCount}
+      totalCreatives={totalCreatives}
       overrides={overrides}
       onAutoName={onAutoName}
       onNameEach={onNameEach}
