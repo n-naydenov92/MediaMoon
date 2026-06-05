@@ -1,7 +1,6 @@
 import type { Page } from '@/lib/gateways/MetaAdsGateway'
 import type { PublishPayload } from '../../launchPipeline/mediaUpload'
 import type { CopyValue } from '../CopyForm/CopyForm'
-import { isValidDestinationUrl } from '../CopyForm/helpers'
 import { assetMediaToken, type AssetCreative } from '../assetCreative'
 import type { TargetingValue } from './useTargetingData'
 
@@ -283,6 +282,5 @@ export function canSubmitCreator(
     && targeting.adSetId !== ''
     && targeting.pageIds.length > 0
     && (targeting.pageIds.length * creativeCount >= 2 || copy.name !== '')
-    && isValidDestinationUrl(copy.url)
   )
 }

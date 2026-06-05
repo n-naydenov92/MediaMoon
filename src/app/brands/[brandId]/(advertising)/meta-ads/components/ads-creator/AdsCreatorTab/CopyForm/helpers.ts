@@ -15,3 +15,30 @@ export function isValidDestinationUrl(raw: string): boolean {
     return false
   }
 }
+
+const URL_FORMAT_HELP = 'Enter a full URL, e.g. https://example.com'
+
+export interface FieldValidity {
+  readonly error: boolean
+  readonly helper: string
+}
+
+// `treatEmptyAsMissing`: the shared form passes "are there inheritors?"; the per-creative
+// editor passes true (any empty resolved URL is missing). `helper` is ' ' when valid so
+// the reserved helper line never shifts layout.
+export function destinationUrlValidity(
+  url: string,
+  treatEmptyAsMissing: boolean,
+  missingHelp: string,
+): FieldValidity {
+  const empty = url.trim() === ''
+  const badFormat = !empty && !isValidDestinationUrl(url)
+  const missing = empty && treatEmptyAsMissing
+  let helper = ' '
+  if (badFormat) {
+    helper = URL_FORMAT_HELP
+  } else if (missing) {
+    helper = missingHelp
+  }
+  return { error: badFormat || missing, helper }
+}

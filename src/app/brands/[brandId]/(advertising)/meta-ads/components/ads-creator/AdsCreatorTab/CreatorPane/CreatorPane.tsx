@@ -11,7 +11,6 @@ import type { AssetCreative } from '../assetCreative'
 import type { CopyValue } from '../CopyForm/CopyForm'
 import type { CopyOverride, EmptyRequiredCounts } from '../perCreativeCopy'
 import { useBaseFilled } from '../useBaseFilled'
-import { isValidDestinationUrl } from '../CopyForm/helpers'
 import type { AdSetRecord, LaunchJob } from '../useLaunchQueue'
 import StepAccordion from '../StepAccordion/StepAccordion'
 import AccountStep from '../AccountStep/AccountStep'
@@ -22,7 +21,6 @@ import CopyStep from '../CopyStep/CopyStep'
 import PreviewDialog from '../PreviewDialog/PreviewDialog'
 import PublishBar from '../PublishBar/PublishBar'
 import QueueLauncher from '../QueueLauncher/QueueLauncher'
-import EmptyRequiredNotice from '../EmptyRequiredNotice/EmptyRequiredNotice'
 import AdNamesDialog from './AdNamesDialog/AdNamesDialog'
 import CopyEachDialog from './CopyEachDialog/CopyEachDialog'
 import {
@@ -139,7 +137,7 @@ export default memo(function CreatorPane({
     copy: (targeting.pageIds.length * creativeCount >= 2 || copy.name !== '')
       && emptyRequired.primary === 0
       && emptyRequired.headline === 0
-      && isValidDestinationUrl(copy.url),
+      && emptyRequired.url === 0,
   }), [
     targeting.accountId,
     targeting.campaignId,
@@ -152,7 +150,7 @@ export default memo(function CreatorPane({
     copy.name,
     emptyRequired.primary,
     emptyRequired.headline,
-    copy.url,
+    emptyRequired.url,
   ])
 
   const [expanded, setExpanded] = useState<ReadonlySet<StepId>>(() => {
@@ -392,7 +390,6 @@ export default memo(function CreatorPane({
       </Box>
 
       <Box className={styles.footer}>
-        <EmptyRequiredNotice counts={emptyRequired} />
         <PublishBar
           adsCount={targeting.pageIds.length * creativeCount}
           canSubmit={canSubmit}

@@ -7,11 +7,11 @@ import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined'
 import type { EmptyRequiredCounts } from '../perCreativeCopy'
 import styles from './EmptyRequiredNotice.module.css'
 
-function clause(count: number, noun: string): string | null {
+function clause(count: number, phrase: string): string | null {
   if (count === 0) {
     return null
   }
-  return `${count} ${count === 1 ? 'creative has' : 'creatives have'} an empty ${noun}`
+  return `${count} ${count === 1 ? 'creative has' : 'creatives have'} ${phrase}`
 }
 
 interface Props {
@@ -21,8 +21,11 @@ interface Props {
 // Warns when one or more creatives would publish with a blank required field
 // (primary text / headline). Renders nothing when every ad is covered.
 export default memo(function EmptyRequiredNotice({ counts }: Props): JSX.Element | null {
-  const parts = [clause(counts.primary, 'primary text'), clause(counts.headline, 'headline')]
-    .filter((p): p is string => p !== null)
+  const parts = [
+    clause(counts.primary, 'an empty primary text'),
+    clause(counts.headline, 'an empty headline'),
+    clause(counts.url, 'a missing or invalid URL'),
+  ].filter((p): p is string => p !== null)
   if (parts.length === 0) {
     return null
   }

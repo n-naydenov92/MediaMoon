@@ -1,6 +1,6 @@
 'use client'
 
-import { memo } from 'react'
+import { memo, type ReactNode } from 'react'
 import Box from '@mui/material/Box'
 import IconButton from '@mui/material/IconButton'
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
@@ -24,6 +24,7 @@ interface Props {
   readonly max?: number
   readonly invalid?: boolean
   readonly errorText?: string
+  readonly labelAside?: ReactNode
 }
 
 export default memo(function VariationList({
@@ -37,12 +38,19 @@ export default memo(function VariationList({
   max = DEFAULT_MAX,
   invalid = false,
   errorText,
+  labelAside,
 }: Props): JSX.Element {
   const remaining = max - values.length
+  // Always render the helper line when the field can error (a blank space when
+  // valid) so toggling the message never shifts the layout below.
+  let helperSlot: string | undefined
+  if (errorText !== undefined) {
+    helperSlot = invalid ? errorText : ' '
+  }
 
   return (
     <Box className={styles.fieldGroup}>
-      <FormField label={label}>
+      <FormField label={label} labelAside={labelAside}>
         <FormTextField
           type={multiline ? undefined : 'text'}
           multiline={multiline}
@@ -51,7 +59,7 @@ export default memo(function VariationList({
           value={values[0]}
           onChange={(e) => onChange(setAt(values, 0, e.target.value))}
           error={invalid}
-          helperText={invalid ? errorText : undefined}
+          helperText={helperSlot}
         />
       </FormField>
 

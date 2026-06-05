@@ -12,8 +12,8 @@ import VariationList from '../../../CopyForm/VariationList/VariationList'
 import { type CopyValue } from '../../../CopyForm/CopyForm'
 import { CTA_OPTIONS, type CtaOption } from '../../../ctaOptions'
 import { MAX_COPY_VARIATIONS } from '../../../copyFeatureFlags'
-import { isValidDestinationUrl } from '../../../CopyForm/helpers'
-import type { OverridableField } from '../../../perCreativeCopy'
+import { destinationUrlValidity } from '../../../CopyForm/helpers'
+import { firstFilled, type OverridableField } from '../../../perCreativeCopy'
 import styles from './CopyDetail.module.css'
 
 const PRIMARY_TEXT_ROWS = 4
@@ -61,9 +61,9 @@ export default memo(function CopyDetail({
     )
   }
 
-  const urlInvalid = value.url.trim() !== '' && !isValidDestinationUrl(value.url)
-  const primaryInvalid = (value.primaryTexts[0] ?? '').trim() === ''
-  const headlineInvalid = (value.headlines[0] ?? '').trim() === ''
+  const primaryInvalid = !firstFilled(value.primaryTexts)
+  const headlineInvalid = !firstFilled(value.headlines)
+  const urlState = destinationUrlValidity(value.url, true, 'Destination URL is required')
 
   return (
     <Box className={styles.root}>
@@ -125,8 +125,8 @@ export default memo(function CopyDetail({
             placeholder="https://example.com"
             value={value.url}
             onChange={handleUrlChange}
-            error={urlInvalid}
-            helperText={urlInvalid ? 'Enter a full URL, e.g. https://example.com' : undefined}
+            error={urlState.error}
+            helperText={urlState.helper}
           />
         </FormField>
 

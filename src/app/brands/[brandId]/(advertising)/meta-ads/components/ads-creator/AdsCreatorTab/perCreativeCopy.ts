@@ -1,4 +1,5 @@
 import type { CopyValue } from './CopyForm/CopyForm'
+import { isValidDestinationUrl } from './CopyForm/helpers'
 import { fileKey } from './CreatorPane/helpers'
 import type { AssetCreative } from './assetCreative'
 
@@ -11,9 +12,9 @@ export type CopyOverride = Partial<
 
 export type OverridableField = keyof CopyOverride
 
-// Copy fields Meta rejects when blank, so an empty resolved value here is a publish
-// blocker rather than a stylistic choice.
-export const REQUIRED_FIELDS = ['primaryTexts', 'headlines'] as const
+// Copy fields Meta rejects when blank/invalid, so an empty (or, for the URL, an
+// unparseable) resolved value here is a publish blocker rather than a style choice.
+export const REQUIRED_FIELDS = ['primaryTexts', 'headlines', 'url'] as const
 const REQUIRED_FIELD_SET: ReadonlySet<OverridableField> = new Set(REQUIRED_FIELDS)
 
 // 'set'   → inherits the shared copy and that field has a value
@@ -23,7 +24,7 @@ const REQUIRED_FIELD_SET: ReadonlySet<OverridableField> = new Set(REQUIRED_FIELD
 //             override) — this creative would publish without it
 export type FieldStatus = 'set' | 'empty' | 'override' | 'missing'
 
-function firstFilled(values: readonly string[] | undefined): boolean {
+export function firstFilled(values: readonly string[] | undefined): boolean {
   return (values?.[0] ?? '').trim() !== ''
 }
 
@@ -68,11 +69,12 @@ export function fieldStatus(
 export interface EmptyRequiredCounts {
   readonly primary: number
   readonly headline: number
+  readonly url: number
 }
 
-// How many creatives would publish with a blank required field, counting the
-// resolved value (its own override if present, otherwise the shared base). Drives
-// the publish block and the "N creatives have an empty …" warnings.
+// How many creatives would publish with a blank/invalid required field, counting
+// the resolved value (its own override if present, otherwise the shared base).
+// Drives the publish block and the "N creatives have an empty …" warnings.
 export function countEmptyRequired(
   base: CopyValue,
   overrides: ReadonlyMap<string, CopyOverride>,
@@ -80,6 +82,7 @@ export function countEmptyRequired(
 ): EmptyRequiredCounts {
   let primary = 0
   let headline = 0
+  let url = 0
   for (const key of creativeKeys) {
     const override = overrides.get(key)
     if (!firstFilled(override?.primaryTexts ?? base.primaryTexts)) {
@@ -88,8 +91,11 @@ export function countEmptyRequired(
     if (!firstFilled(override?.headlines ?? base.headlines)) {
       headline += 1
     }
+    if (!isValidDestinationUrl(override?.url ?? base.url)) {
+      url += 1
+    }
   }
-  return { primary, headline }
+  return { primary, headline, url }
 }
 
 // How many creatives carry their own value for a field. Drives the shared form's

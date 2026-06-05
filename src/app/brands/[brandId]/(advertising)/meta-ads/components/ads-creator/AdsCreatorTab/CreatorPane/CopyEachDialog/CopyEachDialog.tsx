@@ -212,7 +212,7 @@ export default memo(function CopyEachDialog({
       open={open}
       onClose={onClose}
       icon={<EditNoteOutlinedIcon fontSize="inherit" />}
-      title="Edit copy per creative"
+      title="Edit per creative"
       titleId="copy-each-title"
       count={`${items.length} ${items.length === 1 ? 'creative' : 'creatives'}`}
       maxWidth="xl"

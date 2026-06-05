@@ -156,6 +156,7 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
   const canSubmit = canSubmitCreator(targeting, copy, creativeCount)
     && emptyRequired.primary === 0
     && emptyRequired.headline === 0
+    && emptyRequired.url === 0
 
   // The library only consumes copy to flag which texts/URL are already added —
   // a non-urgent highlight. Deferring it keeps the heavy library tree off the

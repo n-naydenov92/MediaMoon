@@ -10,14 +10,14 @@ import EditNoteOutlinedIcon from '@mui/icons-material/EditNoteOutlined'
 import type { CtaType } from '@/lib/gateways/MetaAdsGateway'
 import { CTA_OPTIONS, type CtaOption } from '../ctaOptions'
 import { MAX_COPY_VARIATIONS } from '../copyFeatureFlags'
-import { overrideCount, type CopyOverride } from '../perCreativeCopy'
+import { firstFilled, overrideCount, type CopyOverride } from '../perCreativeCopy'
 import FormField from '../FormField/FormField'
 import FormTextField from '../FormTextField/FormTextField'
 import SearchSelect from '../SearchSelect/SearchSelect'
 import StatusToggle from '../StatusToggle/StatusToggle'
 import VariationList from './VariationList/VariationList'
 import SharedFieldNote from './SharedFieldNote/SharedFieldNote'
-import { isValidDestinationUrl } from './helpers'
+import { destinationUrlValidity } from './helpers'
 import styles from './CopyForm.module.css'
 
 const PRIMARY_TEXT_ROWS = 4
@@ -63,8 +63,6 @@ export default memo(function CopyForm({
   onNameEach,
   onEditEach,
 }: Props): JSX.Element {
-  const urlInvalid = value.url.trim() !== '' && !isValidDestinationUrl(value.url)
-
   // Field updaters read the latest value through a ref so each handler keeps a
   // stable identity. Without this the inline `{ ...value, … }` closures change on
   // every keystroke, breaking the memo on every sibling field — so typing in one
@@ -100,14 +98,26 @@ export default memo(function CopyForm({
   const headlineCustomized = overrideCount(overrides, 'headlines')
   const descriptionCustomized = overrideCount(overrides, 'description')
   const urlCustomized = overrideCount(overrides, 'url')
+  const ctaCustomized = overrideCount(overrides, 'cta')
 
   // Required-field error: the shared value is blank AND at least one creative still
   // inherits it (so that ad would publish empty). When every creative overrides the
   // field, an empty shared base is harmless and we don't flag it here.
-  const primaryInvalid = (value.primaryTexts[0] ?? '').trim() === ''
-    && totalCreatives - primaryCustomized > 0
-  const headlineInvalid = (value.headlines[0] ?? '').trim() === ''
-    && totalCreatives - headlineCustomized > 0
+  const primaryInvalid = !firstFilled(value.primaryTexts) && totalCreatives - primaryCustomized > 0
+  const headlineInvalid = !firstFilled(value.headlines) && totalCreatives - headlineCustomized > 0
+  const urlState = destinationUrlValidity(
+    value.url,
+    totalCreatives - urlCustomized > 0,
+    'Destination URL is required. Edit here or per creative',
+  )
+
+  // Scope chip on a field's label row (right) when some creatives diverge — keeps the
+  // area under the field for the validation message only.
+  const renderAside = (customized: number): JSX.Element | undefined => (
+    onEditEach && customized > 0
+      ? <SharedFieldNote customized={customized} total={totalCreatives} />
+      : undefined
+  )
 
   return (
     <Box className={styles.root}>
@@ -179,7 +189,7 @@ export default memo(function CopyForm({
               onClick={onEditEach}
               className={styles.editEachButton}
             >
-              Edit copy per creative
+              Edit per creative
             </Button>
           )}
         </Box>
@@ -196,11 +206,9 @@ export default memo(function CopyForm({
               firstRows={PRIMARY_TEXT_ROWS}
               max={MAX_COPY_VARIATIONS}
               invalid={primaryInvalid}
-              errorText="Primary text is required — fill it here or per creative"
+              errorText="Primary text is required. Edit here or per creative"
+              labelAside={renderAside(primaryCustomized)}
             />
-            {onEditEach && primaryCustomized > 0 && (
-              <SharedFieldNote customized={primaryCustomized} total={totalCreatives} />
-            )}
           </Box>
 
           <Box className={styles.field}>
@@ -212,15 +220,13 @@ export default memo(function CopyForm({
               addNoun="headline"
               max={MAX_COPY_VARIATIONS}
               invalid={headlineInvalid}
-              errorText="Headline is required — fill it here or per creative"
+              errorText="Headline is required. Edit here or per creative"
+              labelAside={renderAside(headlineCustomized)}
             />
-            {onEditEach && headlineCustomized > 0 && (
-              <SharedFieldNote customized={headlineCustomized} total={totalCreatives} />
-            )}
           </Box>
 
           <Box className={styles.field}>
-            <FormField label="Description">
+            <FormField label="Description" labelAside={renderAside(descriptionCustomized)}>
               <FormTextField
                 type="text"
                 placeholder="Enter your ad description here"
@@ -228,29 +234,10 @@ export default memo(function CopyForm({
                 onChange={handleDescriptionChange}
               />
             </FormField>
-            {onEditEach && descriptionCustomized > 0 && (
-              <SharedFieldNote customized={descriptionCustomized} total={totalCreatives} />
-            )}
           </Box>
 
-          <Box className={styles.actionRow}>
-            <Box className={styles.field}>
-              <FormField label="Destination URL">
-                <FormTextField
-                  type="url"
-                  placeholder="https://example.com"
-                  value={value.url}
-                  onChange={handleUrlChange}
-                  error={urlInvalid}
-                  helperText={urlInvalid ? 'Enter a full URL, e.g. https://example.com' : undefined}
-                />
-              </FormField>
-              {onEditEach && urlCustomized > 0 && (
-                <SharedFieldNote customized={urlCustomized} total={totalCreatives} />
-              )}
-            </Box>
-
-            <FormField label="Call to action">
+          <Box className={styles.field}>
+            <FormField label="Call to action" labelAside={renderAside(ctaCustomized)}>
               <SearchSelect<CtaOption>
                 value={CTA_OPTIONS.find((o) => o.id === value.cta) ?? null}
                 options={CTA_OPTIONS}
@@ -258,6 +245,19 @@ export default memo(function CopyForm({
                 placeholder="Select call to action…"
                 getOptionId={(o) => o.id}
                 getOptionLabel={(o) => o.label}
+              />
+            </FormField>
+          </Box>
+
+          <Box className={styles.field}>
+            <FormField label="Destination URL" labelAside={renderAside(urlCustomized)}>
+              <FormTextField
+                type="url"
+                placeholder="https://example.com"
+                value={value.url}
+                onChange={handleUrlChange}
+                error={urlState.error}
+                helperText={urlState.helper}
               />
             </FormField>
           </Box>
