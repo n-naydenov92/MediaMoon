@@ -13,7 +13,7 @@ interface Props {
 export default function CardContent({ data }: Props): JSX.Element {
   return (
     <>
-      <CardHeader pageName={data.pageName ?? data.adName} avatarUrl={data.pageAvatarUrl} />
+      <CardHeader pageName={data.pageName ?? data.adName} avatarUrl={data.pageAvatarUrl} copyText={data.body} />
       {data.body && <CardBody body={data.body} />}
       <CardMedia
         videoUrl={data.videoUrl}

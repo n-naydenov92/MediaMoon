@@ -111,6 +111,28 @@
   min-width: 0;
 }
 
+.copyBtn.copyBtn {
+  margin-left: auto;
+  flex-shrink: 0;
+  align-self: flex-start;
+  padding: 5px;
+  color: var(--cp-text-secondary);
+  background: var(--cp-bg-surface);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  transition: background 100ms ease, color 100ms ease, border-color 100ms ease;
+}
+
+.copyBtn.copyBtn svg {
+  font-size: 18px;
+}
+
+.copyBtn.copyBtn:hover {
+  color: var(--cp-text-primary);
+  background: var(--cp-bg-elevated);
+  border-color: var(--cp-border-subtle);
+}
+
 .pageName {
   font-family: var(--font-syne), system-ui, sans-serif;
   font-size: 14px;
