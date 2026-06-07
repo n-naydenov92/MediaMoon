@@ -8,12 +8,14 @@ import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import CheckIcon from '@mui/icons-material/Check'
+import CloseIcon from '@mui/icons-material/Close'
 import styles from './StepAccordion.module.css'
 
 interface Props {
   readonly index: number
   readonly title: string
   readonly complete: boolean
+  readonly error?: boolean
   readonly expanded: boolean
   readonly onToggle: () => void
   readonly children: ReactNode
@@ -23,10 +25,17 @@ export default memo(function StepAccordion({
   index,
   title,
   complete,
+  error = false,
   expanded,
   onToggle,
   children,
 }: Props): JSX.Element {
+  let statusLabel = 'Step incomplete'
+  if (error) {
+    statusLabel = 'Step has an error'
+  } else if (complete) {
+    statusLabel = 'Step complete'
+  }
   return (
     <Accordion
       expanded={expanded}
@@ -47,10 +56,12 @@ export default memo(function StepAccordion({
         <Box
           component="span"
           className={styles.status}
-          data-complete={complete ? 'true' : 'false'}
-          aria-label={complete ? 'Step complete' : 'Step incomplete'}
+          data-complete={!error && complete ? 'true' : 'false'}
+          data-error={error ? 'true' : 'false'}
+          aria-label={statusLabel}
         >
-          {complete && <CheckIcon className={styles.checkIcon} fontSize="inherit" />}
+          {error && <CloseIcon className={styles.checkIcon} fontSize="inherit" />}
+          {!error && complete && <CheckIcon className={styles.checkIcon} fontSize="inherit" />}
         </Box>
       </AccordionSummary>
       <AccordionDetails classes={{ root: styles.details }}>{children}</AccordionDetails>

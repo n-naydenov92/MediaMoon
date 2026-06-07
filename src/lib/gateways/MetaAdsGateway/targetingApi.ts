@@ -1,3 +1,4 @@
+import { normalizeAccountId } from '@/config/metaBusinessManagers'
 import { buildUrl, callGraphApi } from './http'
 import type {
   AdSetDetail,
@@ -69,7 +70,7 @@ export async function fetchAdSet(token: string, adSetId: string): Promise<AdSetD
   let currency = 'USD'
   const rawAccountId = adSetJson.account_id ?? ''
   if (rawAccountId) {
-    const accountPath = rawAccountId.startsWith('act_') ? rawAccountId : `act_${rawAccountId}`
+    const accountPath = normalizeAccountId(rawAccountId)
     const accountUrl = buildUrl(`/${accountPath}`, token, { fields: 'currency' })
     try {
       const accountJson = await callGraphApi<GraphAccountCurrencyRaw>(accountUrl)
@@ -240,7 +241,7 @@ function toAdSetDetail(raw: GraphAdSetDetailRaw, currency: string): AdSetDetail 
 }
 
 export async function fetchPixels(token: string, accountId: string): Promise<readonly Pixel[]> {
-  const accountPath = accountId.startsWith('act_') ? accountId : `act_${accountId}`
+  const accountPath = normalizeAccountId(accountId)
   const url = buildUrl(`/${accountPath}/adspixels`, token, {
     fields: 'id,name',
     limit: '100',

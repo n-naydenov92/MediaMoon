@@ -12,8 +12,10 @@ import type { CustomRange, DatePreset, DateRangeSelection } from '@/lib/meta/dat
 import CenteredSpinner from '@/components/ui/CenteredSpinner/CenteredSpinner'
 import EmptyState from '@/components/ui/EmptyState/EmptyState'
 import ErrorPanel from '@/components/ui/ErrorPanel/ErrorPanel'
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import UpdatedBadge from '@/components/layout/PageHeader/UpdatedBadge/UpdatedBadge'
 import { hasTextVariation, isVariationListFull } from '../CopyForm/VariationList/helpers'
+import { libraryAddBlock } from '../assetCompat'
 import type { AssetCreative } from '../assetCreative'
 import DateRangeDropdown from '../../../shared/DateRangeDropdown/DateRangeDropdown'
 import AdvancedFilters from '../../../shared/filters/AdvancedFilters/AdvancedFilters'
@@ -71,6 +73,7 @@ const NOOP_COMPARISON = (): void => { }
 interface Props {
   readonly brandId: BrandId
   readonly market: MarketSelection
+  readonly targetAccountId: string
   readonly primaryTexts: readonly string[]
   readonly headlines: readonly string[]
   readonly url: string
@@ -84,6 +87,7 @@ interface Props {
 export default memo(function LibraryPane({
   brandId,
   market,
+  targetAccountId,
   primaryTexts,
   headlines,
   url,
@@ -305,6 +309,15 @@ export default memo(function LibraryPane({
             />
           </Box>
 
+          {isCreatives && targetAccountId === '' && (
+            <Box className={styles.notice}>
+              <InfoOutlinedIcon className={styles.noticeIcon} color="error" fontSize="inherit" />
+              <Typography component="span" variant="inherit" color="error" className={styles.noticeText}>
+                Select an account first (Step 1) to add creatives.
+              </Typography>
+            </Box>
+          )}
+
           {totalShown === 0 && !hasMore ? (
             <Box className={styles.message}>
               <EmptyState
@@ -326,6 +339,13 @@ export default memo(function LibraryPane({
                 <Box className={styles.grid}>
                   {rankedCreatives.slice(0, visibleCount).map(({ item }) => {
                     const asset = assetByKey.get(item.key) ?? null
+                    const noSource = asset === null
+                    const block = libraryAddBlock(item.creativeType, item.accountId, targetAccountId)
+                    const reason = noSource ? NO_SOURCE_REASON : block.reason
+                    // An added creative that is no longer publishable for the selected
+                    // account drops its "Added" state and shows blocked instead — the
+                    // operator removes it from the "Added from library" list, not here.
+                    const added = !noSource && !block.blocked && addedAssetKeys.has(asset.assetKey)
                     return (
                       <CreativeCard
                         key={item.key}
@@ -338,9 +358,10 @@ export default memo(function LibraryPane({
                         metrics={item.metrics}
                         metricFields={filters.cardFields}
                         asset={asset}
-                        added={asset !== null && addedAssetKeys.has(asset.assetKey)}
-                        disabled={asset === null}
-                        disabledReason={asset === null ? NO_SOURCE_REASON : undefined}
+                        added={added}
+                        disabled={noSource || block.blocked}
+                        disabledReason={reason || undefined}
+                        badgeLabel={!noSource && block.blocked ? block.badge : undefined}
                         onAdd={onAddCreative}
                       />
                     )

@@ -18,6 +18,7 @@ interface Props {
   readonly onRemove: (assetKey: string) => void
   readonly baseFilled?: ReadonlySet<OverridableField>
   readonly overrides?: ReadonlyMap<string, CopyOverride>
+  readonly incompatibleKeys?: ReadonlySet<string>
 }
 
 export default memo(function AddedAssets({
@@ -25,6 +26,7 @@ export default memo(function AddedAssets({
   onRemove,
   baseFilled,
   overrides,
+  incompatibleKeys,
 }: Props): JSX.Element | null {
   if (assets.length === 0) {
     return null
@@ -37,8 +39,14 @@ export default memo(function AddedAssets({
       <Box component="ul" className={styles.list}>
         {assets.map((asset) => {
           const isVideo = asset.mediaType === 'video'
+          const invalid = incompatibleKeys?.has(asset.assetKey) ?? false
           return (
-            <Box component="li" key={asset.assetKey} className={styles.row}>
+            <Box
+              component="li"
+              key={asset.assetKey}
+              className={styles.row}
+              data-invalid={invalid ? 'true' : 'false'}
+            >
               <Box className={styles.thumbWrap}>
                 {asset.thumbnailUrl ? (
                   <Box
@@ -70,9 +78,15 @@ export default memo(function AddedAssets({
                     {asset.name}
                   </Typography>
                 </Box>
-                <Typography component="span" variant="inherit" className={styles.tag}>
-                  Re-uploaded on publish
-                </Typography>
+                {invalid ? (
+                  <Typography component="span" variant="inherit" color="error" className={styles.errorTag}>
+                    Video from a different Business Manager — remove it or pick an account in its BM.
+                  </Typography>
+                ) : (
+                  <Typography component="span" variant="inherit" className={styles.tag}>
+                    Re-uploaded on publish
+                  </Typography>
+                )}
                 {baseFilled && overrides?.has(asset.assetKey) && (
                   <CreativeStatusBadges baseFilled={baseFilled} override={overrides.get(asset.assetKey)} />
                 )}

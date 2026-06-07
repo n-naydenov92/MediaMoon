@@ -3,6 +3,7 @@
 import { memo } from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
+import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import AddIcon from '@mui/icons-material/Add'
 import CheckIcon from '@mui/icons-material/Check'
@@ -29,6 +30,7 @@ interface Props {
   readonly added: boolean
   readonly disabled: boolean
   readonly disabledReason?: string
+  readonly badgeLabel?: string
   readonly onAdd: (asset: AssetCreative) => void
 }
 
@@ -45,61 +47,69 @@ export default memo(function CreativeCard({
   added,
   disabled,
   disabledReason,
+  badgeLabel,
   onAdd,
 }: Props): JSX.Element {
   const trigger = useCreativePreviewTrigger<HTMLDivElement>(adId, accountId)
   const mediaUrl = imageUrl ?? thumbnailUrl
+  const showBlock = disabled && !added
+  const showBadge = showBlock && Boolean(badgeLabel)
 
   return (
-    <Box className={styles.root} title={disabled && !added ? disabledReason : undefined}>
-      <Box
-        ref={trigger.ref}
-        className={styles.media}
-        data-type={creativeType}
-        onPointerEnter={trigger.onPointerEnter}
-        onPointerLeave={trigger.onPointerLeave}
-        onFocus={trigger.onFocus}
-        onBlur={trigger.onBlur}
-        onClick={trigger.onClick}
-      >
-        {mediaUrl ? (
-          <Box component="img" src={mediaUrl} alt={label} className={styles.img} loading="lazy" />
-        ) : (
-          <Box className={styles.placeholder} aria-hidden>
-            {creativeType === 'video' ? (
-              <VideocamOutlinedIcon fontSize="inherit" />
-            ) : (
-              <ImageOutlinedIcon fontSize="inherit" />
-            )}
-          </Box>
-        )}
-        {creativeType === 'video' && (
-          <Box component="span" className={styles.videoBadge} aria-hidden>
-            <PlayArrowRoundedIcon fontSize="inherit" />
-          </Box>
-        )}
+    <Tooltip title={showBlock && disabledReason ? disabledReason : ''}>
+      <Box className={styles.root} data-blocked={showBlock ? 'true' : 'false'}>
+        <Box
+          ref={trigger.ref}
+          className={styles.media}
+          data-type={creativeType}
+          onPointerEnter={trigger.onPointerEnter}
+          onPointerLeave={trigger.onPointerLeave}
+          onFocus={trigger.onFocus}
+          onBlur={trigger.onBlur}
+          onClick={trigger.onClick}
+        >
+          {mediaUrl ? (
+            <Box component="img" src={mediaUrl} alt={label} className={styles.img} loading="lazy" />
+          ) : (
+            <Box className={styles.placeholder} aria-hidden>
+              {creativeType === 'video' ? (
+                <VideocamOutlinedIcon fontSize="inherit" />
+              ) : (
+                <ImageOutlinedIcon fontSize="inherit" />
+              )}
+            </Box>
+          )}
+          {creativeType === 'video' && (
+            <Box component="span" className={styles.videoBadge} aria-hidden>
+              <PlayArrowRoundedIcon fontSize="inherit" />
+            </Box>
+          )}
+          {showBadge && (
+            <Box component="span" className={styles.blockBadge}>{badgeLabel}</Box>
+          )}
+        </Box>
+
+        <Typography component="h3" variant="inherit" className={styles.label} title={label}>
+          {label}
+        </Typography>
+
+        <MetricList fields={metricFields} metrics={metrics} variant="stack" />
+
+        <Button
+          type="button"
+          size="small"
+          fullWidth
+          variant={added ? 'text' : 'outlined'}
+          color={added ? 'success' : 'primary'}
+          disabled={showBlock}
+          startIcon={added ? <CheckIcon fontSize="inherit" /> : <AddIcon fontSize="inherit" />}
+          onClick={added || !asset ? undefined : () => onAdd(asset)}
+          className={styles.addBtn}
+          aria-label={added ? 'Already added' : 'Add to ad'}
+        >
+          {added ? 'Added' : 'Add'}
+        </Button>
       </Box>
-
-      <Typography component="h3" variant="inherit" className={styles.label} title={label}>
-        {label}
-      </Typography>
-
-      <MetricList fields={metricFields} metrics={metrics} variant="stack" />
-
-      <Button
-        type="button"
-        size="small"
-        fullWidth
-        variant={added ? 'text' : 'outlined'}
-        color={added ? 'success' : 'primary'}
-        disabled={disabled && !added}
-        startIcon={added ? <CheckIcon fontSize="inherit" /> : <AddIcon fontSize="inherit" />}
-        onClick={added || !asset ? undefined : () => onAdd(asset)}
-        className={styles.addBtn}
-        aria-label={added ? 'Already added' : 'Add to ad'}
-      >
-        {added ? 'Added' : 'Add'}
-      </Button>
-    </Box>
+    </Tooltip>
   )
 })

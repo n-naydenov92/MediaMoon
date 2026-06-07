@@ -1,9 +1,12 @@
 // An existing Meta creative pulled from the library and queued alongside freshly
-// uploaded files. Its media lives in some (possibly different) ad account, so at
-// publish time it is re-uploaded into the target account rather than referenced
-// by hash/id directly (hashes and video ids are per-account).
+// uploaded files. `accountId` is the source ad account the media lives in. At
+// publish time: images are re-uploaded into the target account (image hashes are
+// per-account); a video's id is reused directly when the target account is in the
+// same Business Manager (video ids are portable within a BM token), otherwise it
+// cannot be reused — see the reupload route.
 export interface AssetCreative {
   readonly assetKey: string
+  readonly accountId: string
   readonly mediaType: 'image' | 'video'
   readonly imageUrl: string | null
   readonly videoId: string | null

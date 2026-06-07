@@ -15,6 +15,7 @@ interface Props {
   readonly onAssetsChange: (next: readonly AssetCreative[]) => void
   readonly baseFilled: ReadonlySet<OverridableField>
   readonly copyOverrides: ReadonlyMap<string, CopyOverride>
+  readonly incompatibleAssetKeys: ReadonlySet<string>
 }
 
 export default memo(function FilesStep({
@@ -24,6 +25,7 @@ export default memo(function FilesStep({
   onAssetsChange,
   baseFilled,
   copyOverrides,
+  incompatibleAssetKeys,
 }: Props): JSX.Element {
   const handleRemove = useCallback(
     (assetKey: string) => onAssetsChange(removeAsset(assets, assetKey)),
@@ -38,6 +40,7 @@ export default memo(function FilesStep({
         onRemove={handleRemove}
         baseFilled={baseFilled}
         overrides={copyOverrides}
+        incompatibleKeys={incompatibleAssetKeys}
       />
     </Box>
   )

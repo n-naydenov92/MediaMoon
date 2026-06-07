@@ -180,6 +180,7 @@ export function creativeToAsset(c: CreativeElement): AssetCreative | null {
     }
     return {
       assetKey: c.videoId,
+      accountId: c.accountId,
       mediaType: 'video',
       imageUrl: null,
       videoId: c.videoId,
@@ -192,6 +193,7 @@ export function creativeToAsset(c: CreativeElement): AssetCreative | null {
   }
   return {
     assetKey: c.imageHash ?? c.imageUrl,
+    accountId: c.accountId,
     mediaType: 'image',
     imageUrl: c.imageUrl,
     videoId: null,

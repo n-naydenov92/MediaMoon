@@ -82,6 +82,12 @@
   color: var(--text-on-accent);
 }
 
+.status[data-error='true'] {
+  background: var(--error);
+  border-color: var(--error);
+  color: var(--text-on-accent);
+}
+
 .checkIcon {
   font-size: 14px;
 }

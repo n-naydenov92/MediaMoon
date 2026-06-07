@@ -107,6 +107,16 @@
   color: var(--text-muted);
 }
 
+.errorTag {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.row[data-invalid='true'] {
+  border-color: var(--error);
+  background: var(--error-soft);
+}
+
 .remove {
   flex: 0 0 auto;
 }

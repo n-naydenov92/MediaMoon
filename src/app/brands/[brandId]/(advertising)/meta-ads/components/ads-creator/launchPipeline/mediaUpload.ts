@@ -137,6 +137,7 @@ export interface MediaRef {
 // download + upload), returning the account-local media reference to publish with.
 export async function reuploadCreativeFromSource(
   asset: {
+    readonly accountId: string
     readonly mediaType: 'image' | 'video'
     readonly imageUrl: string | null
     readonly videoId: string | null
@@ -154,9 +155,16 @@ export async function reuploadCreativeFromSource(
     )
     return { imageHash: res.imageHash }
   }
+  // The source account is needed server-side to decide whether the video id can be
+  // reused (same Business Manager) or is unusable (different BM).
   const res = await postJson<{ videoId: string; thumbnailHash: string }>(
     url,
-    { kind: 'video', videoId: asset.videoId, thumbnailUrl: asset.thumbnailUrl },
+    {
+      kind: 'video',
+      videoId: asset.videoId,
+      thumbnailUrl: asset.thumbnailUrl,
+      sourceAccountId: asset.accountId,
+    },
     signal,
   )
   return { videoId: res.videoId, thumbnailHash: res.thumbnailHash }

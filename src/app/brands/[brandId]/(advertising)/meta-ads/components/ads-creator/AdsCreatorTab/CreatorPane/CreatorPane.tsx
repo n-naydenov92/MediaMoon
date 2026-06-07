@@ -8,6 +8,7 @@ import type { BrandId } from '@/config/brands'
 import type { MarketSelection } from '@/lib/markets'
 import type { StatusFilter } from '@/lib/gateways/MetaAdsGateway'
 import type { AssetCreative } from '../assetCreative'
+import { incompatibleAssetKeys } from '../assetCompat'
 import type { CopyValue } from '../CopyForm/CopyForm'
 import type { CopyOverride, EmptyRequiredCounts } from '../perCreativeCopy'
 import { useBaseFilled } from '../useBaseFilled'
@@ -116,6 +117,12 @@ export default memo(function CreatorPane({
   const isSinglePage = targeting.pageIds.length === 1
   const creativeCount = files.length + assets.length
   const baseFilled = useBaseFilled(copy)
+  // Library assets that can't publish to the selected account (cross-BM videos).
+  // They block the Files step and Publish until removed, and show an inline error.
+  const invalidAssetKeys = useMemo(
+    () => incompatibleAssetKeys(assets, targeting.accountId),
+    [assets, targeting.accountId],
+  )
 
   // The per-creative editor (CopyEachDialog) writes overrides on every keystroke.
   // The Files and Copy steps behind the dialog only need overrides for their badge
@@ -133,7 +140,7 @@ export default memo(function CreatorPane({
     campaign: targeting.campaignId !== '' && targeting.adSetId !== '',
     profiles: targeting.pageIds.length > 0
       && (!isSinglePage || data.instagramAccounts.length === 0 || targeting.instagramId !== ''),
-    files: creativeCount > 0,
+    files: creativeCount > 0 && invalidAssetKeys.size === 0,
     copy: (targeting.pageIds.length * creativeCount >= 2 || copy.name !== '')
       && emptyRequired.primary === 0
       && emptyRequired.headline === 0
@@ -147,6 +154,7 @@ export default memo(function CreatorPane({
     isSinglePage,
     data.instagramAccounts.length,
     creativeCount,
+    invalidAssetKeys,
     copy.name,
     emptyRequired.primary,
     emptyRequired.headline,
@@ -291,8 +299,9 @@ export default memo(function CreatorPane({
       onAssetsChange={onAssetsChange}
       baseFilled={baseFilled}
       copyOverrides={deferredOverrides}
+      incompatibleAssetKeys={invalidAssetKeys}
     />
-  ), [files, onFilesChange, assets, onAssetsChange, baseFilled, deferredOverrides])
+  ), [files, onFilesChange, assets, onAssetsChange, baseFilled, deferredOverrides, invalidAssetKeys])
 
   const copyStepEl = useMemo(() => (
     <CopyStep
@@ -372,6 +381,7 @@ export default memo(function CreatorPane({
           index={4}
           title="Files"
           complete={completion.files}
+          error={invalidAssetKeys.size > 0}
           expanded={expanded.has('files')}
           onToggle={toggleHandlers.files}
         >
@@ -422,6 +432,7 @@ export default memo(function CreatorPane({
         onClose={closeCopyEach}
         brandId={brandId}
         market={market}
+        targetAccountId={targeting.accountId}
         files={files}
         assets={assets}
         baseCopy={copy}

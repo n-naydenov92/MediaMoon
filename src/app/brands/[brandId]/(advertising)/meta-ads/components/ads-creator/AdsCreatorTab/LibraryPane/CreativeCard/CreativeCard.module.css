@@ -57,6 +57,37 @@
   border-radius: 6px;
 }
 
+.blockBadge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 1;
+  max-width: calc(100% - 12px);
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  color: var(--text-on-accent);
+  background: var(--error);
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Dim the media + label to read as disabled, but keep the badge at full strength
+   (it lives in .media, so dim the image itself rather than the whole container). */
+.root[data-blocked='true'] .img,
+.root[data-blocked='true'] .placeholder {
+  opacity: 0.45;
+}
+
+.root[data-blocked='true'] .label {
+  color: var(--text-muted);
+}
+
 .label {
   margin: 0;
   font-size: 13px;

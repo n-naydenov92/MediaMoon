@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { fetchVideoSource, uploadImage, uploadVideo } from '@/lib/gateways/MetaAdsGateway'
+import { uploadImage } from '@/lib/gateways/MetaAdsGateway'
+import { CROSS_BM_VIDEO_REASON, sameBusinessManager } from '@/config/metaBusinessManagers'
 import { resolveAccountTokenFromRequest } from '@/lib/meta/resolveBrandToken'
 
 export const runtime = 'nodejs'
@@ -11,12 +12,16 @@ interface ReuploadRequestBody {
   readonly imageUrl?: string
   readonly videoId?: string
   readonly thumbnailUrl?: string
+  readonly sourceAccountId?: string
 }
 
-// Re-uploads an existing library creative's media into the target ad account, so
-// the published ad references account-local hashes/ids (Meta hashes and video ids
-// are not portable across accounts). Images become a fresh image hash; videos are
-// re-uploaded and their thumbnail hashed too (required by the publish step).
+// Makes an existing library creative's media usable by the target ad account.
+// Images are re-uploaded into the target account (image hashes are per-account).
+// Video files cannot be downloaded from Meta (the `source` field is not exposed for
+// ad videos), but a video id is reusable by any account whose token can see it —
+// i.e. accounts in the same Business Manager. So a same-BM video reuses its id
+// directly (only its thumbnail is re-uploaded as an account-local image); a video
+// from a different BM cannot be reused at all.
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const resolved = resolveAccountTokenFromRequest(request)
   if (!resolved.ok) return resolved.response
@@ -39,23 +44,19 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     if (body.kind === 'video') {
-      if (!body.videoId || !body.thumbnailUrl) {
+      if (!body.videoId || !body.thumbnailUrl || !body.sourceAccountId) {
         return NextResponse.json(
-          { error: 'videoId and thumbnailUrl are required for video re-upload' },
+          { error: 'videoId, thumbnailUrl and sourceAccountId are required for video re-use' },
           { status: 400 },
         )
       }
-      const source = await fetchVideoSource(token, body.videoId)
-      if (!source) {
-        return NextResponse.json(
-          { error: 'Source video is no longer downloadable from Meta' },
-          { status: 422 },
-        )
+      if (!sameBusinessManager(body.sourceAccountId, accountId)) {
+        return NextResponse.json({ error: CROSS_BM_VIDEO_REASON }, { status: 422 })
       }
-      const video = await downloadBytes(source)
-      const { id: videoId } = await uploadVideo(token, accountId, video.bytes, 'library-video.mp4', video.mime)
+      // Same BM: the token can reference the existing video id; only the thumbnail
+      // must be turned into an account-local image hash for the publish step.
       const thumbnailHash = await reuploadImage(token, accountId, body.thumbnailUrl)
-      return NextResponse.json({ videoId, thumbnailHash })
+      return NextResponse.json({ videoId: body.videoId, thumbnailHash })
     }
 
     return NextResponse.json({ error: 'kind must be "image" or "video"' }, { status: 400 })

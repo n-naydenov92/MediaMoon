@@ -17,6 +17,7 @@ import { applyLibraryText } from './CopyForm/VariationList/helpers'
 import { MAX_COPY_VARIATIONS } from './copyFeatureFlags'
 import { EMPTY_COPY, type CopyValue } from './CopyForm/CopyForm'
 import { addAsset, type AssetCreative } from './assetCreative'
+import { incompatibleAssetKeys } from './assetCompat'
 import {
   clearFieldOverrides,
   countEmptyRequired,
@@ -153,10 +154,17 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
     () => countEmptyRequired(copy, copyOverrides, creativeKeys),
     [copy, copyOverrides, creativeKeys],
   )
+  // Library assets that can't publish to the selected account (cross-BM videos)
+  // block Publish until removed — mirrors the inline error and the Files step.
+  const invalidAssetKeys = useMemo(
+    () => incompatibleAssetKeys(assets, targeting.accountId),
+    [assets, targeting.accountId],
+  )
   const canSubmit = canSubmitCreator(targeting, copy, creativeCount)
     && emptyRequired.primary === 0
     && emptyRequired.headline === 0
     && emptyRequired.url === 0
+    && invalidAssetKeys.size === 0
 
   // The library only consumes copy to flag which texts/URL are already added —
   // a non-urgent highlight. Deferring it keeps the heavy library tree off the
@@ -297,6 +305,7 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
       <LibraryPane
         brandId={brandId}
         market={selectedMarket}
+        targetAccountId={targeting.accountId}
         primaryTexts={deferredCopy.primaryTexts}
         headlines={deferredCopy.headlines}
         url={deferredCopy.url}

@@ -46,9 +46,30 @@ export const BUSINESS_MANAGERS: readonly MetaBusinessManager[] = [
   },
 ]
 
-export function getBusinessManagerForAccount(accountId: string): MetaBusinessManager | null {
-  return BUSINESS_MANAGERS.find((bm) => bm.accountIds.includes(accountId)) ?? null
+export function normalizeAccountId(id: string): string {
+  return id.startsWith('act_') ? id : `act_${id}`
 }
+
+export function getBusinessManagerForAccount(accountId: string): MetaBusinessManager | null {
+  const normalized = normalizeAccountId(accountId)
+  return BUSINESS_MANAGERS.find((bm) => bm.accountIds.includes(normalized)) ?? null
+}
+
+// Two ad accounts share a Business Manager when the same BM token can reach both.
+// That is exactly the boundary for reusing a library video's id: video ids are not
+// downloadable, but they are referenceable by any account the token can see.
+export function sameBusinessManager(a: string, b: string): boolean {
+  const x = getBusinessManagerForAccount(a)
+  const y = getBusinessManagerForAccount(b)
+  return x !== null && y !== null && x.id === y.id
+}
+
+// Canonical user-facing reason a library video can't be used for the chosen account.
+// Lives here because it states the same BM rule as sameBusinessManager; shared by the
+// client (library badge / added-row error) and the publish API's defensive 422.
+export const CROSS_BM_VIDEO_REASON = 'This video is from a different Business Manager — it can’t be used '
+  + 'with the selected account. Upload the video file directly, or pick an account in the same '
+  + 'Business Manager.'
 
 export function getBusinessManagersForBrand(brandId: BrandId): readonly MetaBusinessManager[] {
   return BUSINESS_MANAGERS.filter((bm) => bm.brandId === brandId)

@@ -55,6 +55,7 @@ interface Props {
   readonly onClose: () => void
   readonly brandId: BrandId
   readonly market: MarketSelection
+  readonly targetAccountId: string
   readonly files: readonly File[]
   readonly assets: readonly AssetCreative[]
   readonly baseCopy: CopyValue
@@ -70,6 +71,7 @@ export default memo(function CopyEachDialog({
   onClose,
   brandId,
   market,
+  targetAccountId,
   files,
   assets,
   baseCopy,
@@ -329,6 +331,7 @@ export default memo(function CopyEachDialog({
             <LibraryPane
               brandId={brandId}
               market={market}
+              targetAccountId={targetAccountId}
               primaryTexts={deferredActiveValue?.primaryTexts ?? baseCopy.primaryTexts}
               headlines={deferredActiveValue?.headlines ?? baseCopy.headlines}
               url={deferredActiveValue?.url ?? baseCopy.url}
