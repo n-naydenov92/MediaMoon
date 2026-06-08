@@ -42,6 +42,30 @@
   overflow: hidden;
 }
 
+.text[data-expanded='true'] {
+  display: block;
+  -webkit-line-clamp: unset;
+  overflow: visible;
+}
+
+/* Inline "See more / See less" toggle — a link-styled button under the copy. */
+.toggle {
+  align-self: flex-start;
+  margin-top: -2px;
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.toggle:hover {
+  text-decoration: underline;
+}
+
 .metricsRow {
   display: flex;
   flex-wrap: wrap;

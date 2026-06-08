@@ -177,9 +177,10 @@ export default memo(function LibraryPane({
     setVisibleCount(INITIAL_VISIBLE)
   }, [activeTab, filters.rules, search, sort.field, sort.direction])
 
+  // Keep the search term across tabs so switching from Creatives to Primary Texts
+  // (etc.) filters the new tab by the same word instead of silently dropping it.
   function handleTabChange(_event: unknown, next: ElementTabId): void {
     setActiveTab(next)
-    setSearch('')
   }
 
   const variationList = activeTab === 'headline' ? headlines : primaryTexts

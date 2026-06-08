@@ -158,7 +158,7 @@ const PRIMARY_TAB: TabDef = {
   id: 'primary',
   label: 'Primary Texts',
   sortFields: TEXT_SORT_FIELDS,
-  defaultSort: 'roas',
+  defaultSort: 'spend',
   presets: TEXT_PRESETS,
 }
 
@@ -166,7 +166,7 @@ const HEADLINE_TAB: TabDef = {
   id: 'headline',
   label: 'Headlines',
   sortFields: TEXT_SORT_FIELDS,
-  defaultSort: 'ctr',
+  defaultSort: 'spend',
   presets: TEXT_PRESETS,
 }
 

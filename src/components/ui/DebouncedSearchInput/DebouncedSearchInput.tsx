@@ -1,9 +1,11 @@
 'use client'
 
-import { memo, useEffect, useRef, type ChangeEvent } from 'react'
+import { memo, useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react'
+import IconButton from '@mui/material/IconButton'
 import InputAdornment from '@mui/material/InputAdornment'
 import TextField from '@mui/material/TextField'
 import SearchIcon from '@mui/icons-material/Search'
+import CloseIcon from '@mui/icons-material/Close'
 import styles from './DebouncedSearchInput.module.css'
 
 interface Props {
@@ -16,14 +18,15 @@ interface Props {
 
 const DEFAULT_DEBOUNCE_MS = 200
 
-const SEARCH_INPUT_PROPS = {
-  startAdornment: (
-    <InputAdornment position="start">
-      <SearchIcon fontSize="small" />
-    </InputAdornment>
-  ),
-} as const
+const SEARCH_ADORNMENT = (
+  <InputAdornment position="start">
+    <SearchIcon fontSize="small" />
+  </InputAdornment>
+)
 
+// Controlled internally (not by the parent) so the field can render its own clear
+// button and stay in sync with what it emits. The debounce only delays the parent
+// callback — local typing stays instant and never re-renders the parent per keystroke.
 const DebouncedSearchInput = memo(function DebouncedSearchInput({
   placeholder = 'Search…',
   defaultValue = '',
@@ -31,8 +34,35 @@ const DebouncedSearchInput = memo(function DebouncedSearchInput({
   className,
   onDebouncedChange,
 }: Props): JSX.Element {
+  const [value, setValue] = useState(defaultValue)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const onChangeRef = useRef(onDebouncedChange)
+
+  const composedClassName = className ? `${styles.root} ${className}` : styles.root
+
+  const emit = useCallback((next: string, immediate: boolean): void => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current)
+    }
+    if (immediate) {
+      onChangeRef.current(next)
+      return
+    }
+    timerRef.current = setTimeout(() => {
+      onChangeRef.current(next)
+    }, debounceMs)
+  }, [debounceMs])
+
+  const handleChange = useCallback((event: ChangeEvent<HTMLInputElement>): void => {
+    const next = event.target.value
+    setValue(next)
+    emit(next, false)
+  }, [emit])
+
+  const handleClear = useCallback((): void => {
+    setValue('')
+    emit('', true)
+  }, [emit])
 
   useEffect(() => {
     onChangeRef.current = onDebouncedChange
@@ -44,26 +74,23 @@ const DebouncedSearchInput = memo(function DebouncedSearchInput({
     }
   }, [])
 
-  function handleChange(event: ChangeEvent<HTMLInputElement>): void {
-    const next = event.target.value
-    if (timerRef.current) {
-      clearTimeout(timerRef.current)
-    }
-    timerRef.current = setTimeout(() => {
-      onChangeRef.current(next)
-    }, debounceMs)
-  }
-
-  const composedClassName = className ? `${styles.root} ${className}` : styles.root
-
   return (
     <TextField
       size="small"
       placeholder={placeholder}
-      defaultValue={defaultValue}
+      value={value}
       onChange={handleChange}
       className={composedClassName}
-      InputProps={SEARCH_INPUT_PROPS}
+      InputProps={{
+        startAdornment: SEARCH_ADORNMENT,
+        endAdornment: value ? (
+          <InputAdornment position="end">
+            <IconButton size="small" edge="end" aria-label="Clear search" onClick={handleClear}>
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </InputAdornment>
+        ) : null,
+      }}
     />
   )
 })
