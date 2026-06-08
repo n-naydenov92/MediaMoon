@@ -33,9 +33,11 @@ export default memo(function QueueRow({ job, accountId, onRetry, onStop, onDismi
         <Box component="span" className={styles.kindIcon} data-status={job.status} aria-hidden>
           <LayersOutlinedIcon fontSize="inherit" />
         </Box>
-        <Typography component="span" variant="inherit" className={styles.title}>
-          {job.name}
-        </Typography>
+        <Tooltip title={job.name} placement="top" disableInteractive>
+          <Typography component="span" variant="inherit" className={styles.title}>
+            {job.name}
+          </Typography>
+        </Tooltip>
         <Typography component="span" variant="inherit" className={styles.kindLabel}>
           Ad set
         </Typography>
@@ -107,9 +109,11 @@ export default memo(function QueueRow({ job, accountId, onRetry, onStop, onDismi
       <Box component="span" className={styles.kindIcon} data-status={job.status} aria-hidden>
         <MediaIcon fontSize="inherit" />
       </Box>
-      <Typography component="span" variant="inherit" className={styles.title}>
-        {job.name || job.fileName}
-      </Typography>
+      <Tooltip title={job.name || job.fileName} placement="top" disableInteractive>
+        <Typography component="span" variant="inherit" className={styles.title}>
+          {job.name || job.fileName}
+        </Typography>
+      </Tooltip>
       <Typography component="span" variant="inherit" className={styles.kindLabel}>
         Ad
       </Typography>

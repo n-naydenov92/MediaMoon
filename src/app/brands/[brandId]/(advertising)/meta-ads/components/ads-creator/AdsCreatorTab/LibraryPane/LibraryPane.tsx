@@ -1,6 +1,7 @@
 'use client'
 
 import { memo, useCallback, useEffect, useMemo, useState } from 'react'
+import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Tab from '@mui/material/Tab'
@@ -12,7 +13,6 @@ import type { CustomRange, DatePreset, DateRangeSelection } from '@/lib/meta/dat
 import CenteredSpinner from '@/components/ui/CenteredSpinner/CenteredSpinner'
 import EmptyState from '@/components/ui/EmptyState/EmptyState'
 import ErrorPanel from '@/components/ui/ErrorPanel/ErrorPanel'
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import UpdatedBadge from '@/components/layout/PageHeader/UpdatedBadge/UpdatedBadge'
 import { hasTextVariation, isVariationListFull } from '../CopyForm/VariationList/helpers'
 import { libraryAddBlock } from '../assetCompat'
@@ -310,12 +310,9 @@ export default memo(function LibraryPane({
           </Box>
 
           {isCreatives && targetAccountId === '' && (
-            <Box className={styles.notice}>
-              <InfoOutlinedIcon className={styles.noticeIcon} color="error" fontSize="inherit" />
-              <Typography component="span" variant="inherit" color="error" className={styles.noticeText}>
-                Select an account first (Step 1) to add creatives.
-              </Typography>
-            </Box>
+            <Alert severity="warning" className={styles.notice}>
+              Select an account first (Step 1) to add creatives.
+            </Alert>
           )}
 
           {totalShown === 0 && !hasMore ? (

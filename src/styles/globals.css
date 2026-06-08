@@ -22,6 +22,7 @@
   --warning-soft: rgba(234, 179, 8, 0.15);
   --text-on-accent: #ffffff;
   --overlay-strong: rgba(0, 0, 0, 0.6);
+  --overlay-soft: rgba(0, 0, 0, 0.4);
 
   --surface-1: rgba(255, 255, 255, 0.02);
   --surface-2: rgba(255, 255, 255, 0.04);
@@ -67,6 +68,7 @@
   --warning-soft: rgba(202, 138, 4, 0.12);
   --text-on-accent: #ffffff;
   --overlay-strong: rgba(0, 0, 0, 0.6);
+  --overlay-soft: rgba(0, 0, 0, 0.4);
 
   --surface-1: rgba(10, 10, 15, 0.02);
   --surface-2: rgba(10, 10, 15, 0.04);

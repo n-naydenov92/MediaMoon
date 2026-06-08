@@ -77,20 +77,6 @@
 
 .notice {
   flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 8px;
-  font-size: 12px;
-}
-
-.noticeIcon {
-  flex: 0 0 auto;
-  font-size: 15px;
-}
-
-.noticeText {
-  line-height: 1.4;
 }
 
 /* More breathing room on phones so the filter pills don't read as glued to the

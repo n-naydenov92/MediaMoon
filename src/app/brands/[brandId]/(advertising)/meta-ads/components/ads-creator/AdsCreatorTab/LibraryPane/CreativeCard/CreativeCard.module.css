@@ -1,7 +1,10 @@
+/* The card is a <fieldset> so the cross-BM state can hang a notched <legend> on its
+   top border (the MUI outlined-input / NotchedOutline pattern, same as the added row).
+   Reset the browser fieldset defaults; flex layout lives in .body so display:flex
+   doesn't break the legend notch. */
 .root {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  min-inline-size: 0;
+  margin: 0;
   padding: 10px;
   border: 1px solid var(--hairline);
   border-radius: 14px;
@@ -13,6 +16,28 @@
   border-color: var(--accent);
   background: var(--surface-2);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Cross-BM "Unavailable" only — a plain no-account card stays normal (just its Add
+   button is disabled). After :hover (equal specificity) so it keeps the red on hover. */
+.root[data-invalid='true'] {
+  border-color: var(--error);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Compact label hanging on the border line — mirrors the added-row legend. */
+.legend {
+  padding: 0 5px;
+  margin-left: 2px;
+  margin-bottom: -2px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
 }
 
 .media {
@@ -42,6 +67,31 @@
   color: var(--text-muted);
 }
 
+/* Persistent preview trigger, top-right of the media — a frosted-glass pill in the
+   same white-on-scrim language as the video badge. Double class so the overlay
+   background + white icon beat the MUI IconButton root defaults (equal single-class
+   specificity would otherwise leave it transparent with a dark, near-invisible icon). */
+.previewBtn.previewBtn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 1;
+  padding: 2px;
+  color: var(--text-on-accent);
+  background: var(--overlay-soft);
+  backdrop-filter: blur(6px);
+  opacity: 0.7;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.22);
+  transition: background 140ms ease, transform 140ms ease, opacity 140ms ease, box-shadow 140ms ease;
+}
+
+.previewBtn.previewBtn:hover {
+  background: var(--overlay-strong);
+  opacity: 1;
+  transform: scale(1.1);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+}
+
 .videoBadge {
   position: absolute;
   bottom: 6px;
@@ -57,28 +107,6 @@
   border-radius: 6px;
 }
 
-/* Positioning + a small shadow for legibility over the media. Colour, padding and
-   font come from the MUI Chip (color="error"). */
-.blockBadge {
-  position: absolute;
-  top: 6px;
-  left: 6px;
-  z-index: 1;
-  max-width: calc(100% - 12px);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
-}
-
-/* Dim the media + label to read as disabled, but keep the badge at full strength
-   (it lives in .media, so dim the image itself rather than the whole container). */
-.root[data-blocked='true'] .img,
-.root[data-blocked='true'] .placeholder {
-  opacity: 0.45;
-}
-
-.root[data-blocked='true'] .label {
-  color: var(--text-muted);
-}
-
 .label {
   margin: 0;
   font-size: 13px;
@@ -92,6 +120,12 @@
 
 /* Metric strip styles live in MetricList/MetricList.module.css (shared with rows). */
 
-.addBtn {
+/* The Tooltip wrapper around the disabled Add button — keeps the button full-width. */
+.addBtnWrap {
+  display: block;
   margin-top: 2px;
+}
+
+.addBtn {
+  margin-top: 0;
 }
