@@ -3,6 +3,7 @@
 import { memo } from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
+import Chip from '@mui/material/Chip'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import AddIcon from '@mui/icons-material/Add'
@@ -85,7 +86,12 @@ export default memo(function CreativeCard({
             </Box>
           )}
           {showBadge && (
-            <Box component="span" className={styles.blockBadge}>{badgeLabel}</Box>
+            <Chip
+              label={badgeLabel}
+              color="error"
+              size="small"
+              className={styles.blockBadge}
+            />
           )}
         </Box>
 

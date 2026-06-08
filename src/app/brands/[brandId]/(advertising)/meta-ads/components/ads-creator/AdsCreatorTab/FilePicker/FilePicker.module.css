@@ -144,141 +144,21 @@
 
 .counter {
   font-size: 12px;
-  font-weight: 500;
-  color: var(--text-muted);
+  font-weight: 700;
+  color: var(--text-secondary);
+  letter-spacing: -0.01em;
   font-variant-numeric: tabular-nums;
 }
 
 .list {
   list-style: none;
   margin: 0;
-  padding: 4px;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   max-height: 396px;
   overflow-y: auto;
-  border: 1px solid var(--hairline);
-  border-radius: 12px;
-  background: var(--surface-1);
-}
-
-.row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  background: transparent;
-  transition: background 120ms ease;
-}
-
-.row:hover {
-  background: color-mix(in srgb, var(--accent) 6%, transparent);
-}
-
-.thumbWrap {
-  position: relative;
-  width: 56px;
-  height: 56px;
-  flex-shrink: 0;
-  border-radius: 8px;
-  overflow: hidden;
-  background: var(--surface-2);
-  border: 1px solid var(--hairline);
-  cursor: zoom-in;
-}
-
-.previewTooltip.previewTooltip {
-  max-width: none;
-  padding: 0;
-  margin: 0 0 0 12px;
-  background: transparent;
-}
-
-.previewWrap {
-  display: block;
-  width: 280px;
-  height: 280px;
-  border-radius: 12px;
-  overflow: hidden;
-  background: var(--bg-surface);
-  border: 1px solid var(--hairline-strong);
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--text-primary) 8%, transparent),
-    0 16px 36px rgba(0, 0, 0, 0.22),
-    0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.preview {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  display: block;
-}
-
-.thumb {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.videoBadge {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.28);
-  color: #ffffff;
-  font-size: 18px;
-  pointer-events: none;
-}
-
-.info {
-  flex: 1 1 auto;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.nameRow {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-}
-
-.typeIcon {
-  color: var(--text-muted);
-  flex-shrink: 0;
-}
-
-.name {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  min-width: 0;
-}
-
-.size {
-  font-size: 12px;
-  color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
-}
-
-.remove {
-  flex-shrink: 0;
-  color: var(--text-muted);
-}
-
-.remove:hover {
-  color: var(--accent);
 }
 
 .empty {

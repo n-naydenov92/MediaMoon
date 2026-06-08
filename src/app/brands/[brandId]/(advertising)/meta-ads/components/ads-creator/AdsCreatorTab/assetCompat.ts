@@ -1,4 +1,4 @@
-import { CROSS_BM_VIDEO_REASON, sameBusinessManager } from '@/config/metaBusinessManagers'
+import { CROSS_BM_BADGE, CROSS_BM_VIDEO_REASON, sameBusinessManager } from '@/config/metaBusinessManagers'
 import type { AssetCreative } from './assetCreative'
 
 const NO_ACCOUNT_REASON = 'Select an account first (Step 1) to add creatives.'
@@ -36,7 +36,7 @@ export function libraryAddBlock(
     return { blocked: true, reason: NO_ACCOUNT_REASON, badge: '' }
   }
   if (isCrossBmVideo(mediaType, sourceAccountId, targetAccountId)) {
-    return { blocked: true, reason: CROSS_BM_VIDEO_REASON, badge: 'Different BM' }
+    return { blocked: true, reason: CROSS_BM_VIDEO_REASON, badge: CROSS_BM_BADGE }
   }
   return NOT_BLOCKED
 }

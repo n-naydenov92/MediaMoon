@@ -12,17 +12,11 @@ import {
 } from 'react'
 import Box from '@mui/material/Box'
 import ButtonBase from '@mui/material/ButtonBase'
-import IconButton from '@mui/material/IconButton'
-import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
-import CloseIcon from '@mui/icons-material/Close'
 import SearchIcon from '@mui/icons-material/Search'
-import PhotoOutlinedIcon from '@mui/icons-material/PhotoOutlined'
-import MovieOutlinedIcon from '@mui/icons-material/MovieOutlined'
-import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded'
 import { fileKey } from '../CreatorPane/helpers'
 import { type CopyOverride, type OverridableField } from '../perCreativeCopy'
-import CreativeStatusBadges from '../CreativeStatusBadges/CreativeStatusBadges'
+import CreativeRow from '../CreativeRow/CreativeRow'
 import styles from './FilePicker.module.css'
 
 type TypeFilter = 'all' | 'image' | 'video'
@@ -49,12 +43,6 @@ const TYPE_PILLS: readonly { key: TypeFilter; label: string }[] = [
   { key: 'image', label: 'Images' },
   { key: 'video', label: 'Videos' },
 ]
-
-function formatBytes(n: number): string {
-  if (n < 1024) return `${n} B`
-  if (n < 1024 * 1024) return `${Math.round(n / 1024)} KB`
-  return `${(n / (1024 * 1024)).toFixed(1)} MB`
-}
 
 export default memo(function FilePicker({
   files,
@@ -126,9 +114,12 @@ export default memo(function FilePicker({
     setDragging(false)
   }, [])
 
+  // Remove by stable key (not index) so the click handler can stay referentially
+  // stable across renders — keying by fileKey matches how copy overrides/names are
+  // keyed elsewhere, so duplicate files already share one identity.
   const handleRemove = useCallback(
-    (index: number) => {
-      onChange(files.filter((_, i) => i !== index))
+    (key: string) => {
+      onChange(files.filter((f) => fileKey(f) !== key))
     },
     [files, onChange],
   )
@@ -212,81 +203,27 @@ export default memo(function FilePicker({
           <Typography component="span" variant="inherit" className={styles.counter}>
             {isFiltering
               ? `${filteredPreviews.length} of ${previews.length} shown`
-              : `${previews.length} ${previews.length === 1 ? 'file' : 'files'}`}
+              : `Added manually (${previews.length})`}
           </Typography>
 
           {filteredPreviews.length > 0 ? (
             <Box component="ul" className={styles.list}>
               {filteredPreviews.map(({ file, url, isVideo, index }) => (
-                <Box component="li" key={`${file.name}-${index}`} className={styles.row}>
-                  <Tooltip
-                    placement="right"
-                    enterDelay={250}
-                    leaveDelay={80}
-                    classes={{ tooltip: styles.previewTooltip }}
-                    title={(
-                      <Box className={styles.previewWrap}>
-                        {isVideo ? (
-                          <Box
-                            component="video"
-                            src={url}
-                            className={styles.preview}
-                            autoPlay
-                            muted
-                            loop
-                            playsInline
-                          />
-                        ) : (
-                          <Box
-                            component="img"
-                            src={url}
-                            alt={file.name}
-                            className={styles.preview}
-                          />
-                        )}
-                      </Box>
-                    )}
-                  >
-                    <Box className={styles.thumbWrap}>
-                      {isVideo ? (
-                        <>
-                          <Box component="video" src={url} className={styles.thumb} muted playsInline />
-                          <Box component="span" className={styles.videoBadge} aria-hidden>
-                            <PlayArrowRoundedIcon fontSize="inherit" />
-                          </Box>
-                        </>
-                      ) : (
-                        <Box component="img" src={url} alt={file.name} className={styles.thumb} />
-                      )}
-                    </Box>
-                  </Tooltip>
-                  <Box className={styles.info}>
-                    <Box className={styles.nameRow}>
-                      {isVideo ? (
-                        <MovieOutlinedIcon className={styles.typeIcon} fontSize="small" />
-                      ) : (
-                        <PhotoOutlinedIcon className={styles.typeIcon} fontSize="small" />
-                      )}
-                      <Typography component="span" variant="inherit" className={styles.name}>
-                        {file.name}
-                      </Typography>
-                    </Box>
-                    <Typography component="span" variant="inherit" className={styles.size}>
-                      {formatBytes(file.size)}
-                    </Typography>
-                    {baseFilled && overrides?.has(fileKey(file)) && (
-                      <CreativeStatusBadges baseFilled={baseFilled} override={overrides.get(fileKey(file))} />
-                    )}
-                  </Box>
-                  <IconButton
-                    size="small"
-                    className={styles.remove}
-                    onClick={() => handleRemove(index)}
-                    aria-label={`Remove ${file.name}`}
+                <Box component="li" key={`${file.name}-${index}`}>
+                  <CreativeRow
+                    thumbnailUrl={url}
+                    thumbnailKind={isVideo ? 'video' : 'image'}
+                    isVideo={isVideo}
+                    name={file.name}
+                    previewUrl={url}
+                    previewKind={isVideo ? 'video' : 'image'}
+                    baseFilled={baseFilled}
+                    override={overrides?.get(fileKey(file))}
+                    onRemove={handleRemove}
+                    removeKey={fileKey(file)}
+                    removeLabel={`Remove ${file.name}`}
                     disabled={disabled}
-                  >
-                    <CloseIcon fontSize="inherit" />
-                  </IconButton>
+                  />
                 </Box>
               ))}
             </Box>

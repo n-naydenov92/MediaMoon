@@ -71,6 +71,11 @@ export const CROSS_BM_VIDEO_REASON = 'This video is from a different Business Ma
   + 'with the selected account. Upload the video file directly, or pick an account in the same '
   + 'Business Manager.'
 
+// Short badge label for a cross-BM video, shown on the library card and the added-row.
+// Kept to a single word; the full reason lives in the tooltip.
+// Single source so the wording stays identical everywhere.
+export const CROSS_BM_BADGE = 'Unavailable'
+
 export function getBusinessManagersForBrand(brandId: BrandId): readonly MetaBusinessManager[] {
   return BUSINESS_MANAGERS.filter((bm) => bm.brandId === brandId)
 }
