@@ -2,8 +2,11 @@
 
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
 import Box from '@mui/material/Box'
+import IconButton from '@mui/material/IconButton'
+import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined'
+import RestartAltRoundedIcon from '@mui/icons-material/RestartAltRounded'
 import type { BrandId } from '@/config/brands'
 import type { MarketSelection } from '@/lib/markets'
 import type { StatusFilter } from '@/lib/gateways/MetaAdsGateway'
@@ -22,6 +25,7 @@ import CopyStep from '../CopyStep/CopyStep'
 import PreviewDialog from '../PreviewDialog/PreviewDialog'
 import PublishBar from '../PublishBar/PublishBar'
 import QueueLauncher from '../QueueLauncher/QueueLauncher'
+import DecisionDialog from '../DecisionDialog/DecisionDialog'
 import AdNamesDialog from './AdNamesDialog/AdNamesDialog'
 import CopyEachDialog from './CopyEachDialog/CopyEachDialog'
 import {
@@ -66,6 +70,8 @@ interface Props {
   readonly canSubmit: boolean
   readonly emptyRequired: EmptyRequiredCounts
   readonly onSubmit: (adNames: ReadonlyMap<string, string>) => void
+  readonly canReset: boolean
+  readonly onResetDraft: () => void
 }
 
 export default memo(function CreatorPane({
@@ -96,6 +102,8 @@ export default memo(function CreatorPane({
   canSubmit,
   emptyRequired,
   onSubmit,
+  canReset,
+  onResetDraft,
 }: Props): JSX.Element {
   const [campaignStatus, setCampaignStatus] = useState<StatusFilter>('all')
   const [adSetStatus, setAdSetStatus] = useState<StatusFilter>('all')
@@ -209,6 +217,7 @@ export default memo(function CreatorPane({
   const [previewOpen, setPreviewOpen] = useState(false)
   const [adNamesOpen, setAdNamesOpen] = useState(false)
   const [copyEachOpen, setCopyEachOpen] = useState(false)
+  const [resetConfirmOpen, setResetConfirmOpen] = useState(false)
   const selectedPages = useMemo(
     () => data.pages.filter((p) => targeting.pageIds.includes(p.id)),
     [data.pages, targeting.pageIds],
@@ -220,6 +229,12 @@ export default memo(function CreatorPane({
   const closeAdNames = useCallback(() => setAdNamesOpen(false), [])
   const openCopyEach = useCallback(() => setCopyEachOpen(true), [])
   const closeCopyEach = useCallback(() => setCopyEachOpen(false), [])
+  const openResetConfirm = useCallback(() => setResetConfirmOpen(true), [])
+  const closeResetConfirm = useCallback(() => setResetConfirmOpen(false), [])
+  const handleResetConfirmed = useCallback(() => {
+    onResetDraft()
+    setResetConfirmOpen(false)
+  }, [onResetDraft])
   const adsCount = (targeting.pageIds.length || 1) * creativeCount
   const isSingleAd = adsCount === 1
 
@@ -323,15 +338,27 @@ export default memo(function CreatorPane({
           <Typography component="h2" variant="inherit" className={styles.headerTitle}>Launch new ads</Typography>
         </Box>
         <Box className={styles.headerActions}>
-          <Box
-            component="button"
-            type="button"
-            className={styles.previewButton}
-            onClick={openPreview}
-          >
-            <VisibilityOutlinedIcon fontSize="small" />
-            Preview
-          </Box>
+          <Tooltip title="Reset draft">
+            <Box component="span">
+              <IconButton
+                className={`${styles.actionBtn} ${styles.resetBtn}`}
+                onClick={openResetConfirm}
+                disabled={!canReset}
+                aria-label="Reset draft"
+              >
+                <RestartAltRoundedIcon fontSize="small" />
+              </IconButton>
+            </Box>
+          </Tooltip>
+          <Tooltip title="Preview">
+            <IconButton
+              className={styles.actionBtn}
+              onClick={openPreview}
+              aria-label="Preview"
+            >
+              <VisibilityOutlinedIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
           <QueueLauncher
             jobs={jobs}
             accountId={targeting.accountId}
@@ -421,6 +448,17 @@ export default memo(function CreatorPane({
         onChange={onAdNamesChange}
         pageTokens={pageTokens}
         onPageTokensChange={onPageTokensChange}
+      />
+
+      <DecisionDialog
+        open={resetConfirmOpen}
+        title="Reset draft?"
+        message="This clears every step — account, campaign, files and copy. Ads already in the launch queue are not affected."
+        onClose={closeResetConfirm}
+        actions={[
+          { label: 'Cancel', onClick: closeResetConfirm },
+          { label: 'Reset', onClick: handleResetConfirmed, danger: true },
+        ]}
       />
 
       <CopyEachDialog

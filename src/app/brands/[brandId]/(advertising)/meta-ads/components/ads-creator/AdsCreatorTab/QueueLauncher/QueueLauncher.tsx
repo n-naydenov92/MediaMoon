@@ -48,7 +48,7 @@ export default memo(function QueueLauncher({
             classes={{ badge: styles.badge }}
             overlap="circular"
           >
-            <NotificationsIcon className={styles.icon} fontSize="inherit" />
+            <NotificationsIcon fontSize="small" />
           </Badge>
         </IconButton>
       </Tooltip>

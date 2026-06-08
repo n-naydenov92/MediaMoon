@@ -13,6 +13,20 @@ export interface DecisionAction {
   readonly label: string
   readonly onClick: () => void
   readonly emphasis?: boolean
+  // Destructive confirm (e.g. Reset) — renders the button in error red.
+  readonly danger?: boolean
+}
+
+type ButtonColor = 'error' | 'primary' | 'inherit'
+
+function actionColor(action: DecisionAction): ButtonColor {
+  if (action.danger) {
+    return 'error'
+  }
+  if (action.emphasis) {
+    return 'primary'
+  }
+  return 'inherit'
 }
 
 interface Props {
@@ -44,8 +58,8 @@ export default memo(function DecisionDialog({
           <Button
             key={action.label}
             type="button"
-            variant={action.emphasis ? 'contained' : 'text'}
-            color={action.emphasis ? 'primary' : 'inherit'}
+            variant={action.emphasis || action.danger ? 'contained' : 'text'}
+            color={actionColor(action)}
             disableElevation
             onClick={action.onClick}
             className={styles.button}

@@ -223,6 +223,40 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
 
   const addedAssetKeys = useMemo(() => new Set(assets.map((a) => a.assetKey)), [assets])
 
+  // Whether the draft holds anything worth clearing — drives the header Reset button's
+  // disabled state so it never tempts a click on an already-empty draft.
+  const isDirty = useMemo(() => (
+    files.length > 0
+    || assets.length > 0
+    || adNames.size > 0
+    || copyOverrides.size > 0
+    || pageTokens.size > 0
+    || targeting.accountId !== ''
+    || targeting.campaignId !== ''
+    || targeting.adSetId !== ''
+    || targeting.pageIds.length > 0
+    || targeting.instagramId !== ''
+    || copy.name !== ''
+    || copy.url !== ''
+    || copy.description !== ''
+    || copy.cta !== EMPTY_COPY.cta
+    || copy.activate !== EMPTY_COPY.activate
+    || copy.primaryTexts.some((t) => t.trim() !== '')
+    || copy.headlines.some((t) => t.trim() !== '')
+  ), [files, assets, adNames, copyOverrides, pageTokens, targeting, copy])
+
+  // Reset the whole draft back to a blank slate. The launch queue is intentionally
+  // left untouched — those are ads already on their way, not part of this draft.
+  const handleResetDraft = useCallback(() => {
+    setFiles([])
+    setAssets([])
+    setTargeting(EMPTY_TARGETING)
+    setCopy(EMPTY_COPY)
+    setAdNames(new Map())
+    setCopyOverrides(new Map())
+    setPageTokens(new Map())
+  }, [])
+
   const handleSubmit = useCallback((resolvedNames: ReadonlyMap<string, string>) => {
     if (!canSubmit || !targetMarket) {
       return
@@ -301,6 +335,8 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
         canSubmit={canSubmit}
         emptyRequired={emptyRequired}
         onSubmit={handleSubmit}
+        canReset={isDirty}
+        onResetDraft={handleResetDraft}
       />
       <LibraryPane
         brandId={brandId}
