@@ -2,16 +2,21 @@
 
 import { memo } from 'react'
 import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
+import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import CloseIcon from '@mui/icons-material/Close'
 import MovieOutlinedIcon from '@mui/icons-material/MovieOutlined'
 import PhotoOutlinedIcon from '@mui/icons-material/PhotoOutlined'
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded'
+import { CROSS_BM_VIDEO_REASON } from '@/config/metaBusinessManagers'
 import type { AssetCreative } from '../../assetCreative'
 import { type CopyOverride, type OverridableField } from '../../perCreativeCopy'
 import CreativeStatusBadges from '../../CreativeStatusBadges/CreativeStatusBadges'
 import styles from './AddedAssets.module.css'
+
+const DIFFERENT_BM_BADGE = 'Different BM'
 
 interface Props {
   readonly assets: readonly AssetCreative[]
@@ -79,9 +84,19 @@ export default memo(function AddedAssets({
                   </Typography>
                 </Box>
                 {invalid ? (
-                  <Typography component="span" variant="inherit" color="error" className={styles.errorTag}>
-                    Video from a different Business Manager — remove it or pick an account in its BM.
-                  </Typography>
+                  <Box className={styles.invalidRow}>
+                    <Tooltip title={CROSS_BM_VIDEO_REASON}>
+                      <Box component="span" className={styles.errorChip}>{DIFFERENT_BM_BADGE}</Box>
+                    </Tooltip>
+                    <Button
+                      type="button"
+                      size="small"
+                      color="error"
+                      onClick={() => onRemove(asset.assetKey)}
+                    >
+                      Remove
+                    </Button>
+                  </Box>
                 ) : (
                   <Typography component="span" variant="inherit" className={styles.tag}>
                     Re-uploaded on publish

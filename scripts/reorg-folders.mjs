@@ -148,7 +148,7 @@ function runMoves() {
     const newRel = path.relative(PROJECT_ROOT, newAbs)
     try {
       execSync(`git mv "${oldRel}" "${newRel}"`, { stdio: 'pipe' })
-    } catch (err) {
+    } catch {
       try {
         fs.renameSync(oldAbs, newAbs)
       } catch (e) {

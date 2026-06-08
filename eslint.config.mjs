@@ -19,7 +19,7 @@ const noRestrictedSyntax = [
     message: `Use ${use} instead of <${tag}>. See feedback_prefer_mui.md.`,
   })),
   {
-    selector: "JSXOpeningElement[name.name=/^h[1-6]$/]",
+    selector: 'JSXOpeningElement[name.name=/^h[1-6]$/]',
     message: 'Use <Typography component="h*" variant="..."> instead of native heading.',
   },
 ]

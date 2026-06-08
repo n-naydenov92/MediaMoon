@@ -13,26 +13,36 @@ function findMatching(content, openIdx, openChar, closeChar) {
     if (inComment === 'line') {
       if (c === '\n') inComment = null
     } else if (inComment === 'block') {
-      if (c === '*' && next === '/') { inComment = null; i++ }
-    } else if (inString) {
-      if (c === '\\') { i += 2; continue }
-      if (c === inString) inString = null
-    } else {
-      if (c === '/' && next === '/') { inComment = 'line'; i++ }
-      else if (c === '/' && next === '*') { inComment = 'block'; i++ }
-      else if (c === '"' || c === "'" || c === '`') inString = c
-      else if (c === openChar) depth++
-      else if (c === closeChar) {
-        depth--
-        if (depth === 0) return i
+      if (c === '*' && next === '/') {
+        inComment = null
+        i++
       }
+    } else if (inString) {
+      if (c === '\\') {
+        i += 2
+        continue
+      }
+      if (c === inString) inString = null
+    } else if (c === '/' && next === '/') {
+      inComment = 'line'
+      i++
+    } else if (c === '/' && next === '*') {
+      inComment = 'block'
+      i++
+    } else if (c === '"' || c === "'" || c === '`') inString = c
+    else if (c === openChar) depth++
+    else if (c === closeChar) {
+      depth--
+      if (depth === 0) return i
     }
     i++
   }
   return -1
 }
 
-function isWS(c) { return c === ' ' || c === '\n' || c === '\t' || c === '\r' }
+function isWS(c) {
+  return c === ' ' || c === '\n' || c === '\t' || c === '\r'
+}
 
 function transformMemoCall(content, memoIdx, name) {
   const after = memoIdx + 5
@@ -136,13 +146,22 @@ function transformFile(filePath) {
       name = fileName
     } else {
       const constMatch = before.match(/const\s+([A-Z][A-Za-z0-9_]*)\s*=\s*$/)
-      if (constMatch) name = constMatch[1]
+      if (constMatch) {
+        const [, captured] = constMatch
+        name = captured
+      }
     }
 
-    if (!name) { i = next + 5; continue }
+    if (!name) {
+      i = next + 5
+      continue
+    }
 
     const result = transformMemoCall(content, next, name)
-    if (!result) { i = next + 5; continue }
+    if (!result) {
+      i = next + 5
+      continue
+    }
 
     content = content.slice(0, result.start) + result.replacement + content.slice(result.end)
     i = result.start + result.replacement.length

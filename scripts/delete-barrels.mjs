@@ -62,12 +62,9 @@ function followRedirects(filePath, seen = new Set()) {
   const content = fs.readFileSync(filePath, 'utf8')
   // Look for "import X from './Y'" or "export { default } from './Y'" or "export * from './Y'"
   const importRe = /(?:import\s+\w+\s+from|export\s+\{[^}]*\}\s+from|export\s+\*\s+from)\s+['"](\.{1,2}\/[^'"]+)['"]/g
-  let match
   const dir = path.dirname(filePath)
-  let firstSpec = null
-  while ((match = importRe.exec(content)) !== null) {
-    if (firstSpec === null) firstSpec = match[1]
-  }
+  const match = importRe.exec(content)
+  const firstSpec = match ? match[1] : null
   if (!firstSpec) return filePath
   const resolved = resolveImport(path.resolve(dir, firstSpec))
   if (!resolved) return null

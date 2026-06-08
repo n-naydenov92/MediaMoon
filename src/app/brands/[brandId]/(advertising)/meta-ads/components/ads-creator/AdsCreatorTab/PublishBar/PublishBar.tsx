@@ -1,13 +1,22 @@
 'use client'
 
 import { memo, useMemo } from 'react'
+import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import LinearProgress from '@mui/material/LinearProgress'
+import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
+import useMediaQuery from '@mui/material/useMediaQuery'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import type { LaunchJob } from '../useLaunchQueue'
 import styles from './PublishBar.module.css'
+
+// Below this width the Publish button's hover tooltip is unreachable (touch has no
+// hover), so the blocked hint renders as static text above the button instead.
+const MOBILE_BELOW = 900
+
+const BLOCKED_HINT = 'You have incomplete steps or errors in the ad setup.'
 
 interface Props {
   readonly adsCount: number
@@ -54,25 +63,42 @@ export default memo(function PublishBar({
 }: Props): JSX.Element {
   const stats = useMemo(() => computeStats(jobs, latestBatchId(jobs)), [jobs])
   const isPublishing = stats.active > 0
+  const isMobile = useMediaQuery(`(max-width:${MOBILE_BELOW}px)`)
+  const showHint = !canSubmit
   const label = adsCount === 0
     ? 'Publish ads'
     : `Publish ${adsCount} ${adsCount === 1 ? 'ad' : 'ads'}`
 
+  const button = (
+    <Button
+      type="button"
+      variant="contained"
+      disableElevation
+      fullWidth
+      size="large"
+      startIcon={<PlayArrowIcon />}
+      className={styles.button}
+      disabled={!canSubmit}
+      onClick={onSubmit}
+    >
+      {label}
+    </Button>
+  )
+
   return (
     <Box className={styles.root}>
-      <Button
-        type="button"
-        variant="contained"
-        disableElevation
-        fullWidth
-        size="large"
-        startIcon={<PlayArrowIcon />}
-        className={styles.button}
-        disabled={!canSubmit}
-        onClick={onSubmit}
-      >
-        {label}
-      </Button>
+      {isMobile && showHint && (
+        <Alert severity="warning" className={styles.hintAlert}>
+          {BLOCKED_HINT}
+        </Alert>
+      )}
+
+      {!isMobile && showHint ? (
+        <Tooltip title={BLOCKED_HINT}>
+          <Box component="span" className={styles.buttonWrap}>{button}</Box>
+        </Tooltip>
+      ) : button}
+
       {isPublishing && (
         <Box className={styles.progressBlock} role="status" aria-live="polite">
           <Box className={styles.progressLabelRow}>

@@ -132,11 +132,14 @@ export default memo(function AdSetEditor({
   const currency = source?.currency ?? accountCurrency
   const error = submitError ?? loadError
 
-  // Sales default: select the first available pixel once datasets finish loading.
+  // Sales default: auto-select the pixel only when the account has exactly one —
+  // then the choice is unambiguous. With two or more, picking pixels[0] would be a
+  // silent guess (conversions could land in the wrong dataset), so leave it empty
+  // and let the required-field validation force an explicit choice.
   useEffect(() => {
     if (!open || !isSales || salesPixelAppliedRef.current) return
     const [firstPixel] = pixels
-    if (!firstPixel) return
+    if (!firstPixel || pixels.length !== 1) return
     dispatch({ type: 'setPixelId', value: firstPixel.id })
     salesPixelAppliedRef.current = true
   }, [open, isSales, pixels, dispatch])
@@ -259,6 +262,12 @@ export default memo(function AdSetEditor({
         </IconButton>
       </Box>
 
+      {error && (
+        <Alert severity="error" className={styles.errorBanner}>
+          {error}
+        </Alert>
+      )}
+
       <Box className={styles.body}>
         {!isCreate && (
           <SourceRows
@@ -375,12 +384,6 @@ export default memo(function AdSetEditor({
             payorError={visibleErrors.dsaPayor}
           />
         </Box>
-
-        {error && (
-          <Alert severity="error" variant="outlined" className={styles.errorAlert}>
-            {error}
-          </Alert>
-        )}
       </Box>
 
       <Box component="footer" className={styles.footer}>

@@ -3,8 +3,6 @@
   flex-direction: column;
   gap: 10px;
   width: 100%;
-  padding: 4px 0;
-  background: var(--bg-surface);
 }
 
 .progressBlock {
@@ -73,7 +71,21 @@
   background: var(--accent-hover);
 }
 
+/* Opaque fill — --surface-3 is semi-transparent (rgba .06), so it let the page
+   behind the button bleed through and read as a stray white box. */
 .button:disabled {
-  background: var(--surface-3);
+  background: var(--bg-elevated);
   color: var(--text-muted);
+}
+
+/* A disabled MUI Button swallows pointer events, so the desktop Tooltip can't fire
+   off it directly — this span is the hoverable wrapper around it. */
+.buttonWrap {
+  display: block;
+  width: 100%;
+}
+
+/* Touch has no hover, so the blocked reason shows as a MUI Alert above the button. */
+.hintAlert {
+  align-items: center;
 }

@@ -105,3 +105,14 @@
   background: linear-gradient(180deg, transparent 0%, var(--bg-surface) 24%);
   z-index: 2;
 }
+
+/* Phones have no internal scroll (the page scrolls), so the sticky footer and its
+   surface-fading gradient are unnecessary — they just paint a stray background block
+   behind the Publish bar. Placed AFTER the base .footer so it actually wins. */
+@media (max-width: 899px) {
+  .footer {
+    position: static;
+    padding: 0;
+    background: none;
+  }
+}

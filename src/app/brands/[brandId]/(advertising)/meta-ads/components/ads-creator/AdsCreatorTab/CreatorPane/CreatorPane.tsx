@@ -29,7 +29,11 @@ import {
   buildAdNameMap,
   buildAutoAdName,
   fileNameable,
+  firstIncomplete,
   resolvePageToken,
+  STEP_IDS,
+  type Completion,
+  type StepId,
 } from './helpers'
 import { type TargetingValue, useTargetingData } from './useTargetingData'
 import styles from './CreatorPane.module.css'
@@ -62,14 +66,6 @@ interface Props {
   readonly canSubmit: boolean
   readonly emptyRequired: EmptyRequiredCounts
   readonly onSubmit: (adNames: ReadonlyMap<string, string>) => void
-}
-
-const STEP_IDS = ['account', 'campaign', 'profiles', 'files', 'copy'] as const
-type StepId = typeof STEP_IDS[number]
-type Completion = Readonly<Record<StepId, boolean>>
-
-function firstIncomplete(c: Completion): StepId | null {
-  return STEP_IDS.find((id) => !c[id]) ?? null
 }
 
 export default memo(function CreatorPane({

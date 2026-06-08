@@ -78,11 +78,22 @@
   gap: 12px;
 }
 
-.errorAlert {
+/* Sits between the header and the scrollable body — outside the scroll area — so a
+   submit error stays visible no matter how far the form is scrolled, without
+   overlapping any fields. */
+.errorBanner {
+  flex-shrink: 0;
+  margin: 12px 24px;
   font-family: var(--font-dm-sans), system-ui, sans-serif;
   font-size: 13px;
   border-radius: 8px;
   align-items: center;
+}
+
+/* When the banner is shown it owns the top gap (its own 12px bottom margin), so drop
+   the body's top padding to keep the spacing above and below the banner equal. */
+.errorBanner + .body {
+  padding-top: 0;
 }
 
 .footer {

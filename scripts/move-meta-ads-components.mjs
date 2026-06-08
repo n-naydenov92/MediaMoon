@@ -58,7 +58,9 @@ const COMPONENT_FILES = [
   'shared/CreativePreview/CreativePreviewProvider.tsx',
 ]
 
-function abs(rel) { return path.resolve(PROJECT_ROOT, rel) }
+function abs(rel) {
+  return path.resolve(PROJECT_ROOT, rel)
+}
 
 const renameMap = new Map()
 const moves = []

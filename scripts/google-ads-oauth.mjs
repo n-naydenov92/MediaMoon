@@ -21,6 +21,46 @@ const REDIRECT_URI = `http://localhost:${PORT}/callback`
 const SCOPE = 'https://www.googleapis.com/auth/adwords'
 const STATE = randomBytes(16).toString('hex')
 
+function browserCommand(url) {
+  const os = platform()
+  if (os === 'win32') return `start "" "${url}"`
+  if (os === 'darwin') return `open "${url}"`
+  return `xdg-open "${url}"`
+}
+
+function openInBrowser(url) {
+  exec(browserCommand(url), (err) => {
+    if (err) {
+      console.log('(Could not auto-open browser — copy the URL above manually.)')
+    }
+  })
+}
+
+function finish(res, status, message) {
+  res.writeHead(status, { 'Content-Type': 'text/html; charset=utf-8' })
+  res.end(`<!doctype html><meta charset="utf-8"><title>Google Ads OAuth</title><body style="font-family:system-ui;padding:40px;max-width:600px"><h2>${message}</h2></body>`)
+}
+
+async function exchangeCodeForTokens(code) {
+  const body = new URLSearchParams({
+    code,
+    client_id: CLIENT_ID,
+    client_secret: CLIENT_SECRET,
+    redirect_uri: REDIRECT_URI,
+    grant_type: 'authorization_code',
+  })
+  const response = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body,
+  })
+  if (!response.ok) {
+    const text = await response.text()
+    throw new Error(`HTTP ${response.status}: ${text}`)
+  }
+  return response.json()
+}
+
 const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth')
 authUrl.searchParams.set('client_id', CLIENT_ID)
 authUrl.searchParams.set('redirect_uri', REDIRECT_URI)
@@ -85,41 +125,3 @@ const server = createServer(async (req, res) => {
 server.listen(PORT, () => {
   console.log(`Waiting for Google redirect on port ${PORT}...`)
 })
-
-async function exchangeCodeForTokens(code) {
-  const body = new URLSearchParams({
-    code,
-    client_id: CLIENT_ID,
-    client_secret: CLIENT_SECRET,
-    redirect_uri: REDIRECT_URI,
-    grant_type: 'authorization_code',
-  })
-  const response = await fetch('https://oauth2.googleapis.com/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body,
-  })
-  if (!response.ok) {
-    const text = await response.text()
-    throw new Error(`HTTP ${response.status}: ${text}`)
-  }
-  return response.json()
-}
-
-function finish(res, status, message) {
-  res.writeHead(status, { 'Content-Type': 'text/html; charset=utf-8' })
-  res.end(`<!doctype html><meta charset="utf-8"><title>Google Ads OAuth</title><body style="font-family:system-ui;padding:40px;max-width:600px"><h2>${message}</h2></body>`)
-}
-
-function openInBrowser(url) {
-  const cmd = platform() === 'win32'
-    ? `start "" "${url}"`
-    : platform() === 'darwin'
-      ? `open "${url}"`
-      : `xdg-open "${url}"`
-  exec(cmd, (err) => {
-    if (err) {
-      console.log('(Could not auto-open browser — copy the URL above manually.)')
-    }
-  })
-}

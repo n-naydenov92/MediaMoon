@@ -4,6 +4,16 @@ import type { CopyValue } from '../CopyForm/CopyForm'
 import { assetMediaToken, type AssetCreative } from '../assetCreative'
 import type { TargetingValue } from './useTargetingData'
 
+// The five creation steps, in display order. The accordion and completion state key
+// off this single list.
+export const STEP_IDS = ['account', 'campaign', 'profiles', 'files', 'copy'] as const
+export type StepId = typeof STEP_IDS[number]
+export type Completion = Readonly<Record<StepId, boolean>>
+
+export function firstIncomplete(c: Completion): StepId | null {
+  return STEP_IDS.find((id) => !c[id]) ?? null
+}
+
 // Stable identity for a File across re-renders (the FilePicker list key uses
 // name+index, which is fine for React but reorders break it for naming state).
 export function fileKey(file: File): string {

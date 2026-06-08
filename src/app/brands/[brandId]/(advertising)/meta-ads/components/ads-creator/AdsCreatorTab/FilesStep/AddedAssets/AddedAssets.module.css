@@ -107,14 +107,30 @@
   color: var(--text-muted);
 }
 
-.errorTag {
-  font-size: 11px;
-  font-weight: 600;
+.invalidRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
+/* Compact red chip matching the library card's "Different BM" badge; full reason in
+   its tooltip. Replaces the wall-of-red sentence the row used to show. */
+.errorChip {
+  align-self: flex-start;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--text-on-accent);
+  background: var(--error);
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+/* Just the border marks an invalid row — no red fill, so it reads as "needs a fix"
+   rather than alarming. */
 .row[data-invalid='true'] {
   border-color: var(--error);
-  background: var(--error-soft);
 }
 
 .remove {

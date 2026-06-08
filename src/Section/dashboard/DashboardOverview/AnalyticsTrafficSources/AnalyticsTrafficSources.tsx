@@ -127,7 +127,7 @@ function renderTooltip(
   totalUsers: number,
   totalRevenue: number,
 ): (props: TooltipContentProps) => JSX.Element | null {
-  return function ({ active, payload }) {
+  return function TrafficTooltipContent({ active, payload }) {
     if (!active || !payload || payload.length === 0) {
       return null
     }

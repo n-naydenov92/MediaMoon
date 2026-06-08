@@ -15,8 +15,12 @@ export async function extractVideoThumbnail(file: File): Promise<File> {
     video.crossOrigin = 'anonymous'
 
     await new Promise<void>((resolve, reject) => {
-      const onLoaded = (): void => { resolve() }
-      const onError = (): void => { reject(new Error('Failed to load video for thumbnail extraction')) }
+      const onLoaded = (): void => {
+        resolve()
+      }
+      const onError = (): void => {
+        reject(new Error('Failed to load video for thumbnail extraction'))
+      }
       video.addEventListener('loadedmetadata', onLoaded, { once: true })
       video.addEventListener('error', onError, { once: true })
     })
@@ -27,8 +31,12 @@ export async function extractVideoThumbnail(file: File): Promise<File> {
     video.currentTime = seekTarget
 
     await new Promise<void>((resolve, reject) => {
-      const onSeeked = (): void => { resolve() }
-      const onError = (): void => { reject(new Error('Failed to seek video')) }
+      const onSeeked = (): void => {
+        resolve()
+      }
+      const onError = (): void => {
+        reject(new Error('Failed to seek video'))
+      }
       video.addEventListener('seeked', onSeeked, { once: true })
       video.addEventListener('error', onError, { once: true })
     })

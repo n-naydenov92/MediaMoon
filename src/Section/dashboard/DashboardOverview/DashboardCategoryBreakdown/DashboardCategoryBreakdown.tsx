@@ -129,7 +129,7 @@ export default memo(function DashboardCategoryBreakdown({
 })
 
 function renderTooltip(total: number): (props: TooltipContentProps) => JSX.Element | null {
-  return function ({ active, payload }) {
+  return function CategoryTooltipContent({ active, payload }) {
     if (!active || !payload || payload.length === 0) {
       return null
     }
