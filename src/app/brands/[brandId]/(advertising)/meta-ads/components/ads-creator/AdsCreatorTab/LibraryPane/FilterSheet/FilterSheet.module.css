@@ -1,0 +1,114 @@
+/* Sit at the modal z-index (not the lower drawer default) so the sheet appears
+   above a host Dialog (e.g. the Edit-per-creative dialog), not behind it. */
+.drawer.drawer {
+  z-index: 1300;
+}
+
+.paper.paper {
+  height: 88vh;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  background: var(--bg-surface);
+  display: flex;
+  flex-direction: column;
+}
+
+.sheet {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 8px 16px 24px;
+  color: var(--text-primary);
+}
+
+.handle {
+  align-self: center;
+  width: 36px;
+  height: 4px;
+  margin: 4px 0;
+  border-radius: 999px;
+  background: var(--hairline-strong);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title.title {
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.clear.clear {
+  text-transform: none;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sectionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sectionLabel {
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip.chip {
+  height: 32px;
+}
+
+.chipIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 2px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.chipIcon[data-key='winners'],
+.chipIcon[data-key='video'],
+.chipIcon[data-key='image'] {
+  color: var(--success);
+}
+
+.chipIcon[data-key='underperformers'] {
+  color: var(--error);
+}
+
+.chipIcon[data-key='all'] {
+  color: var(--accent);
+}
+
+.addBtn.addBtn {
+  text-transform: none;
+}
+
+.empty {
+  color: var(--text-muted);
+}
+
+.ruleList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

@@ -1,28 +1,27 @@
 'use client'
 
-import { memo, useMemo } from 'react'
+import { memo, useMemo, useState } from 'react'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
+import Chip from '@mui/material/Chip'
 import LinearProgress from '@mui/material/LinearProgress'
-import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
-import useMediaQuery from '@mui/material/useMediaQuery'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import type { LaunchJob } from '../useLaunchQueue'
 import styles from './PublishBar.module.css'
 
-// Below this width the Publish button's hover tooltip is unreachable (touch has no
-// hover), so the blocked hint renders as static text above the button instead.
-const MOBILE_BELOW = 900
-
-const BLOCKED_HINT = 'You have incomplete steps or errors in the ad setup.'
+export interface IncompleteStep {
+  readonly label: string
+  readonly onOpen: () => void
+}
 
 interface Props {
   readonly adsCount: number
   readonly canSubmit: boolean
   readonly onSubmit: () => void
   readonly jobs: readonly LaunchJob[]
+  readonly incompleteSteps: readonly IncompleteStep[]
 }
 
 interface QueueStats {
@@ -59,45 +58,65 @@ function computeStats(jobs: readonly LaunchJob[], batchId: string | null): Queue
 }
 
 export default memo(function PublishBar({
-  adsCount, canSubmit, onSubmit, jobs,
+  adsCount, canSubmit, onSubmit, jobs, incompleteSteps,
 }: Props): JSX.Element {
   const stats = useMemo(() => computeStats(jobs, latestBatchId(jobs)), [jobs])
   const isPublishing = stats.active > 0
-  const isMobile = useMediaQuery(`(max-width:${MOBILE_BELOW}px)`)
-  const showHint = !canSubmit
-  const label = adsCount === 0
-    ? 'Publish ads'
-    : `Publish ${adsCount} ${adsCount === 1 ? 'ad' : 'ads'}`
+  const [hintOpen, setHintOpen] = useState(false)
 
-  const button = (
-    <Button
-      type="button"
-      variant="contained"
-      disableElevation
-      fullWidth
-      size="large"
-      startIcon={<PlayArrowIcon />}
-      className={styles.button}
-      disabled={!canSubmit}
-      onClick={onSubmit}
-    >
-      {label}
-    </Button>
-  )
+  // Blocked: the button itself states what's left to do, reads as muted (not a
+  // standard CTA, no hover), yet a tap surfaces which steps remain — no reliance on
+  // hover, which touch doesn't have.
+  let label: string
+  if (!canSubmit) {
+    label = 'Finish setup to publish'
+  } else if (adsCount === 0) {
+    label = 'Publish ads'
+  } else {
+    label = `Publish ${adsCount} ${adsCount === 1 ? 'ad' : 'ads'}`
+  }
 
   return (
     <Box className={styles.root}>
-      {isMobile && showHint && (
-        <Alert severity="warning" className={styles.hintAlert}>
-          {BLOCKED_HINT}
+      {hintOpen && !canSubmit && (
+        <Alert severity="warning" className={styles.hintAlert} onClose={() => setHintOpen(false)}>
+          <Box className={styles.hintBody}>
+            <Typography component="span" variant="body2" className={styles.hintLabel}>
+              Finish setup:
+            </Typography>
+            <Box className={styles.hintChips}>
+              {incompleteSteps.map((step) => (
+                <Chip
+                  key={step.label}
+                  label={step.label}
+                  size="small"
+                  clickable
+                  onClick={() => {
+                    step.onOpen()
+                    setHintOpen(false)
+                  }}
+                  className={styles.hintChip}
+                />
+              ))}
+            </Box>
+          </Box>
         </Alert>
       )}
 
-      {!isMobile && showHint ? (
-        <Tooltip title={BLOCKED_HINT}>
-          <Box component="span" className={styles.buttonWrap}>{button}</Box>
-        </Tooltip>
-      ) : button}
+      <Button
+        type="button"
+        variant="contained"
+        disableElevation
+        fullWidth
+        size="large"
+        startIcon={canSubmit ? <PlayArrowIcon /> : undefined}
+        className={`${styles.button} ${!canSubmit ? styles.blockedLook : ''}`}
+        aria-disabled={!canSubmit}
+        disableRipple={!canSubmit}
+        onClick={!canSubmit ? () => setHintOpen(true) : onSubmit}
+      >
+        {label}
+      </Button>
 
       {isPublishing && (
         <Box className={styles.progressBlock} role="status" aria-live="polite">

@@ -6,8 +6,9 @@
 }
 
 .body {
-  /* Shared column track for the header and every row, so sections stay aligned. */
-  --queue-grid: 22px minmax(0, 1fr) 56px 132px 44px 64px;
+  /* Shared column track for the header and every row, so sections stay aligned.
+     Columns: icon · Name · Destination · Type · Status · Open · Actions. */
+  --queue-grid: 22px minmax(0, 1.2fr) minmax(0, 1fr) 52px 120px 40px 60px;
   flex: 1 1 auto;
   min-height: 0;
   display: flex;

@@ -27,6 +27,15 @@ interface Props {
 }
 
 export default memo(function QueueRow({ job, accountId, onRetry, onStop, onDismiss }: Props): JSX.Element {
+  // The ad set an ad went into, or the campaign an ad set was created under.
+  const destinationCell = (
+    <Tooltip title={job.destination} placement="top" disableInteractive>
+      <Typography component="span" variant="caption" className={styles.destination}>
+        {job.destination || '—'}
+      </Typography>
+    </Tooltip>
+  )
+
   if (job.kind === 'adSet') {
     return (
       <Box className={styles.row} data-status={job.status}>
@@ -34,11 +43,12 @@ export default memo(function QueueRow({ job, accountId, onRetry, onStop, onDismi
           <LayersOutlinedIcon fontSize="inherit" />
         </Box>
         <Tooltip title={job.name} placement="top" disableInteractive>
-          <Typography component="span" variant="inherit" className={styles.title}>
+          <Typography component="span" variant="body2" className={styles.title}>
             {job.name}
           </Typography>
         </Tooltip>
-        <Typography component="span" variant="inherit" className={styles.kindLabel}>
+        {destinationCell}
+        <Typography component="span" variant="caption" className={styles.kindLabel}>
           Ad set
         </Typography>
         <Box className={styles.statusCol}>
@@ -83,7 +93,7 @@ export default memo(function QueueRow({ job, accountId, onRetry, onStop, onDismi
         <Box className={styles.track} style={cssVars({ '--bar-pct': `${Math.round(job.progress)}%` })}>
           <Box component="span" className={styles.barFill} data-status={job.status} />
         </Box>
-        <Typography component="span" variant="inherit" className={styles.pct}>
+        <Typography component="span" variant="caption" className={styles.pct}>
           {Math.round(job.progress)}%
         </Typography>
       </Box>
@@ -91,7 +101,7 @@ export default memo(function QueueRow({ job, accountId, onRetry, onStop, onDismi
   } else if (isFailed && job.error) {
     statusCell = (
       <Tooltip title={job.error} placement="top" disableInteractive enterDelay={300}>
-        <Typography component="span" variant="inherit" className={styles.errorText}>
+        <Typography component="span" variant="caption" className={styles.errorText}>
           {job.error}
         </Typography>
       </Tooltip>
@@ -110,11 +120,12 @@ export default memo(function QueueRow({ job, accountId, onRetry, onStop, onDismi
         <MediaIcon fontSize="inherit" />
       </Box>
       <Tooltip title={job.name || job.fileName} placement="top" disableInteractive>
-        <Typography component="span" variant="inherit" className={styles.title}>
+        <Typography component="span" variant="body2" className={styles.title}>
           {job.name || job.fileName}
         </Typography>
       </Tooltip>
-      <Typography component="span" variant="inherit" className={styles.kindLabel}>
+      {destinationCell}
+      <Typography component="span" variant="caption" className={styles.kindLabel}>
         Ad
       </Typography>
 

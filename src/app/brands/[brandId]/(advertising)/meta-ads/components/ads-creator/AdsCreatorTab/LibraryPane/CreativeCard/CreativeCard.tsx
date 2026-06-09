@@ -64,7 +64,7 @@ export default memo(function CreativeCard({
     <Box component="fieldset" className={styles.root} data-invalid={showBadge ? 'true' : 'false'}>
       {showBadge && (
         <Box component="legend" className={styles.legend}>
-          <Typography component="span" variant="inherit" color="error">
+          <Typography component="span" variant="caption" color="error">
             {badgeLabel}
           </Typography>
         </Box>

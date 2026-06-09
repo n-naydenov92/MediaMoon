@@ -28,6 +28,8 @@ import {
   buildAutoAdName,
   fileNameable,
   resolvePageToken,
+  STEP_IDS,
+  STEP_LABELS,
   type Completion,
 } from './helpers'
 import { useCreatorSteps } from './useCreatorSteps'
@@ -61,7 +63,7 @@ interface Props {
   readonly onAdSetCreated: (record: AdSetRecord) => void
   readonly canSubmit: boolean
   readonly emptyRequired: EmptyRequiredCounts
-  readonly onSubmit: (adNames: ReadonlyMap<string, string>) => void
+  readonly onSubmit: (adNames: ReadonlyMap<string, string>, adSetName: string) => void
   readonly canReset: boolean
   readonly onResetDraft: () => void
 }
@@ -159,6 +161,15 @@ export default memo(function CreatorPane({
 
   const { expanded, toggleHandlers } = useCreatorSteps(completion)
 
+  // Steps still blocking Publish — surfaced (on tap) in the PublishBar so the user
+  // can jump straight to what's unfinished instead of hunting through the form.
+  const incompleteSteps = useMemo(
+    () => STEP_IDS
+      .filter((id) => !completion[id])
+      .map((id) => ({ label: STEP_LABELS[id], onOpen: toggleHandlers[id] })),
+    [completion, toggleHandlers],
+  )
+
   const [previewOpen, setPreviewOpen] = useState(false)
   const [adNamesOpen, setAdNamesOpen] = useState(false)
   const [copyEachOpen, setCopyEachOpen] = useState(false)
@@ -196,10 +207,14 @@ export default memo(function CreatorPane({
   }, [copy, nameableCreatives, onCopyChange, pageTokens, selectedPages])
 
   const handleSubmit = useCallback(() => {
+    const adSetName = data.adSets.find((a) => a.id === targeting.adSetId)?.name ?? ''
     onSubmit(buildAdNameMap({
       pages: selectedPages, creatives: nameableCreatives, pageTokens, copy, adNames, isSingleAd,
-    }))
-  }, [adNames, copy, nameableCreatives, isSingleAd, onSubmit, pageTokens, selectedPages])
+    }), adSetName)
+  }, [
+    adNames, copy, nameableCreatives, isSingleAd, onSubmit, pageTokens, selectedPages,
+    data.adSets, targeting.adSetId,
+  ])
 
   // Each step's body is memoized so its element keeps a stable identity. StepAccordion
   // is memo'd, but `children` is a prop — a fresh element every render would re-render
@@ -284,7 +299,7 @@ export default memo(function CreatorPane({
       <Box className={styles.steps} tabIndex={0} aria-label="Ad creation steps">
         <StepAccordion
           index={1}
-          title="Account"
+          title={STEP_LABELS.account}
           complete={completion.account}
           expanded={expanded.has('account')}
           onToggle={toggleHandlers.account}
@@ -294,7 +309,7 @@ export default memo(function CreatorPane({
 
         <StepAccordion
           index={2}
-          title="Campaign"
+          title={STEP_LABELS.campaign}
           complete={completion.campaign}
           expanded={expanded.has('campaign')}
           onToggle={toggleHandlers.campaign}
@@ -304,7 +319,7 @@ export default memo(function CreatorPane({
 
         <StepAccordion
           index={3}
-          title="Profiles"
+          title={STEP_LABELS.profiles}
           complete={completion.profiles}
           expanded={expanded.has('profiles')}
           onToggle={toggleHandlers.profiles}
@@ -314,7 +329,7 @@ export default memo(function CreatorPane({
 
         <StepAccordion
           index={4}
-          title="Files"
+          title={STEP_LABELS.files}
           complete={completion.files}
           error={invalidAssetKeys.size > 0}
           expanded={expanded.has('files')}
@@ -325,7 +340,7 @@ export default memo(function CreatorPane({
 
         <StepAccordion
           index={5}
-          title="Copy"
+          title={STEP_LABELS.copy}
           complete={completion.copy}
           expanded={expanded.has('copy')}
           onToggle={toggleHandlers.copy}
@@ -340,6 +355,7 @@ export default memo(function CreatorPane({
           canSubmit={canSubmit}
           onSubmit={handleSubmit}
           jobs={jobs}
+          incompleteSteps={incompleteSteps}
         />
       </Box>
 

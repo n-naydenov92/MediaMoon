@@ -67,25 +67,46 @@
   transition: background 80ms ease-out;
 }
 
-.button:hover:not(:disabled) {
+.button:hover:not(.blockedLook) {
   background: var(--accent-hover);
 }
 
-/* Opaque fill — --surface-3 is semi-transparent (rgba .06), so it let the page
-   behind the button bleed through and read as a stray white box. */
-.button:disabled {
+/* Blocked: muted, static (no hover, no pointer cursor) so it doesn't read as a
+   ready CTA — but it stays tappable to surface what's left. Opaque fill since
+   --surface-3 is semi-transparent and would let the page bleed through. */
+.button.blockedLook {
   background: var(--bg-elevated);
   color: var(--text-muted);
+  cursor: default;
 }
 
-/* A disabled MUI Button swallows pointer events, so the desktop Tooltip can't fire
-   off it directly — this span is the hoverable wrapper around it. */
-.buttonWrap {
-  display: block;
+.button.blockedLook:hover {
+  background: var(--bg-elevated);
+}
+
+/* The blocked reason shows (on tap) as a MUI Alert above
+   the button, listing the steps left to finish. */
+.hintAlert {
+  align-items: center;
+}
+
+.hintBody {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   width: 100%;
 }
 
-/* Touch has no hover, so the blocked reason shows as a MUI Alert above the button. */
-.hintAlert {
-  align-items: center;
+.hintLabel {
+  color: var(--text-primary);
+}
+
+.hintChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.hintChip.hintChip {
+  height: 26px;
 }

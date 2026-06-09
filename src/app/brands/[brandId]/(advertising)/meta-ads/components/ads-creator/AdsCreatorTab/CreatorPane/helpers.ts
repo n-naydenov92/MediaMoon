@@ -10,6 +10,16 @@ export const STEP_IDS = ['account', 'campaign', 'profiles', 'files', 'copy'] as 
 export type StepId = typeof STEP_IDS[number]
 export type Completion = Readonly<Record<StepId, boolean>>
 
+// Display labels for each step — the single source for the accordion titles and the
+// PublishBar's "finish setup" chips, so adding a step touches only STEP_IDS + this map.
+export const STEP_LABELS: Record<StepId, string> = {
+  account: 'Account',
+  campaign: 'Campaign',
+  profiles: 'Profiles',
+  files: 'Files',
+  copy: 'Copy',
+}
+
 export function firstIncomplete(c: Completion): StepId | null {
   return STEP_IDS.find((id) => !c[id]) ?? null
 }

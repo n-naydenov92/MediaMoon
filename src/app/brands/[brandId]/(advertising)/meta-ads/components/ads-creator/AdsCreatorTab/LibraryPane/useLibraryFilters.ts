@@ -21,6 +21,7 @@ export interface LibraryFilters {
   readonly addRule: (rule: FilterRule) => void
   readonly updateRule: (index: number, rule: FilterRule) => void
   readonly removeRule: (index: number) => void
+  readonly clearRules: () => void
 }
 
 // Per-tab filter rules. spend/impressions are split out as `serverRules` (drive a
@@ -66,6 +67,10 @@ export function useLibraryFilters(
     }))
   }
 
+  function clearRules(): void {
+    setRulesByTab((prev) => ({ ...prev, [activeTab]: [] }))
+  }
+
   return {
     rules,
     serverRules,
@@ -76,5 +81,6 @@ export function useLibraryFilters(
     addRule,
     updateRule,
     removeRule,
+    clearRules,
   }
 }

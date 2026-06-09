@@ -48,8 +48,8 @@ export default memo(function CreatorHeader({
     <>
       <Box component="header" className={styles.header}>
         <Box className={styles.headerTitleWrap}>
-          <Typography component="span" variant="inherit" className={styles.headerKicker}>Draft</Typography>
-          <Typography component="h2" variant="inherit" className={styles.headerTitle}>Launch new ads</Typography>
+          <Typography component="span" variant="overline" color="text.secondary">Draft</Typography>
+          <Typography component="h4" variant="h4">Launch new ads</Typography>
         </Box>
         <Box className={styles.headerActions}>
           <Tooltip title="Reset draft">

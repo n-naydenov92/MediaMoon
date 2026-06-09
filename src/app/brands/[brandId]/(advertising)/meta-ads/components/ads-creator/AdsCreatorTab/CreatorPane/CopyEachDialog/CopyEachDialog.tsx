@@ -14,6 +14,8 @@ import type { MarketSelection } from '@/lib/markets'
 import type { Page } from '@/lib/gateways/MetaAdsGateway'
 import type { CopyValue } from '../../CopyForm/CopyForm'
 import {
+  REQUIRED_FIELDS,
+  fieldStatus,
   resolveCopy,
   withOverrideField,
   type CopyOverride,
@@ -122,6 +124,19 @@ export default memo(function CopyEachDialog({
   const deferredOverrides = useDeferredValue(overrides)
   const deferredActiveValue = activeKey ? resolveCopy(baseCopy, deferredOverrides.get(activeKey)) : null
   const deferredActiveOverride = activeKey ? deferredOverrides.get(activeKey) : undefined
+
+  // Keys of every creative still missing a required field. The mobile picker uses
+  // this to flag the prev/next arrows and offer a jump-to-next-error step, so
+  // errors on off-screen creatives are reachable without a permanent nag.
+  const errorKeys = useMemo(() => {
+    const keys = new Set<string>()
+    for (const item of items) {
+      if (REQUIRED_FIELDS.some((f) => fieldStatus(baseFilled, deferredOverrides.get(item.key), f) === 'missing')) {
+        keys.add(item.key)
+      }
+    }
+    return keys
+  }, [items, baseFilled, deferredOverrides])
 
   // The active creative is always a target (it's the one on screen); checked
   // others extend the set. Library "Add" writes to all of them.
@@ -258,6 +273,7 @@ export default memo(function CopyEachDialog({
             baseFilled={baseFilled}
             activeKey={activeKey}
             activeOverride={deferredActiveOverride}
+            errorKeys={errorKeys}
             onSelect={selectCreative}
             onOpenList={openList}
           />
@@ -277,7 +293,6 @@ export default memo(function CopyEachDialog({
         <Box className={styles.detailCol}>
           <CopyDetail
             value={activeValue}
-            creativeName={activeItem?.name ?? null}
             onFieldChange={updateField}
             onReset={resetActive}
             canReset={activeOverride !== undefined}
@@ -321,7 +336,7 @@ export default memo(function CopyEachDialog({
                 media={activeItem?.media ?? null}
               />
             ) : (
-              <Typography component="span" variant="inherit" className={styles.previewEmpty}>
+              <Typography component="span" variant="body2" className={styles.previewEmpty}>
                 No creative selected.
               </Typography>
             )}
@@ -350,6 +365,7 @@ export default memo(function CopyEachDialog({
           anchor="bottom"
           open={listOpen}
           onClose={closeList}
+          className={styles.listDrawer}
           classes={{ paper: styles.sheetPaper }}
         >
           <CreativeRail

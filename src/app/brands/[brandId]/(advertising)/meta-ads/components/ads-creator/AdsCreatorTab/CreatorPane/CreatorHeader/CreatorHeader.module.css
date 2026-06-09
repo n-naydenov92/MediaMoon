@@ -13,24 +13,6 @@
   min-width: 0;
 }
 
-.headerKicker {
-  font-family: var(--font-syne), system-ui, sans-serif;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: var(--text-muted);
-  text-transform: uppercase;
-}
-
-.headerTitle {
-  margin: 0;
-  font-family: var(--font-syne), system-ui, sans-serif;
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--text-primary);
-}
-
 .headerActions {
   display: flex;
   align-items: center;

@@ -1,0 +1,42 @@
+.toggle.toggle {
+  min-width: 0;
+  gap: 4px;
+  padding: 4px 8px;
+  color: var(--text-secondary);
+  border-radius: 8px;
+}
+
+.toggle.toggle:hover {
+  background: var(--surface-2);
+  color: var(--text-primary);
+}
+
+.toggle.toggle[data-active='true'] {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.toggle.toggle[data-active='true']:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.filterIcon {
+  color: var(--text-muted);
+}
+
+.toggle.toggle[data-active='true'] .filterIcon {
+  color: var(--accent);
+}
+
+.badge {
+  display: inline-flex;
+}
+
+.badge :global(.MuiBadge-badge) {
+  min-width: 15px;
+  height: 15px;
+  padding: 0 4px;
+  font-size: 9px;
+  font-weight: 700;
+}

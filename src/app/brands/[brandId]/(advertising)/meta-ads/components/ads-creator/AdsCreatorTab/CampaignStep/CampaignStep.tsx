@@ -111,7 +111,12 @@ export default memo(function CampaignStep({
   ) => {
     refetchAdSets()
     onChange({ ...value, adSetId: newAdSetId })
-    onAdSetCreated({ name: newAdSetName, adSetId: newAdSetId, accountId: value.accountId })
+    onAdSetCreated({
+      name: newAdSetName,
+      campaignName: selectedCampaign?.name ?? '',
+      adSetId: newAdSetId,
+      accountId: value.accountId,
+    })
     const trimmedName = newAdSetName.length > TOAST_NAME_MAX_LENGTH
       ? `${newAdSetName.slice(0, TOAST_NAME_MAX_LENGTH).trimEnd()}…`
       : newAdSetName
@@ -120,7 +125,7 @@ export default memo(function CampaignStep({
         ? `Created "${trimmedName}" — LIVE`
         : `Created "${trimmedName}" — PAUSED`,
     })
-  }, [onChange, refetchAdSets, value, onAdSetCreated])
+  }, [onChange, refetchAdSets, value, onAdSetCreated, selectedCampaign])
 
   const renderAdSetRowAction = useCallback((adSet: AdSet): ReactNode => (
     <Tooltip title="Duplicate" placement="top" disableInteractive enterDelay={400}>
@@ -149,7 +154,7 @@ export default memo(function CampaignStep({
     <Box className={styles.root}>
       <Box className={styles.field}>
         <Box className={styles.labelRow}>
-          <Typography component="span" variant="inherit" className={styles.fieldLabel}>
+          <Typography component="span" variant="body1" className={styles.fieldLabel}>
             Campaign
           </Typography>
           <StatusFilterPills value={campaignStatus} onChange={onCampaignStatusChange} />
@@ -174,7 +179,7 @@ export default memo(function CampaignStep({
 
       <Box className={styles.field}>
         <Box className={styles.labelRow}>
-          <Typography component="span" variant="inherit" className={styles.fieldLabel}>
+          <Typography component="span" variant="body1" className={styles.fieldLabel}>
             Ad set
           </Typography>
           <StatusFilterPills value={adSetStatus} onChange={onAdSetStatusChange} />

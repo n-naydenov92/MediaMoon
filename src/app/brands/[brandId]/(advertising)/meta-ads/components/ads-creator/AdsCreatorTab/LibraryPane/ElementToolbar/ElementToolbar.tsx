@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, useRef, useState } from 'react'
+import { memo, useRef, useState, type ReactNode } from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import ListItemText from '@mui/material/ListItemText'
@@ -22,6 +22,10 @@ interface Props {
   readonly sortFields: readonly SortFieldDef[]
   readonly onSortChange: (field: SortFieldId) => void
   readonly onSearchChange: (value: string) => void
+  // Sort lives in the bottom sheet on mobile, so it can be hidden here.
+  readonly showSort?: boolean
+  // The mobile filter-sheet trigger; rendered only when provided (mobile).
+  readonly filterTrigger?: ReactNode
 }
 
 export default memo(function ElementToolbar({
@@ -35,6 +39,8 @@ export default memo(function ElementToolbar({
   sortFields,
   onSortChange,
   onSearchChange,
+  showSort = true,
+  filterTrigger,
 }: Props): JSX.Element {
   const triggerRef = useRef<HTMLButtonElement | null>(null)
   const [open, setOpen] = useState(false)
@@ -58,41 +64,46 @@ export default memo(function ElementToolbar({
         onDebouncedChange={onSearchChange}
         className={styles.search}
       />
-      <Button
-        ref={triggerRef}
-        size="small"
-        variant="outlined"
-        color="inherit"
-        endIcon={<KeyboardArrowDownIcon />}
-        onClick={() => setOpen(true)}
-        className={styles.sortBtn}
-      >
-        <Box component="span" className={styles.sortLabelMuted}>Sort:&nbsp;</Box>
-        {`${activeLabel} ${arrow}`}
-      </Button>
-      <Menu
-        anchorEl={triggerRef.current}
-        open={open}
-        onClose={() => setOpen(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-      >
-        {sortFields.map((field) => (
-          <MenuItem
-            key={field.id}
-            dense
-            selected={field.id === sortField}
-            onClick={() => handlePick(field.id)}
+      {showSort && (
+        <>
+          <Button
+            ref={triggerRef}
+            size="small"
+            variant="outlined"
+            color="inherit"
+            endIcon={<KeyboardArrowDownIcon />}
+            onClick={() => setOpen(true)}
+            className={styles.sortBtn}
           >
-            <ListItemText primary={field.label} />
-            {field.id === sortField && (
-              <Box component="span" className={styles.dirArrow}>
-                {arrow}
-              </Box>
-            )}
-          </MenuItem>
-        ))}
-      </Menu>
+            <Box component="span" className={styles.sortLabelMuted}>Sort:&nbsp;</Box>
+            {`${activeLabel} ${arrow}`}
+          </Button>
+          <Menu
+            anchorEl={triggerRef.current}
+            open={open}
+            onClose={() => setOpen(false)}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+          >
+            {sortFields.map((field) => (
+              <MenuItem
+                key={field.id}
+                dense
+                selected={field.id === sortField}
+                onClick={() => handlePick(field.id)}
+              >
+                <ListItemText primary={field.label} />
+                {field.id === sortField && (
+                  <Box component="span" className={styles.dirArrow}>
+                    {arrow}
+                  </Box>
+                )}
+              </MenuItem>
+            ))}
+          </Menu>
+        </>
+      )}
+      {filterTrigger && <Box className={styles.triggerSlot}>{filterTrigger}</Box>}
     </Box>
   )
 })

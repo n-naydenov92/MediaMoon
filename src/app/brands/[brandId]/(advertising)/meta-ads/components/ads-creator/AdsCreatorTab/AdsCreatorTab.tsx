@@ -149,6 +149,7 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
         canReset={isDirty}
         onResetDraft={resetDraft}
       />
+      <Box className={styles.paneDivider} aria-hidden />
       <LibraryPane
         brandId={brandId}
         market={selectedMarket}

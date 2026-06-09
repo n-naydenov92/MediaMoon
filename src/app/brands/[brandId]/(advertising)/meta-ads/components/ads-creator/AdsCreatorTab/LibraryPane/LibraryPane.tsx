@@ -7,6 +7,7 @@ import Button from '@mui/material/Button'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import Typography from '@mui/material/Typography'
+import useMediaQuery from '@mui/material/useMediaQuery'
 import type { BrandId } from '@/config/brands'
 import type { MarketSelection } from '@/lib/markets'
 import type { CustomRange, DatePreset, DateRangeSelection } from '@/lib/meta/dateRange'
@@ -21,6 +22,8 @@ import DateRangeDropdown from '../../../shared/DateRangeDropdown/DateRangeDropdo
 import AdvancedFilters from '../../../shared/filters/AdvancedFilters/AdvancedFilters'
 import CreativeCard from './CreativeCard/CreativeCard'
 import ElementFilterChips from './ElementFilterChips/ElementFilterChips'
+import FilterToggle from './FilterToggle/FilterToggle'
+import FilterSheet from './FilterSheet/FilterSheet'
 import ElementToolbar from './ElementToolbar/ElementToolbar'
 import TextElementRow from './TextElementRow/TextElementRow'
 import {
@@ -104,11 +107,16 @@ export default memo(function LibraryPane({
   const [activeTab, setActiveTab] = useState<ElementTabId>('creatives')
   const [search, setSearch] = useState('')
   const [addFilterOpen, setAddFilterOpen] = useState(false)
+  const [filtersCollapsed, setFiltersCollapsed] = useState(false)
+  const [filterSheetOpen, setFilterSheetOpen] = useState(false)
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE)
+
+  const isMobile = useMediaQuery('(max-width:640px)')
 
   const tabDef = getTabDef(activeTab)
   const sort = useLibrarySort(activeTab)
   const filters = useLibraryFilters(activeTab, tabDef.presets)
+  const handleToggleFilters = useCallback(() => setFiltersCollapsed((prev) => !prev), [])
 
   const { state, refresh, loadMore } = useElementLibrary(
     brandId,
@@ -227,7 +235,7 @@ export default memo(function LibraryPane({
   return (
     <Box component="aside" className={styles.root} aria-label="Creative library">
       <Box className={styles.header}>
-        <Typography component="h2" variant="inherit" className={styles.title}>
+        <Typography component="h2" variant="h3" className={styles.title}>
           Ad Library
         </Typography>
         <Box className={styles.headerControls}>
@@ -242,24 +250,34 @@ export default memo(function LibraryPane({
           />
         </Box>
       </Box>
-      <Tabs
-        value={activeTab}
-        onChange={handleTabChange}
-        variant="scrollable"
-        scrollButtons="auto"
-        allowScrollButtonsMobile
-        className={styles.tabs}
-      >
-        {ELEMENT_TABS.map((tab) => (
-          <Tab
-            key={tab.id}
-            value={tab.id}
-            label={`${tab.label} (${counts[tab.id]}${countSuffix})`}
-            className={styles.tab}
-            disableRipple
+      <Box className={styles.tabsRow}>
+        <Tabs
+          value={activeTab}
+          onChange={handleTabChange}
+          variant="scrollable"
+          scrollButtons="auto"
+          allowScrollButtonsMobile
+          className={styles.tabs}
+        >
+          {ELEMENT_TABS.map((tab) => (
+            <Tab
+              key={tab.id}
+              value={tab.id}
+              label={`${tab.label} (${counts[tab.id]}${countSuffix})`}
+              className={styles.tab}
+              disableRipple
+            />
+          ))}
+        </Tabs>
+        {state.status === 'success' && !isMobile && (
+          <FilterToggle
+            filterCount={filters.rules.length}
+            onClick={handleToggleFilters}
+            ariaLabel={filtersCollapsed ? 'Show filters' : 'Hide filters'}
+            chevron={filtersCollapsed ? 'down' : 'up'}
           />
-        ))}
-      </Tabs>
+        )}
+      </Box>
 
       {state.status === 'loading' && (
         <Box className={styles.message}>
@@ -285,17 +303,19 @@ export default memo(function LibraryPane({
       {state.status === 'success' && (
         <>
           <Box className={styles.controls}>
-            <Box className={styles.filterSection}>
-              <ElementFilterChips
-                presets={tabDef.presets}
-                activePreset={filters.activePreset}
-                rules={filters.rules}
-                onSelectPreset={filters.selectPreset}
-                onOpenAddFilter={() => setAddFilterOpen(true)}
-                onUpdateRule={filters.updateRule}
-                onRemoveRule={filters.removeRule}
-              />
-            </Box>
+            {!isMobile && !filtersCollapsed && (
+              <Box className={styles.filterSection}>
+                <ElementFilterChips
+                  presets={tabDef.presets}
+                  activePreset={filters.activePreset}
+                  rules={filters.rules}
+                  onSelectPreset={filters.selectPreset}
+                  onOpenAddFilter={() => setAddFilterOpen(true)}
+                  onUpdateRule={filters.updateRule}
+                  onRemoveRule={filters.removeRule}
+                />
+              </Box>
+            )}
             <ElementToolbar
               shown={Math.min(visibleCount, totalShown)}
               total={totalShown}
@@ -307,6 +327,16 @@ export default memo(function LibraryPane({
               sortFields={tabDef.sortFields}
               onSortChange={sort.onChange}
               onSearchChange={setSearch}
+              showSort={!isMobile}
+              filterTrigger={
+                isMobile ? (
+                  <FilterToggle
+                    filterCount={filters.rules.length}
+                    onClick={() => setFilterSheetOpen(true)}
+                    ariaLabel="Open filters"
+                  />
+                ) : undefined
+              }
             />
           </Box>
 
@@ -401,6 +431,26 @@ export default memo(function LibraryPane({
             </Box>
           )}
         </>
+      )}
+
+      {isMobile && (
+        <FilterSheet
+          open={filterSheetOpen}
+          onClose={() => setFilterSheetOpen(false)}
+          onOpen={() => setFilterSheetOpen(true)}
+          presets={tabDef.presets}
+          activePreset={filters.activePreset}
+          rules={filters.rules}
+          sortField={sort.field}
+          sortDirection={sort.direction}
+          sortFields={tabDef.sortFields}
+          onSortChange={sort.onChange}
+          onSelectPreset={filters.selectPreset}
+          onUpdateRule={filters.updateRule}
+          onRemoveRule={filters.removeRule}
+          onClearAll={filters.clearRules}
+          onOpenAddFilter={() => setAddFilterOpen(true)}
+        />
       )}
 
       <AdvancedFilters

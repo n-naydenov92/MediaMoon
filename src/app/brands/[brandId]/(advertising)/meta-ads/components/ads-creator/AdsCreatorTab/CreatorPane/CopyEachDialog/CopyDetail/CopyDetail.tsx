@@ -20,7 +20,6 @@ const PRIMARY_TEXT_ROWS = 4
 
 interface Props {
   readonly value: CopyValue | null
-  readonly creativeName: string | null
   readonly onFieldChange: <F extends OverridableField>(field: F, next: CopyValue[F]) => void
   readonly onReset: () => void
   readonly canReset: boolean
@@ -28,7 +27,6 @@ interface Props {
 
 export default memo(function CopyDetail({
   value,
-  creativeName,
   onFieldChange,
   onReset,
   canReset,
@@ -68,8 +66,8 @@ export default memo(function CopyDetail({
   return (
     <Box className={styles.root}>
       <Box className={styles.header}>
-        <Typography component="span" variant="inherit" className={styles.editing}>
-          {creativeName ? `Editing: ${creativeName}` : 'Editing copy'}
+        <Typography component="h4" variant="h4" className={styles.sectionTitle}>
+          Creative Setup
         </Typography>
         <Button
           type="button"
@@ -81,7 +79,7 @@ export default memo(function CopyDetail({
           onClick={onReset}
           className={styles.resetButton}
         >
-          Reset to shared
+          Reset
         </Button>
       </Box>
 

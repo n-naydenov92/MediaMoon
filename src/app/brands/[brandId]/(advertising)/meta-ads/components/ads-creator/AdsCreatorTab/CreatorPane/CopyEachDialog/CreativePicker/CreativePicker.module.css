@@ -14,6 +14,26 @@
   border-radius: 8px;
 }
 
+/* A creative in this direction is missing a required field — tint the arrow so
+   the user knows there's a problem to step toward. */
+.step[data-error='true'] {
+  color: var(--error);
+}
+
+.jump {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 999px;
+  background: var(--error-soft);
+  color: var(--error);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
 .current {
   flex: 1 1 auto;
   min-width: 0;

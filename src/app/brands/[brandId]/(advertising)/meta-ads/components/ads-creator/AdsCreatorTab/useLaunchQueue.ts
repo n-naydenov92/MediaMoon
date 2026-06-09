@@ -28,6 +28,9 @@ export interface AdJob extends BaseJob {
   // current batch only — not ads published in earlier batches.
   readonly batchId: string
   readonly name: string
+  // The ad set this ad was published into — snapshotted at enqueue time, since the
+  // queue history outlives the draft's loaded ad-set list.
+  readonly destination: string
   readonly fileName: string
   readonly fileSize: number
   readonly mediaType: 'video' | 'image'
@@ -40,6 +43,8 @@ export interface AdJob extends BaseJob {
 export interface AdSetJob extends BaseJob {
   readonly kind: 'adSet'
   readonly name: string
+  // The campaign this ad set was created under.
+  readonly destination: string
   readonly adSetId: string
   readonly accountId: string
 }
@@ -48,14 +53,20 @@ export type LaunchJob = AdJob | AdSetJob
 
 export interface AdSetRecord {
   readonly name: string
+  readonly campaignName: string
   readonly adSetId: string
   readonly accountId: string
 }
 
 export interface UseLaunchQueueResult {
   readonly jobs: readonly LaunchJob[]
-  readonly enqueue: (payload: PublishPayload, file: File, batchId: string) => void
-  readonly enqueueAsset: (payload: PublishPayload, asset: AssetCreative, batchId: string) => void
+  readonly enqueue: (payload: PublishPayload, file: File, batchId: string, destination: string) => void
+  readonly enqueueAsset: (
+    payload: PublishPayload,
+    asset: AssetCreative,
+    batchId: string,
+    destination: string,
+  ) => void
   readonly retry: (jobId: string) => void
   readonly stop: (jobId: string) => void
   readonly dismiss: (jobId: string) => void
@@ -116,13 +127,15 @@ export function useLaunchQueue(): UseLaunchQueueResult {
       updateJob(job.id, { status: 'publishing', progress: 100 })
       const { adId } = await publishAd(payload, mediaRef, signal)
       updateJob(job.id, { status: 'done', adId })
+      // Only drop the retained source on success — a failed job keeps it so Retry can
+      // re-run from the original file/payload (dismiss clears it otherwise).
+      pendingRef.current.delete(job.id)
     } catch (err) {
       const failure = err instanceof Error ? err.message : 'Unknown error'
       const message = signal.aborted ? 'Stopped manually.' : failure
       updateJob(job.id, { status: 'failed', error: message })
     } finally {
       controllersRef.current.delete(job.id)
-      pendingRef.current.delete(job.id)
     }
   }, [updateJob])
 
@@ -143,34 +156,39 @@ export function useLaunchQueue(): UseLaunchQueueResult {
     }
   }, [jobs, runJob])
 
-  const enqueue = useCallback((payload: PublishPayload, file: File, batchId: string): void => {
-    const id = crypto.randomUUID()
-    const mediaType: 'video' | 'image' = file.type.startsWith('video/') ? 'video' : 'image'
-    const job: AdJob = {
-      id,
-      kind: 'ad',
-      batchId,
-      name: payload.copy.name.trim() || file.name,
-      fileName: file.name,
-      fileSize: file.size,
-      mediaType,
-      status: 'queued',
-      progress: 0,
-      error: null,
-      adId: null,
-    }
-    pendingRef.current.set(id, { job, source: { kind: 'file', file }, payload })
-    setJobs((prev) => [...prev, job])
-  }, [])
+  const enqueue = useCallback(
+    (payload: PublishPayload, file: File, batchId: string, destination: string): void => {
+      const id = crypto.randomUUID()
+      const mediaType: 'video' | 'image' = file.type.startsWith('video/') ? 'video' : 'image'
+      const job: AdJob = {
+        id,
+        kind: 'ad',
+        batchId,
+        name: payload.copy.name.trim() || file.name,
+        destination,
+        fileName: file.name,
+        fileSize: file.size,
+        mediaType,
+        status: 'queued',
+        progress: 0,
+        error: null,
+        adId: null,
+      }
+      pendingRef.current.set(id, { job, source: { kind: 'file', file }, payload })
+      setJobs((prev) => [...prev, job])
+    },
+    [],
+  )
 
   const enqueueAsset = useCallback(
-    (payload: PublishPayload, asset: AssetCreative, batchId: string): void => {
+    (payload: PublishPayload, asset: AssetCreative, batchId: string, destination: string): void => {
       const id = crypto.randomUUID()
       const job: AdJob = {
         id,
         kind: 'ad',
         batchId,
         name: payload.copy.name.trim() || asset.name,
+        destination,
         fileName: asset.name,
         fileSize: 0,
         mediaType: asset.mediaType,
@@ -185,13 +203,14 @@ export function useLaunchQueue(): UseLaunchQueueResult {
     [],
   )
 
-  const recordAdSet = useCallback(({ name, adSetId, accountId }: AdSetRecord): void => {
+  const recordAdSet = useCallback(({ name, campaignName, adSetId, accountId }: AdSetRecord): void => {
     const job: AdSetJob = {
       id: crypto.randomUUID(),
       kind: 'adSet',
       status: 'done',
       error: null,
       name,
+      destination: campaignName,
       adSetId,
       accountId,
     }

@@ -53,6 +53,12 @@
   color: var(--text-muted);
 }
 
+.triggerSlot {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+}
+
 .dirArrow {
   margin-left: 16px;
   color: var(--accent);

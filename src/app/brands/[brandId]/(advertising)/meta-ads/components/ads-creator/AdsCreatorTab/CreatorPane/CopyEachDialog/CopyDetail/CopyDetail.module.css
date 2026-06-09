@@ -26,17 +26,14 @@
   border-bottom: 1px solid var(--hairline);
 }
 
-.editing {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-muted);
-  overflow: hidden;
-  text-overflow: ellipsis;
+.sectionTitle {
+  margin: 0;
   white-space: nowrap;
 }
 
 .resetButton {
   flex-shrink: 0;
+  margin-left: auto;
   text-transform: none;
   font-weight: 600;
   border-radius: 8px;

@@ -36,7 +36,7 @@ export default memo(function AccountStep({ accounts, value, onChange }: Props): 
 
   return (
     <Box className={styles.root}>
-      <FormField label="Ad account" hint="Where these ads will be published">
+      <FormField label="Ad account">
         <SearchSelect<AdAccount>
           value={selected}
           options={accounts}

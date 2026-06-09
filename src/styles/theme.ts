@@ -63,6 +63,14 @@ const typography: ThemeOptions['typography'] = {
   body1: { fontSize: 14, fontWeight: 400, lineHeight: 1.55 },
   body2: { fontSize: 13, fontWeight: 400, lineHeight: 1.5 },
   caption: { fontSize: 12, fontWeight: 500, letterSpacing: '0.02em' },
+  overline: {
+    fontFamily: FONT_HEADING,
+    fontSize: 11,
+    fontWeight: 700,
+    letterSpacing: '0.08em',
+    lineHeight: 1.4,
+    textTransform: 'uppercase',
+  },
   button: { fontFamily: FONT_BODY, fontWeight: 500, textTransform: 'none', letterSpacing: 0 },
 }
 

@@ -80,7 +80,6 @@
   display: block;
   text-align: center;
   color: var(--text-muted);
-  font-size: 13px;
   padding-top: 32px;
 }
 
@@ -90,8 +89,16 @@
   border-radius: 8px;
 }
 
-.sheetPaper {
-  max-height: 72dvh;
+/* Lift above the host dialog (modal z-index) so the list sheet opens in front of
+   the Edit-per-creative dialog, not behind it. */
+.listDrawer.listDrawer {
+  z-index: 1300;
+}
+
+.sheetPaper.sheetPaper {
+  height: 88dvh;
+  display: flex;
+  flex-direction: column;
   background: var(--bg-surface);
   border-top-left-radius: 14px;
   border-top-right-radius: 14px;

@@ -54,10 +54,10 @@ export default memo(function QueueSection({
           aria-expanded={!collapsed}
         >
           <ExpandMoreIcon className={styles.chevron} data-collapsed={collapsed ? 'true' : 'false'} fontSize="inherit" />
-          <Typography component="span" variant="inherit" className={styles.title}>
+          <Typography component="span" variant="caption" className={styles.title}>
             {title}
           </Typography>
-          <Typography component="span" variant="inherit" className={styles.count}>
+          <Typography component="span" variant="caption" className={styles.count}>
             {jobs.length}
           </Typography>
         </Button>
@@ -80,11 +80,12 @@ export default memo(function QueueSection({
       <Collapse in={!collapsed} timeout={200} unmountOnExit>
         <Box className={styles.columns} aria-hidden>
           <Box component="span" />
-          <Typography component="span" variant="inherit" className={styles.col}>Name</Typography>
-          <Typography component="span" variant="inherit" className={styles.col}>Type</Typography>
-          <Typography component="span" variant="inherit" className={styles.col}>Status</Typography>
-          <Typography component="span" variant="inherit" className={`${styles.col} ${styles.colCenter}`}>Open</Typography>
-          <Typography component="span" variant="inherit" className={`${styles.col} ${styles.colCenter}`}>Actions</Typography>
+          <Typography component="span" variant="body2" className={styles.col}>Name</Typography>
+          <Typography component="span" variant="body2" className={styles.col}>Destination</Typography>
+          <Typography component="span" variant="body2" className={styles.col}>Type</Typography>
+          <Typography component="span" variant="body2" className={styles.col}>Status</Typography>
+          <Typography component="span" variant="body2" className={`${styles.col} ${styles.colCenter}`}>Open</Typography>
+          <Typography component="span" variant="body2" className={`${styles.col} ${styles.colCenter}`}>Actions</Typography>
         </Box>
         <Box className={styles.rows}>
           {jobs.map((job) => (

@@ -35,8 +35,8 @@ export function useLaunchSubmit({
   copyOverrides,
   queue,
   clearForNextBatch,
-}: Input): (resolvedNames: ReadonlyMap<string, string>) => void {
-  return useCallback((resolvedNames: ReadonlyMap<string, string>) => {
+}: Input): (resolvedNames: ReadonlyMap<string, string>, adSetName: string) => void {
+  return useCallback((resolvedNames: ReadonlyMap<string, string>, adSetName: string) => {
     if (!canSubmit || !targetMarket) {
       return
     }
@@ -46,7 +46,7 @@ export function useLaunchSubmit({
     for (const { pageId, file, key } of adKeyCombos(targeting.pageIds, files)) {
       const name = resolvedNames.get(key) || copy.name || file.name
       const adCopy = resolveCopy(copy, copyOverrides.get(creativeKey(file)))
-      queue.enqueue(buildPublishPayload({ targeting, copy: adCopy, pageId, name, isSinglePage }), file, batchId)
+      queue.enqueue(buildPublishPayload({ targeting, copy: adCopy, pageId, name, isSinglePage }), file, batchId, adSetName)
     }
     for (const pageId of targeting.pageIds) {
       for (const asset of assets) {
@@ -54,7 +54,12 @@ export function useLaunchSubmit({
           || (isSingleAd ? copy.name.trim() : '')
           || asset.name
         const adCopy = resolveCopy(copy, copyOverrides.get(asset.assetKey))
-        queue.enqueueAsset(buildPublishPayload({ targeting, copy: adCopy, pageId, name, isSinglePage }), asset, batchId)
+        queue.enqueueAsset(
+          buildPublishPayload({ targeting, copy: adCopy, pageId, name, isSinglePage }),
+          asset,
+          batchId,
+          adSetName,
+        )
       }
     }
     clearForNextBatch()
