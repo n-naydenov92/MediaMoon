@@ -17,7 +17,6 @@ export interface DraftHandlers {
   readonly handleAdvantageAudienceChange: (value: boolean) => void
   readonly handleAdvantageAgeChange: (value: boolean) => void
   readonly handleAdvantageGenderChange: (value: boolean) => void
-  readonly handleIsDynamicCreativeChange: (value: boolean) => void
   readonly handleDsaBeneficiaryChange: (value: string) => void
   readonly handleDsaPayorChange: (value: string) => void
   readonly handleOptimizationGoalChange: (value: string) => void
@@ -45,7 +44,6 @@ export function useDraftHandlers(dispatch: Dispatch<DraftAction>): DraftHandlers
     handleAdvantageAudienceChange: (value) => dispatch({ type: 'setAdvantageAudience', value }),
     handleAdvantageAgeChange: (value) => dispatch({ type: 'setAdvantageAge', value }),
     handleAdvantageGenderChange: (value) => dispatch({ type: 'setAdvantageGender', value }),
-    handleIsDynamicCreativeChange: (value) => dispatch({ type: 'setIsDynamicCreative', value }),
     handleDsaBeneficiaryChange: (value) => dispatch({ type: 'setDsaBeneficiary', value }),
     handleDsaPayorChange: (value) => dispatch({ type: 'setDsaPayor', value }),
     handleOptimizationGoalChange: (value) => dispatch({ type: 'setOptimizationGoal', value }),

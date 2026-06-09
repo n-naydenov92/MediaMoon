@@ -9,16 +9,22 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
 import styles from './FilterToggle.module.css'
 
 interface Props {
+  // Drives the active (accent) coloring — any filter applied, preset or custom rule.
+  readonly active: boolean
   readonly filterCount: number
   readonly onClick: () => void
   readonly ariaLabel: string
+  // Collapsed/desktop shows color only: the count is hidden because, with the chips
+  // gone, a bare number reads as noise — the accent tint is the reminder that matters.
+  readonly showCount?: boolean
   // 'up'/'down' renders the inline accordion chevron (desktop); omit it for the
   // mobile sheet trigger, where a chevron would wrongly imply inline expansion.
   readonly chevron?: 'up' | 'down'
 }
 
-export default memo(function FilterToggle({ filterCount, onClick, ariaLabel, chevron }: Props): JSX.Element {
-  const hasFilters = filterCount > 0
+export default memo(function FilterToggle({
+  active, filterCount, onClick, ariaLabel, showCount = true, chevron,
+}: Props): JSX.Element {
   return (
     <Button
       type="button"
@@ -26,14 +32,14 @@ export default memo(function FilterToggle({ filterCount, onClick, ariaLabel, che
       color="inherit"
       onClick={onClick}
       className={styles.toggle}
-      data-active={hasFilters ? 'true' : 'false'}
+      data-active={active ? 'true' : 'false'}
       aria-label={ariaLabel}
       aria-expanded={chevron ? chevron === 'up' : undefined}
     >
       <Badge
         color="primary"
         badgeContent={filterCount}
-        invisible={!hasFilters}
+        invisible={!showCount || filterCount === 0}
         className={styles.badge}
       >
         <FilterAltOutlinedIcon className={styles.filterIcon} fontSize="small" />

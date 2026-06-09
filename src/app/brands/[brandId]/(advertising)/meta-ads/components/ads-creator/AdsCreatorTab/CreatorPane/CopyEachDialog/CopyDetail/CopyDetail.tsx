@@ -83,61 +83,63 @@ export default memo(function CopyDetail({
         </Button>
       </Box>
 
-      <VariationList
-        label="Primary Text"
-        values={value.primaryTexts}
-        onChange={handlePrimaryChange}
-        placeholder="Enter your ad primary text here"
-        addNoun="primary text"
-        multiline
-        firstRows={PRIMARY_TEXT_ROWS}
-        max={MAX_COPY_VARIATIONS}
-        invalid={primaryInvalid}
-        errorText="Primary text is required"
-      />
-
-      <VariationList
-        label="Headline"
-        values={value.headlines}
-        onChange={handleHeadlineChange}
-        placeholder="Enter your ad title here"
-        addNoun="headline"
-        max={MAX_COPY_VARIATIONS}
-        invalid={headlineInvalid}
-        errorText="Headline is required"
-      />
-
-      <FormField label="Description">
-        <FormTextField
-          type="text"
-          placeholder="Enter your ad description here"
-          value={value.description}
-          onChange={handleDescriptionChange}
+      <Box className={styles.fields}>
+        <VariationList
+          label="Primary Text"
+          values={value.primaryTexts}
+          onChange={handlePrimaryChange}
+          placeholder="Enter your ad primary text here"
+          addNoun="primary text"
+          multiline
+          firstRows={PRIMARY_TEXT_ROWS}
+          max={MAX_COPY_VARIATIONS}
+          invalid={primaryInvalid}
+          errorText="Primary text is required"
         />
-      </FormField>
 
-      <Box className={styles.actionRow}>
-        <FormField label="Destination URL">
+        <VariationList
+          label="Headline"
+          values={value.headlines}
+          onChange={handleHeadlineChange}
+          placeholder="Enter your ad title here"
+          addNoun="headline"
+          max={MAX_COPY_VARIATIONS}
+          invalid={headlineInvalid}
+          errorText="Headline is required"
+        />
+
+        <FormField label="Description">
           <FormTextField
-            type="url"
-            placeholder="https://example.com"
-            value={value.url}
-            onChange={handleUrlChange}
-            error={urlState.error}
-            helperText={urlState.helper}
+            type="text"
+            placeholder="Enter your ad description here"
+            value={value.description}
+            onChange={handleDescriptionChange}
           />
         </FormField>
 
-        <FormField label="Call to action">
-          <SearchSelect<CtaOption>
-            value={CTA_OPTIONS.find((o) => o.id === value.cta) ?? null}
-            options={CTA_OPTIONS}
-            onChange={handleCtaChange}
-            placeholder="Select call to action…"
-            getOptionId={(o) => o.id}
-            getOptionLabel={(o) => o.label}
-          />
-        </FormField>
+        <Box className={styles.actionRow}>
+          <FormField label="Destination URL">
+            <FormTextField
+              type="url"
+              placeholder="https://example.com"
+              value={value.url}
+              onChange={handleUrlChange}
+              error={urlState.error}
+              helperText={urlState.helper}
+            />
+          </FormField>
+
+          <FormField label="Call to action">
+            <SearchSelect<CtaOption>
+              value={CTA_OPTIONS.find((o) => o.id === value.cta) ?? null}
+              options={CTA_OPTIONS}
+              onChange={handleCtaChange}
+              placeholder="Select call to action…"
+              getOptionId={(o) => o.id}
+              getOptionLabel={(o) => o.label}
+            />
+          </FormField>
+        </Box>
       </Box>
     </Box>
   )

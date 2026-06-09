@@ -21,7 +21,6 @@ import StatusToggle from '../StatusToggle/StatusToggle'
 import NameSection from './NameSection/NameSection'
 import BudgetScheduleSection from './BudgetScheduleSection/BudgetScheduleSection'
 import AudienceSection from './AudienceSection/AudienceSection'
-import DynamicCreativeSection from './DynamicCreativeSection/DynamicCreativeSection'
 import EuAdvertiserSection from './EuAdvertiserSection/EuAdvertiserSection'
 import ConversionSection from './ConversionSection/ConversionSection'
 import PlacementsSection from './PlacementsSection/PlacementsSection'
@@ -318,14 +317,6 @@ export default memo(function AdSetEditor({
             onBidStrategyChange={handlers.handleBidStrategyChange}
             onBidAmountChange={handlers.handleBidAmountChange}
             onAttributionSpecChange={handlers.handleAttributionSpecChange}
-            disabled={sectionsDisabled}
-          />
-        </Box>
-
-        <Box className={styles.sectionCard}>
-          <DynamicCreativeSection
-            enabled={draft.isDynamicCreative}
-            onChange={handlers.handleIsDynamicCreativeChange}
             disabled={sectionsDisabled}
           />
         </Box>

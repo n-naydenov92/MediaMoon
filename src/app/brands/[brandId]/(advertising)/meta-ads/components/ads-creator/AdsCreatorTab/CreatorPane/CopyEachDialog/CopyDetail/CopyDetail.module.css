@@ -1,7 +1,8 @@
 .root {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  min-height: 0;
+  height: 100%;
 }
 
 .empty {
@@ -16,14 +17,40 @@
   font-size: 13px;
 }
 
+/* Fixed top bar of the detail column — same 48px height + hairline as the
+   Preview/Ad Library tab row, so the two columns' headers sit on one line. */
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  min-height: 28px;
-  padding-bottom: 14px;
+  flex: 0 0 auto;
+  min-height: 48px;
+  padding: 0 16px;
   border-bottom: 1px solid var(--hairline);
+  background: var(--bg-surface);
+}
+
+.fields {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+}
+
+/* Stacked on mobile the dialog body scrolls as a whole, so the fields flow inline
+   rather than owning a nested scroll area. */
+@media (max-width: 900px) {
+  .root {
+    height: auto;
+  }
+
+  .fields {
+    overflow-y: visible;
+  }
 }
 
 .sectionTitle {

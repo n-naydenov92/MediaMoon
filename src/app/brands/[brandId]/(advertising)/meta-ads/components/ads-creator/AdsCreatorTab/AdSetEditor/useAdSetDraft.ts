@@ -23,7 +23,6 @@ export interface DraftState {
   readonly advantageAudience: boolean
   readonly advantageAge: boolean
   readonly advantageGender: boolean
-  readonly isDynamicCreative: boolean
   readonly dsaBeneficiary: string
   readonly dsaPayor: string
   readonly optimizationGoal: string
@@ -50,7 +49,6 @@ export type DraftAction =
   | { type: 'setAdvantageAudience'; value: boolean }
   | { type: 'setAdvantageAge'; value: boolean }
   | { type: 'setAdvantageGender'; value: boolean }
-  | { type: 'setIsDynamicCreative'; value: boolean }
   | { type: 'setDsaBeneficiary'; value: string }
   | { type: 'setDsaPayor'; value: string }
   | { type: 'setOptimizationGoal'; value: string }
@@ -85,7 +83,6 @@ function emptyDraft(initialName: string): DraftState {
     advantageAudience: true,
     advantageAge: false,
     advantageGender: false,
-    isDynamicCreative: false,
     dsaBeneficiary: '',
     dsaPayor: '',
     optimizationGoal: '',
@@ -126,7 +123,6 @@ function reducer(state: DraftState, action: DraftAction): DraftState {
         advantageAudience: detail.targeting.advantageAudience,
         advantageAge: detail.targeting.advantageAge,
         advantageGender: detail.targeting.advantageGender,
-        isDynamicCreative: detail.isDynamicCreative,
         dsaBeneficiary: detail.dsaBeneficiary,
         dsaPayor: detail.dsaPayor,
         optimizationGoal: detail.optimizationGoal,
@@ -150,7 +146,6 @@ function reducer(state: DraftState, action: DraftAction): DraftState {
     case 'setAdvantageAudience': return { ...state, advantageAudience: action.value }
     case 'setAdvantageAge': return { ...state, advantageAge: action.value }
     case 'setAdvantageGender': return { ...state, advantageGender: action.value }
-    case 'setIsDynamicCreative': return { ...state, isDynamicCreative: action.value }
     case 'setDsaBeneficiary': return { ...state, dsaBeneficiary: action.value }
     case 'setDsaPayor': return { ...state, dsaPayor: action.value }
     case 'setOptimizationGoal': return { ...state, optimizationGoal: action.value }

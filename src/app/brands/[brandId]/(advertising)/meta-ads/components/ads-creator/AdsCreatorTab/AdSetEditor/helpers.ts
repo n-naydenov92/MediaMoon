@@ -145,7 +145,6 @@ export interface DuplicateRequestPayload {
   startTime?: string
   endTime?: string
   targeting?: Record<string, unknown>
-  isDynamicCreative?: boolean
   dsaBeneficiary?: string
   dsaPayor?: string
   optimizationGoal?: string
@@ -165,6 +164,7 @@ export interface CreateRequestPayload {
   readonly optimizationGoal: string
   readonly billingEvent: string
   readonly targeting: Record<string, unknown>
+  // Deprecated: dynamic creative is no longer offered in the UI; always sent off.
   readonly isDynamicCreative: boolean
   startTime?: string
   endTime?: string
@@ -332,7 +332,7 @@ export function buildCreatePayload(
     optimizationGoal: draft.optimizationGoal,
     billingEvent: 'IMPRESSIONS',
     targeting,
-    isDynamicCreative: draft.isDynamicCreative,
+    isDynamicCreative: false,
   }
 
   const stateStartTs = Date.parse(draft.startTime)
@@ -444,9 +444,6 @@ export function buildDuplicatePayload(
     payload.targeting = targetingPayload
   }
 
-  if (source.isDynamicCreative !== draft.isDynamicCreative) {
-    payload.isDynamicCreative = draft.isDynamicCreative
-  }
   if (source.dsaBeneficiary !== draft.dsaBeneficiary) {
     payload.dsaBeneficiary = draft.dsaBeneficiary
   }

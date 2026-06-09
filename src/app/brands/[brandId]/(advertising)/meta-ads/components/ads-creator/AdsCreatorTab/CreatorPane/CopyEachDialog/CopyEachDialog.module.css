@@ -14,8 +14,10 @@
 .detailCol {
   flex: 1 1 auto;
   min-width: 0;
-  overflow-y: auto;
-  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
   background: var(--bg-surface);
 }
 
@@ -31,8 +33,10 @@
 
 .rightTabs {
   display: flex;
+  align-items: center;
   gap: 4px;
-  padding: 10px 12px;
+  min-height: 48px;
+  padding: 0 12px;
   border-bottom: 1px solid var(--hairline);
 }
 
@@ -112,7 +116,7 @@
 
   .detailCol {
     flex: 0 0 auto;
-    overflow-y: visible;
+    overflow: visible;
   }
 
   .rightCol {

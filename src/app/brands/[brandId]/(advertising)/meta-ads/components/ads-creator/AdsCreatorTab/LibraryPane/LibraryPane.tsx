@@ -271,7 +271,9 @@ export default memo(function LibraryPane({
         </Tabs>
         {state.status === 'success' && !isMobile && (
           <FilterToggle
+            active={filtersCollapsed || filters.rules.length > 0}
             filterCount={filters.rules.length}
+            showCount={false}
             onClick={handleToggleFilters}
             ariaLabel={filtersCollapsed ? 'Show filters' : 'Hide filters'}
             chevron={filtersCollapsed ? 'down' : 'up'}
@@ -331,6 +333,7 @@ export default memo(function LibraryPane({
               filterTrigger={
                 isMobile ? (
                   <FilterToggle
+                    active={filters.rules.length > 0}
                     filterCount={filters.rules.length}
                     onClick={() => setFilterSheetOpen(true)}
                     ariaLabel="Open filters"

@@ -111,12 +111,21 @@ export default memo(function CopyForm({
     'Destination URL is required. Edit here or per creative',
   )
 
-  // Scope chip on a field's label row (right) when some creatives diverge — keeps the
-  // area under the field for the validation message only.
+  // With the per-creative editor available, every shared field is just a default the
+  // user can instead set per creative — so its empty placeholder says so, rather than
+  // implying the shared value is the only option.
+  const perCreativeActive = Boolean(onEditEach) && totalCreatives > 0
+
+  // Scope chip on a field's label row (right) — shown for every field whenever
+  // per-creative editing is possible, so its live scope ("used in N of N" → "0 of N")
+  // is visible from the start, not only once a creative diverges.
   const renderAside = (customized: number): JSX.Element | undefined => (
-    onEditEach && customized > 0
+    perCreativeActive
       ? <SharedFieldNote customized={customized} total={totalCreatives} />
       : undefined
+  )
+  const sharedPlaceholder = (noun: string, fallback: string): string => (
+    perCreativeActive ? `You can add ${noun} here, or per creative` : fallback
   )
 
   return (
@@ -200,7 +209,7 @@ export default memo(function CopyForm({
               label="Primary Text"
               values={value.primaryTexts}
               onChange={handlePrimaryChange}
-              placeholder="Enter your ad primary text here"
+              placeholder={sharedPlaceholder('primary text', 'Enter your ad primary text here')}
               addNoun="primary text"
               multiline
               firstRows={PRIMARY_TEXT_ROWS}
@@ -216,7 +225,7 @@ export default memo(function CopyForm({
               label="Headline"
               values={value.headlines}
               onChange={handleHeadlineChange}
-              placeholder="Enter your ad title here"
+              placeholder={sharedPlaceholder('a headline', 'Enter your ad title here')}
               addNoun="headline"
               max={MAX_COPY_VARIATIONS}
               invalid={headlineInvalid}
@@ -229,7 +238,7 @@ export default memo(function CopyForm({
             <FormField label="Description" labelAside={renderAside(descriptionCustomized)}>
               <FormTextField
                 type="text"
-                placeholder="Enter your ad description here"
+                placeholder={sharedPlaceholder('a description', 'Enter your ad description here')}
                 value={value.description}
                 onChange={handleDescriptionChange}
               />
@@ -253,7 +262,7 @@ export default memo(function CopyForm({
             <FormField label="Destination URL" labelAside={renderAside(urlCustomized)}>
               <FormTextField
                 type="url"
-                placeholder="https://example.com"
+                placeholder={sharedPlaceholder('a URL', 'https://example.com')}
                 value={value.url}
                 onChange={handleUrlChange}
                 error={urlState.error}

@@ -124,7 +124,7 @@ export default memo(function CreativeRow({
               </Typography>
             </Tooltip>
           </Box>
-          {baseFilled && override && (
+          {baseFilled && (
             <CreativeStatusBadges baseFilled={baseFilled} override={override} />
           )}
         </Box>
