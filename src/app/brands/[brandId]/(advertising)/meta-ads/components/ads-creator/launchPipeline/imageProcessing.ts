@@ -1,45 +1,64 @@
 export const MAX_IMAGE_BYTES = Math.floor(3.5 * 1024 * 1024)
 const COMPRESSION_QUALITY_LADDER = [0.9, 0.7, 0.5, 0.3] as const
 const MAX_IMAGE_DIMENSION = 1920
+const THUMBNAIL_STEP_TIMEOUT_MS = 15000
 
-export async function extractVideoThumbnail(file: File): Promise<File> {
+// Wait for a one-shot video event, but never hang: reject on the element's `error`
+// event, on the caller's abort signal, or after `timeoutMs`. Browsers cap concurrent
+// `<video>` decoders per renderer process, so `loadedmetadata`/`seeked` can silently
+// never fire (and never `error`) when many videos decode at once — the timeout/abort
+// is the only escape from that.
+function waitForVideoEvent(
+  video: HTMLVideoElement,
+  event: 'loadedmetadata' | 'seeked',
+  signal: AbortSignal | undefined,
+): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(new Error('Thumbnail extraction aborted'))
+      return
+    }
+    const cleanup = new AbortController()
+    let timer: ReturnType<typeof setTimeout>
+    const settle = (action: () => void): void => {
+      clearTimeout(timer)
+      cleanup.abort()
+      action()
+    }
+    timer = setTimeout(
+      () => settle(() => reject(new Error(`Timed out waiting for video "${event}"`))),
+      THUMBNAIL_STEP_TIMEOUT_MS,
+    )
+    const opts = { once: true, signal: cleanup.signal }
+    video.addEventListener(event, () => settle(resolve), opts)
+    video.addEventListener('error', () => settle(() => reject(new Error(`Video "${event}" failed`))), opts)
+    signal?.addEventListener('abort', () => settle(() => reject(new Error('Thumbnail extraction aborted'))), opts)
+  })
+}
+
+export async function extractVideoThumbnail(file: File, signal?: AbortSignal): Promise<File> {
   if (typeof document === 'undefined') {
     throw new Error('Video thumbnail extraction requires a browser environment')
   }
   const url = URL.createObjectURL(file)
+  const video = document.createElement('video')
   try {
-    const video = document.createElement('video')
     video.src = url
     video.muted = true
     video.preload = 'metadata'
     video.crossOrigin = 'anonymous'
 
-    await new Promise<void>((resolve, reject) => {
-      const onLoaded = (): void => {
-        resolve()
-      }
-      const onError = (): void => {
-        reject(new Error('Failed to load video for thumbnail extraction'))
-      }
-      video.addEventListener('loadedmetadata', onLoaded, { once: true })
-      video.addEventListener('error', onError, { once: true })
-    })
+    await waitForVideoEvent(video, 'loadedmetadata', signal)
 
     const seekTarget = Number.isFinite(video.duration) && video.duration > 0
       ? Math.min(1, video.duration * 0.1)
       : 0
-    video.currentTime = seekTarget
-
-    await new Promise<void>((resolve, reject) => {
-      const onSeeked = (): void => {
-        resolve()
-      }
-      const onError = (): void => {
-        reject(new Error('Failed to seek video'))
-      }
-      video.addEventListener('seeked', onSeeked, { once: true })
-      video.addEventListener('error', onError, { once: true })
-    })
+    // Setting currentTime to its existing value doesn't fire `seeked`; skip the wait
+    // so we don't hang on a no-op seek (the timeout would otherwise fail a fine video).
+    if (seekTarget !== video.currentTime) {
+      video.currentTime = seekTarget
+      await waitForVideoEvent(video, 'seeked', signal)
+    }
 
     const longest = Math.max(video.videoWidth, video.videoHeight)
     if (longest === 0) {
@@ -59,6 +78,10 @@ export async function extractVideoThumbnail(file: File): Promise<File> {
     return new File([blob], `${baseName}.thumbnail.jpg`, { type: 'image/jpeg' })
   } finally {
     URL.revokeObjectURL(url)
+    // Release the media element's decoder promptly so concurrent extractions aren't
+    // starved of the browser's limited decoder pool.
+    video.removeAttribute('src')
+    video.load()
   }
 }
 

@@ -109,7 +109,7 @@ export function useLaunchQueue(): UseLaunchQueueResult {
         mediaRef = await reuploadCreativeFromSource(source.asset, payload.accountId, signal)
       } else if (job.mediaType === 'video') {
         const { file } = source
-        const thumbnailFile = await extractVideoThumbnail(file)
+        const thumbnailFile = await extractVideoThumbnail(file, signal)
         const [videoId, thumbnailHash] = await Promise.all([
           uploadVideoChunked(file, payload.accountId, (pct: number) => {
             updateJob(job.id, { progress: pct * 0.95 })

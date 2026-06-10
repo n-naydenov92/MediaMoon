@@ -82,6 +82,10 @@ export default memo(function QueueRow({ job, accountId, onRetry, onStop, onDismi
   }
 
   const isActive = job.status === 'uploading' || job.status === 'publishing'
+  // Stop is only safe while uploading — no ad exists yet, so a retry can't duplicate.
+  // Once publishing, the create request may already have reached Meta; aborting it
+  // leaves an unknown state a retry could double-publish, so Stop is hidden.
+  const isStoppable = job.status === 'uploading'
   const isDone = job.status === 'done'
   const isFailed = job.status === 'failed'
   const MediaIcon = job.mediaType === 'video' ? MovieOutlinedIcon : ImageOutlinedIcon
@@ -149,7 +153,7 @@ export default memo(function QueueRow({ job, accountId, onRetry, onStop, onDismi
       </Box>
 
       <Box className={styles.actions}>
-        {isActive && (
+        {isStoppable && (
           <Tooltip title="Stop — mark as failed" placement="top" disableInteractive>
             <IconButton
               aria-label="Stop"
