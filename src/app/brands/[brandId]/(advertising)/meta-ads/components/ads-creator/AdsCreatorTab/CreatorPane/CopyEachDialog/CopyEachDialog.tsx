@@ -22,6 +22,7 @@ import {
   type OverridableField,
 } from '../../perCreativeCopy'
 import type { AssetCreative } from '../../assetCreative'
+import type { CreativeSlot } from '../../creativeSlots'
 import AdFeedCard from '../../AdFeedCard/AdFeedCard'
 import LibraryPane from '../../LibraryPane/LibraryPane'
 import CreatorDialog from '../../CreatorDialog/CreatorDialog'
@@ -31,7 +32,7 @@ import { mapWith } from '../helpers'
 import CreativeRail from './CreativeRail/CreativeRail'
 import CreativePicker from './CreativePicker/CreativePicker'
 import CopyDetail from './CopyDetail/CopyDetail'
-import { applyOverrideToKeys, assetItem, fileItem, type CreativeItem } from './helpers'
+import { applyOverrideToKeys, slotItem, type CreativeItem } from './helpers'
 import styles from './CopyEachDialog.module.css'
 
 // Below this width the 3-pane workspace can't breathe, so the dialog goes
@@ -58,8 +59,9 @@ interface Props {
   readonly brandId: BrandId
   readonly market: MarketSelection
   readonly targetAccountId: string
-  readonly files: readonly File[]
-  readonly assets: readonly AssetCreative[]
+  readonly slots: readonly CreativeSlot[]
+  readonly onDuplicate: (sourceKey: string) => void
+  readonly onRemoveDuplicate: (key: string) => void
   readonly baseCopy: CopyValue
   readonly overrides: ReadonlyMap<string, CopyOverride>
   readonly onOverridesChange: (next: ReadonlyMap<string, CopyOverride>) => void
@@ -74,8 +76,9 @@ export default memo(function CopyEachDialog({
   brandId,
   market,
   targetAccountId,
-  files,
-  assets,
+  slots,
+  onDuplicate,
+  onRemoveDuplicate,
   baseCopy,
   overrides,
   onOverridesChange,
@@ -94,16 +97,26 @@ export default memo(function CopyEachDialog({
   // fullscreen switch in CreatorDialog).
   const isMobile = useMediaQuery(`(max-width:${FULLSCREEN_BELOW}px)`)
 
-  const fileUrls = useMemo(() => files.map((f) => URL.createObjectURL(f)), [files])
+  // One object URL per source file (duplicates reuse their source's URL). Keyed by
+  // source key so adding a duplicate doesn't re-mint every preview.
+  const fileUrlBySourceKey = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const slot of slots) {
+      if (slot.source.kind === 'file' && !map.has(slot.sourceKey)) {
+        map.set(slot.sourceKey, URL.createObjectURL(slot.source.file))
+      }
+    }
+    return map
+  }, [slots])
   useEffect(() => () => {
-    for (const url of fileUrls) {
+    for (const url of fileUrlBySourceKey.values()) {
       URL.revokeObjectURL(url)
     }
-  }, [fileUrls])
+  }, [fileUrlBySourceKey])
 
   const items = useMemo<readonly CreativeItem[]>(
-    () => [...files.map((file, i) => fileItem(file, fileUrls[i]!)), ...assets.map(assetItem)],
-    [files, fileUrls, assets],
+    () => slots.map((slot) => slotItem(slot, fileUrlBySourceKey)),
+    [slots, fileUrlBySourceKey],
   )
 
   // Derive the active creative from the user's selection, falling back to the
@@ -287,6 +300,8 @@ export default memo(function CopyEachDialog({
             onSelect={setSelectedKey}
             onToggleCheck={toggleCheck}
             onApplyToChecked={applyToChecked}
+            onDuplicate={onDuplicate}
+            onRemoveDuplicate={onRemoveDuplicate}
           />
         )}
 
@@ -378,6 +393,8 @@ export default memo(function CopyEachDialog({
             onSelect={selectCreative}
             onToggleCheck={toggleCheck}
             onApplyToChecked={applyToChecked}
+            onDuplicate={onDuplicate}
+            onRemoveDuplicate={onRemoveDuplicate}
           />
         </Drawer>
       )}

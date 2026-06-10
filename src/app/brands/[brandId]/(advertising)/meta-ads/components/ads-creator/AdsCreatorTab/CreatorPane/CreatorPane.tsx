@@ -6,6 +6,7 @@ import type { BrandId } from '@/config/brands'
 import type { MarketSelection } from '@/lib/markets'
 import type { StatusFilter } from '@/lib/gateways/MetaAdsGateway'
 import type { AssetCreative } from '../assetCreative'
+import type { CreativeSlot } from '../creativeSlots'
 import { incompatibleAssetKeys } from '../assetCompat'
 import type { CopyValue } from '../CopyForm/CopyForm'
 import type { CopyOverride, EmptyRequiredCounts } from '../perCreativeCopy'
@@ -23,11 +24,10 @@ import CreatorHeader from './CreatorHeader/CreatorHeader'
 import AdNamesDialog from './AdNamesDialog/AdNamesDialog'
 import CopyEachDialog from './CopyEachDialog/CopyEachDialog'
 import {
-  assetNameable,
   buildAdNameMap,
   buildAutoAdName,
-  fileNameable,
   resolvePageToken,
+  slotNameable,
   STEP_IDS,
   STEP_LABELS,
   type Completion,
@@ -46,6 +46,9 @@ interface Props {
   readonly onFilesChange: (next: readonly File[]) => void
   readonly assets: readonly AssetCreative[]
   readonly onAssetsChange: (next: readonly AssetCreative[]) => void
+  readonly slots: readonly CreativeSlot[]
+  readonly onDuplicateCreative: (sourceKey: string) => void
+  readonly onRemoveDuplicate: (key: string) => void
   readonly addedAssetKeys: ReadonlySet<string>
   readonly onAddCreative: (asset: AssetCreative) => void
   readonly copy: CopyValue
@@ -78,6 +81,9 @@ export default memo(function CreatorPane({
   onFilesChange,
   assets,
   onAssetsChange,
+  slots,
+  onDuplicateCreative,
+  onRemoveDuplicate,
   addedAssetKeys,
   onAddCreative,
   copy,
@@ -113,7 +119,7 @@ export default memo(function CreatorPane({
   })
 
   const isSinglePage = targeting.pageIds.length === 1
-  const creativeCount = files.length + assets.length
+  const creativeCount = slots.length
   const baseFilled = useBaseFilled(copy)
   // Library assets that can't publish to the selected account (cross-BM videos).
   // They block the Files step and Publish until removed, and show an inline error.
@@ -187,11 +193,15 @@ export default memo(function CreatorPane({
   const adsCount = (targeting.pageIds.length || 1) * creativeCount
   const isSingleAd = adsCount === 1
 
-  // Every nameable ad creative — uploaded files and library assets alike — so the
-  // naming UI and submit cover both, not just the manual uploads.
-  const nameableCreatives = useMemo(
-    () => [...files.map(fileNameable), ...assets.map(assetNameable)],
-    [files, assets],
+  // Every nameable ad slot — uploaded files, library assets and duplicates alike — so
+  // the naming UI and submit cover them all, each as its own ad.
+  const nameableCreatives = useMemo(() => slots.map(slotNameable), [slots])
+
+  // Duplicate slots only — the Files step renders these beneath their source so each
+  // upload/asset can spawn extra ad slots inline.
+  const duplicates = useMemo(
+    () => slots.filter((s) => s.isDuplicate).map((s) => ({ key: s.key, sourceKey: s.sourceKey })),
+    [slots],
   )
 
   // Single ad: fill the shared Ad name field with the structured template
@@ -264,8 +274,14 @@ export default memo(function CreatorPane({
       baseFilled={baseFilled}
       copyOverrides={deferredOverrides}
       incompatibleAssetKeys={invalidAssetKeys}
+      duplicates={duplicates}
+      onDuplicate={onDuplicateCreative}
+      onRemoveDuplicate={onRemoveDuplicate}
     />
-  ), [files, onFilesChange, assets, onAssetsChange, baseFilled, deferredOverrides, invalidAssetKeys])
+  ), [
+    files, onFilesChange, assets, onAssetsChange, baseFilled, deferredOverrides, invalidAssetKeys,
+    duplicates, onDuplicateCreative, onRemoveDuplicate,
+  ])
 
   const copyStepEl = useMemo(() => (
     <CopyStep
@@ -384,8 +400,9 @@ export default memo(function CreatorPane({
         brandId={brandId}
         market={market}
         targetAccountId={targeting.accountId}
-        files={files}
-        assets={assets}
+        slots={slots}
+        onDuplicate={onDuplicateCreative}
+        onRemoveDuplicate={onRemoveDuplicate}
         baseCopy={copy}
         overrides={copyOverrides}
         onOverridesChange={onCopyOverridesChange}

@@ -110,6 +110,24 @@
   min-width: 0;
 }
 
+/* Duplicate reveals on row hover/focus so the resting row stays uncluttered; the
+   touch path uses the always-visible action in the per-creative rail instead. */
+.duplicate {
+  flex: 0 0 auto;
+  color: var(--text-muted);
+  opacity: 0;
+  transition: opacity 120ms ease, color 120ms ease;
+}
+
+.row:hover .duplicate,
+.row:focus-within .duplicate {
+  opacity: 1;
+}
+
+.duplicate:hover {
+  color: var(--accent);
+}
+
 .remove {
   flex: 0 0 auto;
   color: var(--text-muted);

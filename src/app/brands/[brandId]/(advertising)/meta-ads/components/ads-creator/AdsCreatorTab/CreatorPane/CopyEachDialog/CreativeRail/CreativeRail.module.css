@@ -84,6 +84,29 @@
   box-shadow: inset 2px 0 0 0 var(--error);
 }
 
+/* Row actions reveal on hover/focus (desktop); always shown in the touch sheet. */
+.rowActions {
+  display: inline-flex;
+  flex-shrink: 0;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.row:hover .rowActions,
+.row:focus-within .rowActions {
+  opacity: 1;
+}
+
+.sheet .rowActions {
+  opacity: 1;
+}
+
+.actionBtn {
+  padding: 4px;
+  color: var(--text-secondary);
+}
+
 .checkWrap {
   display: inline-flex;
   flex-shrink: 0;

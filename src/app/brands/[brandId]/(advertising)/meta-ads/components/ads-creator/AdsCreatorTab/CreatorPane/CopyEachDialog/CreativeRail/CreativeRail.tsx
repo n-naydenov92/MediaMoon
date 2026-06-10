@@ -4,9 +4,12 @@ import { memo } from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Checkbox from '@mui/material/Checkbox'
+import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded'
+import ContentCopyRoundedIcon from '@mui/icons-material/ContentCopyRounded'
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
 import {
   REQUIRED_FIELDS,
   fieldStatus,
@@ -26,6 +29,9 @@ interface Props {
   readonly onSelect: (key: string) => void
   readonly onToggleCheck: (key: string) => void
   readonly onApplyToChecked: () => void
+  // Spawn another ad slot from a creative, or remove a duplicate slot.
+  readonly onDuplicate: (sourceKey: string) => void
+  readonly onRemoveDuplicate: (key: string) => void
   // 'rail' (default) is the fixed-width desktop column; 'sheet' spans full width
   // for use inside the mobile bottom-sheet drawer.
   readonly variant?: 'rail' | 'sheet'
@@ -40,6 +46,8 @@ export default memo(function CreativeRail({
   onSelect,
   onToggleCheck,
   onApplyToChecked,
+  onDuplicate,
+  onRemoveDuplicate,
   variant = 'rail',
 }: Props): JSX.Element {
   // The active creative is the source of a bulk apply, so it reads as a locked
@@ -99,6 +107,30 @@ export default memo(function CreativeRail({
                   </Tooltip>
                   <CreativeStatusBadges baseFilled={baseFilled} override={override} />
                 </Box>
+              </Box>
+              <Box className={styles.rowActions}>
+                <Tooltip title="Duplicate the creative as separate ad" placement="top" disableInteractive>
+                  <IconButton
+                    size="small"
+                    className={styles.actionBtn}
+                    onClick={() => onDuplicate(item.sourceKey)}
+                    aria-label={`Duplicate ${item.name}`}
+                  >
+                    <ContentCopyRoundedIcon fontSize="inherit" />
+                  </IconButton>
+                </Tooltip>
+                {item.isDuplicate && (
+                  <Tooltip title="Remove this duplicate" placement="top" disableInteractive>
+                    <IconButton
+                      size="small"
+                      className={styles.actionBtn}
+                      onClick={() => onRemoveDuplicate(item.key)}
+                      aria-label={`Remove ${item.name}`}
+                    >
+                      <CloseRoundedIcon fontSize="inherit" />
+                    </IconButton>
+                  </Tooltip>
+                )}
               </Box>
             </Box>
           )

@@ -43,6 +43,9 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
     setCopyOverrides,
     pageTokens,
     setPageTokens,
+    slots,
+    duplicateCreative,
+    removeDuplicate,
     emptyRequired,
     addedAssetKeys,
     canSubmit,
@@ -87,8 +90,7 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
     canSubmit,
     targetMarket,
     targeting,
-    files,
-    assets,
+    slots,
     copy,
     copyOverrides,
     queue,
@@ -128,6 +130,9 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
         onFilesChange={setFiles}
         assets={assets}
         onAssetsChange={setAssets}
+        slots={slots}
+        onDuplicateCreative={duplicateCreative}
+        onRemoveDuplicate={removeDuplicate}
         addedAssetKeys={addedAssetKeys}
         onAddCreative={handleAddCreative}
         copy={copy}

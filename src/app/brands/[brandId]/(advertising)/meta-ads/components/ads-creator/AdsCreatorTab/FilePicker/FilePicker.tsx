@@ -1,6 +1,7 @@
 'use client'
 
 import {
+  Fragment,
   memo,
   useCallback,
   useEffect,
@@ -16,6 +17,7 @@ import Typography from '@mui/material/Typography'
 import SearchIcon from '@mui/icons-material/Search'
 import { fileKey } from '../CreatorPane/helpers'
 import { type CopyOverride, type OverridableField } from '../perCreativeCopy'
+import type { CreativeDuplicate } from '../creativeSlots'
 import CreativeRow from '../CreativeRow/CreativeRow'
 import styles from './FilePicker.module.css'
 
@@ -27,6 +29,9 @@ interface Props {
   readonly disabled?: boolean
   readonly baseFilled?: ReadonlySet<OverridableField>
   readonly overrides?: ReadonlyMap<string, CopyOverride>
+  readonly duplicates?: readonly CreativeDuplicate[]
+  readonly onDuplicate?: (sourceKey: string) => void
+  readonly onRemoveDuplicate?: (key: string) => void
 }
 
 interface FilePreview {
@@ -50,6 +55,9 @@ export default memo(function FilePicker({
   disabled = false,
   baseFilled,
   overrides,
+  duplicates = [],
+  onDuplicate,
+  onRemoveDuplicate,
 }: Props): JSX.Element {
   const inputRef = useRef<HTMLInputElement>(null)
   const [previews, setPreviews] = useState<readonly FilePreview[]>([])
@@ -208,24 +216,54 @@ export default memo(function FilePicker({
 
           {filteredPreviews.length > 0 ? (
             <Box component="ul" className={styles.list}>
-              {filteredPreviews.map(({ file, url, isVideo, index }) => (
-                <Box component="li" key={`${file.name}-${index}`}>
-                  <CreativeRow
-                    thumbnailUrl={url}
-                    thumbnailKind={isVideo ? 'video' : 'image'}
-                    isVideo={isVideo}
-                    name={file.name}
-                    previewUrl={url}
-                    previewKind={isVideo ? 'video' : 'image'}
-                    baseFilled={baseFilled}
-                    override={overrides?.get(fileKey(file))}
-                    onRemove={handleRemove}
-                    removeKey={fileKey(file)}
-                    removeLabel={`Remove ${file.name}`}
-                    disabled={disabled}
-                  />
-                </Box>
-              ))}
+              {filteredPreviews.map(({ file, url, isVideo, index }) => {
+                const sourceKey = fileKey(file)
+                const dups = duplicates.filter((d) => d.sourceKey === sourceKey)
+                return (
+                  <Fragment key={`${file.name}-${index}`}>
+                    <Box component="li">
+                      <CreativeRow
+                        thumbnailUrl={url}
+                        thumbnailKind={isVideo ? 'video' : 'image'}
+                        isVideo={isVideo}
+                        name={file.name}
+                        previewUrl={url}
+                        previewKind={isVideo ? 'video' : 'image'}
+                        baseFilled={baseFilled}
+                        override={overrides?.get(sourceKey)}
+                        onRemove={handleRemove}
+                        removeKey={sourceKey}
+                        removeLabel={`Remove ${file.name}`}
+                        onDuplicate={onDuplicate}
+                        duplicateKey={sourceKey}
+                        duplicateLabel={`Duplicate ${file.name}`}
+                        disabled={disabled}
+                      />
+                    </Box>
+                    {onDuplicate && onRemoveDuplicate && dups.map((dup, i) => (
+                      <Box component="li" key={dup.key}>
+                        <CreativeRow
+                          thumbnailUrl={url}
+                          thumbnailKind={isVideo ? 'video' : 'image'}
+                          isVideo={isVideo}
+                          name={`${file.name} (copy ${i + 1})`}
+                          previewUrl={url}
+                          previewKind={isVideo ? 'video' : 'image'}
+                          baseFilled={baseFilled}
+                          override={overrides?.get(dup.key)}
+                          onRemove={onRemoveDuplicate}
+                          removeKey={dup.key}
+                          removeLabel={`Remove copy ${i + 1} of ${file.name}`}
+                          onDuplicate={onDuplicate}
+                          duplicateKey={sourceKey}
+                          duplicateLabel={`Duplicate ${file.name}`}
+                          disabled={disabled}
+                        />
+                      </Box>
+                    ))}
+                  </Fragment>
+                )
+              })}
             </Box>
           ) : (
             <Box className={styles.empty}>

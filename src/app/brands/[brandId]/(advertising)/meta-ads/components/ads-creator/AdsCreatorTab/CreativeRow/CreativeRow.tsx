@@ -6,6 +6,7 @@ import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import CloseIcon from '@mui/icons-material/Close'
+import ContentCopyRoundedIcon from '@mui/icons-material/ContentCopyRounded'
 import MovieOutlinedIcon from '@mui/icons-material/MovieOutlined'
 import PhotoOutlinedIcon from '@mui/icons-material/PhotoOutlined'
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded'
@@ -39,6 +40,12 @@ interface Props {
   readonly onRemove: (key: string) => void
   readonly removeKey: string
   readonly removeLabel: string
+  // When set, a hover "duplicate" action that spawns another ad slot from this
+  // creative. Stable parent handler + the source key (same pattern as onRemove), so
+  // the click closure lives inside this memo instead of breaking it each render.
+  readonly onDuplicate?: (key: string) => void
+  readonly duplicateKey?: string
+  readonly duplicateLabel?: string
   readonly disabled?: boolean
 }
 
@@ -57,6 +64,9 @@ export default memo(function CreativeRow({
   onRemove,
   removeKey,
   removeLabel,
+  onDuplicate,
+  duplicateKey,
+  duplicateLabel,
   disabled = false,
 }: Props): JSX.Element {
   const thumb = (
@@ -128,6 +138,19 @@ export default memo(function CreativeRow({
             <CreativeStatusBadges baseFilled={baseFilled} override={override} />
           )}
         </Box>
+        {onDuplicate && duplicateKey !== undefined && (
+          <Tooltip title="Duplicate the creative as separate ad" placement="top" disableInteractive>
+            <IconButton
+              size="small"
+              className={styles.duplicate}
+              onClick={() => onDuplicate(duplicateKey)}
+              aria-label={duplicateLabel ?? 'Duplicate creative'}
+              disabled={disabled}
+            >
+              <ContentCopyRoundedIcon fontSize="inherit" />
+            </IconButton>
+          </Tooltip>
+        )}
         <IconButton
           size="small"
           className={styles.remove}

@@ -2,6 +2,7 @@ import type { Page } from '@/lib/gateways/MetaAdsGateway'
 import type { PublishPayload } from '../../launchPipeline/mediaUpload'
 import type { CopyValue } from '../CopyForm/CopyForm'
 import { assetMediaToken, type AssetCreative } from '../assetCreative'
+import type { CreativeSlot } from '../creativeSlots'
 import type { TargetingValue } from './useTargetingData'
 
 // The five creation steps, in display order. The accordion and completion state key
@@ -91,6 +92,18 @@ export function fileNameable(file: File): NameableCreative {
 
 export function assetNameable(asset: AssetCreative): NameableCreative {
   return { key: asset.assetKey, name: asset.name, media: assetMediaToken(asset), baseName: asset.name }
+}
+
+// A creative slot (original or duplicate) as a nameable. A duplicate reuses its
+// source's media but takes the slot's own key and a "(copy N)" display name, so the
+// naming UI and the ad-name map treat it as a separate, distinguishable ad.
+export function slotNameable(slot: CreativeSlot): NameableCreative {
+  const base = slot.source.kind === 'file'
+    ? fileNameable(slot.source.file)
+    : assetNameable(slot.source.asset)
+  return slot.isDuplicate
+    ? { ...base, key: slot.key, name: `${base.name} (copy ${slot.copyIndex})` }
+    : base
 }
 
 // The pre-filled, editable default each ad shows. Library assets already carry a
@@ -197,23 +210,6 @@ export function adCombos(
       pageTok,
     }))
   })
-}
-
-// Id-keyed enumeration for the publish step, where names are already resolved and
-// page objects aren't on hand — only the selected page ids.
-export interface AdKeyCombo {
-  readonly pageId: string
-  readonly file: File
-  readonly key: string
-}
-
-export function adKeyCombos(
-  pageIds: readonly string[],
-  files: readonly File[],
-): readonly AdKeyCombo[] {
-  return pageIds.flatMap(
-    (pageId) => files.map((file) => ({ pageId, file, key: adNameMapKey(pageId, fileKey(file)) })),
-  )
 }
 
 // Immutable Map set/delete — `null` removes the key. Replaces the
