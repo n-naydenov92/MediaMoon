@@ -9,3 +9,16 @@
   flex-shrink: 0;
   display: inline-block;
 }
+
+.statusRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.warning {
+  flex: 1 1 200px;
+  min-width: 0;
+}

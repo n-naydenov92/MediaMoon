@@ -1,8 +1,7 @@
 import { memo, type CSSProperties } from 'react'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
-import type { AdAccount } from '@/lib/gateways/MetaAdsGateway'
-import { statusFor } from './helpers'
+import { accountStatusInfo, type AdAccount } from '@/lib/gateways/MetaAdsGateway'
 import styles from './AdAccountSummary.module.css'
 
 interface Props {
@@ -11,7 +10,7 @@ interface Props {
 }
 
 export default memo(function AdAccountSummary({ account, brandColor }: Props): JSX.Element {
-  const status = statusFor(account.accountStatus)
+  const status = accountStatusInfo(account.accountStatus)
   const cssVars = { '--brand-color': brandColor } as CSSProperties
 
   return (

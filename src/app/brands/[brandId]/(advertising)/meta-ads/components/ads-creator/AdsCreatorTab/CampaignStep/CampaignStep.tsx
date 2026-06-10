@@ -53,6 +53,16 @@ function effectiveToOptionStatus(effective: string): OptionStatus {
   return effective === 'ACTIVE' ? 'active' : 'paused'
 }
 
+// Humanise Meta's SCREAMING_SNAKE effective status for the dot tooltip
+// (e.g. CAMPAIGN_PAUSED → "Campaign Paused").
+function effectiveStatusLabel(effective: string): string {
+  return effective
+    .toLowerCase()
+    .split('_')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+}
+
 export default memo(function CampaignStep({
   campaigns,
   adSets,
@@ -173,6 +183,7 @@ export default memo(function CampaignStep({
           getOptionId={(o) => o.id}
           getOptionLabel={(o) => o.name}
           getOptionStatus={(o) => effectiveToOptionStatus(o.effectiveStatus)}
+          getOptionStatusLabel={(o) => effectiveStatusLabel(o.effectiveStatus)}
           noOptionsText="No campaigns match this search."
         />
       </Box>
@@ -194,6 +205,7 @@ export default memo(function CampaignStep({
           getOptionId={(o) => o.id}
           getOptionLabel={(o) => o.name}
           getOptionStatus={(o) => effectiveToOptionStatus(o.effectiveStatus)}
+          getOptionStatusLabel={(o) => effectiveStatusLabel(o.effectiveStatus)}
           renderRowAction={renderAdSetRowAction}
           createAction={adSetCreateAction}
           noOptionsText="No ad sets match this search."

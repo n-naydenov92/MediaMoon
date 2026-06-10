@@ -43,6 +43,9 @@ export {
 
 export type { StatusFilter } from './accountsApi'
 
+export { accountStatusInfo, canAccountServeAds } from './accountStatus'
+export type { AccountStatusInfo, AccountStatusTone } from './accountStatus'
+
 export { fetchAdSet, fetchPixels } from './targetingApi'
 
 export { fetchAccountInsights } from './insightsApi'

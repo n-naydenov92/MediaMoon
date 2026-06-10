@@ -184,6 +184,14 @@
   background: var(--text-muted);
 }
 
+.statusDot[data-status='warn'] {
+  background: var(--warning);
+}
+
+.statusDot[data-status='inactive'] {
+  background: var(--error);
+}
+
 .optionName {
   font-weight: 600;
   color: var(--text-primary);

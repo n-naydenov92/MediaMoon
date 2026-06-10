@@ -20,7 +20,7 @@ import CheckIcon from '@mui/icons-material/Check'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import styles from './SearchSelect.module.css'
 
-export type OptionStatus = 'active' | 'paused'
+export type OptionStatus = 'active' | 'paused' | 'warn' | 'inactive'
 
 export interface SearchSelectCreateAction {
   readonly label: string
@@ -74,6 +74,9 @@ interface Props<T> {
   readonly getOptionLabel: (option: T) => string
   readonly getOptionSecondary?: (option: T) => string
   readonly getOptionStatus?: (option: T) => OptionStatus
+  // When set, the status dot is wrapped in a tooltip with this label (e.g. the human
+  // account/campaign status) so hovering a dot explains what its colour means.
+  readonly getOptionStatusLabel?: (option: T) => string
   readonly getOptionIcon?: (option: T) => ReactNode
   readonly getOptionGroup?: (option: T) => string
   readonly collapsibleGroups?: boolean
@@ -95,6 +98,7 @@ function SearchSelectInner<T>({
   getOptionLabel,
   getOptionSecondary,
   getOptionStatus,
+  getOptionStatusLabel,
   getOptionIcon,
   getOptionGroup,
   collapsibleGroups = false,
@@ -219,6 +223,7 @@ function SearchSelectInner<T>({
           const secondary = getOptionSecondary ? getOptionSecondary(option) : null
           const tooltipText = secondary ? `${label} ${secondary}` : label
           const icon: ReactNode = getOptionIcon ? getOptionIcon(option) : leadingIcon
+          const statusLabel = getOptionStatusLabel ? getOptionStatusLabel(option) : ''
           return (
             <Box
               key={getOptionId(option)}
@@ -233,12 +238,14 @@ function SearchSelectInner<T>({
                 </Box>
               ) : null}
               {getOptionStatus && (
-                <Box
-                  component="span"
-                  className={styles.statusDot}
-                  data-status={getOptionStatus(option)}
-                  aria-hidden
-                />
+                <Tooltip title={statusLabel} placement="top" disableInteractive>
+                  <Box
+                    component="span"
+                    className={styles.statusDot}
+                    data-status={getOptionStatus(option)}
+                    aria-hidden
+                  />
+                </Tooltip>
               )}
               <Tooltip title={tooltipText} placement="top" disableInteractive enterDelay={400}>
                 <Typography component="span" variant="inherit" className={styles.optionName}>
