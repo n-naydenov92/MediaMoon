@@ -17,6 +17,9 @@ export const BRAND_MARKET_AD_ACCOUNTS: Record<BrandId, BrandMarketAccounts> = {
   bubullincas: {
     BG: ['act_1073479967115320'],
   },
+  monitrade: {
+    BG: ['act_181255093815434'],
+  },
 }
 
 export function getAdAccountIds(brandId: BrandId, market: Market): readonly string[] {

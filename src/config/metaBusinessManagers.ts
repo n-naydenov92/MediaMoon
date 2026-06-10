@@ -44,6 +44,13 @@ export const BUSINESS_MANAGERS: readonly MetaBusinessManager[] = [
     tokenEnvVar: 'META_TOKEN_BUBULLINCAS',
     accountIds: ['act_1073479967115320'],
   },
+  {
+    id: 'monitrade-bm',
+    label: 'Moni Trade BM',
+    brandId: 'monitrade',
+    tokenEnvVar: 'META_TOKEN_MONITRADE',
+    accountIds: ['act_181255093815434'],
+  },
 ]
 
 export function normalizeAccountId(id: string): string {
