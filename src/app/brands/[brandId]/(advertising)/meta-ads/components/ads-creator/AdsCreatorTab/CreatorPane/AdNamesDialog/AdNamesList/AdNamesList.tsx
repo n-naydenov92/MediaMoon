@@ -12,6 +12,7 @@ interface Props {
   readonly adsCount: number
   readonly names: ReadonlyMap<string, string>
   readonly multiPage: boolean
+  readonly emptyHint: string
   readonly onNameChange: (key: string, value: string, fallback: string) => void
 }
 
@@ -20,20 +21,26 @@ export default memo(function AdNamesList({
   adsCount,
   names,
   multiPage,
+  emptyHint,
   onNameChange,
 }: Props): JSX.Element {
   return (
     <>
       <Box className={styles.listHeader}>
-        <Typography component="span" variant="inherit" className={styles.listHeaderLabel}>
+        <Typography component="span" variant="caption" color="text.disabled">
           Ad names
         </Typography>
-        <Typography component="span" variant="inherit" className={styles.listHeaderCount}>
+        <Typography component="span" variant="caption" color="text.secondary" className={styles.listHeaderCount}>
           {adsCount}
         </Typography>
       </Box>
 
       <Box className={styles.list}>
+        {combos.length === 0 && (
+          <Typography component="p" variant="body1" color="text.disabled" className={styles.emptyHint}>
+            {emptyHint}
+          </Typography>
+        )}
         {combos.map((combo) => (
           <AdNameRow
             key={combo.key}

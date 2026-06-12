@@ -190,7 +190,9 @@ export default memo(function CreatorPane({
   const closeAdNames = useCallback(() => setAdNamesOpen(false), [])
   const openCopyEach = useCallback(() => setCopyEachOpen(true), [])
   const closeCopyEach = useCallback(() => setCopyEachOpen(false), [])
-  const adsCount = (targeting.pageIds.length || 1) * creativeCount
+  // Real ad count = pages × creatives. With no page selected there are zero ads —
+  // the naming controls key off this, so it must not pretend a phantom page.
+  const adsCount = targeting.pageIds.length * creativeCount
   const isSingleAd = adsCount === 1
 
   // Every nameable ad slot — uploaded files, library assets and duplicates alike — so
@@ -212,7 +214,7 @@ export default memo(function CreatorPane({
     if (!creative) {
       return
     }
-    const tok = page ? resolvePageToken(pageTokens, page.id, page.name) : ''
+    const tok = page ? resolvePageToken(pageTokens, page.id) : ''
     onCopyChange({ ...copy, name: buildAutoAdName(creative, tok) })
   }, [copy, nameableCreatives, onCopyChange, pageTokens, selectedPages])
 
@@ -291,7 +293,7 @@ export default memo(function CreatorPane({
       totalCreatives={creativeCount}
       overrides={deferredOverrides}
       onAutoName={isSingleAd ? handleAutoNameSingle : undefined}
-      onNameEach={adsCount >= 2 ? openAdNames : undefined}
+      onNameEach={!isSingleAd && creativeCount > 0 ? openAdNames : undefined}
       onEditEach={creativeCount >= 2 ? openCopyEach : undefined}
     />
   ), [
@@ -367,7 +369,7 @@ export default memo(function CreatorPane({
 
       <Box className={styles.footer}>
         <PublishBar
-          adsCount={targeting.pageIds.length * creativeCount}
+          adsCount={adsCount}
           canSubmit={canSubmit}
           onSubmit={handleSubmit}
           jobs={jobs}

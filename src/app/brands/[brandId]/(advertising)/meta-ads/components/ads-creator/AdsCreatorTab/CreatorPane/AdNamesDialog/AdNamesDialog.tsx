@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, useCallback, useMemo, useRef, useState } from 'react'
+import { memo, useCallback, useDeferredValue, useMemo, useRef, useState } from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline'
@@ -10,11 +10,8 @@ import {
   type NameableCreative,
   EMPTY_AD_NAME_TAGS,
   adCombos,
-  adNameMapKey,
   buildAdNameFromTags,
   mapWith,
-  resolvePageToken,
-  restampPageToken,
 } from '../helpers'
 import CreatorDialog from '../../CreatorDialog/CreatorDialog'
 import BulkNamingSection from './BulkNamingSection/BulkNamingSection'
@@ -44,15 +41,13 @@ export default memo(function AdNamesDialog({
   onPageTokensChange,
 }: Props): JSX.Element {
   const multiPage = selectedPages.length > 1
-  const adsCount = creatives.length * Math.max(selectedPages.length, 1)
+  const adsCount = creatives.length * selectedPages.length
 
-  const [bulkOpen, setBulkOpen] = useState(false)
+  const [bulkOpen, setBulkOpen] = useState(true)
   const toggleBulk = useCallback(() => setBulkOpen((v) => !v), [])
-  const [pageNamesOpen, setPageNamesOpen] = useState(false)
+  const [pageNamesOpen, setPageNamesOpen] = useState(true)
   const togglePageNames = useCallback(() => setPageNamesOpen((v) => !v), [])
   const [tags, setTags] = useState<AdNameTags>(EMPTY_AD_NAME_TAGS)
-  const tagsEmpty = tags.product === '' && tags.creativeInfo === ''
-    && tags.textType === '' && tags.destination === ''
   const [fullName, setFullName] = useState('')
 
   const combos = useMemo(
@@ -60,63 +55,68 @@ export default memo(function AdNamesDialog({
     [selectedPages, creatives, pageTokens],
   )
 
-  // The name and token maps change on every keystroke. Reading them through a ref
-  // keeps `setName`/`setPageTok` stable, so the memoized rows below only re-render
-  // the field actually being edited instead of the whole list each keystroke.
-  const liveRef = useRef({ names, pageTokens })
-  liveRef.current = { names, pageTokens }
+  // Live bulk typing rewrites the whole names map each keystroke. The ad-name list
+  // is the heavy consumer, so it reads a deferred copy — keeping the bulk/page fields
+  // responsive while the rows catch up off the keystroke critical path.
+  const deferredNames = useDeferredValue(names)
 
-  const handleApplyTags = useCallback(() => {
-    onChange(new Map(combos.map((c) => [c.key, buildAdNameFromTags(c.creative, c.pageTok, tags)])))
-  }, [combos, onChange, tags])
+  // setName reads the latest names through a ref so its identity stays stable —
+  // memoized rows only re-render the field actually being edited.
+  const namesRef = useRef(names)
+  namesRef.current = names
 
-  // Apply one full name to every ad; the page token is always appended last.
-  const handleApplyFullName = useCallback(() => {
-    const trimmed = fullName.trim()
-    if (trimmed === '') {
+  // Live: any bulk field or page name rewrites every ad name as you type. Full name
+  // wins when present, else the structured tags; clearing the template falls back to
+  // the auto names. A page token is appended only when the operator has typed one.
+  const rebuildNames = useCallback((
+    nextTags: AdNameTags,
+    nextFullName: string,
+    nextTokens: ReadonlyMap<string, string>,
+  ) => {
+    const trimmed = nextFullName.trim()
+    const hasTags = nextTags.product !== '' || nextTags.creativeInfo !== ''
+      || nextTags.textType !== '' || nextTags.destination !== ''
+    if (trimmed === '' && !hasTags) {
+      onChange(new Map())
       return
     }
-    onChange(new Map(combos.map((c) => [c.key, c.pageTok ? `${trimmed}-${c.pageTok}` : trimmed])))
-  }, [combos, fullName, onChange])
+    const next = adCombos(selectedPages, creatives, nextTokens).map((c): [string, string] => {
+      if (trimmed !== '') {
+        return [c.key, c.pageTok ? `${trimmed}-${c.pageTok}` : trimmed]
+      }
+      return [c.key, buildAdNameFromTags(c.creative, c.pageTok, nextTags)]
+    })
+    onChange(new Map(next))
+  }, [selectedPages, creatives, onChange])
+
+  const handleTagsChange = useCallback((next: AdNameTags) => {
+    setTags(next)
+    rebuildNames(next, fullName, pageTokens)
+  }, [rebuildNames, fullName, pageTokens])
+
+  const handleFullNameChange = useCallback((next: string) => {
+    setFullName(next)
+    rebuildNames(tags, next, pageTokens)
+  }, [rebuildNames, tags, pageTokens])
 
   const setName = useCallback((key: string, value: string, fallback: string) => {
-    onChange(mapWith(liveRef.current.names, key, value === '' || value === fallback ? null : value))
+    onChange(mapWith(namesRef.current, key, value === '' || value === fallback ? null : value))
   }, [onChange])
 
-  // Store the raw value (including empty) once touched, so the field is freely
-  // editable — page naming is optional, an empty token just omits it. Also
-  // re-stamp the token on already-set ad names for this page so the change
-  // applies live (only on names that still carry the old token — manual edits
-  // are left alone).
+  // Page name is optional — an empty field appends no token. Typing one rewrites the
+  // generated names live.
   const setPageTok = useCallback((page: Page, value: string) => {
-    const { names: currNames, pageTokens: currTokens } = liveRef.current
-    const oldTok = resolvePageToken(currTokens, page.id, page.name)
-    onPageTokensChange(mapWith(currTokens, page.id, value))
-
-    if (oldTok === value) {
-      return
-    }
-    let changed = false
-    const nextNames = new Map(currNames)
-    for (const creative of creatives) {
-      const key = adNameMapKey(page.id, creative.key)
-      const current = currNames.get(key)
-      if (current === undefined) {
-        continue
-      }
-      const updated = restampPageToken(current, oldTok, value)
-      if (updated !== current) {
-        nextNames.set(key, updated)
-        changed = true
-      }
-    }
-    if (changed) {
-      onChange(nextNames)
-    }
-  }, [creatives, onChange, onPageTokensChange])
+    const nextTokens = mapWith(pageTokens, page.id, value)
+    onPageTokensChange(nextTokens)
+    rebuildNames(tags, fullName, nextTokens)
+  }, [pageTokens, onPageTokensChange, rebuildNames, tags, fullName])
 
   const countLabel = `${creatives.length} ${creatives.length === 1 ? 'creative' : 'creatives'}`
     + ` · ${adsCount} ${adsCount === 1 ? 'ad' : 'ads'}`
+
+  // The actionable hint lives in the Page names section ("Select a page…"), so the
+  // empty output area just labels itself rather than repeating the call to action.
+  const emptyHint = 'Your ad names will appear here'
 
   return (
     <CreatorDialog
@@ -145,12 +145,9 @@ export default memo(function AdNamesDialog({
           open={bulkOpen}
           onToggle={toggleBulk}
           tags={tags}
-          onTagsChange={setTags}
-          onApplyTags={handleApplyTags}
-          tagsEmpty={tagsEmpty}
+          onTagsChange={handleTagsChange}
           fullName={fullName}
-          onFullNameChange={setFullName}
-          onApplyFullName={handleApplyFullName}
+          onFullNameChange={handleFullNameChange}
         />
 
         <PageTokensSection
@@ -164,8 +161,9 @@ export default memo(function AdNamesDialog({
         <AdNamesList
           combos={combos}
           adsCount={adsCount}
-          names={names}
+          names={deferredNames}
           multiPage={multiPage}
+          emptyHint={emptyHint}
           onNameChange={setName}
         />
       </Box>

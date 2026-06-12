@@ -2,9 +2,11 @@
 
 import { memo } from 'react'
 import Box from '@mui/material/Box'
+import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import MovieOutlinedIcon from '@mui/icons-material/MovieOutlined'
 import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined'
+import StorefrontOutlinedIcon from '@mui/icons-material/StorefrontOutlined'
 import FormTextField from '../../../../FormTextField/FormTextField'
 import { type AdCombo, buildAutoAdName } from '../../../helpers'
 import styles from '../../AdNamesDialog.module.css'
@@ -33,13 +35,25 @@ export default memo(function AdNameRow({
         <Box component="span" className={styles.mediaIcon} aria-hidden>
           <MediaIcon fontSize="inherit" />
         </Box>
-        <Typography component="span" variant="inherit" className={styles.fileName}>
+        <Typography component="span" variant="caption" color="text.disabled" className={styles.fileName}>
           {combo.creative.name}
         </Typography>
         {multiPage && (
-          <Typography component="span" variant="inherit" className={styles.pageChip}>
-            {combo.page.name}
-          </Typography>
+          <Tooltip title={combo.page.name}>
+            {combo.page.pictureUrl ? (
+              <Box
+                component="img"
+                src={combo.page.pictureUrl}
+                alt={combo.page.name}
+                referrerPolicy="no-referrer"
+                className={styles.adRowAvatar}
+              />
+            ) : (
+              <Box component="span" className={styles.adRowAvatarFallback}>
+                <StorefrontOutlinedIcon fontSize="inherit" />
+              </Box>
+            )}
+          </Tooltip>
         )}
       </Box>
       <FormTextField

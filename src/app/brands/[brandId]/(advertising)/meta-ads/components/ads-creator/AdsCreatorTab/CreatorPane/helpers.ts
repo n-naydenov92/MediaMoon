@@ -35,17 +35,6 @@ export function mediaToken(file: File): 'Video' | 'IMG' {
   return file.type.startsWith('video/') ? 'Video' : 'IMG'
 }
 
-// Short page identifier from the page name initials (e.g. "Nedelya Shtonova" → "NS").
-export function pageToken(name: string): string {
-  return name
-    .trim()
-    .split(/\s+/)
-    .map((word) => word.charAt(0))
-    .filter(Boolean)
-    .join('')
-    .toUpperCase()
-}
-
 export function monthToken(now: Date): string {
   return now.toLocaleString('en-US', { month: 'short' })
 }
@@ -109,8 +98,8 @@ export function slotNameable(slot: CreativeSlot): NameableCreative {
 // The pre-filled, editable default each ad shows. Library assets already carry a
 // descriptive name, so they default to it (with the page token appended to keep
 // per-page ads distinct). Uploaded files get the structured placeholder skeleton
-// {Media}-{Month}-Product-CreativeInfo-TextType[-{Page}]-Dest. `pageTok` is the
-// already-resolved page token (custom or auto), or '' to omit.
+// {Media}-{Month}-Product-CreativeInfo-TextType-Dest[-{Page}]. `pageTok` is the
+// already-resolved page token (custom or auto), appended last, or '' to omit.
 export function buildAutoAdName(
   creative: NameableCreative,
   pageTok: string,
@@ -123,8 +112,8 @@ export function buildAutoAdName(
     creative.media,
     monthToken(now),
     ...PLACEHOLDER_PARTS,
-    pageTok,
     DESTINATION_PLACEHOLDER,
+    pageTok,
   ]
     .filter(Boolean)
     .join('-')
@@ -143,48 +132,24 @@ export function buildAdNameFromTags(
     sanitizeTag(tags.product),
     sanitizeTag(tags.creativeInfo),
     sanitizeTag(tags.textType),
-    pageTok,
     sanitizeTag(tags.destination),
+    pageTok,
   ]
     .filter(Boolean)
     .join('-')
 }
 
-// Custom page token if the operator touched the field (even to empty — page
-// naming is optional), else the auto initials.
+// The custom page token the operator typed, or '' when none — page naming is
+// optional and nothing is appended by default.
 export function resolvePageToken(
   pageTokens: ReadonlyMap<string, string>,
   pageId: string,
-  pageName: string,
 ): string {
-  return pageTokens.has(pageId) ? (pageTokens.get(pageId) ?? '') : pageToken(pageName)
+  return pageTokens.get(pageId) ?? ''
 }
 
 export function adNameMapKey(pageId: string, creativeKey: string): string {
   return `${pageId}::${creativeKey}`
-}
-
-// Swap the page-token segment in a built name when the page token changes,
-// preserving any trailing destination segment (the name is `…-{page}` or
-// `…-{page}-{dest}`). An empty newTok drops the page segment but keeps the tail.
-// Returns the name untouched when the old token isn't present — manual edits and
-// names from other pages are left alone.
-export function restampPageToken(name: string, oldTok: string, newTok: string): string {
-  if (!oldTok) {
-    return name
-  }
-  if (name.endsWith(`-${oldTok}`)) {
-    const base = name.slice(0, -(oldTok.length + 1))
-    return newTok ? `${base}-${newTok}` : base
-  }
-  const marker = `-${oldTok}-`
-  const idx = name.lastIndexOf(marker)
-  if (idx === -1) {
-    return name
-  }
-  const before = name.slice(0, idx)
-  const tail = name.slice(idx + marker.length)
-  return newTok ? `${before}-${newTok}-${tail}` : `${before}-${tail}`
 }
 
 // One ad per (page × creative). Each combo carries its resolved page token so
@@ -202,7 +167,7 @@ export function adCombos(
   pageTokens: ReadonlyMap<string, string>,
 ): readonly AdCombo[] {
   return pages.flatMap((page) => {
-    const pageTok = resolvePageToken(pageTokens, page.id, page.name)
+    const pageTok = resolvePageToken(pageTokens, page.id)
     return creatives.map((creative) => ({
       page,
       creative,

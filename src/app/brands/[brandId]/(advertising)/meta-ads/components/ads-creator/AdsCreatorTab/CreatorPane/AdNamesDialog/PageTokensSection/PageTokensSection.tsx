@@ -9,7 +9,6 @@ import LabelOutlinedIcon from '@mui/icons-material/LabelOutlined'
 import PublicOutlinedIcon from '@mui/icons-material/PublicOutlined'
 import type { Page } from '@/lib/gateways/MetaAdsGateway'
 import FormTextField from '../../../FormTextField/FormTextField'
-import { pageToken } from '../../helpers'
 import styles from '../AdNamesDialog.module.css'
 
 interface Props {
@@ -37,13 +36,18 @@ export default memo(function PageTokensSection({
         aria-expanded={open}
       >
         <LabelOutlinedIcon className={styles.bulkIcon} fontSize="inherit" />
-        <Typography component="span" variant="inherit" className={styles.bulkTitle}>
+        <Typography component="span" variant="caption" color="text.secondary" className={styles.bulkTitle}>
           Page names — appended to every name
         </Typography>
         <ExpandMoreIcon className={styles.chevron} data-open={open ? 'true' : 'false'} fontSize="inherit" />
       </Box>
       <Collapse in={open} timeout={180} unmountOnExit>
         <Box className={styles.pageRows}>
+          {selectedPages.length === 0 && (
+            <Typography component="p" variant="body2" color="text.secondary" className={styles.pageEmptyHint}>
+              Select a page to name your ads
+            </Typography>
+          )}
           {selectedPages.map((page) => (
             <Box key={page.id} className={styles.pageRow}>
               {page.pictureUrl ? (
@@ -59,13 +63,13 @@ export default memo(function PageTokensSection({
                   <PublicOutlinedIcon fontSize="inherit" />
                 </Box>
               )}
-              <Typography component="span" variant="inherit" className={styles.pageRowName}>
+              <Typography component="span" variant="body2" color="text.secondary" className={styles.pageRowName}>
                 {page.name}
               </Typography>
               <FormTextField
                 className={styles.pageTokenField}
-                placeholder={pageToken(page.name)}
-                value={pageTokens.has(page.id) ? (pageTokens.get(page.id) ?? '') : pageToken(page.name)}
+                placeholder="Add page name"
+                value={pageTokens.get(page.id) ?? ''}
                 onChange={(e) => onPageTokChange(page, e.target.value)}
               />
             </Box>
