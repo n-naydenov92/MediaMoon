@@ -4,7 +4,6 @@ import { getConfiguredBusinessManagersForBrand, getMetaTokenForAccount } from '@
 import {
   countActiveAdsInAccount,
   fetchAccountInsights,
-  fetchAdsWithInsights,
   type AdAccount,
 } from '@/lib/gateways/MetaAdsGateway'
 import {
@@ -22,15 +21,15 @@ import {
   sumKpis,
   type AccountKpis,
 } from '@/lib/meta/aggregate'
-import { fetchAllAccounts, toLeaderboardEntry } from './accountFetching'
+import { fetchAdsOrNull, fetchAllAccounts, toLeaderboardEntry } from './accountFetching'
 import { parseBrandId, parseCriteriaFromQuery, resolveTargetAccounts } from './queryParsing'
 import {
   edgeCacheHeaders,
   emptyResponse,
+  summaryCacheHeaders,
   type SummaryResponse,
 } from './summaryResponse'
 
-const ADS_PER_ACCOUNT_LIMIT = 200
 const NO_TOKEN_STATUS = 503
 const UPSTREAM_ERROR_STATUS = 502
 
@@ -81,10 +80,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         const [currentInsights, previousInsights, ads, activeAdsCount] = await Promise.all([
           fetchAccountInsights(token, account.id, account.currency, datePresent, { daily: true }),
           fetchAccountInsights(token, account.id, account.currency, datePast, { daily: false }),
-          fetchAdsWithInsights(token, account.id, account.currency, datePresent, {
-            limit: ADS_PER_ACCOUNT_LIMIT,
-            filters: [{ field: 'spend', operator: 'GREATER_THAN', value: criteria.minSpend }],
-          }),
+          fetchAdsOrNull(token, account, { dateParams: datePresent, minSpend: criteria.minSpend }),
           countActiveAdsInAccount(token, account.id),
         ])
         return { account, currentInsights, previousInsights, ads, activeAdsCount }
@@ -126,7 +122,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       ),
     )
 
-    const allAdEntries = usable.flatMap((u) => u.ads.map(toLeaderboardEntry))
+    const allAdEntries = usable.flatMap((u) => (u.ads ?? []).map(toLeaderboardEntry))
+    const accountsMissingAds = usable.filter((u) => u.ads === null).map((u) => u.account.name)
 
     const response: SummaryResponse = {
       kpis: computeKpiDelta(sumKpis(currentKpis), sumKpis(previousKpis)),
@@ -136,11 +133,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       topVideos: pickTopByType(allAdEntries, 'video', criteria),
       topImages: pickTopByType(allAdEntries, 'image', criteria),
       underperformers: pickUnderperformers(allAdEntries, criteria),
+      accountsMissingAds,
       criteria,
       fetchedAt: Date.now(),
     }
 
-    return NextResponse.json(response, { headers: edgeCacheHeaders() })
+    return NextResponse.json(response, { headers: summaryCacheHeaders(response) })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error'
     return NextResponse.json({ error: message }, { status: UPSTREAM_ERROR_STATUS })

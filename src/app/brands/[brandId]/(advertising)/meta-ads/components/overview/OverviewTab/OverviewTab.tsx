@@ -123,6 +123,12 @@ export default function OverviewTab({ brandId }: Props): JSX.Element {
           {state.message}
         </Notice>
       )}
+      {state.status === 'success' && state.data.accountsMissingAds.length > 0 && (
+        <Notice variant="info" title="Some ads couldn't be loaded">
+          Meta didn&apos;t return ad-level data for {state.data.accountsMissingAds.join(', ')}.
+          KPIs are complete, but the leaderboards are missing those ads. Refresh to try again.
+        </Notice>
+      )}
       {state.status === 'success' && (
         <KpiGrid
           kpis={state.data.kpis}

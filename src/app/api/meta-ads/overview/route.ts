@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { GRAPH_API_BASE } from '@/lib/gateways/MetaAdsGateway'
 import { resolveBrandTokenFromRequest } from '@/lib/meta/resolveBrandToken'
-
-const BASE = 'https://graph.facebook.com/v21.0'
 
 async function get<T>(token: string, path: string, params: Record<string, string>): Promise<T> {
   const qs = new URLSearchParams({ ...params, access_token: token })
-  const res = await fetch(`${BASE}${path}?${qs}`)
+  const res = await fetch(`${GRAPH_API_BASE}${path}?${qs}`)
   return res.json() as Promise<T>
 }
 

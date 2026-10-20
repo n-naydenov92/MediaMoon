@@ -1,11 +1,10 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { GRAPH_API_BASE } from '@/lib/gateways/MetaAdsGateway'
 import {
   resolveAccountTokenFromRequest,
   resolveBrandTokenFromRequest,
 } from '@/lib/meta/resolveBrandToken'
-
-const BASE = 'https://graph.facebook.com/v21.0'
 
 const FIELDS = [
   'impressions',
@@ -51,8 +50,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   ].join(',')
 
   const [insightsRes, adRes] = await Promise.all([
-    fetch(`${BASE}/${adId}/insights?${qs}`),
-    fetch(`${BASE}/${adId}?fields=${encodeURIComponent(creativeFields)}&access_token=${token}`),
+    fetch(`${GRAPH_API_BASE}/${adId}/insights?${qs}`),
+    fetch(`${GRAPH_API_BASE}/${adId}?fields=${encodeURIComponent(creativeFields)}&access_token=${token}`),
   ])
 
   const insights = await insightsRes.json() as { data?: unknown[]; error?: unknown }
@@ -67,11 +66,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
   const [postPreview, videoSource] = await Promise.all([
     storyId
-      ? fetch(`${BASE}/${storyId}?fields=message,story,from{name,id},full_picture,attachments{media,title,description,url,subattachments}&access_token=${token}`)
+      ? fetch(`${GRAPH_API_BASE}/${storyId}?fields=message,story,from{name,id},full_picture,attachments{media,title,description,url,subattachments}&access_token=${token}`)
         .then((r) => r.json())
       : Promise.resolve(null),
     videoId
-      ? fetch(`${BASE}/${videoId}?fields=source,thumbnails&access_token=${token}`)
+      ? fetch(`${GRAPH_API_BASE}/${videoId}?fields=source,thumbnails&access_token=${token}`)
         .then((r) => r.json() as Promise<{ source?: string; thumbnails?: { data?: { uri?: string }[] }; error?: unknown }>)
       : Promise.resolve(null),
   ])

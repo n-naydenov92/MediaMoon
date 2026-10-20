@@ -21,6 +21,7 @@ export interface OverviewSummary {
   readonly topVideos: readonly AdLeaderboardEntry[]
   readonly topImages: readonly AdLeaderboardEntry[]
   readonly underperformers: readonly AdLeaderboardEntry[]
+  readonly accountsMissingAds: readonly string[]
   readonly criteria: TopCriteria
   readonly fetchedAt: number
 }
@@ -93,7 +94,9 @@ export function useOverviewData(query: OverviewQuery): OverviewControls {
           return
         }
         const data = (await response.json()) as OverviewSummary
-        cacheRef.current.set(cacheKey, data)
+        if (data.accountsMissingAds.length === 0) {
+          cacheRef.current.set(cacheKey, data)
+        }
         setState({ status: 'success', data })
       } catch (err) {
         if (err instanceof DOMException && err.name === 'AbortError') {

@@ -6,7 +6,7 @@ const ACCOUNTS = [
   { envVar: 'META_TOKEN_THEGREENBEAR', accountId: 'act_222478775571065', label: 'TheGreenBear (primary)' },
 ]
 
-const API_VERSION = 'v21.0'
+const API_VERSION = 'v25.0'
 const BASE = `https://graph.facebook.com/${API_VERSION}`
 
 async function call(path, token, params = {}) {

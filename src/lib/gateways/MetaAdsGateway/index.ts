@@ -29,6 +29,8 @@ export type {
 
 export { CTA_TYPES } from './types'
 
+export { GRAPH_API_BASE } from './http'
+
 export {
   countActiveAdsInAccount,
   createAdSet,
