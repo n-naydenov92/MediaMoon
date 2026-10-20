@@ -3,11 +3,11 @@ import type { NextRequest } from 'next/server'
 import { findBrandById, isBrandId } from '@/config/brands'
 import { parseMarketSelection } from '@/lib/markets'
 import { parseDateRangeFromQuery, previousPeriod } from '@/lib/meta/dateRange'
+import { metaErrorResponse } from '@/lib/meta/metaErrorResponse'
 import type { DashboardSummary } from '@/types/dashboard'
 import { buildCacheTag, buildSummary } from './helpers'
 
 const CACHE_TTL_MS = 3_600_000
-const UPSTREAM_ERROR_STATUS = 502
 
 interface CacheEntry {
   readonly data: DashboardSummary
@@ -55,8 +55,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   } catch (err) {
     // eslint-disable-next-line no-console -- intentional logging
     console.error('[dashboard/summary] failed', err)
-    const message = err instanceof Error ? err.message : 'Unknown error'
-    return NextResponse.json({ error: message }, { status: UPSTREAM_ERROR_STATUS })
+    return metaErrorResponse(err)
   }
 }
 

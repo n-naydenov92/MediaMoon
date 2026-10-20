@@ -201,6 +201,7 @@ This means 10 concurrent users = 1 API call per cache window, not 10.
 - `src/lib/gateways/TrendsGateway.ts`
 - `src/lib/gateways/WooGateway.ts` — WooCommerce REST per brand (revenue / orders / top products)
 - `src/lib/gateways/GoogleAnalyticsGateway.ts` — GA4 Data API (sessions / active users) via `@google-analytics/data` + service-account JSON; per-brand property IDs in `src/config/analyticsProviders.ts`
+- `src/lib/gateways/MetaAdsGateway/` — Meta Marketing API, one system-user token per Business Manager. Every call goes through `http.ts` (usage headers, typed `MetaApiError`, local block while Meta throttles); routes map errors with `src/lib/meta/metaErrorResponse.ts`. Never call `graph.facebook.com` directly. Rate limits and auth: `docs/adr/0001-meta-api-rate-limits.md`; check tier/usage with `node --env-file=.env.local scripts/meta-usage.mjs`
 - `src/lib/pipeline.ts` — orchestrates the above
 
 **Module Registry** — `src/config/modules.ts` drives sidebar, root redirect, and Clerk role checks. Adding a module = one entry here + one folder + one API route.

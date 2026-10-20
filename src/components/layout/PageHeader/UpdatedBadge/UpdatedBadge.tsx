@@ -6,19 +6,27 @@ import Box from '@mui/material/Box'
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
-import { formatAgo, formatTimestamp } from '@/lib/relativeTime'
+import { formatAgo } from '@/lib/relativeTime'
 import { useThemeMode } from '@/styles/useThemeMode'
+import { buildFetchedTooltip } from './helpers'
 import styles from './UpdatedBadge.module.css'
 
 const TICK_INTERVAL_MS = 30_000
 
 interface Props {
   readonly fetchedAt: number | null
+  // When the data comes from a cache: shows in the tooltip how long it is still reused.
+  readonly cachedUntil?: number | null
   readonly onRefresh: () => void
   readonly disabled?: boolean
 }
 
-export default function UpdatedBadge({ fetchedAt, onRefresh, disabled = false }: Props): JSX.Element {
+export default function UpdatedBadge({
+  fetchedAt,
+  cachedUntil = null,
+  onRefresh,
+  disabled = false,
+}: Props): JSX.Element {
   const { mode } = useThemeMode()
   const [now, setNow] = useState<number>(() => Date.now())
 
@@ -28,7 +36,7 @@ export default function UpdatedBadge({ fetchedAt, onRefresh, disabled = false }:
   }, [])
 
   const ago = fetchedAt === null ? 'Loading…' : formatAgo(now - fetchedAt)
-  const labelTooltip = fetchedAt === null ? '' : `Last fetched at ${formatTimestamp(fetchedAt)}`
+  const labelTooltip = fetchedAt === null ? '' : buildFetchedTooltip(fetchedAt, cachedUntil, now)
   const isDisabled = disabled || fetchedAt === null
 
   return (

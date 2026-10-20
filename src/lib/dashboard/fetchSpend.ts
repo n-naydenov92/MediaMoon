@@ -1,7 +1,8 @@
 import { getAdAccountIds } from '@/config/adAccounts'
 import type { BrandId } from '@/config/brands'
 import { getConfiguredBusinessManagersForBrand } from '@/config/metaTokens'
-import { fetchAccountInsights, fetchAdAccounts } from '@/lib/gateways/MetaAdsGateway'
+import { fetchAccountInsights } from '@/lib/gateways/MetaAdsGateway'
+import { getAdAccountsCached } from '@/lib/meta/cachedMetaReads'
 import { convertToEur } from '@/lib/meta/fx'
 import { toMetaInsightsParams, type DateRangeSelection } from '@/lib/meta/dateRange'
 import type { MarketSelection } from '@/lib/markets'
@@ -85,8 +86,9 @@ async function resolveTargetAccounts(
   }
   const marketAllowed = marketAccountFilter(brandId, market)
   const perBm = await Promise.all(
-    configured.map(async ({ businessManager, token }) => {
-      const accounts = await fetchAdAccounts(token)
+    configured.map(async (configuredBm) => {
+      const { businessManager, token } = configuredBm
+      const accounts = await getAdAccountsCached(configuredBm)
       const allowed = new Set(businessManager.accountIds)
       return accounts
         .filter((a) => allowed.has(a.id) && marketAllowed(a.id))

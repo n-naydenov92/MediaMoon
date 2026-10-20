@@ -1,5 +1,7 @@
 # Meta Ads — OAuth Migration Log
 
+> **Заменен от [ADR 0001](adr/0001-meta-api-rate-limits.md) (2026-10-20).** Описаното по-долу (MediaMoon App, `META_ACCESS_TOKEN`) вече не е актуално: всички токени са system user токени на app-а NaydenovGroup, по един на Business Manager. Пазим документа като история.
+
 ## Текущ стейт (2026-04-28)
 
 OAuth логиката е **премахната**. Приложението работи с прост `META_ACCESS_TOKEN` env var.

@@ -14,6 +14,7 @@ import type {
 import { useAbortableFetch } from './useAbortableFetch'
 
 const EMPTY_DSA_ENTITIES: DsaEntities = { beneficiaries: [], payors: [] }
+const META_ASSETS_CACHE_URL = '/api/meta-ads/cache'
 
 export interface TargetingValue {
   readonly accountId: string
@@ -39,6 +40,10 @@ export interface TargetingData {
   readonly instagramAccounts: readonly InstagramAccount[]
   readonly dsaEntities: DsaEntities
   readonly refetchAdSets: () => void
+  // Clears the server cache of accounts / Pages / Instagram / pixels / DSA, then
+  // reloads the lists shown here.
+  readonly reloadAssets: () => void
+  readonly isReloadingAssets: boolean
 }
 
 interface Input {
@@ -71,12 +76,33 @@ export function useTargetingData({
 
   const [adSetsRefetchKey, setAdSetsRefetchKey] = useState(0)
   const refetchAdSets = useCallback(() => setAdSetsRefetchKey((k) => k + 1), [])
+  // Part of the cached lists' URLs below (the routes ignore it), so bumping it refetches them.
+  const [assetsReloadKey, setAssetsReloadKey] = useState(0)
+  const [isReloadingAssets, setIsReloadingAssets] = useState(false)
+
+  const reloadAssets = useCallback((): void => {
+    setIsReloadingAssets(true)
+    void (async () => {
+      try {
+        const response = await fetch(META_ASSETS_CACHE_URL, { method: 'DELETE' })
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`)
+        }
+        setAssetsReloadKey((k) => k + 1)
+      } catch (err) {
+        // eslint-disable-next-line no-console -- intentional logging at fetch boundary
+        console.error('[useTargetingData] reload from Meta failed', err)
+      } finally {
+        setIsReloadingAssets(false)
+      }
+    })()
+  }, [])
 
   const accountsResp = useAbortableFetch<AccountsResponse>(
-    `/api/meta-ads/accounts?brandId=${brandId}`,
+    `/api/meta-ads/accounts?brandId=${brandId}&_r=${assetsReloadKey}`,
   )
   const pagesResp = useAbortableFetch<PagesResponse>(
-    `/api/meta-ads/pages?brandId=${brandId}`,
+    `/api/meta-ads/pages?brandId=${brandId}&_r=${assetsReloadKey}`,
   )
   const campaignsResp = useAbortableFetch<CampaignsResponse>(
     accountId ? `/api/meta-ads/campaigns?accountId=${accountId}&status=${campaignStatus}` : null,
@@ -88,11 +114,11 @@ export function useTargetingData({
   )
   const igResp = useAbortableFetch<InstagramAccountsResponse>(
     accountId && singlePageId
-      ? `/api/meta-ads/instagram-accounts?accountId=${accountId}&pageId=${singlePageId}`
+      ? `/api/meta-ads/instagram-accounts?accountId=${accountId}&pageId=${singlePageId}&_r=${assetsReloadKey}`
       : null,
   )
   const dsaResp = useAbortableFetch<DsaEntitiesResponse>(
-    accountId ? `/api/meta-ads/dsa-entities?accountId=${accountId}` : null,
+    accountId ? `/api/meta-ads/dsa-entities?accountId=${accountId}&_r=${assetsReloadKey}` : null,
   )
 
   const accounts = useMemo(
@@ -105,5 +131,15 @@ export function useTargetingData({
   const instagramAccounts = igResp?.instagramAccounts ?? []
   const dsaEntities = dsaResp?.dsaEntities ?? EMPTY_DSA_ENTITIES
 
-  return { accounts, campaigns, adSets, pages, instagramAccounts, dsaEntities, refetchAdSets }
+  return {
+    accounts,
+    campaigns,
+    adSets,
+    pages,
+    instagramAccounts,
+    dsaEntities,
+    refetchAdSets,
+    reloadAssets,
+    isReloadingAssets,
+  }
 }

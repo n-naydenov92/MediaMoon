@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 720">
+  <style>
+    .moon { fill: #1B1A3A; }
+    @media (prefers-color-scheme: dark) { .moon { fill: #FFFFFF; } }
+  </style>
+  <path class="moon" d="M384.14 14.94A345.08 345.08 0 1 0 686.54 516.54A292.95 292.95 0 0 1 384.14 14.94Z"/>
+  <polygon points="508,218.96 508,414.63 671.08,316.81" fill="#6C5CE7" stroke="#6C5CE7" stroke-width="32" stroke-linejoin="round"/>
+</svg>

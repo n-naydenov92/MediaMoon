@@ -7,15 +7,20 @@ import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined'
 import RestartAltRoundedIcon from '@mui/icons-material/RestartAltRounded'
+import CloudSyncOutlinedIcon from '@mui/icons-material/CloudSyncOutlined'
 import type { LaunchJob } from '../../useLaunchQueue'
 import QueueLauncher from '../../QueueLauncher/QueueLauncher'
 import DecisionDialog from '../../DecisionDialog/DecisionDialog'
 import styles from './CreatorHeader.module.css'
 
+const RELOAD_ASSETS_LABEL = 'Reload accounts, Pages, Instagram, pixels & DSA from Meta'
+
 interface Props {
   readonly canReset: boolean
   readonly onResetDraft: () => void
   readonly onPreview: () => void
+  readonly onReloadAssets: () => void
+  readonly isReloadingAssets: boolean
   readonly jobs: readonly LaunchJob[]
   readonly accountId: string
   readonly onRetry: (jobId: string) => void
@@ -23,13 +28,15 @@ interface Props {
   readonly onDismiss: (jobId: string) => void
 }
 
-// The draft header: title + the three compact action buttons (Reset / Preview /
-// Queue). Owns the reset-confirm dialog as local UI state — Reset only clears once
-// the operator confirms, and the actual clearing lives in the parent (onResetDraft).
+// The draft header: title + the compact action buttons (Reload from Meta / Reset /
+// Preview / Queue). Owns the reset-confirm dialog as local UI state — Reset only clears
+// once the operator confirms, and the actual clearing lives in the parent (onResetDraft).
 export default memo(function CreatorHeader({
   canReset,
   onResetDraft,
   onPreview,
+  onReloadAssets,
+  isReloadingAssets,
   jobs,
   accountId,
   onRetry,
@@ -52,6 +59,18 @@ export default memo(function CreatorHeader({
           <Typography component="h4" variant="h4">Launch new ads</Typography>
         </Box>
         <Box className={styles.headerActions}>
+          <Tooltip title={RELOAD_ASSETS_LABEL}>
+            <Box component="span">
+              <IconButton
+                className={styles.actionBtn}
+                onClick={onReloadAssets}
+                disabled={isReloadingAssets}
+                aria-label={RELOAD_ASSETS_LABEL}
+              >
+                <CloudSyncOutlinedIcon fontSize="small" />
+              </IconButton>
+            </Box>
+          </Tooltip>
           <Tooltip title="Reset draft">
             <Box component="span">
               <IconButton

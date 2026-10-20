@@ -20,7 +20,6 @@ interface GraphPixelRaw {
 
 interface GraphListResponse<T> {
   data: T[]
-  error?: { code: number; message: string; type: string }
 }
 
 interface GraphCampaignBudgetRaw {
@@ -50,12 +49,10 @@ interface GraphAdSetDetailRaw {
   promoted_object?: Record<string, unknown>
   attribution_spec?: readonly { event_type?: string; window_days?: number }[]
   campaign?: GraphCampaignBudgetRaw
-  error?: { code: number; message: string; type: string }
 }
 
 interface GraphAccountCurrencyRaw {
   currency?: string
-  error?: { code: number; message: string; type: string }
 }
 
 export async function fetchAdSet(token: string, adSetId: string): Promise<AdSetDetail> {
@@ -63,9 +60,6 @@ export async function fetchAdSet(token: string, adSetId: string): Promise<AdSetD
     fields: 'id,name,status,effective_status,daily_budget,lifetime_budget,start_time,end_time,account_id,targeting,is_dynamic_creative,dsa_beneficiary,dsa_payor,optimization_goal,bid_strategy,bid_amount,destination_type,promoted_object,attribution_spec,campaign{id,daily_budget,lifetime_budget}',
   })
   const adSetJson = await callGraphApi<GraphAdSetDetailRaw>(adSetUrl)
-  if (adSetJson.error) {
-    throw new Error(`Meta API error ${adSetJson.error.code}: ${adSetJson.error.message}`)
-  }
 
   let currency = 'USD'
   const rawAccountId = adSetJson.account_id ?? ''
@@ -247,8 +241,5 @@ export async function fetchPixels(token: string, accountId: string): Promise<rea
     limit: '100',
   })
   const json = await callGraphApi<GraphListResponse<GraphPixelRaw>>(url)
-  if (json.error) {
-    throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
-  }
   return (json.data ?? []).map((raw) => ({ id: raw.id, name: raw.name }))
 }

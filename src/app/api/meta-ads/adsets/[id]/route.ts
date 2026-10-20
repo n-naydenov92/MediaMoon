@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { fetchAdSet } from '@/lib/gateways/MetaAdsGateway'
+import { metaErrorResponse } from '@/lib/meta/metaErrorResponse'
 import { resolveAccountTokenFromRequest } from '@/lib/meta/resolveBrandToken'
 
 export const runtime = 'nodejs'
@@ -23,7 +24,6 @@ export async function GET(request: NextRequest, ctx: RouteContext): Promise<Next
     const detail = await fetchAdSet(resolved.token, id)
     return NextResponse.json({ result: detail })
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error'
-    return NextResponse.json({ error: message }, { status: 502 })
+    return metaErrorResponse(err)
   }
 }

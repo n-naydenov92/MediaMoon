@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { uploadImage } from '@/lib/gateways/MetaAdsGateway'
+import { metaErrorResponse } from '@/lib/meta/metaErrorResponse'
 import { resolveAccountTokenFromRequest } from '@/lib/meta/resolveBrandToken'
 
 export const runtime = 'nodejs'
@@ -30,7 +31,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const result = await uploadImage(resolved.token, resolved.accountId, bytes, file.name, file.type)
     return NextResponse.json({ imageHash: result.hash })
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error'
-    return NextResponse.json({ error: message }, { status: 502 })
+    return metaErrorResponse(err)
   }
 }

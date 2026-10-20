@@ -29,7 +29,6 @@ interface GraphAdInsightsRow {
 
 interface GraphAdInsightsResponse {
   data?: GraphAdInsightsRow[]
-  error?: { message: string; type: string; code: number }
   paging?: { next?: string }
 }
 
@@ -48,7 +47,6 @@ interface GraphAdWithCreativeRaw {
 
 interface GraphAdsListResponse {
   data?: GraphAdWithCreativeRaw[]
-  error?: { message: string; type: string; code: number }
   paging?: { next?: string }
 }
 
@@ -105,9 +103,6 @@ async function fetchFilteredAdInsightsRows(
   const all: GraphAdInsightsRow[] = []
   for (let page = 0; page < MAX_INSIGHTS_PAGES && url; page += 1) {
     const json: GraphAdInsightsResponse = await callGraphApi<GraphAdInsightsResponse>(url)
-    if (json.error) {
-      throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
-    }
     all.push(...(json.data ?? []))
     url = json.paging?.next ?? null
   }
@@ -129,9 +124,6 @@ async function fetchAdsMetadataByIds(
       limit: String(chunk.length),
     })
     const json = await callGraphApi<GraphAdsListResponse>(url)
-    if (json.error) {
-      throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
-    }
     for (const raw of json.data ?? []) {
       byId.set(raw.id, raw)
     }
@@ -204,7 +196,6 @@ interface GraphAdWithElementsRaw {
 
 interface GraphAdsElementsResponse {
   data?: GraphAdWithElementsRaw[]
-  error?: { message: string; type: string; code: number }
   paging?: { next?: string }
 }
 
@@ -268,9 +259,6 @@ async function fetchAdElementsMetadataByIds(
       thumbnail_height: '400',
     })
     const json = await callGraphApi<GraphAdsElementsResponse>(url)
-    if (json.error) {
-      throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
-    }
     for (const raw of json.data ?? []) {
       byId.set(raw.id, raw)
     }
@@ -306,9 +294,6 @@ export async function fetchRankedAdInsights(
   const rows: GraphAdInsightsRow[] = []
   for (let page = 0; page < MAX_INSIGHTS_PAGES && url && rows.length < max; page += 1) {
     const json: GraphAdInsightsResponse = await callGraphApi<GraphAdInsightsResponse>(url)
-    if (json.error) {
-      throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
-    }
     rows.push(...(json.data ?? []))
     url = json.paging?.next ?? null
   }

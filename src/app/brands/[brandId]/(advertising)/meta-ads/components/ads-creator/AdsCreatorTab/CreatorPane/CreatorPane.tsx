@@ -26,6 +26,7 @@ import CopyEachDialog from './CopyEachDialog/CopyEachDialog'
 import {
   buildAdNameMap,
   buildAutoAdName,
+  readDisplayedAdSetLabel,
   resolvePageToken,
   slotNameable,
   STEP_IDS,
@@ -60,6 +61,7 @@ interface Props {
   readonly pageTokens: ReadonlyMap<string, string>
   readonly onPageTokensChange: (next: ReadonlyMap<string, string>) => void
   readonly jobs: readonly LaunchJob[]
+  readonly queuePausedUntil: number | null
   readonly onRetry: (jobId: string) => void
   readonly onStop: (jobId: string) => void
   readonly onDismiss: (jobId: string) => void
@@ -95,6 +97,7 @@ export default memo(function CreatorPane({
   pageTokens,
   onPageTokensChange,
   jobs,
+  queuePausedUntil,
   onRetry,
   onStop,
   onDismiss,
@@ -139,9 +142,17 @@ export default memo(function CreatorPane({
     [data.accounts, targeting.accountId],
   )
   const accountCurrency = selectedAccount?.currency ?? 'USD'
+  // The ad set counts as chosen only while it is in the list loaded for the current
+  // account + campaign. A bare `adSetId` can outlive a campaign switch, and publishing
+  // with it would land the ads in the previous campaign's ad set.
+  const selectedAdSet = useMemo(
+    () => data.adSets.find((a) => a.id === targeting.adSetId) ?? null,
+    [data.adSets, targeting.adSetId],
+  )
+  const canPublish = canSubmit && selectedAdSet !== null
   const completion = useMemo<Completion>(() => ({
     account: targeting.accountId !== '',
-    campaign: targeting.campaignId !== '' && targeting.adSetId !== '',
+    campaign: targeting.campaignId !== '' && selectedAdSet !== null,
     profiles: targeting.pageIds.length > 0
       && (!isSinglePage || data.instagramAccounts.length === 0 || targeting.instagramId !== ''),
     files: creativeCount > 0 && invalidAssetKeys.size === 0,
@@ -152,7 +163,7 @@ export default memo(function CreatorPane({
   }), [
     targeting.accountId,
     targeting.campaignId,
-    targeting.adSetId,
+    selectedAdSet,
     targeting.pageIds,
     targeting.instagramId,
     isSinglePage,
@@ -219,13 +230,30 @@ export default memo(function CreatorPane({
   }, [copy, nameableCreatives, onCopyChange, pageTokens, selectedPages])
 
   const handleSubmit = useCallback(() => {
-    const adSetName = data.adSets.find((a) => a.id === targeting.adSetId)?.name ?? ''
+    if (!selectedAdSet) {
+      return
+    }
+    // TEMP DIAGNOSTIC (ad set mix-up): screen vs. state at the moment of Publish.
+    const displayedAdSet = readDisplayedAdSetLabel()
+    const diagnostic = {
+      displayedOnScreen: displayedAdSet,
+      stateAdSetId: targeting.adSetId,
+      stateAdSetName: selectedAdSet.name,
+      campaignId: targeting.campaignId,
+    }
+    if (displayedAdSet !== selectedAdSet.name) {
+      // eslint-disable-next-line no-console -- temporary ad set mix-up diagnostic
+      console.error('[AdSetCheck] MISMATCH: screen shows a different ad set than state', diagnostic)
+    } else {
+      // eslint-disable-next-line no-console -- temporary ad set mix-up diagnostic
+      console.info('[AdSetCheck] publish click OK', diagnostic)
+    }
     onSubmit(buildAdNameMap({
       pages: selectedPages, creatives: nameableCreatives, pageTokens, copy, adNames, isSingleAd,
-    }), adSetName)
+    }), selectedAdSet.name)
   }, [
-    adNames, copy, nameableCreatives, isSingleAd, onSubmit, pageTokens, selectedPages,
-    data.adSets, targeting.adSetId,
+    adNames, copy, nameableCreatives, isSingleAd, onSubmit, pageTokens, selectedPages, selectedAdSet,
+    targeting.adSetId, targeting.campaignId,
   ])
 
   // Each step's body is memoized so its element keeps a stable identity. StepAccordion
@@ -307,6 +335,8 @@ export default memo(function CreatorPane({
         canReset={canReset}
         onResetDraft={onResetDraft}
         onPreview={openPreview}
+        onReloadAssets={data.reloadAssets}
+        isReloadingAssets={data.isReloadingAssets}
         jobs={jobs}
         accountId={targeting.accountId}
         onRetry={onRetry}
@@ -370,9 +400,10 @@ export default memo(function CreatorPane({
       <Box className={styles.footer}>
         <PublishBar
           adsCount={adsCount}
-          canSubmit={canSubmit}
+          canSubmit={canPublish}
           onSubmit={handleSubmit}
           jobs={jobs}
+          queuePausedUntil={queuePausedUntil}
           incompleteSteps={incompleteSteps}
         />
       </Box>

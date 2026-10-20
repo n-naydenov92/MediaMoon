@@ -12,15 +12,18 @@ import {
 import { parseDateRangeFromQuery, toMetaInsightsParams } from '@/lib/meta/dateRange'
 import { convertFromEur, convertToEur } from '@/lib/meta/fx'
 import { parseFilterRules, type ComparisonOperator } from '@/lib/meta/filterRules'
+import { metaErrorResponse } from '@/lib/meta/metaErrorResponse'
 import { fetchAllAccounts } from '../summary/accountFetching'
 import { parseBrandId, resolveTargetAccounts } from '../summary/queryParsing'
 
 const DEFAULT_PAGE_SIZE = 200
 const MAX_PAGE_SIZE = 500
 const NO_TOKEN_STATUS = 503
-const UPSTREAM_ERROR_STATUS = 502
-const CACHE_MAX_AGE_SECONDS = 3600
-const CACHE_STALE_WHILE_REVALIDATE_SECONDS = 600
+const LIBRARY_CACHE_SECONDS = 300
+const MS_PER_SECOND = 1000
+// The Ad Library's Refresh: skip Vercel's CDN copy, and don't store this one either.
+const FRESH_PARAM = 'fresh'
+const NO_STORE_HEADERS = { 'Cache-Control': 'no-store' }
 
 // Only spend/impressions can be pushed into Meta's insights filtering (raw fields).
 // ROAS/CPP/CTR/etc. are derived client-side and stay client-side view filters.
@@ -61,6 +64,7 @@ interface ElementsResponse {
   readonly items: readonly AdElementRow[]
   readonly nextOffset: number | null
   readonly fetchedAt: number
+  readonly cachedUntil: number
 }
 
 interface AccountEntry {
@@ -93,9 +97,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     (r) => SERVER_FILTER_FIELDS.has(r.field) && typeof r.value === 'number',
   )
 
+  const headers = params.has(FRESH_PARAM) ? NO_STORE_HEADERS : edgeCacheHeaders()
+
   const accountIds = resolveTargetAccounts(brandId, params.get('market'), params.get('account'))
   if (accountIds.length === 0) {
-    return NextResponse.json(emptyResponse(), { headers: edgeCacheHeaders() })
+    return NextResponse.json(buildResponse([], null), { headers })
   }
 
   if (getConfiguredBusinessManagersForBrand(brandId).length === 0) {
@@ -146,11 +152,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const hasMore = merged.length > offset + limit || truncated
     const nextOffset = pageEntries.length === limit && hasMore ? offset + limit : null
 
-    const response: ElementsResponse = { items, nextOffset, fetchedAt: Date.now() }
-    return NextResponse.json(response, { headers: edgeCacheHeaders() })
+    return NextResponse.json(buildResponse(items, nextOffset), { headers })
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error'
-    return NextResponse.json({ error: message }, { status: UPSTREAM_ERROR_STATUS })
+    return metaErrorResponse(err)
   }
 }
 
@@ -212,14 +216,15 @@ function clampInt(raw: string | null, fallback: number, min: number, max: number
   return Math.min(Math.max(n, min), max)
 }
 
-function emptyResponse(): ElementsResponse {
-  return { items: [], nextOffset: null, fetchedAt: Date.now() }
+function buildResponse(items: readonly AdElementRow[], nextOffset: number | null): ElementsResponse {
+  const fetchedAt = Date.now()
+  return { items, nextOffset, fetchedAt, cachedUntil: fetchedAt + LIBRARY_CACHE_SECONDS * MS_PER_SECOND }
 }
 
+// No stale-while-revalidate: once `cachedUntil` passes, the next load waits for fresh
+// data, so the expiry the Ad Library shows is the real one.
 function edgeCacheHeaders(): Record<string, string> {
-  return {
-    'Cache-Control': `s-maxage=${CACHE_MAX_AGE_SECONDS}, stale-while-revalidate=${CACHE_STALE_WHILE_REVALIDATE_SECONDS}`,
-  }
+  return { 'Cache-Control': `s-maxage=${LIBRARY_CACHE_SECONDS}` }
 }
 
 function toElementRow(ad: AdWithCreativeElements, accountName: string): AdElementRow {

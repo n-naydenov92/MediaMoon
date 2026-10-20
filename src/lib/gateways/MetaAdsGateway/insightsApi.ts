@@ -9,7 +9,6 @@ import type { AccountInsights, InsightsDailyPoint } from './types'
 
 interface GraphInsightsResponse {
   data?: GraphInsightsRow[]
-  error?: { message: string; type: string; code: number }
 }
 
 export async function fetchAccountInsights(
@@ -39,8 +38,5 @@ export async function fetchInsightsRows(
 ): Promise<readonly GraphInsightsRow[]> {
   const url = buildUrl(`/${accountId}/insights`, token, params)
   const json = await callGraphApi<GraphInsightsResponse>(url)
-  if (json.error) {
-    throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
-  }
   return json.data ?? []
 }

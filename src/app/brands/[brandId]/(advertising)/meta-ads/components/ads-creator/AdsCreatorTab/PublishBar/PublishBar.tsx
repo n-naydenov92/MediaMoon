@@ -9,6 +9,7 @@ import LinearProgress from '@mui/material/LinearProgress'
 import Typography from '@mui/material/Typography'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import type { LaunchJob } from '../useLaunchQueue'
+import QueuePausedNotice from '../QueuePausedNotice/QueuePausedNotice'
 import styles from './PublishBar.module.css'
 
 export interface IncompleteStep {
@@ -21,6 +22,7 @@ interface Props {
   readonly canSubmit: boolean
   readonly onSubmit: () => void
   readonly jobs: readonly LaunchJob[]
+  readonly queuePausedUntil: number | null
   readonly incompleteSteps: readonly IncompleteStep[]
 }
 
@@ -58,7 +60,7 @@ function computeStats(jobs: readonly LaunchJob[], batchId: string | null): Queue
 }
 
 export default memo(function PublishBar({
-  adsCount, canSubmit, onSubmit, jobs, incompleteSteps,
+  adsCount, canSubmit, onSubmit, jobs, queuePausedUntil, incompleteSteps,
 }: Props): JSX.Element {
   const stats = useMemo(() => computeStats(jobs, latestBatchId(jobs)), [jobs])
   const isPublishing = stats.active > 0
@@ -140,6 +142,8 @@ export default memo(function PublishBar({
           )}
         </Box>
       )}
+
+      {queuePausedUntil !== null && <QueuePausedNotice pausedUntil={queuePausedUntil} />}
     </Box>
   )
 })

@@ -29,6 +29,10 @@ export type {
 
 export { CTA_TYPES } from './types'
 
+export { MetaApiError } from './graphErrors'
+export type { MetaFailureReason } from './graphErrors'
+export type { ThrottleInfo, ThrottleScope } from './rateLimit'
+
 export {
   countActiveAdsInAccount,
   createAdSet,
@@ -65,6 +69,9 @@ export {
   uploadImage,
   uploadVideo,
 } from './publishApi'
+
+export { fetchAdPreview } from './previewApi'
+export type { AdPreview, EmbeddedGraphError } from './previewApi'
 
 export {
   startVideoUpload,

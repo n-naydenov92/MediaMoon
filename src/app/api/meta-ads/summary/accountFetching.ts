@@ -1,16 +1,13 @@
 import type { BrandId } from '@/config/brands'
 import { getConfiguredBusinessManagersForBrand } from '@/config/metaTokens'
-import {
-  fetchAdAccounts,
-  type AdAccount,
-  type AdWithInsights,
-} from '@/lib/gateways/MetaAdsGateway'
+import type { AdAccount, AdWithInsights } from '@/lib/gateways/MetaAdsGateway'
 import type { AdLeaderboardEntry } from '@/lib/meta/aggregate'
+import { getAdAccountsCached } from '@/lib/meta/cachedMetaReads'
 import { convertToEur } from '@/lib/meta/fx'
 
 export async function fetchAllAccounts(brandId: BrandId): Promise<readonly AdAccount[]> {
   const configured = getConfiguredBusinessManagersForBrand(brandId)
-  const lists = await Promise.all(configured.map(({ token }) => fetchAdAccounts(token)))
+  const lists = await Promise.all(configured.map(getAdAccountsCached))
   const dedupe = new Map<string, AdAccount>()
   for (const account of lists.flat()) {
     if (!dedupe.has(account.id)) {

@@ -5,18 +5,15 @@ interface GraphStartResponse {
   readonly video_id?: string
   readonly start_offset?: string
   readonly end_offset?: string
-  readonly error?: { message: string; type: string; code: number }
 }
 
 interface GraphTransferResponse {
   readonly start_offset?: string
   readonly end_offset?: string
-  readonly error?: { message: string; type: string; code: number }
 }
 
 interface GraphFinishResponse {
   readonly success?: boolean
-  readonly error?: { message: string; type: string; code: number }
 }
 
 export interface VideoUploadStart {
@@ -45,9 +42,6 @@ export async function startVideoUpload(
     `/${accountId}/advideos`,
     form,
   )
-  if (json.error) {
-    throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
-  }
   if (!json.upload_session_id || !json.video_id || json.start_offset === undefined || json.end_offset === undefined) {
     throw new Error('Meta API returned incomplete start response')
   }
@@ -76,9 +70,6 @@ export async function transferVideoChunk(
     `/${accountId}/advideos`,
     form,
   )
-  if (json.error) {
-    throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
-  }
   if (json.start_offset === undefined || json.end_offset === undefined) {
     throw new Error('Meta API returned incomplete transfer response')
   }
@@ -93,7 +84,6 @@ export async function transferVideoChunk(
 
 interface GraphVideoSourceResponse {
   readonly source?: string
-  readonly error?: { message: string; type: string; code: number }
 }
 
 // The downloadable CDN URL for an existing ad video, used to re-upload it into a
@@ -101,9 +91,6 @@ interface GraphVideoSourceResponse {
 export async function fetchVideoSource(token: string, videoId: string): Promise<string | null> {
   const url = buildUrl(`/${videoId}`, token, { fields: 'source' })
   const json = await callGraphApi<GraphVideoSourceResponse>(url)
-  if (json.error) {
-    throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
-  }
   return json.source ?? null
 }
 
@@ -120,9 +107,6 @@ export async function finishVideoUpload(
     `/${accountId}/advideos`,
     form,
   )
-  if (json.error) {
-    throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
-  }
   if (json.success !== true) {
     throw new Error('Meta API did not confirm video upload finish')
   }

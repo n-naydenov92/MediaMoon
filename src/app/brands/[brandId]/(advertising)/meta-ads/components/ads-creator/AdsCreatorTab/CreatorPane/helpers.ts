@@ -251,6 +251,18 @@ export function buildPublishPayload({
   }
 }
 
+// TEMP DIAGNOSTIC (ad set mix-up): the text the ad set picker shows on screen right
+// now, read from the DOM so it is independent of React state. Remove with the logs.
+const AD_SET_INPUT_SELECTOR = 'input[placeholder="Select ad set…"]'
+
+export function readDisplayedAdSetLabel(): string | null {
+  if (typeof document === 'undefined') {
+    return null
+  }
+  const input = document.querySelector<HTMLInputElement>(AD_SET_INPUT_SELECTOR)
+  return input ? input.value : null
+}
+
 export function canSubmitCreator(
   targeting: TargetingValue,
   copy: CopyValue,

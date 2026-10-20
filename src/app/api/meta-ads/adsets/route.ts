@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { fetchAdSets, type StatusFilter } from '@/lib/gateways/MetaAdsGateway'
+import { metaErrorResponse } from '@/lib/meta/metaErrorResponse'
 import { resolveAccountTokenFromRequest } from '@/lib/meta/resolveBrandToken'
 
 function parseStatus(raw: string | null): StatusFilter {
@@ -23,7 +24,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const adSets = await fetchAdSets(resolved.token, campaignId, status)
     return NextResponse.json({ adSets })
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return metaErrorResponse(err)
   }
 }

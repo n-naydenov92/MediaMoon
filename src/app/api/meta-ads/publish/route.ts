@@ -4,16 +4,17 @@ import {
   createAd,
   createAdCreative,
   CTA_TYPES,
-  fetchInstagramAccountsForPage,
   type CtaType,
   type PublishAdResult,
 } from '@/lib/gateways/MetaAdsGateway'
+import { getInstagramAccountsCached } from '@/lib/meta/cachedMetaReads'
+import { metaErrorResponse } from '@/lib/meta/metaErrorResponse'
 import { resolveAccountTokenFromRequest } from '@/lib/meta/resolveBrandToken'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
 
-type PublishStep = 'creative' | 'ad'
+const NUMERIC_ID = /^\d+$/
 
 interface PublishRequestBody {
   readonly adSetId?: string
@@ -30,6 +31,9 @@ interface PublishRequestBody {
   readonly imageHash?: string
   readonly videoId?: string
   readonly thumbnailHash?: string
+  // Set when resuming a publish whose creative already exists (the ad step failed),
+  // so the retry does not create a second, orphaned creative.
+  readonly creativeId?: string
 }
 
 function isCtaType(v: string): v is CtaType {
@@ -49,7 +53,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   const {
     adSetId, pageId, headline, bodyText, description, destinationUrl, ctaType, adName, status,
-    instagramActorId, autoResolveInstagram, imageHash, videoId, thumbnailHash,
+    imageHash, videoId, thumbnailHash,
   } = body
 
   // Default to PAUSED; only go live when the client explicitly asks for ACTIVE.
@@ -83,34 +87,26 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     )
   }
 
-  let resolvedInstagramActorId: string | undefined = instagramActorId || undefined
-  if (!resolvedInstagramActorId && autoResolveInstagram === true) {
+  let creativeId = reusableCreativeId(body.creativeId)
+  if (!creativeId) {
     try {
-      const accounts = await fetchInstagramAccountsForPage(resolved.token, pageId)
-      resolvedInstagramActorId = accounts[0]?.id
-    } catch {
-      resolvedInstagramActorId = undefined
+      const creative = await createAdCreative(resolved.token, {
+        accountId: resolved.accountId,
+        headline,
+        bodyText,
+        description: typeof description === 'string' && description ? description : undefined,
+        destinationUrl,
+        ctaType,
+        pageId,
+        instagramActorId: await resolveInstagramActorId(resolved.token, pageId, body),
+        imageHash: hasImage ? imageHash : undefined,
+        videoId: hasVideo ? videoId : undefined,
+        thumbnailHash: hasThumbnail ? thumbnailHash : undefined,
+      })
+      creativeId = creative.id
+    } catch (err) {
+      return metaErrorResponse(err, { step: 'creative' })
     }
-  }
-
-  let creativeId: string
-  try {
-    const creative = await createAdCreative(resolved.token, {
-      accountId: resolved.accountId,
-      headline,
-      bodyText,
-      description: typeof description === 'string' && description ? description : undefined,
-      destinationUrl,
-      ctaType,
-      pageId,
-      instagramActorId: resolvedInstagramActorId,
-      imageHash: hasImage ? imageHash : undefined,
-      videoId: hasVideo ? videoId : undefined,
-      thumbnailHash: hasThumbnail ? thumbnailHash : undefined,
-    })
-    creativeId = creative.id
-  } catch (err) {
-    return errorResponse(err, 'creative')
   }
 
   let adId: string
@@ -118,7 +114,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const ad = await createAd(resolved.token, resolved.accountId, adSetId, creativeId, adName, adStatus)
     adId = ad.id
   } catch (err) {
-    return errorResponse(err, 'ad')
+    return metaErrorResponse(err, { step: 'ad', creativeId })
   }
 
   const result: PublishAdResult = {
@@ -130,7 +126,27 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   return NextResponse.json({ result })
 }
 
-function errorResponse(err: unknown, step: PublishStep): NextResponse {
-  const message = err instanceof Error ? err.message : 'Unknown error'
-  return NextResponse.json({ error: message, step }, { status: 502 })
+function reusableCreativeId(raw: unknown): string | null {
+  return typeof raw === 'string' && NUMERIC_ID.test(raw) ? raw : null
+}
+
+// A failed Instagram lookup must not block the ad: the creative is then created
+// without an Instagram identity.
+async function resolveInstagramActorId(
+  token: string,
+  pageId: string,
+  body: PublishRequestBody,
+): Promise<string | undefined> {
+  if (body.instagramActorId) {
+    return body.instagramActorId
+  }
+  if (body.autoResolveInstagram !== true) {
+    return undefined
+  }
+  try {
+    const accounts = await getInstagramAccountsCached(pageId, token)
+    return accounts[0]?.id
+  } catch {
+    return undefined
+  }
 }

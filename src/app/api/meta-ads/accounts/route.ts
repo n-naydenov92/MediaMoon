@@ -2,7 +2,9 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { isBrandId } from '@/config/brands'
 import { getConfiguredBusinessManagersForBrand } from '@/config/metaTokens'
-import { fetchAdAccounts, type AdAccount } from '@/lib/gateways/MetaAdsGateway'
+import type { AdAccount } from '@/lib/gateways/MetaAdsGateway'
+import { getAdAccountsCached } from '@/lib/meta/cachedMetaReads'
+import { metaErrorResponse } from '@/lib/meta/metaErrorResponse'
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const brandIdRaw = request.nextUrl.searchParams.get('brandId')
@@ -22,7 +24,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   }
 
   try {
-    const perBmAccounts = await Promise.all(configured.map(({ token }) => fetchAdAccounts(token)))
+    const perBmAccounts = await Promise.all(configured.map(getAdAccountsCached))
     const accountsById = new Map<string, AdAccount>()
     for (const account of perBmAccounts.flat()) {
       if (!accountsById.has(account.id)) {
@@ -31,7 +33,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }
     return NextResponse.json({ accounts: Array.from(accountsById.values()) })
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return metaErrorResponse(err)
   }
 }

@@ -41,6 +41,14 @@ export function useLaunchSubmit({
     const isSinglePage = targeting.pageIds.length === 1
     const isSingleAd = targeting.pageIds.length * slots.length === 1
     const batchId = crypto.randomUUID()
+    // TEMP DIAGNOSTIC (ad set mix-up): the ad set id actually baked into this batch's payloads.
+    // eslint-disable-next-line no-console -- temporary ad set mix-up diagnostic
+    console.info('[AdSetCheck] batch enqueued', {
+      batchId,
+      payloadAdSetId: targeting.adSetId,
+      adSetName,
+      ads: targeting.pageIds.length * slots.length,
+    })
     for (const pageId of targeting.pageIds) {
       for (const slot of slots) {
         const adCopy = resolveCopy(copy, copyOverrides.get(slot.key))

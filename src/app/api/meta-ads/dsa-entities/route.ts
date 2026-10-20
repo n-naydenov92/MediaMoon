@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { fetchDsaEntities } from '@/lib/gateways/MetaAdsGateway'
+import { getDsaEntitiesCached } from '@/lib/meta/cachedMetaReads'
+import { metaErrorResponse } from '@/lib/meta/metaErrorResponse'
 import { resolveAccountTokenFromRequest } from '@/lib/meta/resolveBrandToken'
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
@@ -8,10 +9,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   if (!resolved.ok) return resolved.response
 
   try {
-    const dsaEntities = await fetchDsaEntities(resolved.token, resolved.accountId)
+    const dsaEntities = await getDsaEntitiesCached(resolved.accountId, resolved.token)
     return NextResponse.json({ dsaEntities })
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return metaErrorResponse(err)
   }
 }

@@ -28,6 +28,8 @@ export interface ElementsPayload {
   readonly items: readonly AdElementRow[]
   readonly nextOffset: number | null
   readonly fetchedAt: number
+  // Set by the route: until then the browser and Vercel's CDN reuse this page.
+  readonly cachedUntil: number
 }
 
 export interface ElementMetrics extends AdMetrics {

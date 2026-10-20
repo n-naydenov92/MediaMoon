@@ -29,10 +29,10 @@ import {
   emptyResponse,
   type SummaryResponse,
 } from './summaryResponse'
+import { metaErrorResponse } from '@/lib/meta/metaErrorResponse'
 
 const ADS_PER_ACCOUNT_LIMIT = 200
 const NO_TOKEN_STATUS = 503
-const UPSTREAM_ERROR_STATUS = 502
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const params = request.nextUrl.searchParams
@@ -142,7 +142,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json(response, { headers: edgeCacheHeaders() })
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error'
-    return NextResponse.json({ error: message }, { status: UPSTREAM_ERROR_STATUS })
+    return metaErrorResponse(err)
   }
 }

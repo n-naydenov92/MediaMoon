@@ -1,12 +1,15 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { startVideoUpload } from '@/lib/gateways/MetaAdsGateway'
+import { metaErrorResponse } from '@/lib/meta/metaErrorResponse'
 import { resolveAccountTokenFromRequest } from '@/lib/meta/resolveBrandToken'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
 
-const CHUNK_SIZE_BYTES = 4 * 1024 * 1024
+// Sized for slow uplinks (measured ~30–70 KB/s): a 1 MB chunk lands in well under the
+// 120 s per-request Meta timeout, where 4 MB chunks timed out and retried from zero.
+const CHUNK_SIZE_BYTES = 1024 * 1024
 
 interface StartRequestBody {
   readonly fileSize?: number
@@ -47,7 +50,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       chunkSize: CHUNK_SIZE_BYTES,
     })
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error'
-    return NextResponse.json({ error: message }, { status: 502 })
+    return metaErrorResponse(err)
   }
 }

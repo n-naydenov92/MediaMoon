@@ -144,6 +144,7 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
         pageTokens={pageTokens}
         onPageTokensChange={setPageTokens}
         jobs={queue.jobs}
+        queuePausedUntil={queue.pausedUntil}
         onRetry={queue.retry}
         onStop={queue.stop}
         onDismiss={queue.dismiss}

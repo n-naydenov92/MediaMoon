@@ -6,6 +6,7 @@ import { stringifyFilterRules, type FilterRule } from '@/lib/meta/filterRules'
 import type { ElementsPayload } from './decompose'
 
 const NO_TOKEN_STATUS = 503
+const FRESH_PARAM = 'fresh=1'
 export const ELEMENT_PAGE_SIZE = 200
 
 export type ElementLibraryState =
@@ -24,19 +25,26 @@ interface ApiError {
   error?: string
 }
 
+// Module scope on purpose: the main library pane and the one embedded in "Edit per
+// creative" (remounted on every dialog open) share it, so reopening the dialog does
+// not repeat the 6–11 Meta calls behind one page. An entry lives until the route's
+// `cachedUntil`, the same moment Vercel's CDN copy expires.
+const pageCache = new Map<string, ElementsPayload>()
+
 // One page per (brand, market, date, server-filter) window, ranked by spend at the
 // source. Switching tabs/view-filters never re-hits the network — only changing a
-// server filter, the date, or "Load more" does. The Map cache shares the merged,
-// accumulated pages across remounts; the route adds the shared edge cache on top.
+// server filter, the date, or "Load more" does. The page cache keeps the merged,
+// accumulated pages across remounts; the route adds the shared CDN cache on top.
+// Refresh skips both.
 export function useElementLibrary(
   brandId: BrandId,
   market: MarketSelection,
   dateSelection: DateRangeSelection,
   serverFilters: readonly FilterRule[],
 ): ElementLibraryControls {
-  const cacheRef = useRef<Map<string, ElementsPayload>>(new Map())
   const [state, setState] = useState<ElementLibraryState>({ status: 'loading' })
   const [refreshTick, setRefreshTick] = useState(0)
+  const handledRefreshTickRef = useRef(refreshTick)
   const stateRef = useRef<ElementLibraryState>(state)
   // eslint-disable-next-line react-hooks/refs -- read latest state inside loadMore without re-subscribing (same pattern as useAdsList)
   stateRef.current = state
@@ -46,8 +54,12 @@ export function useElementLibrary(
   useEffect(() => {
     const controller = new AbortController()
     const cacheKey = pageKey(baseSearch, 0)
+    // Only the load that Refresh triggered skips the caches; a later date or filter
+    // change reads them again.
+    const isRefresh = refreshTick !== handledRefreshTickRef.current
+    handledRefreshTickRef.current = refreshTick
 
-    const cached = refreshTick === 0 ? cacheRef.current.get(cacheKey) : undefined
+    const cached = isRefresh ? undefined : readCachedPage(cacheKey)
     if (cached) {
       setState({ status: 'success', data: cached, loadingMore: false })
       return () => controller.abort()
@@ -57,10 +69,8 @@ export function useElementLibrary(
 
     void (async () => {
       try {
-        const response = await fetch(`/api/meta-ads/elements?${cacheKey}`, {
-          signal: controller.signal,
-          cache: refreshTick > 0 ? 'reload' : 'default',
-        })
+        const query = isRefresh ? `${cacheKey}&${FRESH_PARAM}` : cacheKey
+        const response = await fetch(`/api/meta-ads/elements?${query}`, { signal: controller.signal })
         if (response.status === NO_TOKEN_STATUS) {
           setState({ status: 'no-token' })
           return
@@ -71,7 +81,7 @@ export function useElementLibrary(
           return
         }
         const data = (await response.json()) as ElementsPayload
-        cacheRef.current.set(cacheKey, data)
+        writeCachedPage(cacheKey, data)
         setState({ status: 'success', data, loadingMore: false })
       } catch (err) {
         if (err instanceof DOMException && err.name === 'AbortError') {
@@ -86,7 +96,7 @@ export function useElementLibrary(
   }, [baseSearch, refreshTick])
 
   const refresh = useCallback((): void => {
-    cacheRef.current.clear()
+    pageCache.clear()
     setRefreshTick((n) => n + 1)
   }, [])
 
@@ -111,12 +121,14 @@ export function useElementLibrary(
         if (previous.status !== 'success') {
           return
         }
+        // The merged list is as old as its first page, so it keeps that page's times.
         const merged: ElementsPayload = {
           items: [...previous.data.items, ...data.items],
           nextOffset: data.nextOffset,
-          fetchedAt: data.fetchedAt,
+          fetchedAt: previous.data.fetchedAt,
+          cachedUntil: previous.data.cachedUntil,
         }
-        cacheRef.current.set(pageKey(baseSearch, 0), merged)
+        writeCachedPage(pageKey(baseSearch, 0), merged)
         setState({ status: 'success', loadingMore: false, data: merged })
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Unknown error'
@@ -126,6 +138,18 @@ export function useElementLibrary(
   }, [baseSearch])
 
   return { state, refresh, loadMore }
+}
+
+function readCachedPage(key: string): ElementsPayload | undefined {
+  const entry = pageCache.get(key)
+  if (!entry || Date.now() >= entry.cachedUntil) {
+    return undefined
+  }
+  return entry
+}
+
+function writeCachedPage(key: string, data: ElementsPayload): void {
+  pageCache.set(key, data)
 }
 
 function pageKey(baseSearch: string, offset: number): string {

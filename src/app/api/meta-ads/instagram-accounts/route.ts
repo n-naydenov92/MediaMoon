@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { fetchInstagramAccountsForPage } from '@/lib/gateways/MetaAdsGateway'
+import { getInstagramAccountsCached } from '@/lib/meta/cachedMetaReads'
+import { metaErrorResponse } from '@/lib/meta/metaErrorResponse'
 import { resolveAccountTokenFromRequest } from '@/lib/meta/resolveBrandToken'
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
@@ -13,10 +14,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   }
 
   try {
-    const instagramAccounts = await fetchInstagramAccountsForPage(resolved.token, pageId)
+    const instagramAccounts = await getInstagramAccountsCached(pageId, resolved.token)
     return NextResponse.json({ instagramAccounts })
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return metaErrorResponse(err)
   }
 }

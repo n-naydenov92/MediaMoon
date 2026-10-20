@@ -125,6 +125,7 @@ export default memo(function LibraryPane({
     filters.serverRules,
   )
   const fetchedAt = state.status === 'success' ? state.data.fetchedAt : null
+  const cachedUntil = state.status === 'success' ? state.data.cachedUntil : null
   const loadingMore = state.status === 'success' && state.loadingMore
   const hasMore = state.status === 'success' && state.data.nextOffset !== null
 
@@ -239,7 +240,12 @@ export default memo(function LibraryPane({
           Ad Library
         </Typography>
         <Box className={styles.headerControls}>
-          <UpdatedBadge fetchedAt={fetchedAt} onRefresh={refresh} disabled={state.status === 'loading'} />
+          <UpdatedBadge
+            fetchedAt={fetchedAt}
+            cachedUntil={cachedUntil}
+            onRefresh={refresh}
+            disabled={state.status === 'loading'}
+          />
           <DateRangeDropdown
             value={dateSelection}
             onPresetChange={(preset: DatePreset) => setDateSelection({ kind: 'preset', preset })}
