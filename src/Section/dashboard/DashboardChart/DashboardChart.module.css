@@ -110,6 +110,20 @@
   padding: 2px 0;
 }
 
+.tooltipLabelGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tooltipDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--dot-color);
+  flex-shrink: 0;
+}
+
 .tooltipLabel {
   color: var(--text-secondary);
 }

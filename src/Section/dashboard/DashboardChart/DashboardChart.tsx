@@ -37,6 +37,10 @@ interface Props {
   readonly hasAnalytics: boolean
 }
 
+// A right-axis metric shares no scale with the € lines, so its height says nothing about
+// them. Dashing it and colouring its axis ticks to match shows which axis to read it on.
+const RIGHT_AXIS_DASH = '5 4'
+
 export default function DashboardChart({
   data,
   hasCommerce,
@@ -60,6 +64,7 @@ export default function DashboardChart({
 
   const showDots = enriched.length === 1
   const dotProp = showDots ? { r: 4 } : false
+  const isRightAxis = config?.axis === 'right'
 
   const handleChange = (event: SelectChangeEvent): void => {
     setThirdMetric(event.target.value as ThirdMetric)
@@ -115,18 +120,18 @@ export default function DashboardChart({
               tickFormatter={shortMoney}
               width={56}
             />
-            {config?.axis === 'right' && (
+            {config && isRightAxis && (
               <YAxis
                 yAxisId="right"
                 orientation="right"
                 tickLine={false}
                 axisLine={false}
-                tick={{ fill: palette.axis, fontSize: 11 }}
+                tick={{ fill: palette.metric, fontSize: 11 }}
                 tickFormatter={config.tickFormat}
                 width={48}
               />
             )}
-            <RechartsTooltip content={renderChartTooltip(config, hasCommerce)} />
+            <RechartsTooltip content={renderChartTooltip(config, hasCommerce, palette)} />
             <Line
               yAxisId="eur"
               type="monotone"
@@ -156,6 +161,7 @@ export default function DashboardChart({
                 dataKey="thirdValue"
                 stroke={palette.metric}
                 strokeWidth={2}
+                strokeDasharray={isRightAxis ? RIGHT_AXIS_DASH : undefined}
                 dot={dotProp}
                 name={config.label}
                 connectNulls
