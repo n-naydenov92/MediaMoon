@@ -3,10 +3,13 @@ import type { BrandId } from '@/config/brands'
 import { ALL_MARKETS, type MarketSelection } from '@/lib/markets'
 import type { DateRangeSelection } from '@/lib/meta/dateRange'
 import { stringifyFilterRules, type FilterRule } from '@/lib/meta/filterRules'
+import { clearSessionCaches, createSessionCache } from '@/lib/sessionCache'
 import type { ElementsPayload } from './decompose'
 
 const NO_TOKEN_STATUS = 503
 export const ELEMENT_PAGE_SIZE = 200
+
+const libraryCache = createSessionCache<ElementsPayload>()
 
 export type ElementLibraryState =
   | { readonly status: 'loading' }
@@ -26,15 +29,14 @@ interface ApiError {
 
 // One page per (brand, market, date, server-filter) window, ranked by spend at the
 // source. Switching tabs/view-filters never re-hits the network — only changing a
-// server filter, the date, or "Load more" does. The Map cache shares the merged,
-// accumulated pages across remounts; the route adds the shared edge cache on top.
+// server filter, the date, or "Load more" does. The session cache keeps the merged,
+// accumulated pages until Refresh, shared by the panel and the per-creative dialog.
 export function useElementLibrary(
   brandId: BrandId,
   market: MarketSelection,
   dateSelection: DateRangeSelection,
   serverFilters: readonly FilterRule[],
 ): ElementLibraryControls {
-  const cacheRef = useRef<Map<string, ElementsPayload>>(new Map())
   const [state, setState] = useState<ElementLibraryState>({ status: 'loading' })
   const [refreshTick, setRefreshTick] = useState(0)
   const stateRef = useRef<ElementLibraryState>(state)
@@ -47,7 +49,7 @@ export function useElementLibrary(
     const controller = new AbortController()
     const cacheKey = pageKey(baseSearch, 0)
 
-    const cached = refreshTick === 0 ? cacheRef.current.get(cacheKey) : undefined
+    const cached = libraryCache.get(cacheKey)
     if (cached) {
       setState({ status: 'success', data: cached, loadingMore: false })
       return () => controller.abort()
@@ -59,7 +61,7 @@ export function useElementLibrary(
       try {
         const response = await fetch(`/api/meta-ads/elements?${cacheKey}`, {
           signal: controller.signal,
-          cache: refreshTick > 0 ? 'reload' : 'default',
+          cache: 'no-store',
         })
         if (response.status === NO_TOKEN_STATUS) {
           setState({ status: 'no-token' })
@@ -71,7 +73,7 @@ export function useElementLibrary(
           return
         }
         const data = (await response.json()) as ElementsPayload
-        cacheRef.current.set(cacheKey, data)
+        libraryCache.set(cacheKey, data)
         setState({ status: 'success', data, loadingMore: false })
       } catch (err) {
         if (err instanceof DOMException && err.name === 'AbortError') {
@@ -86,7 +88,7 @@ export function useElementLibrary(
   }, [baseSearch, refreshTick])
 
   const refresh = useCallback((): void => {
-    cacheRef.current.clear()
+    clearSessionCaches()
     setRefreshTick((n) => n + 1)
   }, [])
 
@@ -100,7 +102,7 @@ export function useElementLibrary(
 
     void (async () => {
       try {
-        const response = await fetch(`/api/meta-ads/elements?${pageKey(baseSearch, nextOffset)}`)
+        const response = await fetch(`/api/meta-ads/elements?${pageKey(baseSearch, nextOffset)}`, { cache: 'no-store' })
         if (!response.ok) {
           const body = (await response.json().catch(() => ({}))) as ApiError
           setState({ status: 'error', message: body.error ?? `HTTP ${response.status}` })
@@ -116,7 +118,7 @@ export function useElementLibrary(
           nextOffset: data.nextOffset,
           fetchedAt: data.fetchedAt,
         }
-        cacheRef.current.set(pageKey(baseSearch, 0), merged)
+        libraryCache.set(pageKey(baseSearch, 0), merged)
         setState({ status: 'success', loadingMore: false, data: merged })
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Unknown error'

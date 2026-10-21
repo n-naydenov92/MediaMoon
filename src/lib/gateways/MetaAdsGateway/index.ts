@@ -29,7 +29,16 @@ export type {
 
 export { CTA_TYPES } from './types'
 
-export { GRAPH_API_BASE } from './http'
+export { MetaApiError } from './graphErrors'
+export type { MetaFailureReason } from './graphErrors'
+export type {
+  MetaUsage,
+  ThrottleInfo,
+  ThrottleScope,
+  UsageMeter,
+} from './rateLimit'
+
+export { fetchMetaUsage } from './usageApi'
 
 export {
   countActiveAdsForPage,
@@ -68,6 +77,9 @@ export {
   uploadImage,
   uploadVideo,
 } from './publishApi'
+
+export { fetchAdPreview } from './previewApi'
+export type { AdPreview, EmbeddedGraphError } from './previewApi'
 
 export {
   startVideoUpload,

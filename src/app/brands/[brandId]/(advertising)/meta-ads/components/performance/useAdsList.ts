@@ -5,6 +5,7 @@ import { ALL_MARKETS } from '@/lib/markets'
 import type { DateRangeSelection } from '@/lib/meta/dateRange'
 import type { AdRow } from './columnSpecs'
 import { stringifyFilterRules, type FilterRule } from '@/lib/meta/filterRules'
+import { clearSessionCaches, createSessionCache } from '@/lib/sessionCache'
 import { stringifySort, type SortSpec } from './sliceToFilters'
 
 const NO_TOKEN_STATUS = 503
@@ -43,8 +44,9 @@ interface ApiError {
 
 const PAGE_SIZE = 50
 
+const adsPageCache = createSessionCache<AdsPage>()
+
 export function useAdsList(query: AdsListQuery): AdsListControls {
-  const cacheRef = useRef<Map<string, AdsPage>>(new Map())
   const [state, setState] = useState<AdsListState>({ status: 'loading' })
   const [refreshTick, setRefreshTick] = useState(0)
   const stateRef = useRef<AdsListState>(state)
@@ -62,7 +64,7 @@ export function useAdsList(query: AdsListQuery): AdsListControls {
     search.set('limit', String(query.pageSize))
     const cacheKey = search.toString()
 
-    const cached = refreshTick === 0 ? cacheRef.current.get(cacheKey) : undefined
+    const cached = adsPageCache.get(cacheKey)
     if (cached) {
       setState({ status: 'success', data: cached, loadingMore: false })
       return () => controller.abort()
@@ -74,7 +76,7 @@ export function useAdsList(query: AdsListQuery): AdsListControls {
       try {
         const response = await fetch(`/api/meta-ads/ads?${cacheKey}`, {
           signal: controller.signal,
-          cache: refreshTick > 0 ? 'reload' : 'default',
+          cache: 'no-store',
         })
         if (response.status === NO_TOKEN_STATUS) {
           setState({ status: 'no-token' })
@@ -86,7 +88,7 @@ export function useAdsList(query: AdsListQuery): AdsListControls {
           return
         }
         const data = (await response.json()) as AdsPage
-        cacheRef.current.set(cacheKey, data)
+        adsPageCache.set(cacheKey, data)
         setState({ status: 'success', data, loadingMore: false })
       } catch (err) {
         if (err instanceof DOMException && err.name === 'AbortError') {
@@ -101,7 +103,7 @@ export function useAdsList(query: AdsListQuery): AdsListControls {
   }, [queryKey, refreshTick, baseSearch, query.pageSize])
 
   const refresh = useCallback((): void => {
-    cacheRef.current.clear()
+    clearSessionCaches()
     setRefreshTick((n) => n + 1)
   }, [])
 
@@ -119,7 +121,7 @@ export function useAdsList(query: AdsListQuery): AdsListControls {
 
     void (async () => {
       try {
-        const response = await fetch(`/api/meta-ads/ads?${search.toString()}`)
+        const response = await fetch(`/api/meta-ads/ads?${search.toString()}`, { cache: 'no-store' })
         if (!response.ok) {
           const body = (await response.json().catch(() => ({}))) as ApiError
           setState({ status: 'error', message: body.error ?? `HTTP ${response.status}` })
@@ -139,7 +141,7 @@ export function useAdsList(query: AdsListQuery): AdsListControls {
         const firstPageSearch = new URLSearchParams(baseSearch)
         firstPageSearch.set('offset', '0')
         firstPageSearch.set('limit', String(query.pageSize))
-        cacheRef.current.set(firstPageSearch.toString(), merged)
+        adsPageCache.set(firstPageSearch.toString(), merged)
         setState({ status: 'success', loadingMore: false, data: merged })
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Unknown error'

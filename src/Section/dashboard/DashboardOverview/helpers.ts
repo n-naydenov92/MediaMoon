@@ -15,7 +15,6 @@ export function buildDashboardQuery(
   brandId: BrandId,
   dateSelection: DateRangeSelection,
   market: MarketSelection,
-  isRefresh: boolean,
 ): string {
   const params = new URLSearchParams({ brandId })
   if (dateSelection.kind === 'preset') {
@@ -26,9 +25,6 @@ export function buildDashboardQuery(
   }
   if (market !== ALL_MARKETS) {
     params.set('market', market)
-  }
-  if (isRefresh) {
-    params.set('refresh', 'true')
   }
   return params.toString()
 }

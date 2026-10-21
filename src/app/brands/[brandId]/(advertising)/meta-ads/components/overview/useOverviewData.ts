@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import type { Market } from '@/types'
 import type { BrandId } from '@/config/brands'
 import type {
@@ -10,8 +10,11 @@ import type {
 } from '@/lib/meta/aggregate'
 import type { DateRangeSelection } from '@/lib/meta/dateRange'
 import { ALL_MARKETS } from '@/lib/markets'
+import { clearSessionCaches, createSessionCache } from '@/lib/sessionCache'
 
 const NO_TOKEN_STATUS = 503
+
+const overviewCache = createSessionCache<OverviewSummary>()
 
 export interface OverviewSummary {
   readonly kpis: KpiDelta
@@ -50,7 +53,6 @@ interface ApiError {
 export function useOverviewData(query: OverviewQuery): OverviewControls {
   const [state, setState] = useState<OverviewState>({ status: 'loading' })
   const [refreshTick, setRefreshTick] = useState(0)
-  const cacheRef = useRef<Map<string, OverviewSummary>>(new Map())
 
   const dateKey =
     query.dateSelection.kind === 'preset'
@@ -60,12 +62,12 @@ export function useOverviewData(query: OverviewQuery): OverviewControls {
   useEffect(() => {
     const controller = new AbortController()
     const cacheKey = `${query.brandId}|${query.market}|${dateKey}`
-    const cached = refreshTick === 0 ? cacheRef.current.get(cacheKey) : undefined
+    const cached = overviewCache.get(cacheKey)
     if (cached) {
       setState({ status: 'success', data: cached })
-    } else {
-      setState({ status: 'loading' })
+      return () => controller.abort()
     }
+    setState({ status: 'loading' })
 
     const search = new URLSearchParams({ brandId: query.brandId })
     if (query.dateSelection.kind === 'preset') {
@@ -82,7 +84,7 @@ export function useOverviewData(query: OverviewQuery): OverviewControls {
       try {
         const response = await fetch(`/api/meta-ads/summary?${search.toString()}`, {
           signal: controller.signal,
-          cache: refreshTick > 0 ? 'reload' : 'default',
+          cache: 'no-store',
         })
         if (response.status === NO_TOKEN_STATUS) {
           setState({ status: 'no-token' })
@@ -95,7 +97,7 @@ export function useOverviewData(query: OverviewQuery): OverviewControls {
         }
         const data = (await response.json()) as OverviewSummary
         if (data.accountsMissingAds.length === 0) {
-          cacheRef.current.set(cacheKey, data)
+          overviewCache.set(cacheKey, data)
         }
         setState({ status: 'success', data })
       } catch (err) {
@@ -111,6 +113,7 @@ export function useOverviewData(query: OverviewQuery): OverviewControls {
   }, [query.brandId, query.market, query.dateSelection, dateKey, refreshTick])
 
   const refresh = useCallback((): void => {
+    clearSessionCaches()
     setRefreshTick((n) => n + 1)
   }, [])
 

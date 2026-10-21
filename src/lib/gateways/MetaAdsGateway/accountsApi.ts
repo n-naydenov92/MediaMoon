@@ -1,20 +1,21 @@
+import { MetaApiError } from './graphErrors'
 import { buildUrl, callGraphApi, callGraphApiPost } from './http'
 import type { AdAccount, AdSet, Campaign, DsaEntities, InstagramAccount, Page } from './types'
 
+const TRANSIENT_RETRY_ATTEMPTS = 3
+const TRANSIENT_RETRY_BASE_DELAY_MS = 600
+
 interface GraphListResponse<T> {
   data: T[]
-  error?: { message: string; type: string; code: number }
 }
 
 interface GraphSummaryResponse {
   data?: unknown[]
   summary?: { total_count?: number }
-  error?: { message: string; type: string; code: number }
 }
 
 interface GraphAdsVolumeResponse {
   data?: { ads_running_or_in_review_count?: number }[]
-  error?: { message: string; type: string; code: number }
 }
 
 interface GraphAdAccountRaw {
@@ -52,9 +53,6 @@ export async function fetchAdAccounts(token: string): Promise<readonly AdAccount
     limit: '100',
   })
   const json = await callGraphApi<GraphListResponse<GraphAdAccountRaw>>(url)
-  if (json.error) {
-    throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
-  }
   return (json.data ?? []).map(toAdAccount)
 }
 
@@ -80,9 +78,6 @@ export async function fetchCampaigns(
     ...buildStatusParams(status, CAMPAIGN_PAUSED_STATUSES),
   })
   const json = await callGraphApi<GraphListResponse<GraphCampaignRaw>>(url)
-  if (json.error) {
-    throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
-  }
   return (json.data ?? []).map(toCampaign)
 }
 
@@ -97,9 +92,6 @@ export async function fetchAdSets(
     ...buildStatusParams(status, ADSET_PAUSED_STATUSES),
   })
   const json = await callGraphApi<GraphListResponse<GraphAdSetRaw>>(url)
-  if (json.error) {
-    throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
-  }
   return (json.data ?? []).map(toAdSet)
 }
 
@@ -109,9 +101,6 @@ export async function fetchPages(token: string): Promise<readonly Page[]> {
     limit: '100',
   })
   const json = await callGraphApi<GraphListResponse<GraphPageRaw>>(url)
-  if (json.error) {
-    throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
-  }
   return (json.data ?? []).map(toPage)
 }
 
@@ -124,7 +113,6 @@ interface GraphInstagramAccountRaw {
 interface GraphPageWithInstagramRaw {
   instagram_business_account?: GraphInstagramAccountRaw
   connected_instagram_account?: GraphInstagramAccountRaw
-  error?: { message: string; type: string; code: number }
 }
 
 export async function fetchInstagramAccountsForPage(
@@ -135,9 +123,6 @@ export async function fetchInstagramAccountsForPage(
     fields: 'instagram_business_account{id,username,profile_picture_url},connected_instagram_account{id,username,profile_picture_url}',
   })
   const json = await callGraphApi<GraphPageWithInstagramRaw>(url)
-  if (json.error) {
-    throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
-  }
   const accounts: InstagramAccount[] = []
   if (json.instagram_business_account) {
     accounts.push({
@@ -162,44 +147,30 @@ export async function fetchInstagramAccountsForPage(
 interface CopyAdSetResponse {
   copied_adset_id?: string
   copied_ad_set_id?: string
-  error?: { code: number; message: string; is_transient?: boolean }
 }
 
 interface UpdateAdSetResponse {
   success?: boolean
-  error?: { code: number; message: string; is_transient?: boolean }
 }
 
 interface CreateAdSetResponse {
   id?: string
-  error?: { code: number; message: string; is_transient?: boolean }
 }
 
-async function postWithRetry<T extends { error?: { code: number; is_transient?: boolean } }>(
-  path: string,
-  body: URLSearchParams,
-  attempts = 3,
-): Promise<T> {
-  let lastErr: unknown
-  for (let i = 0; i < attempts; i += 1) {
+async function postWithRetry<T>(path: string, body: URLSearchParams): Promise<T> {
+  for (let attempt = 1; attempt < TRANSIENT_RETRY_ATTEMPTS; attempt += 1) {
     try {
-      const result = await callGraphApiPost<T>(path, body)
-      if (!result.error || !result.error.is_transient) return result
-      lastErr = new Error(`Meta API error ${result.error.code}: transient`)
+      return await callGraphApiPost<T>(path, body)
     } catch (err) {
-      lastErr = err
-      const message = err instanceof Error ? err.message : ''
-      if (!message.includes('transient') && !message.includes('HTTP 500') && !message.includes('HTTP 503')) {
+      if (!(err instanceof MetaApiError) || err.reason !== 'transient') {
         throw err
       }
-    }
-    if (i < attempts - 1) {
       await new Promise((resolve) => {
-        setTimeout(resolve, 600 * (i + 1))
+        setTimeout(resolve, TRANSIENT_RETRY_BASE_DELAY_MS * attempt)
       })
     }
   }
-  throw lastErr instanceof Error ? lastErr : new Error('Meta API failed after retries')
+  return callGraphApiPost<T>(path, body)
 }
 
 export async function createAdSet(
@@ -213,9 +184,6 @@ export async function createAdSet(
   body.set('access_token', token)
 
   const json = await postWithRetry<CreateAdSetResponse>(`/${accountId}/adsets`, body)
-  if (json.error) {
-    throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
-  }
   if (!json.id) {
     throw new Error('Meta API did not return a created ad set id')
   }
@@ -249,9 +217,6 @@ export async function duplicateAdSet(
   }
 
   const copyJson = await postWithRetry<CopyAdSetResponse>(`/${adSetId}/copies`, copyBody)
-  if (copyJson.error) {
-    throw new Error(`Meta API error ${copyJson.error.code}: ${copyJson.error.message}`)
-  }
   const newId = copyJson.copied_adset_id ?? copyJson.copied_ad_set_id
   if (!newId) {
     throw new Error('Meta API did not return a copied ad set id')
@@ -270,10 +235,7 @@ export async function duplicateAdSet(
     })
   }
 
-  const renameJson = await postWithRetry<UpdateAdSetResponse>(`/${newId}`, updateBody)
-  if (renameJson.error) {
-    throw new Error(`Meta API error ${renameJson.error.code}: ${renameJson.error.message}`)
-  }
+  await postWithRetry<UpdateAdSetResponse>(`/${newId}`, updateBody)
 
   return { adSetId: newId }
 }
@@ -293,9 +255,6 @@ export async function fetchDsaEntities(token: string, accountId: string): Promis
     limit: '200',
   })
   const json = await callGraphApi<GraphListResponse<GraphAdSetDsaRaw>>(url)
-  if (json.error) {
-    throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
-  }
   const beneficiaries = new Set<string>()
   const payors = new Set<string>()
   for (const ad of json.data ?? []) {
@@ -319,9 +278,6 @@ export async function countActiveAdsInAccount(token: string, accountId: string):
     fields: 'id',
   })
   const json = await callGraphApi<GraphSummaryResponse>(url)
-  if (json.error) {
-    throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
-  }
   return json.summary?.total_count ?? 0
 }
 
@@ -339,9 +295,6 @@ export async function countActiveAdsForPage(
     fields: 'ads_running_or_in_review_count',
   })
   const json = await callGraphApi<GraphAdsVolumeResponse>(url)
-  if (json.error) {
-    throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
-  }
   return json.data?.[0]?.ads_running_or_in_review_count ?? 0
 }
 

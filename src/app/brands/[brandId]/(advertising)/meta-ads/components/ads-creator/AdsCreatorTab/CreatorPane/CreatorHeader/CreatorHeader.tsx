@@ -7,9 +7,11 @@ import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined'
 import RestartAltRoundedIcon from '@mui/icons-material/RestartAltRounded'
+import SpeedOutlinedIcon from '@mui/icons-material/SpeedOutlined'
 import type { LaunchJob } from '../../useLaunchQueue'
 import QueueLauncher from '../../QueueLauncher/QueueLauncher'
 import DecisionDialog from '../../DecisionDialog/DecisionDialog'
+import MetaLimitsDialog from '../../MetaLimitsDialog/MetaLimitsDialog'
 import styles from './CreatorHeader.module.css'
 
 interface Props {
@@ -23,9 +25,9 @@ interface Props {
   readonly onDismiss: (jobId: string) => void
 }
 
-// The draft header: title + the three compact action buttons (Reset / Preview /
-// Queue). Owns the reset-confirm dialog as local UI state — Reset only clears once
-// the operator confirms, and the actual clearing lives in the parent (onResetDraft).
+// The draft header: title + the compact action buttons (Meta limits / Reset / Preview /
+// Queue). Owns the reset-confirm and limits dialogs as local UI state — Reset only clears
+// once the operator confirms, and the actual clearing lives in the parent (onResetDraft).
 export default memo(function CreatorHeader({
   canReset,
   onResetDraft,
@@ -43,6 +45,10 @@ export default memo(function CreatorHeader({
     onResetDraft()
     setResetConfirmOpen(false)
   }, [onResetDraft])
+  const [limitsOpen, setLimitsOpen] = useState(false)
+  const openLimits = useCallback(() => setLimitsOpen(true), [])
+  const closeLimits = useCallback(() => setLimitsOpen(false), [])
+  const limitsTooltip = accountId ? 'Meta API limits' : 'Pick an ad account to see its Meta API limits'
 
   return (
     <>
@@ -52,6 +58,18 @@ export default memo(function CreatorHeader({
           <Typography component="h4" variant="h4">Launch new ads</Typography>
         </Box>
         <Box className={styles.headerActions}>
+          <Tooltip title={limitsTooltip}>
+            <Box component="span">
+              <IconButton
+                className={styles.actionBtn}
+                onClick={openLimits}
+                disabled={!accountId}
+                aria-label="Meta API limits"
+              >
+                <SpeedOutlinedIcon fontSize="small" />
+              </IconButton>
+            </Box>
+          </Tooltip>
           <Tooltip title="Reset draft">
             <Box component="span">
               <IconButton
@@ -82,6 +100,8 @@ export default memo(function CreatorHeader({
           />
         </Box>
       </Box>
+
+      <MetaLimitsDialog open={limitsOpen} onClose={closeLimits} accountId={accountId} />
 
       <DecisionDialog
         open={resetConfirmOpen}

@@ -3,22 +3,18 @@ import type { AdCreativeParams } from './types'
 
 interface GraphImageUploadResponse {
   images: Record<string, { hash: string; url: string }>
-  error?: { message: string; type: string; code: number }
 }
 
 interface GraphVideoUploadResponse {
   id: string
-  error?: { message: string; type: string; code: number }
 }
 
 interface GraphCreativeResponse {
   id: string
-  error?: { message: string; type: string; code: number }
 }
 
 interface GraphAdResponse {
   id: string
-  error?: { message: string; type: string; code: number }
 }
 
 export async function uploadImage(
@@ -36,9 +32,6 @@ export async function uploadImage(
     `/${accountId}/adimages`,
     form,
   )
-  if (json.error) {
-    throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
-  }
   const entry = json.images[filename]
   if (!entry) {
     throw new Error('Meta API returned no image hash')
@@ -62,9 +55,6 @@ export async function uploadVideo(
     `/${accountId}/advideos`,
     form,
   )
-  if (json.error) {
-    throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
-  }
   return { id: json.id }
 }
 
@@ -82,9 +72,6 @@ export async function createAdCreative(
     `/${params.accountId}/adcreatives`,
     body,
   )
-  if (json.error) {
-    throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
-  }
   return { id: json.id }
 }
 
@@ -104,9 +91,6 @@ export async function createAd(
     access_token: token,
   })
   const json = await callGraphApiPost<GraphAdResponse>(`/${accountId}/ads`, body)
-  if (json.error) {
-    throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
-  }
   return { id: json.id }
 }
 

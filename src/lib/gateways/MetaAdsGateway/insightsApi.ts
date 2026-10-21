@@ -20,7 +20,6 @@ const DAILY_CONVERSION_FIELDS = 'inline_link_clicks,actions,action_values'
 
 interface GraphInsightsResponse {
   data?: GraphInsightsRow[]
-  error?: { message: string; type: string; code: number }
   paging?: { next?: string }
 }
 
@@ -69,9 +68,6 @@ export async function fetchInsightsRows(
   const rows: GraphInsightsRow[] = []
   for (let page = 0; page < MAX_INSIGHTS_PAGES && url; page += 1) {
     const json: GraphInsightsResponse = await callGraphApi<GraphInsightsResponse>(url)
-    if (json.error) {
-      throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
-    }
     rows.push(...(json.data ?? []))
     url = json.paging?.next ?? null
   }

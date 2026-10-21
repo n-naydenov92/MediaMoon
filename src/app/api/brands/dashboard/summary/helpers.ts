@@ -24,8 +24,6 @@ import type {
   DashboardSummary,
 } from '@/types/dashboard'
 
-export const CACHE_VERSION = 'v27'
-
 export async function buildSummary(
   brandId: BrandId,
   current: DateRangeSelection,
@@ -86,20 +84,6 @@ export async function buildSummary(
     analytics: buildAnalytics(analyticsCurrent, kpis),
     previousAnalytics: buildAnalytics(analyticsPrevious, previousKpis),
   }
-}
-
-export function buildCacheTag(
-  brandId: string,
-  market: MarketSelection,
-  params: URLSearchParams,
-): string {
-  const from = params.get('from')
-  const to = params.get('to')
-  if (from && to) {
-    return `dashboard:${CACHE_VERSION}:${brandId}:${market}:custom:${from}:${to}`
-  }
-  const preset = params.get('datePreset') ?? 'today'
-  return `dashboard:${CACHE_VERSION}:${brandId}:${market}:${preset}`
 }
 
 function buildPeriodKpis(

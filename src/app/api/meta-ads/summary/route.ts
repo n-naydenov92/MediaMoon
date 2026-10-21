@@ -23,15 +23,10 @@ import {
 } from '@/lib/meta/aggregate'
 import { fetchAdsOrNull, fetchAllAccounts, toLeaderboardEntry } from './accountFetching'
 import { parseBrandId, parseCriteriaFromQuery, resolveTargetAccounts } from './queryParsing'
-import {
-  edgeCacheHeaders,
-  emptyResponse,
-  summaryCacheHeaders,
-  type SummaryResponse,
-} from './summaryResponse'
+import { emptyResponse, type SummaryResponse } from './summaryResponse'
+import { metaErrorResponse } from '@/lib/meta/metaErrorResponse'
 
 const NO_TOKEN_STATUS = 503
-const UPSTREAM_ERROR_STATUS = 502
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const params = request.nextUrl.searchParams
@@ -53,7 +48,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
   const accountIds = resolveTargetAccounts(brandId, params.get('market'), params.get('account'))
   if (accountIds.length === 0) {
-    return NextResponse.json(emptyResponse(criteria), { headers: edgeCacheHeaders() })
+    return NextResponse.json(emptyResponse(criteria))
   }
 
   if (getConfiguredBusinessManagersForBrand(brandId).length === 0) {
@@ -138,9 +133,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       fetchedAt: Date.now(),
     }
 
-    return NextResponse.json(response, { headers: summaryCacheHeaders(response) })
+    return NextResponse.json(response)
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error'
-    return NextResponse.json({ error: message }, { status: UPSTREAM_ERROR_STATUS })
+    return metaErrorResponse(err)
   }
 }

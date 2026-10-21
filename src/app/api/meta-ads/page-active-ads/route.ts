@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { countActiveAdsForPage } from '@/lib/gateways/MetaAdsGateway'
+import { metaErrorResponse } from '@/lib/meta/metaErrorResponse'
 import { resolveBrandTokenFromRequest } from '@/lib/meta/resolveBrandToken'
 import { adsVolumeAccountId, parsePageIds } from './helpers'
 
@@ -25,7 +26,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const activeAdsByPageId = Object.fromEntries(pageIds.map((pageId, i) => [pageId, counts[i]]))
     return NextResponse.json({ activeAdsByPageId })
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return metaErrorResponse(err)
   }
 }

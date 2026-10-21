@@ -11,14 +11,12 @@ import { parseDateRangeFromQuery, toMetaInsightsParams } from '@/lib/meta/dateRa
 import { convertToEur } from '@/lib/meta/fx'
 import { fetchAllAccounts } from '../summary/accountFetching'
 import { parseBrandId, resolveTargetAccounts } from '../summary/queryParsing'
+import { metaErrorResponse } from '@/lib/meta/metaErrorResponse'
 
 const AD_INSIGHTS_PAGE_SIZE = 200
 const NO_TOKEN_STATUS = 503
-const UPSTREAM_ERROR_STATUS = 502
 const DEFAULT_PAGE_LIMIT = 50
 const MAX_PAGE_LIMIT = 200
-const CACHE_MAX_AGE_SECONDS = 3600
-const CACHE_STALE_WHILE_REVALIDATE_SECONDS = 600
 
 interface AdRow {
   readonly adId: string
@@ -98,7 +96,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
   const accountIds = resolveTargetAccounts(brandId, params.get('market'), params.get('account'))
   if (accountIds.length === 0) {
-    return NextResponse.json(emptyResponse(), { headers: edgeCacheHeaders() })
+    return NextResponse.json(emptyResponse())
   }
 
   if (getConfiguredBusinessManagersForBrand(brandId).length === 0) {
@@ -148,21 +146,14 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       nextOffset,
       fetchedAt: Date.now(),
     }
-    return NextResponse.json(response, { headers: edgeCacheHeaders() })
+    return NextResponse.json(response)
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error'
-    return NextResponse.json({ error: message }, { status: UPSTREAM_ERROR_STATUS })
+    return metaErrorResponse(err)
   }
 }
 
 function emptyResponse(): AdsListResponse {
   return { items: [], total: 0, nextOffset: null, fetchedAt: Date.now() }
-}
-
-function edgeCacheHeaders(): Record<string, string> {
-  return {
-    'Cache-Control': `s-maxage=${CACHE_MAX_AGE_SECONDS}, stale-while-revalidate=${CACHE_STALE_WHILE_REVALIDATE_SECONDS}`,
-  }
 }
 
 function buildMetaSideFilters(rules: readonly FilterRule[]): readonly AdInsightsFilter[] {

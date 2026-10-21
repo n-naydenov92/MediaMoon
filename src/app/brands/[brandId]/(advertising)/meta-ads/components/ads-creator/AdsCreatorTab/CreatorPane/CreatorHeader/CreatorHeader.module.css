@@ -20,8 +20,8 @@
   flex-shrink: 0;
 }
 
-/* Compact, uniform icon buttons (Reset / Preview / Queue) so the three sit together
-   without crowding. Mirrors the QueueLauncher button so all three read as one set. */
+/* Compact, uniform icon buttons (Meta limits / Reset / Preview / Queue) so they sit
+   together without crowding. Mirrors the QueueLauncher button so all read as one set. */
 .actionBtn {
   width: 32px;
   height: 32px;

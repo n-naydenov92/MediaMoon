@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { fetchPages } from '@/lib/gateways/MetaAdsGateway'
+import { metaErrorResponse } from '@/lib/meta/metaErrorResponse'
 import { resolveBrandTokenFromRequest } from '@/lib/meta/resolveBrandToken'
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
@@ -11,7 +12,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const pages = await fetchPages(resolved.token)
     return NextResponse.json({ pages })
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return metaErrorResponse(err)
   }
 }

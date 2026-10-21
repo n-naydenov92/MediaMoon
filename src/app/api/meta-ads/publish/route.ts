@@ -8,6 +8,7 @@ import {
   type CtaType,
   type PublishAdResult,
 } from '@/lib/gateways/MetaAdsGateway'
+import { metaErrorResponse } from '@/lib/meta/metaErrorResponse'
 import { resolveAccountTokenFromRequest } from '@/lib/meta/resolveBrandToken'
 
 export const runtime = 'nodejs'
@@ -131,6 +132,5 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 }
 
 function errorResponse(err: unknown, step: PublishStep): NextResponse {
-  const message = err instanceof Error ? err.message : 'Unknown error'
-  return NextResponse.json({ error: message, step }, { status: 502 })
+  return metaErrorResponse(err, { step })
 }

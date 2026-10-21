@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { fetchInstagramAccountsForPage } from '@/lib/gateways/MetaAdsGateway'
+import { metaErrorResponse } from '@/lib/meta/metaErrorResponse'
 import { resolveAccountTokenFromRequest } from '@/lib/meta/resolveBrandToken'
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
@@ -16,7 +17,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const instagramAccounts = await fetchInstagramAccountsForPage(resolved.token, pageId)
     return NextResponse.json({ instagramAccounts })
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return metaErrorResponse(err)
   }
 }

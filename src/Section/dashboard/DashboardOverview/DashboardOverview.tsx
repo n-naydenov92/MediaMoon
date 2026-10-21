@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
@@ -16,6 +16,7 @@ import {
   type CustomRange,
   type DatePreset,
 } from '@/lib/meta/dateRange'
+import { clearSessionCaches, createSessionCache } from '@/lib/sessionCache'
 import type { BrandConfig } from '@/types'
 import type { DashboardSummary } from '@/types/dashboard'
 import DashboardAnalytics from './DashboardAnalytics/DashboardAnalytics'
@@ -42,6 +43,8 @@ type DashboardState =
 
 const CUSTOM_COMPARISON_LABEL = 'vs prev. period'
 
+const summaryCache = createSessionCache<DashboardSummary>()
+
 export default function DashboardOverview({ brand }: Props): JSX.Element {
   const { selectedMarket } = useBrandShellContext()
   const router = useRouter()
@@ -60,7 +63,6 @@ export default function DashboardOverview({ brand }: Props): JSX.Element {
 
   const [refreshTick, setRefreshTick] = useState(0)
   const [state, setState] = useState<DashboardState>({ status: 'loading' })
-  const cacheRef = useRef<Map<string, DashboardSummary>>(new Map())
   const productsState = useDashboardProducts({
     brandId: brand.id,
     market: selectedMarket,
@@ -72,21 +74,20 @@ export default function DashboardOverview({ brand }: Props): JSX.Element {
   useEffect(() => {
     const controller = new AbortController()
     const cacheKey = `${brand.id}|${selectedMarket}|${dateKey}`
-    const cached = refreshTick === 0 ? cacheRef.current.get(cacheKey) : undefined
-
+    const cached = summaryCache.get(cacheKey)
     if (cached) {
       setState({ status: 'success', data: cached })
-    } else {
-      setState({ status: 'loading' })
+      return () => controller.abort()
     }
+    setState({ status: 'loading' })
 
-    const search = buildDashboardQuery(brand.id, dateSelection, selectedMarket, refreshTick > 0)
+    const search = buildDashboardQuery(brand.id, dateSelection, selectedMarket)
 
     void (async () => {
       try {
         const response = await fetch(`/api/brands/dashboard/summary?${search}`, {
           signal: controller.signal,
-          cache: refreshTick > 0 ? 'reload' : 'default',
+          cache: 'no-store',
         })
         if (!response.ok) {
           const body = (await response.json().catch(() => ({}))) as { error?: string }
@@ -94,7 +95,7 @@ export default function DashboardOverview({ brand }: Props): JSX.Element {
           return
         }
         const data = (await response.json()) as DashboardSummary
-        cacheRef.current.set(cacheKey, data)
+        summaryCache.set(cacheKey, data)
         setState({ status: 'success', data })
       } catch (err) {
         if (err instanceof DOMException && err.name === 'AbortError') {
@@ -109,6 +110,7 @@ export default function DashboardOverview({ brand }: Props): JSX.Element {
   }, [brand.id, dateKey, dateSelection, refreshTick, selectedMarket])
 
   const handleRefresh = useCallback(() => {
+    clearSessionCaches()
     setRefreshTick((n) => n + 1)
   }, [])
 
