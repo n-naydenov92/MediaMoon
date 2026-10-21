@@ -73,6 +73,7 @@ interface Props<T> {
   readonly getOptionId: (option: T) => string
   readonly getOptionLabel: (option: T) => string
   readonly getOptionSecondary?: (option: T) => string
+  readonly getOptionTooltip?: (option: T) => string
   readonly getOptionStatus?: (option: T) => OptionStatus
   // When set, the status dot is wrapped in a tooltip with this label (e.g. the human
   // account/campaign status) so hovering a dot explains what its colour means.
@@ -97,6 +98,7 @@ function SearchSelectInner<T>({
   getOptionId,
   getOptionLabel,
   getOptionSecondary,
+  getOptionTooltip,
   getOptionStatus,
   getOptionStatusLabel,
   getOptionIcon,
@@ -221,7 +223,8 @@ function SearchSelectInner<T>({
           void keyToOmit
           const label = getOptionLabel(option)
           const secondary = getOptionSecondary ? getOptionSecondary(option) : null
-          const tooltipText = secondary ? `${label} ${secondary}` : label
+          const defaultTooltipText = secondary ? `${label} ${secondary}` : label
+          const tooltipText = getOptionTooltip ? getOptionTooltip(option) : defaultTooltipText
           const icon: ReactNode = getOptionIcon ? getOptionIcon(option) : leadingIcon
           const statusLabel = getOptionStatusLabel ? getOptionStatusLabel(option) : ''
           return (

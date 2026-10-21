@@ -234,7 +234,11 @@
   font-size: 18px;
   color: var(--accent);
   flex-shrink: 0;
-  margin-left: 6px;
+  margin-left: auto;
+}
+
+.optionAction + .checkIconTrailing {
+  margin-left: 0;
 }
 
 .empty {

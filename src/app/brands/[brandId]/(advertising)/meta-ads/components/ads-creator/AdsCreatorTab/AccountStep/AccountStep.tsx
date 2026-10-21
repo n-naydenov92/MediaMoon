@@ -59,7 +59,7 @@ export default memo(function AccountStep({ accounts, value, onChange }: Props): 
           leadingIcon={<MetaLogo />}
           getOptionId={(o) => o.id}
           getOptionLabel={(o) => o.name}
-          getOptionSecondary={(o) => `(${o.id})`}
+          getOptionTooltip={(o) => `${o.name} (${o.id})`}
           getOptionStatus={(o) => accountStatusInfo(o.accountStatus).tone}
           getOptionStatusLabel={(o) => accountStatusInfo(o.accountStatus).label}
           noOptionsText="No ad accounts match this search."
