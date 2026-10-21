@@ -4,6 +4,8 @@ import {
   type FilterField,
   type FilterRule,
 } from '@/lib/meta/filterRules'
+import { libraryAddBlock } from '../assetCompat'
+import type { AssetCreative } from '../assetCreative'
 import type { CreativeElement, ElementMetrics } from './decompose'
 import type { ElementTabId, PresetDef, PresetKey, SortDirection, SortFieldId } from './config'
 
@@ -83,6 +85,16 @@ export function activePresetKey(
 ): PresetKey | null {
   const signature = stringifyFilterRules(rules)
   return presets.find((p) => stringifyFilterRules(p.rules) === signature)?.key ?? null
+}
+
+// The same rule that disables a card's Add button: no re-usable source media, or a
+// video the selected account can't publish (it belongs to another Business Manager).
+export function isCreativeAddable(
+  c: CreativeElement,
+  asset: AssetCreative | null,
+  targetAccountId: string,
+): boolean {
+  return asset !== null && !libraryAddBlock(c.creativeType, c.accountId, targetAccountId).blocked
 }
 
 export function matchesSearch(haystack: string, query: string): boolean {

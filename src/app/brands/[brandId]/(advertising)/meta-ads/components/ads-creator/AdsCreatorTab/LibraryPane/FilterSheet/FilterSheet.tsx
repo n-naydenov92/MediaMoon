@@ -14,6 +14,7 @@ import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded'
 import ImageRoundedIcon from '@mui/icons-material/ImageRounded'
 import type { FilterRule } from '@/lib/meta/filterRules'
 import RuleChip from '../../../../shared/filters/RuleChip/RuleChip'
+import AvailableOnlyChip from '../AvailableOnlyChip/AvailableOnlyChip'
 import type { PresetDef, PresetKey, SortDirection, SortFieldDef, SortFieldId } from '../config'
 import styles from './FilterSheet.module.css'
 
@@ -32,6 +33,8 @@ interface Props {
   readonly presets: readonly PresetDef[]
   readonly activePreset: PresetKey | null
   readonly rules: readonly FilterRule[]
+  // Rules plus any on/off filter, so "Clear all" and the empty note match the trigger's count.
+  readonly filterCount: number
   readonly sortField: SortFieldId
   readonly sortDirection: SortDirection
   readonly sortFields: readonly SortFieldDef[]
@@ -41,6 +44,9 @@ interface Props {
   readonly onRemoveRule: (index: number) => void
   readonly onClearAll: () => void
   readonly onOpenAddFilter: () => void
+  // Omitted where the filter doesn't apply (text tabs, no account picked yet).
+  readonly availableOnly?: boolean
+  readonly onAvailableOnlyChange: (next: boolean) => void
 }
 
 export default memo(function FilterSheet({
@@ -50,6 +56,7 @@ export default memo(function FilterSheet({
   presets,
   activePreset,
   rules,
+  filterCount,
   sortField,
   sortDirection,
   sortFields,
@@ -59,6 +66,8 @@ export default memo(function FilterSheet({
   onRemoveRule,
   onClearAll,
   onOpenAddFilter,
+  availableOnly,
+  onAvailableOnlyChange,
 }: Props): JSX.Element {
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const arrow = sortDirection === 'desc' ? '↓' : '↑'
@@ -79,7 +88,7 @@ export default memo(function FilterSheet({
           <Typography component="h2" variant="h3" className={styles.title}>
             Filters
           </Typography>
-          {rules.length > 0 && (
+          {filterCount > 0 && (
             <Button
               type="button"
               size="small"
@@ -144,6 +153,21 @@ export default memo(function FilterSheet({
           </Box>
         </Box>
 
+        {availableOnly !== undefined && (
+          <Box className={styles.section}>
+            <Typography component="span" variant="caption" className={styles.sectionLabel}>
+              Availability
+            </Typography>
+            <Box className={styles.chips}>
+              <AvailableOnlyChip
+                checked={availableOnly}
+                onChange={onAvailableOnlyChange}
+                className={styles.chip}
+              />
+            </Box>
+          </Box>
+        )}
+
         <Box className={styles.section}>
           <Box className={styles.sectionHead}>
             <Typography component="span" variant="caption" className={styles.sectionLabel}>
@@ -161,11 +185,12 @@ export default memo(function FilterSheet({
               Add filter
             </Button>
           </Box>
-          {rules.length === 0 ? (
+          {filterCount === 0 && (
             <Typography component="span" variant="body2" className={styles.empty}>
               No filters applied
             </Typography>
-          ) : (
+          )}
+          {rules.length > 0 && (
             <Box className={styles.ruleList}>
               {rules.map((rule, index) => (
                 <RuleChip

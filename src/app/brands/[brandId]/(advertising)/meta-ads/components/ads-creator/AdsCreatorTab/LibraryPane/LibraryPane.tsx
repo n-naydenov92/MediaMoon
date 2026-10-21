@@ -37,6 +37,7 @@ import {
 } from './config'
 import {
   creativeMatchesRules,
+  isCreativeAddable,
   matchesSearch,
   rankElements,
   tabKind,
@@ -109,6 +110,7 @@ export default memo(function LibraryPane({
   const [addFilterOpen, setAddFilterOpen] = useState(false)
   const [filtersCollapsed, setFiltersCollapsed] = useState(false)
   const [filterSheetOpen, setFilterSheetOpen] = useState(false)
+  const [availableOnly, setAvailableOnly] = useState(false)
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE)
 
   const isMobile = useMediaQuery('(max-width:640px)')
@@ -155,16 +157,27 @@ export default memo(function LibraryPane({
   }
 
   const { viewRules } = filters
+  const hasTargetAccount = targetAccountId !== ''
+  // Without an account every card is blocked, so "Available only" would empty the grid.
+  const hideUnavailable = availableOnly && hasTargetAccount
   const rankedCreatives = useMemo(() => {
     const filtered = creatives.filter(
-      (c) => creativeMatchesRules(c, viewRules) && matchesSearch(c.label, search),
+      (c) => creativeMatchesRules(c, viewRules)
+        && matchesSearch(c.label, search)
+        && (!hideUnavailable || isCreativeAddable(c, assetByKey.get(c.key) ?? null, targetAccountId)),
     )
     return rankElements(filtered, sort.field, sort.direction)
-  }, [creatives, viewRules, search, sort.field, sort.direction])
+  }, [creatives, viewRules, search, sort.field, sort.direction, hideUnavailable, assetByKey, targetAccountId])
 
   const kind = tabKind(activeTab)
   const isCreatives = kind === 'creative'
   const isUrls = kind === 'url'
+
+  // Undefined hides the chip: it only filters creatives, and only once an account is picked.
+  const availableOnlyChip = isCreatives && hasTargetAccount ? availableOnly : undefined
+  // "Available only" counts as a filter (toggle tint, mobile badge, "Clear all"), but
+  // only on the tab it actually filters.
+  const filterCount = filters.rules.length + (isCreatives && hideUnavailable ? 1 : 0)
 
   let activeTextSource = primaries
   if (activeTab === 'headline') {
@@ -183,7 +196,7 @@ export default memo(function LibraryPane({
 
   useEffect(() => {
     setVisibleCount(INITIAL_VISIBLE)
-  }, [activeTab, filters.rules, search, sort.field, sort.direction])
+  }, [activeTab, filters.rules, search, sort.field, sort.direction, hideUnavailable])
 
   // Keep the search term across tabs so switching from Creatives to Primary Texts
   // (etc.) filters the new tab by the same word instead of silently dropping it.
@@ -209,6 +222,13 @@ export default memo(function LibraryPane({
       onAddPrimaryText(text)
     }
   }, [activeTab, onAddUrl, onAddHeadline, onAddPrimaryText])
+
+  function handleClearFilters(): void {
+    filters.clearRules()
+    if (isCreatives) {
+      setAvailableOnly(false)
+    }
+  }
 
   // Two levels: reveal more of the already-loaded set first; once it is exhausted
   // and the server has more pages, fetch the next page (and reveal a step of it).
@@ -271,8 +291,7 @@ export default memo(function LibraryPane({
         </Tabs>
         {state.status === 'success' && !isMobile && (
           <FilterToggle
-            active={filtersCollapsed || filters.rules.length > 0}
-            filterCount={filters.rules.length}
+            filterCount={filterCount}
             showCount={false}
             onClick={handleToggleFilters}
             ariaLabel={filtersCollapsed ? 'Show filters' : 'Hide filters'}
@@ -315,6 +334,8 @@ export default memo(function LibraryPane({
                   onOpenAddFilter={() => setAddFilterOpen(true)}
                   onUpdateRule={filters.updateRule}
                   onRemoveRule={filters.removeRule}
+                  availableOnly={availableOnlyChip}
+                  onAvailableOnlyChange={setAvailableOnly}
                 />
               </Box>
             )}
@@ -333,8 +354,7 @@ export default memo(function LibraryPane({
               filterTrigger={
                 isMobile ? (
                   <FilterToggle
-                    active={filters.rules.length > 0}
-                    filterCount={filters.rules.length}
+                    filterCount={filterCount}
                     onClick={() => setFilterSheetOpen(true)}
                     ariaLabel="Open filters"
                   />
@@ -343,7 +363,7 @@ export default memo(function LibraryPane({
             />
           </Box>
 
-          {isCreatives && targetAccountId === '' && (
+          {isCreatives && !hasTargetAccount && (
             <Alert severity="warning" className={styles.notice}>
               Select an account first (Step 1) to add creatives.
             </Alert>
@@ -444,6 +464,7 @@ export default memo(function LibraryPane({
           presets={tabDef.presets}
           activePreset={filters.activePreset}
           rules={filters.rules}
+          filterCount={filterCount}
           sortField={sort.field}
           sortDirection={sort.direction}
           sortFields={tabDef.sortFields}
@@ -451,8 +472,10 @@ export default memo(function LibraryPane({
           onSelectPreset={filters.selectPreset}
           onUpdateRule={filters.updateRule}
           onRemoveRule={filters.removeRule}
-          onClearAll={filters.clearRules}
+          onClearAll={handleClearFilters}
           onOpenAddFilter={() => setAddFilterOpen(true)}
+          availableOnly={availableOnlyChip}
+          onAvailableOnlyChange={setAvailableOnly}
         />
       )}
 

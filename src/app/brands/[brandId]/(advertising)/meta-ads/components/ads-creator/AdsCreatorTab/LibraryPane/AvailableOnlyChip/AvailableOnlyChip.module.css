@@ -1,0 +1,9 @@
+/* Same size as the preset chips' icons. Inherits the chip's text color so the check
+   stays readable on both the soft (desktop) and solid (mobile sheet) active fills. */
+.checkIcon.checkIcon {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 2px;
+  font-size: 14px;
+  color: inherit;
+}

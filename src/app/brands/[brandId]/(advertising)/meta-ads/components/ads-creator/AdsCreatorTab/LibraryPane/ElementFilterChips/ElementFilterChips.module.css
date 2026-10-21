@@ -78,6 +78,18 @@
   border-style: dashed;
 }
 
+/* Takes over the push-right from "+ Add filter" so the two sit together on the right,
+   apart from the single-choice presets. */
+.availableOnly {
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.availableOnly + .addFilter.addFilter {
+  margin-left: 0;
+}
+
 .mobileBar {
   display: none;
   align-items: center;

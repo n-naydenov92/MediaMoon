@@ -19,6 +19,7 @@ import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded'
 import ImageRoundedIcon from '@mui/icons-material/ImageRounded'
 import type { FilterRule } from '@/lib/meta/filterRules'
 import RuleChip from '../../../../shared/filters/RuleChip/RuleChip'
+import AvailableOnlyChip from '../AvailableOnlyChip/AvailableOnlyChip'
 import type { PresetDef, PresetKey } from '../config'
 import styles from './ElementFilterChips.module.css'
 
@@ -38,6 +39,9 @@ interface Props {
   readonly onOpenAddFilter: () => void
   readonly onUpdateRule: (index: number, rule: FilterRule) => void
   readonly onRemoveRule: (index: number) => void
+  // Omitted where the filter doesn't apply (text tabs, no account picked yet).
+  readonly availableOnly?: boolean
+  readonly onAvailableOnlyChange: (next: boolean) => void
 }
 
 export default memo(function ElementFilterChips({
@@ -48,6 +52,8 @@ export default memo(function ElementFilterChips({
   onOpenAddFilter,
   onUpdateRule,
   onRemoveRule,
+  availableOnly,
+  onAvailableOnlyChange,
 }: Props): JSX.Element {
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const mobileTriggerRef = useRef<HTMLButtonElement | null>(null)
@@ -82,6 +88,15 @@ export default memo(function ElementFilterChips({
             />
           )
         })}
+        {availableOnly !== undefined && (
+          <Box className={styles.availableOnly}>
+            <AvailableOnlyChip
+              checked={availableOnly}
+              onChange={onAvailableOnlyChange}
+              className={styles.presetChip}
+            />
+          </Box>
+        )}
         <Chip
           label="+ Add filter"
           clickable

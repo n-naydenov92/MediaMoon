@@ -9,8 +9,8 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
 import styles from './FilterToggle.module.css'
 
 interface Props {
-  // Drives the active (accent) coloring — any filter applied, preset or custom rule.
-  readonly active: boolean
+  // Any applied filter (preset or custom rule) tints the toggle. Open/collapsed never
+  // does — the chevron already shows that, and a tint without filters reads as "filtered".
   readonly filterCount: number
   readonly onClick: () => void
   readonly ariaLabel: string
@@ -23,8 +23,10 @@ interface Props {
 }
 
 export default memo(function FilterToggle({
-  active, filterCount, onClick, ariaLabel, showCount = true, chevron,
+  filterCount, onClick, ariaLabel, showCount = true, chevron,
 }: Props): JSX.Element {
+  const active = filterCount > 0
+
   return (
     <Button
       type="button"
