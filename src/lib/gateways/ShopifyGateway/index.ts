@@ -8,21 +8,28 @@ import {
 } from './derive'
 import { fetchOrdersInRange } from './orders'
 import { collectUniqueProductIds, fetchProductCategories } from './products'
-import type { CommerceSalesAndProducts } from '../WooGateway'
+import type { CommerceProductsBreakdown, CommerceSalesRangeResult } from '../WooGateway'
 
-export async function fetchSalesAndProducts(
+export async function fetchSales(
+  config: ShopifyProviderConfig,
+  dateMin: string,
+  dateMax: string,
+  market: MarketSelection,
+): Promise<CommerceSalesRangeResult> {
+  const orders = filterOrdersByMarket(await fetchOrdersInRange(config, dateMin, dateMax), market)
+  return deriveSalesRange(orders, config.currency)
+}
+
+export async function fetchProductsBreakdown(
   config: ShopifyProviderConfig,
   dateMin: string,
   dateMax: string,
   topLimit: number,
   market: MarketSelection,
-): Promise<CommerceSalesAndProducts> {
-  const allOrders = await fetchOrdersInRange(config, dateMin, dateMax)
-  const orders = filterOrdersByMarket(allOrders, market)
-  const uniqueProductIds = collectUniqueProductIds(orders)
-  const productCategoryMap = await fetchProductCategories(config, uniqueProductIds)
+): Promise<CommerceProductsBreakdown> {
+  const orders = filterOrdersByMarket(await fetchOrdersInRange(config, dateMin, dateMax), market)
+  const productCategoryMap = await fetchProductCategories(config, collectUniqueProductIds(orders))
   return {
-    sales: deriveSalesRange(orders, config.currency),
     topProducts: deriveTopProducts(orders, topLimit),
     categoryRevenue: deriveCategoryRevenue(orders, productCategoryMap),
   }

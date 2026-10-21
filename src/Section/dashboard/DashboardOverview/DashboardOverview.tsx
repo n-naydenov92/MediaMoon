@@ -10,7 +10,6 @@ import Typography from '@mui/material/Typography'
 import PageHeader from '@/components/layout/PageHeader/PageHeader'
 import type { BrandId } from '@/config/brands'
 import { useBrandShellContext } from '@/contexts/brandShell/useBrandShellContext'
-import { ALL_MARKETS } from '@/lib/markets'
 import {
   COMPARISON_LABELS,
   parseDateRangeFromQuery,
@@ -28,7 +27,8 @@ import DashboardProductsBreakdown from './DashboardProductsBreakdown/DashboardPr
 import DashboardSpendBreakdown from '../DashboardSpendBreakdown/DashboardSpendBreakdown'
 import { buildDashboardCrumbs } from './dashboardCrumbs'
 import KpiSkeletons from './KpiSkeletons/KpiSkeletons'
-import { isSingleDayRange } from './helpers'
+import { buildDashboardQuery, isSingleDayRange } from './helpers'
+import { useDashboardProducts } from './useDashboardProducts'
 import styles from './DashboardOverview.module.css'
 
 interface Props {
@@ -61,6 +61,13 @@ export default function DashboardOverview({ brand }: Props): JSX.Element {
   const [refreshTick, setRefreshTick] = useState(0)
   const [state, setState] = useState<DashboardState>({ status: 'loading' })
   const cacheRef = useRef<Map<string, DashboardSummary>>(new Map())
+  const productsState = useDashboardProducts({
+    brandId: brand.id,
+    market: selectedMarket,
+    dateSelection,
+    dateKey,
+    refreshTick,
+  })
 
   useEffect(() => {
     const controller = new AbortController()
@@ -73,23 +80,11 @@ export default function DashboardOverview({ brand }: Props): JSX.Element {
       setState({ status: 'loading' })
     }
 
-    const params = new URLSearchParams({ brandId: brand.id })
-    if (dateSelection.kind === 'preset') {
-      params.set('datePreset', dateSelection.preset)
-    } else {
-      params.set('from', dateSelection.range.from)
-      params.set('to', dateSelection.range.to)
-    }
-    if (selectedMarket !== ALL_MARKETS) {
-      params.set('market', selectedMarket)
-    }
-    if (refreshTick > 0) {
-      params.set('refresh', 'true')
-    }
+    const search = buildDashboardQuery(brand.id, dateSelection, selectedMarket, refreshTick > 0)
 
     void (async () => {
       try {
-        const response = await fetch(`/api/brands/dashboard/summary?${params.toString()}`, {
+        const response = await fetch(`/api/brands/dashboard/summary?${search}`, {
           signal: controller.signal,
           cache: refreshTick > 0 ? 'reload' : 'default',
         })
@@ -258,12 +253,18 @@ export default function DashboardOverview({ brand }: Props): JSX.Element {
       <Typography component="h2" variant="h2" className={styles.sectionHeading}>
         Products Breakdown
       </Typography>
-      <DashboardProductsBreakdown
-        products={state.status === 'success' ? state.data.topProducts : []}
-        categories={state.status === 'success' ? state.data.categories ?? [] : []}
-        hasCommerce={state.status === 'success' ? state.data.hasCommerce : true}
-        loading={state.status === 'loading'}
-      />
+      {productsState.status === 'error' ? (
+        <Alert severity="error" variant="outlined" className={styles.error}>
+          Couldn&apos;t load products. {productsState.message}
+        </Alert>
+      ) : (
+        <DashboardProductsBreakdown
+          products={productsState.status === 'success' ? productsState.data.topProducts : []}
+          categories={productsState.status === 'success' ? productsState.data.categories : []}
+          hasCommerce={productsState.status === 'success' ? productsState.data.hasCommerce : true}
+          loading={productsState.status === 'loading'}
+        />
+      )}
     </Stack>
   )
 }

@@ -12,7 +12,7 @@ import {
   type CommerceTotals,
 } from '@/lib/dashboard/aggregate'
 import { fetchAnalyticsForBrand } from '@/lib/dashboard/fetchAnalytics'
-import { fetchCommerceForBrand } from '@/lib/dashboard/fetchCommerce'
+import { fetchCommerceTotalsForBrand } from '@/lib/dashboard/fetchCommerce'
 import { fetchGoogleAdsBothPeriods } from '@/lib/dashboard/fetchGoogleAds'
 import { fetchKlaviyoForBrand } from '@/lib/dashboard/fetchKlaviyo'
 import { fetchSpendBothPeriods } from '@/lib/dashboard/fetchSpend'
@@ -24,7 +24,7 @@ import type {
   DashboardSummary,
 } from '@/types/dashboard'
 
-export const CACHE_VERSION = 'v23'
+export const CACHE_VERSION = 'v27'
 
 export async function buildSummary(
   brandId: BrandId,
@@ -41,13 +41,11 @@ export async function buildSummary(
       fetchKlaviyoForBrand(brandId, current),
       fetchKlaviyoForBrand(brandId, previous),
     ])
-  const commerceCurrent = commercePeriods.current
-  const commercePrevious = commercePeriods.previous
+  const commerceCurrentTotals = commercePeriods.current
+  const commercePreviousTotals = commercePeriods.previous
   const analyticsCurrent = analyticsPeriods.current
   const analyticsPrevious = analyticsPeriods.previous
 
-  const commerceCurrentTotals = commerceCurrent?.totals ?? null
-  const commercePreviousTotals = commercePrevious?.totals ?? null
   const analyticsCurrentForAgg = toAggregateAnalytics(analyticsCurrent)
   const analyticsPreviousForAgg = toAggregateAnalytics(analyticsPrevious)
 
@@ -74,10 +72,9 @@ export async function buildSummary(
     previous: previousKpis,
     deltas: computeDeltas(kpis, previousKpis),
     byDay,
-    topProducts: commerceCurrent?.topProducts ?? [],
     spendBreakdown: buildSpendBreakdown(spend.current.meta, googleAds.current),
     fetchedAt: Date.now(),
-    hasCommerce: commerceCurrent !== null,
+    hasCommerce: commerceCurrentTotals !== null,
     hasAnalytics: analyticsCurrent !== null,
     channels: buildChannelsBreakdown(spend.current.meta, googleAds.current, klaviyoCurrent),
     previousChannels: buildChannelsBreakdown(
@@ -88,7 +85,6 @@ export async function buildSummary(
     channelsByDay: buildChannelsByDay(spend.current.meta, googleAds.current),
     analytics: buildAnalytics(analyticsCurrent, kpis),
     previousAnalytics: buildAnalytics(analyticsPrevious, previousKpis),
-    categories: commerceCurrent?.categories ?? [],
   }
 }
 
@@ -151,11 +147,13 @@ async function fetchCommerceBothPeriods(
   previous: DateRangeSelection,
   market: MarketSelection,
 ): Promise<{
-  current: Awaited<ReturnType<typeof fetchCommerceForBrand>>
-  previous: Awaited<ReturnType<typeof fetchCommerceForBrand>>
+  current: Awaited<ReturnType<typeof fetchCommerceTotalsForBrand>>
+  previous: Awaited<ReturnType<typeof fetchCommerceTotalsForBrand>>
 }> {
-  const currentResult = await fetchCommerceForBrand(brandId, current, market)
-  const previousResult = await fetchCommerceForBrand(brandId, previous, market)
+  const [currentResult, previousResult] = await Promise.all([
+    fetchCommerceTotalsForBrand(brandId, current, market),
+    fetchCommerceTotalsForBrand(brandId, previous, market),
+  ])
   return { current: currentResult, previous: previousResult }
 }
 

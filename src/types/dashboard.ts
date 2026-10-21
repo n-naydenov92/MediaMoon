@@ -170,7 +170,6 @@ export interface DashboardSummary {
   readonly previous: DashboardKpis
   readonly deltas: DashboardKpiDeltas
   readonly byDay: readonly DashboardDailyPoint[]
-  readonly topProducts: readonly DashboardTopProduct[]
   readonly spendBreakdown: readonly SpendBreakdownPoint[]
   readonly fetchedAt: number
   readonly hasCommerce: boolean
@@ -180,5 +179,10 @@ export interface DashboardSummary {
   readonly channelsByDay?: DashboardChannelsByDay
   readonly analytics?: DashboardAnalyticsData
   readonly previousAnalytics?: DashboardAnalyticsData
-  readonly categories?: readonly CategoryBreakdownPoint[]
+}
+
+export interface DashboardProducts {
+  readonly hasCommerce: boolean
+  readonly topProducts: readonly DashboardTopProduct[]
+  readonly categories: readonly CategoryBreakdownPoint[]
 }
