@@ -23,6 +23,8 @@ import {
 } from '../../perCreativeCopy'
 import type { AssetCreative } from '../../assetCreative'
 import type { CreativeSlot } from '../../creativeSlots'
+import { slotNameable, type AdNaming } from '../../adNaming'
+import type { OverrideActions } from '../../useAdNaming'
 import AdFeedCard from '../../AdFeedCard/AdFeedCard'
 import LibraryPane from '../../LibraryPane/LibraryPane'
 import CreatorDialog from '../../CreatorDialog/CreatorDialog'
@@ -32,12 +34,20 @@ import { mapWith } from '../helpers'
 import CreativeRail from './CreativeRail/CreativeRail'
 import CreativePicker from './CreativePicker/CreativePicker'
 import CopyDetail from './CopyDetail/CopyDetail'
-import { applyOverrideToKeys, slotItem, type CreativeItem } from './helpers'
+import CreativeAdName from './CreativeAdName/CreativeAdName'
+import { applyOverrideToKeys, removalLosses, slotItem, type CreativeItem } from './helpers'
 import styles from './CopyEachDialog.module.css'
 
 // Below this width the 3-pane workspace can't breathe, so the dialog goes
 // full-screen (md breakpoint).
 const FULLSCREEN_BELOW = 900
+
+// The Creative Setup header needs ~410px for its action labels; the fixed rail and
+// preview columns leave the detail column less than that below this width, so
+// Duplicate/Remove drop to their icons.
+const ACTION_LABELS_FROM = 1280
+
+const LIST_FORMAT = new Intl.ListFormat('en', { type: 'conjunction' })
 
 type RightTab = 'preview' | 'library'
 
@@ -45,6 +55,14 @@ const FIELD_LABEL: Record<'primaryTexts' | 'headlines' | 'url', string> = {
   primaryTexts: 'primary text',
   headlines: 'headline',
   url: 'destination URL',
+}
+
+// A destructive action waiting on the operator's confirmation.
+interface PendingDecision {
+  readonly title: string
+  readonly message: string
+  readonly confirmLabel: string
+  readonly commit: () => void
 }
 
 function hasValue(value: CopyValue[OverridableField]): boolean {
@@ -61,11 +79,13 @@ interface Props {
   readonly targetAccountId: string
   readonly slots: readonly CreativeSlot[]
   readonly onDuplicate: (sourceKey: string) => void
-  readonly onRemoveDuplicate: (key: string) => void
+  readonly onRemove: (slot: CreativeSlot) => void
   readonly baseCopy: CopyValue
   readonly overrides: ReadonlyMap<string, CopyOverride>
   readonly onOverridesChange: (next: ReadonlyMap<string, CopyOverride>) => void
   readonly selectedPages: readonly Page[]
+  readonly naming: AdNaming
+  readonly namingActions: OverrideActions
   readonly addedAssetKeys: ReadonlySet<string>
   readonly onAddCreative: (asset: AssetCreative) => void
 }
@@ -78,24 +98,27 @@ export default memo(function CopyEachDialog({
   targetAccountId,
   slots,
   onDuplicate,
-  onRemoveDuplicate,
+  onRemove,
   baseCopy,
   overrides,
   onOverridesChange,
   selectedPages,
+  naming,
+  namingActions,
   addedAssetKeys,
   onAddCreative,
 }: Props): JSX.Element {
   const [selectedKey, setSelectedKey] = useState<string | null>(null)
-  const [checkedKeys, setCheckedKeys] = useState<ReadonlySet<string>>(() => new Set())
+  const [checkedState, setCheckedKeys] = useState<ReadonlySet<string>>(() => new Set())
   const [rightTab, setRightTab] = useState<RightTab>('preview')
-  const [pending, setPending] = useState<{ message: string; commit: () => void } | null>(null)
+  const [pending, setPending] = useState<PendingDecision | null>(null)
   const [listOpen, setListOpen] = useState(false)
 
   // Below the breakpoint the 3-pane rail can't fit, so the rail collapses into a
   // top picker bar and the full list moves into a bottom sheet (same width as the
   // fullscreen switch in CreatorDialog).
   const isMobile = useMediaQuery(`(max-width:${FULLSCREEN_BELOW}px)`)
+  const iconOnlyActions = useMediaQuery(`(max-width:${ACTION_LABELS_FROM - 0.05}px)`)
 
   // One object URL per source file (duplicates reuse their source's URL). Keyed by
   // source key so adding a duplicate doesn't re-mint every preview.
@@ -119,6 +142,13 @@ export default memo(function CopyEachDialog({
     [slots, fileUrlBySourceKey],
   )
 
+  // A removed creative drops out of the bulk-apply selection too, so "Apply to
+  // selected (N)" never counts ads that are gone.
+  const checkedKeys = useMemo<ReadonlySet<string>>(() => {
+    const live = new Set(items.map((i) => i.key))
+    return new Set([...checkedState].filter((key) => live.has(key)))
+  }, [checkedState, items])
+
   // Derive the active creative from the user's selection, falling back to the
   // first whenever the selection is empty or no longer present — no effect, no
   // second source of truth.
@@ -130,6 +160,14 @@ export default memo(function CopyEachDialog({
   const activeValue = activeKey ? resolveCopy(baseCopy, activeOverride) : null
   const activeItem = items.find((i) => i.key === activeKey) ?? null
   const baseFilled = useBaseFilled(baseCopy)
+
+  // The name field reads naming live: deferring it would reset the typed value and
+  // jump the caret. Memoized so the detail pane re-renders only when naming changes.
+  const activeSlot = slots.find((s) => s.key === activeKey) ?? null
+  const activeNameable = useMemo(() => (activeSlot ? slotNameable(activeSlot) : null), [activeSlot])
+  const nameField = useMemo(() => (
+    <CreativeAdName pages={selectedPages} creative={activeNameable} naming={naming} actions={namingActions} />
+  ), [selectedPages, activeNameable, naming, namingActions])
 
   // The rail badges and the library's "added" highlight track the overrides but
   // don't need to update on the same frame as the keystroke. Deferring them keeps
@@ -165,8 +203,11 @@ export default memo(function CopyEachDialog({
   // every keystroke; without the ref each callback would be reborn each time, which
   // would re-render the rail and the library pane on every character typed (defeating
   // the deferred-overrides work above).
-  const liveRef = useRef({ activeKey, baseCopy, overrides, onOverridesChange, checkedKeys, addTargets })
-  liveRef.current = { activeKey, baseCopy, overrides, onOverridesChange, checkedKeys, addTargets }
+  const live = {
+    activeKey, activeSlot, slots, baseCopy, overrides, onOverridesChange, checkedKeys, addTargets, naming, selectedPages,
+  }
+  const liveRef = useRef(live)
+  liveRef.current = live
 
   const updateField = useCallback(
     <F extends OverridableField>(field: F, next: CopyValue[F]): void => {
@@ -222,6 +263,42 @@ export default memo(function CopyEachDialog({
     change(mapWith(curr, key, null))
   }, [])
 
+  const duplicateActive = useCallback((): void => {
+    const { activeSlot: slot } = liveRef.current
+    if (slot) {
+      onDuplicate(slot.sourceKey)
+    }
+  }, [onDuplicate])
+
+  // Ask first only when removing throws work away (its own copy, a typed ad name or
+  // its duplicates); a creative with nothing of its own goes at once.
+  const requestRemoveActive = useCallback((): void => {
+    const { activeSlot: slot, slots: all, overrides: curr, naming: names, selectedPages: pages } = liveRef.current
+    if (!slot) {
+      return
+    }
+    const losses = removalLosses({
+      slot,
+      slots: all,
+      copyOverrides: curr,
+      nameOverrides: names.overrides,
+      pageIds: pages.map((p) => p.id),
+    })
+    if (losses.length === 0) {
+      onRemove(slot)
+      return
+    }
+    setPending({
+      title: 'Remove this creative?',
+      message: `This also discards ${LIST_FORMAT.format(losses)}.`,
+      confirmLabel: 'Remove',
+      commit: () => {
+        onRemove(slot)
+        setPending(null)
+      },
+    })
+  }, [onRemove])
+
   // Apply a library value to every target. With >1 target that already carries a
   // value for the field, ask first so a bulk add can't silently wipe custom copy.
   const requestAddText = useCallback(
@@ -240,7 +317,12 @@ export default memo(function CopyEachDialog({
       }
       const replacing = targets.filter((key) => hasValue(resolveCopy(base, curr.get(key))[field])).length
       if (targets.length > 1 && replacing > 0) {
-        setPending({ message: `This replaces the ${label} on ${targets.length} creatives.`, commit })
+        setPending({
+          title: 'Replace copy on multiple creatives?',
+          message: `This replaces the ${label} on ${targets.length} creatives.`,
+          confirmLabel: 'Replace',
+          commit,
+        })
       } else {
         commit()
       }
@@ -300,8 +382,6 @@ export default memo(function CopyEachDialog({
             onSelect={setSelectedKey}
             onToggleCheck={toggleCheck}
             onApplyToChecked={applyToChecked}
-            onDuplicate={onDuplicate}
-            onRemoveDuplicate={onRemoveDuplicate}
           />
         )}
 
@@ -311,6 +391,11 @@ export default memo(function CopyEachDialog({
             onFieldChange={updateField}
             onReset={resetActive}
             canReset={activeOverride !== undefined}
+            onDuplicate={duplicateActive}
+            onRemove={requestRemoveActive}
+            canRemove={items.length > 1}
+            iconOnlyActions={iconOnlyActions}
+            nameField={nameField}
           />
         </Box>
 
@@ -393,20 +478,18 @@ export default memo(function CopyEachDialog({
             onSelect={selectCreative}
             onToggleCheck={toggleCheck}
             onApplyToChecked={applyToChecked}
-            onDuplicate={onDuplicate}
-            onRemoveDuplicate={onRemoveDuplicate}
           />
         </Drawer>
       )}
 
       <DecisionDialog
         open={pending !== null}
-        title="Replace copy on multiple creatives?"
+        title={pending?.title ?? ''}
         message={pending?.message ?? ''}
         onClose={() => setPending(null)}
         actions={[
           { label: 'Cancel', onClick: () => setPending(null) },
-          { label: 'Replace', onClick: () => pending?.commit(), emphasis: true },
+          { label: pending?.confirmLabel ?? '', onClick: () => pending?.commit(), emphasis: true },
         ]}
       />
     </CreatorDialog>

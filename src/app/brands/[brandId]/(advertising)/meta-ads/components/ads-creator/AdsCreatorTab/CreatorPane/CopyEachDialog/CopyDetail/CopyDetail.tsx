@@ -1,10 +1,11 @@
 'use client'
 
-import { memo, useCallback, type ChangeEvent } from 'react'
+import { memo, useCallback, type ChangeEvent, type ReactNode } from 'react'
 import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import RestartAltOutlinedIcon from '@mui/icons-material/RestartAltOutlined'
+import ContentCopyRoundedIcon from '@mui/icons-material/ContentCopyRounded'
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
 import FormField from '../../../FormField/FormField'
 import FormTextField from '../../../FormTextField/FormTextField'
 import SearchSelect from '../../../SearchSelect/SearchSelect'
@@ -14,6 +15,7 @@ import { CTA_OPTIONS, type CtaOption } from '../../../ctaOptions'
 import { MAX_COPY_VARIATIONS } from '../../../copyFeatureFlags'
 import { destinationUrlValidity } from '../../../CopyForm/helpers'
 import { firstFilled, type OverridableField } from '../../../perCreativeCopy'
+import HeaderAction from './HeaderAction/HeaderAction'
 import styles from './CopyDetail.module.css'
 
 const PRIMARY_TEXT_ROWS = 4
@@ -23,6 +25,14 @@ interface Props {
   readonly onFieldChange: <F extends OverridableField>(field: F, next: CopyValue[F]) => void
   readonly onReset: () => void
   readonly canReset: boolean
+  // Act on the creative being edited, so it's always the one in the preview.
+  readonly onDuplicate: () => void
+  readonly onRemove: () => void
+  readonly canRemove: boolean
+  readonly iconOnlyActions: boolean
+  // Ad names are per ad, not copy — the caller owns them and slots the field in here.
+  // Reset leaves it alone; each name has its own reset.
+  readonly nameField: ReactNode
 }
 
 export default memo(function CopyDetail({
@@ -30,6 +40,11 @@ export default memo(function CopyDetail({
   onFieldChange,
   onReset,
   canReset,
+  onDuplicate,
+  onRemove,
+  canRemove,
+  iconOnlyActions,
+  nameField,
 }: Props): JSX.Element {
   // onFieldChange is already stable; wrapping each field keeps the per-field
   // callbacks stable too, so the untouched fields skip re-render while typing.
@@ -69,21 +84,35 @@ export default memo(function CopyDetail({
         <Typography component="h4" variant="h4" className={styles.sectionTitle}>
           Creative Setup
         </Typography>
-        <Button
-          type="button"
-          size="small"
-          variant="text"
-          color="inherit"
-          startIcon={<RestartAltOutlinedIcon fontSize="inherit" />}
-          disabled={!canReset}
-          onClick={onReset}
-          className={styles.resetButton}
-        >
-          Reset
-        </Button>
+        <Box className={styles.headerActions}>
+          <HeaderAction
+            label="Duplicate"
+            hint="Duplicate the creative as separate ad"
+            icon={<ContentCopyRoundedIcon fontSize="inherit" />}
+            onClick={onDuplicate}
+            iconOnly={iconOnlyActions}
+          />
+          <HeaderAction
+            label="Remove"
+            hint={canRemove ? 'Remove the creative from this batch' : 'The last creative can’t be removed'}
+            icon={<CloseRoundedIcon fontSize="inherit" />}
+            onClick={onRemove}
+            disabled={!canRemove}
+            iconOnly={iconOnlyActions}
+          />
+          <HeaderAction
+            label="Reset"
+            hint="Go back to the shared copy"
+            icon={<RestartAltOutlinedIcon fontSize="inherit" />}
+            onClick={onReset}
+            disabled={!canReset}
+          />
+        </Box>
       </Box>
 
       <Box className={styles.fields}>
+        {nameField}
+
         <VariationList
           label="Primary Text"
           values={value.primaryTexts}

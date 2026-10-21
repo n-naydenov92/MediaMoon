@@ -44,6 +44,7 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
     slots,
     duplicateCreative,
     removeDuplicate,
+    removeCreative,
     emptyRequired,
     addedAssetKeys,
     canSubmit,
@@ -131,6 +132,7 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
         slots={slots}
         onDuplicateCreative={duplicateCreative}
         onRemoveDuplicate={removeDuplicate}
+        onRemoveCreative={removeCreative}
         addedAssetKeys={addedAssetKeys}
         onAddCreative={handleAddCreative}
         copy={copy}

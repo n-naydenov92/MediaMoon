@@ -44,6 +44,7 @@ interface Props {
   readonly slots: readonly CreativeSlot[]
   readonly onDuplicateCreative: (sourceKey: string) => void
   readonly onRemoveDuplicate: (key: string) => void
+  readonly onRemoveCreative: (slot: CreativeSlot) => void
   readonly addedAssetKeys: ReadonlySet<string>
   readonly onAddCreative: (asset: AssetCreative) => void
   readonly copy: CopyValue
@@ -77,6 +78,7 @@ export default memo(function CreatorPane({
   slots,
   onDuplicateCreative,
   onRemoveDuplicate,
+  onRemoveCreative,
   addedAssetKeys,
   onAddCreative,
   copy,
@@ -391,11 +393,13 @@ export default memo(function CreatorPane({
         targetAccountId={targeting.accountId}
         slots={slots}
         onDuplicate={onDuplicateCreative}
-        onRemoveDuplicate={onRemoveDuplicate}
+        onRemove={onRemoveCreative}
         baseCopy={copy}
         overrides={copyOverrides}
         onOverridesChange={onCopyOverridesChange}
         selectedPages={selectedPages}
+        naming={naming}
+        namingActions={namingActions}
         addedAssetKeys={addedAssetKeys}
         onAddCreative={onAddCreative}
       />

@@ -2,13 +2,10 @@ import type { AssetCreative } from '../../assetCreative'
 import type { FeedMedia } from '../../AdFeedCard/helpers'
 import { creativeKey, type CopyOverride } from '../../perCreativeCopy'
 import type { CreativeSlot } from '../../creativeSlots'
+import { adNameMapKey } from '../../adNaming'
 
 export interface CreativeItem {
   readonly key: string
-  // The creative this slot is backed by — equals `key` for an original, the source's
-  // key for a duplicate. Drives the "duplicate this creative" action.
-  readonly sourceKey: string
-  readonly isDuplicate: boolean
   readonly name: string
   readonly thumbUrl: string | null
   readonly media: FeedMedia | null
@@ -19,8 +16,6 @@ export function assetItem(asset: AssetCreative): CreativeItem {
   const url = asset.imageUrl ?? asset.thumbnailUrl
   return {
     key: asset.assetKey,
-    sourceKey: asset.assetKey,
-    isDuplicate: false,
     name: asset.name,
     thumbUrl: asset.thumbnailUrl ?? asset.imageUrl,
     media: url ? { url, name: asset.name, isVideo: asset.mediaType === 'video' } : null,
@@ -31,11 +26,8 @@ export function assetItem(asset: AssetCreative): CreativeItem {
 // can revoke it on unmount).
 export function fileItem(file: File, objectUrl: string): CreativeItem {
   const isVideo = file.type.startsWith('video/')
-  const key = creativeKey(file)
   return {
-    key,
-    sourceKey: key,
-    isDuplicate: false,
+    key: creativeKey(file),
     name: file.name,
     thumbUrl: isVideo ? null : objectUrl,
     media: { url: objectUrl, name: file.name, isVideo },
@@ -57,8 +49,6 @@ export function slotItem(
   return {
     ...base,
     key: slot.key,
-    sourceKey: slot.sourceKey,
-    isDuplicate: true,
     name: `${base.name} (copy ${slot.copyIndex})`,
   }
 }
@@ -80,4 +70,31 @@ export function applyOverrideToKeys(
     }
   }
   return next
+}
+
+interface RemovalInput {
+  readonly slot: CreativeSlot
+  readonly slots: readonly CreativeSlot[]
+  readonly copyOverrides: ReadonlyMap<string, CopyOverride>
+  readonly nameOverrides: ReadonlyMap<string, string>
+  readonly pageIds: readonly string[]
+}
+
+// What removing a creative throws away besides the media: its own copy, a typed ad
+// name and, for an original, its duplicates. Empty when nothing would be lost.
+export function removalLosses({
+  slot,
+  slots,
+  copyOverrides,
+  nameOverrides,
+  pageIds,
+}: RemovalInput): readonly string[] {
+  const duplicateCount = slot.isDuplicate
+    ? 0
+    : slots.filter((s) => s.isDuplicate && s.sourceKey === slot.key).length
+  return [
+    copyOverrides.has(slot.key) ? 'its custom copy' : null,
+    pageIds.some((pageId) => nameOverrides.has(adNameMapKey(pageId, slot.key))) ? 'its ad name' : null,
+    duplicateCount > 0 ? `${duplicateCount} ${duplicateCount === 1 ? 'duplicate' : 'duplicates'}` : null,
+  ].filter((loss): loss is string => loss !== null)
 }

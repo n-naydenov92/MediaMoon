@@ -9,7 +9,7 @@ import {
   type SetStateAction,
 } from 'react'
 import { EMPTY_COPY, type CopyValue } from './CopyForm/CopyForm'
-import { type AssetCreative } from './assetCreative'
+import { removeAsset, type AssetCreative } from './assetCreative'
 import { incompatibleAssetKeys } from './assetCompat'
 import {
   countEmptyRequired,
@@ -46,6 +46,8 @@ export interface AdDraft {
   readonly slots: readonly CreativeSlot[]
   readonly duplicateCreative: (sourceKey: string) => void
   readonly removeDuplicate: (key: string) => void
+  // Removes any slot — an uploaded file, a library asset or a duplicate.
+  readonly removeCreative: (slot: CreativeSlot) => void
   readonly creativeCount: number
   readonly emptyRequired: EmptyRequiredCounts
   readonly addedAssetKeys: ReadonlySet<string>
@@ -161,6 +163,21 @@ export function useAdDraft(): AdDraft {
     setDuplicates((prev) => prev.filter((d) => d.key !== key))
   }, [])
 
+  // Removing an original takes its duplicates, copy and names with it — the prune
+  // effects drop whatever no longer has a slot.
+  const removeCreative = useCallback((slot: CreativeSlot) => {
+    if (slot.isDuplicate) {
+      removeDuplicate(slot.key)
+      return
+    }
+    const { source } = slot
+    if (source.kind === 'file') {
+      setFiles((prev) => prev.filter((f) => f !== source.file))
+    } else {
+      setAssets((prev) => removeAsset(prev, source.asset.assetKey))
+    }
+  }, [removeDuplicate])
+
   // Reset the whole draft back to a blank slate. The launch queue is intentionally
   // left untouched — those are ads already on their way, not part of this draft.
   const resetDraft = useCallback(() => {
@@ -199,6 +216,7 @@ export function useAdDraft(): AdDraft {
     slots,
     duplicateCreative,
     removeDuplicate,
+    removeCreative,
     creativeCount,
     emptyRequired,
     addedAssetKeys,

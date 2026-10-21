@@ -18,15 +18,18 @@
 }
 
 /* Fixed top bar of the detail column — same 48px height + hairline as the
-   Preview/Ad Library tab row, so the two columns' headers sit on one line. */
+   Preview/Ad Library tab row, so the two columns' headers sit on one line. When the
+   column is squeezed narrower than title + actions, the actions wrap instead of
+   being clipped. */
 .header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 4px 8px;
   flex: 0 0 auto;
   min-height: 48px;
-  padding: 0 16px;
+  padding: 4px 16px;
   border-bottom: 1px solid var(--hairline);
   background: var(--bg-surface);
 }
@@ -58,12 +61,12 @@
   white-space: nowrap;
 }
 
-.resetButton {
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   flex-shrink: 0;
   margin-left: auto;
-  text-transform: none;
-  font-weight: 600;
-  border-radius: 8px;
 }
 
 .actionRow {
