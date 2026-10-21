@@ -1,6 +1,9 @@
+/* flex-shrink: 0 — overflow:hidden drops a flex item's min-height to 0, so inside a
+   flex scroll container the card would squash its media/footer instead of scrolling. */
 .feedCard {
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
   width: 100%;
   max-width: 335px;
   margin: 0 auto;
@@ -62,13 +65,34 @@
   color: var(--text-muted);
 }
 
-.feedPrimaryText {
+/* Padding sits on the wrapper: on the clamped element itself, bottom padding would
+   reveal a sliver of the first hidden line. */
+.feedPrimary {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   padding: 0 14px 12px;
-  font-size: 14px;
-  line-height: 1.4;
-  color: var(--text-primary);
+}
+
+.feedPrimaryText {
   white-space: pre-wrap;
-  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Facebook's feed collapses primary text to ~3 lines behind "See more". */
+.feedPrimaryText[data-expanded='false'] {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.feedSeeMore {
+  align-self: flex-start;
+}
+
+.feedSeeMore:hover {
+  text-decoration: underline;
 }
 
 .feedMediaWrap {

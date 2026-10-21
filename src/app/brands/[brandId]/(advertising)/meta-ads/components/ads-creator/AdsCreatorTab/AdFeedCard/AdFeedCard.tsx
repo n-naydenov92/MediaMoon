@@ -2,8 +2,10 @@
 
 import { memo } from 'react'
 import Box from '@mui/material/Box'
+import ButtonBase from '@mui/material/ButtonBase'
 import Typography from '@mui/material/Typography'
 import type { CtaType } from '@/lib/gateways/MetaAdsGateway'
+import { useLineClamp } from '../../../shared/hooks/useLineClamp'
 import { CTA_LABELS } from '../ctaOptions'
 import { domainOf, initialOf, type FeedMedia } from './helpers'
 import styles from './AdFeedCard.module.css'
@@ -31,6 +33,8 @@ export default memo(function AdFeedCard({
   cta,
   media,
 }: Props): JSX.Element {
+  const primaryClamp = useLineClamp<HTMLParagraphElement>(primary)
+
   return (
     <Box className={styles.feedCard}>
       <Box className={styles.feedHeader}>
@@ -57,9 +61,30 @@ export default memo(function AdFeedCard({
         </Box>
       </Box>
 
-      <Typography component="p" variant="inherit" className={styles.feedPrimaryText}>
-        {primary}
-      </Typography>
+      <Box className={styles.feedPrimary}>
+        <Typography
+          ref={primaryClamp.ref}
+          component="p"
+          variant="body1"
+          color="text.primary"
+          className={styles.feedPrimaryText}
+          data-expanded={primaryClamp.isExpanded}
+        >
+          {primary}
+        </Typography>
+        {primaryClamp.isClamped && (
+          <ButtonBase
+            type="button"
+            disableRipple
+            className={styles.feedSeeMore}
+            onClick={primaryClamp.toggle}
+          >
+            <Typography component="span" variant="body2" color="text.secondary">
+              {primaryClamp.isExpanded ? 'See less' : 'See more'}
+            </Typography>
+          </ButtonBase>
+        )}
+      </Box>
 
       <Box className={styles.feedMediaWrap}>
         {!media && <Box className={styles.feedMediaEmpty}>No media</Box>}

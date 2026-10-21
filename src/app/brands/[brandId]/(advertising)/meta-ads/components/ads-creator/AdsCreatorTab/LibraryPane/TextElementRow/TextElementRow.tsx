@@ -1,11 +1,12 @@
 'use client'
 
-import { memo, useCallback, useEffect, useRef, useState } from 'react'
+import { memo } from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import AddIcon from '@mui/icons-material/Add'
 import CheckIcon from '@mui/icons-material/Check'
+import { useLineClamp } from '../../../../shared/hooks/useLineClamp'
 import type { ElementMetrics } from '../decompose'
 import MetricList from '../MetricList/MetricList'
 import type { CardMetricField } from '../MetricList/helpers'
@@ -32,21 +33,7 @@ export default memo(function TextElementRow({
   disabled,
   onAdd,
 }: Props): JSX.Element {
-  const textRef = useRef<HTMLParagraphElement>(null)
-  const [expanded, setExpanded] = useState(false)
-  const [isClamped, setIsClamped] = useState(false)
-
-  const handleToggle = useCallback(() => setExpanded((prev) => !prev), [])
-
-  // Only offer "See more" when the copy is actually truncated. Re-measure when it
-  // collapses; skip while expanded (the clamp is off, so it would read as not clamped).
-  useEffect(() => {
-    const el = textRef.current
-    if (!el || expanded) {
-      return
-    }
-    setIsClamped(el.scrollHeight > el.clientHeight + 1)
-  }, [text, expanded])
+  const textClamp = useLineClamp<HTMLParagraphElement>(text)
 
   return (
     <Box className={styles.root}>
@@ -57,20 +44,20 @@ export default memo(function TextElementRow({
         <Typography
           component="p"
           variant="inherit"
-          ref={textRef}
+          ref={textClamp.ref}
           className={styles.text}
-          data-expanded={expanded ? 'true' : 'false'}
+          data-expanded={textClamp.isExpanded}
         >
           {text}
         </Typography>
-        {isClamped && (
+        {textClamp.isClamped && (
           <Box
             component="button"
             type="button"
             className={styles.toggle}
-            onClick={handleToggle}
+            onClick={textClamp.toggle}
           >
-            {expanded ? 'See less' : 'See more'}
+            {textClamp.isExpanded ? 'See less' : 'See more'}
           </Box>
         )}
         <Box className={styles.metricsRow}>
