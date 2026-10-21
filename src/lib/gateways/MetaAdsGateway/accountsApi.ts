@@ -248,9 +248,6 @@ export async function duplicateAdSet(
     }
   }
 
-  // eslint-disable-next-line no-console
-  console.log('[duplicateAdSet COPY PAYLOAD]', Array.from(copyBody.entries()).filter(([k]) => k !== 'access_token'))
-
   const copyJson = await postWithRetry<CopyAdSetResponse>(`/${adSetId}/copies`, copyBody)
   if (copyJson.error) {
     throw new Error(`Meta API error ${copyJson.error.code}: ${copyJson.error.message}`)
@@ -272,9 +269,6 @@ export async function duplicateAdSet(
       updateBody.set(key, value)
     })
   }
-
-  // eslint-disable-next-line no-console
-  console.log('[duplicateAdSet UPDATE PAYLOAD]', Array.from(updateBody.entries()).filter(([k]) => k !== 'access_token'))
 
   const renameJson = await postWithRetry<UpdateAdSetResponse>(`/${newId}`, updateBody)
   if (renameJson.error) {

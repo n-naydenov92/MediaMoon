@@ -250,16 +250,6 @@ export function stringArraysEqual(a: readonly string[], b: readonly string[]): b
   return aSorted.every((v, i) => v === bSorted[i])
 }
 
-export function placementsEqual(a: PlacementSelection, b: PlacementSelection): boolean {
-  if (a.mode !== b.mode) return false
-  if (a.deviceMode !== b.deviceMode) return false
-  return stringArraysEqual(a.publisherPlatforms, b.publisherPlatforms)
-    && stringArraysEqual(a.facebookPositions, b.facebookPositions)
-    && stringArraysEqual(a.instagramPositions, b.instagramPositions)
-    && stringArraysEqual(a.audienceNetworkPositions, b.audienceNetworkPositions)
-    && stringArraysEqual(a.messengerPositions, b.messengerPositions)
-}
-
 function deviceModeToArray(mode: DeviceMode): readonly string[] {
   if (mode === 'MOBILE') return ['mobile']
   if (mode === 'DESKTOP') return ['desktop']
@@ -374,6 +364,81 @@ export function buildCreatePayload(
   return payload
 }
 
+const INSTAGRAM_EXPLORE_POSITIONS: ReadonlySet<string> = new Set(['explore', 'explore_home'])
+
+function isExplorePosition(position: unknown): boolean {
+  return typeof position === 'string' && INSTAGRAM_EXPLORE_POSITIONS.has(position)
+}
+
+function isAudienceEdited(source: AdSetDetail, draft: DraftState): boolean {
+  const original = source.targeting
+  return original.ageMin !== draft.ageMin
+    || original.ageMax !== draft.ageMax
+    || original.gender !== draft.gender
+    || !stringArraysEqual(original.countries, draft.countries)
+    || original.advantageAudience !== draft.advantageAudience
+    || original.advantageAge !== draft.advantageAge
+    || original.advantageGender !== draft.advantageGender
+}
+
+function applyAudienceEdits(
+  rawTargeting: Readonly<Record<string, unknown>>,
+  draft: DraftState,
+): Record<string, unknown> {
+  const targeting: Record<string, unknown> = {
+    ...rawTargeting,
+    age_min: draft.ageMin,
+    age_max: effectiveAgeMax(draft),
+    genders: genderToMetaArray(draft.gender),
+    geo_locations: buildGeoLocations(rawTargeting, draft.countries),
+    targeting_automation: buildTargetingAutomation(
+      rawTargeting,
+      draft.advantageAudience,
+      draft.advantageAge,
+      draft.advantageGender,
+    ),
+  }
+  // age_range requires advantage_audience enabled; Meta rejects otherwise.
+  if (!draft.advantageAudience) {
+    delete targeting.age_range
+  }
+  return targeting
+}
+
+// Instagram Explore is never carried into a copy (operator decision). Meta also
+// rejects explore_home without explore, which some older ad sets still store.
+// If no Instagram position is left, Instagram itself is dropped — an empty
+// position list would otherwise mean "all Instagram positions".
+function withoutInstagramExplore(targeting: Record<string, unknown>): Record<string, unknown> {
+  const positions = targeting.instagram_positions
+  if (!Array.isArray(positions) || !positions.some(isExplorePosition)) {
+    return targeting
+  }
+  const kept = positions.filter((position) => !isExplorePosition(position))
+  if (kept.length > 0) {
+    return { ...targeting, instagram_positions: kept }
+  }
+  const platforms = Array.isArray(targeting.publisher_platforms) ? targeting.publisher_platforms : []
+  const withoutInstagram: Record<string, unknown> = {
+    ...targeting,
+    publisher_platforms: platforms.filter((platform) => platform !== 'instagram'),
+  }
+  delete withoutInstagram.instagram_positions
+  return withoutInstagram
+}
+
+// Meta's /copies silently drops manual placements, device platforms and the
+// inventory filter (brand_safety_content_filter_levels), so the source's
+// targeting is always re-sent: 1:1, plus only the audience fields the operator
+// edited. targeting_automation.individual_setting can't be restored — Meta
+// ignores it on write (verified; no effect on the audience estimate).
+function buildDuplicateTargeting(source: AdSetDetail, draft: DraftState): Record<string, unknown> {
+  const targeting = isAudienceEdited(source, draft)
+    ? applyAudienceEdits(source.rawTargeting, draft)
+    : { ...source.rawTargeting }
+  return withoutInstagramExplore(targeting)
+}
+
 export function buildDuplicatePayload(
   draft: DraftState,
   source: AdSetDetail | null,
@@ -414,35 +479,7 @@ export function buildDuplicatePayload(
     }
   }
 
-  const ageChanged = source.targeting.ageMin !== draft.ageMin
-    || source.targeting.ageMax !== draft.ageMax
-  const genderChanged = source.targeting.gender !== draft.gender
-  const countriesChanged = !stringArraysEqual(source.targeting.countries, draft.countries)
-  const advantageChanged = source.targeting.advantageAudience !== draft.advantageAudience
-    || source.targeting.advantageAge !== draft.advantageAge
-    || source.targeting.advantageGender !== draft.advantageGender
-  const placementsChanged = !placementsEqual(source.placements, ADVANTAGE_PLUS_PLACEMENT)
-  if (ageChanged || genderChanged || countriesChanged || advantageChanged || placementsChanged) {
-    const targetingPayload: Record<string, unknown> = {
-      ...source.rawTargeting,
-      age_min: draft.ageMin,
-      age_max: effectiveAgeMax(draft),
-      genders: genderToMetaArray(draft.gender),
-      geo_locations: buildGeoLocations(source.rawTargeting, draft.countries),
-      targeting_automation: buildTargetingAutomation(
-        source.rawTargeting,
-        draft.advantageAudience,
-        draft.advantageAge,
-        draft.advantageGender,
-      ),
-      ...buildPlacementsForTargeting(ADVANTAGE_PLUS_PLACEMENT),
-    }
-    // age_range requires advantage_audience enabled; Meta rejects otherwise.
-    if (!draft.advantageAudience) {
-      delete targetingPayload.age_range
-    }
-    payload.targeting = targetingPayload
-  }
+  payload.targeting = buildDuplicateTargeting(source, draft)
 
   if (source.dsaBeneficiary !== draft.dsaBeneficiary) {
     payload.dsaBeneficiary = draft.dsaBeneficiary

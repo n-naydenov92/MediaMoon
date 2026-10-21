@@ -359,7 +359,7 @@ export default memo(function AdSetEditor({
         </Box>
 
         <Box className={styles.sectionCard}>
-          <PlacementsSection />
+          <PlacementsSection sourcePlacements={source?.placements ?? null} />
         </Box>
 
         <Box className={styles.sectionCard}>
