@@ -12,6 +12,11 @@ interface GraphSummaryResponse {
   error?: { message: string; type: string; code: number }
 }
 
+interface GraphAdsVolumeResponse {
+  data?: { ads_running_or_in_review_count?: number }[]
+  error?: { message: string; type: string; code: number }
+}
+
 interface GraphAdAccountRaw {
   id: string
   name: string
@@ -324,6 +329,26 @@ export async function countActiveAdsInAccount(token: string, accountId: string):
     throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
   }
   return json.summary?.total_count ?? 0
+}
+
+// `ads_volume` is the count Meta weighs against the per-Page ad limit: ads running
+// (ad + ad set + campaign active, schedule started) or in review/processing, summed
+// across every ad account using the Page — paused uploads don't count. Queried per
+// Page because the actor breakdown omits Pages with no running ads in `accountId`.
+export async function countActiveAdsForPage(
+  token: string,
+  accountId: string,
+  pageId: string,
+): Promise<number> {
+  const url = buildUrl(`/${accountId}/ads_volume`, token, {
+    page_id: pageId,
+    fields: 'ads_running_or_in_review_count',
+  })
+  const json = await callGraphApi<GraphAdsVolumeResponse>(url)
+  if (json.error) {
+    throw new Error(`Meta API error ${json.error.code}: ${json.error.message}`)
+  }
+  return json.data?.[0]?.ads_running_or_in_review_count ?? 0
 }
 
 function toAdAccount(raw: GraphAdAccountRaw): AdAccount {

@@ -261,11 +261,12 @@ export default memo(function CreatorPane({
   const profilesStepEl = useMemo(() => (
     <ProfilesStep
       pages={data.pages}
+      activeAdsByPageId={data.activeAdsByPageId}
       instagramAccounts={data.instagramAccounts}
       value={targeting}
       onChange={onTargetingChange}
     />
-  ), [data.pages, data.instagramAccounts, targeting, onTargetingChange])
+  ), [data.pages, data.activeAdsByPageId, data.instagramAccounts, targeting, onTargetingChange])
 
   const filesStepEl = useMemo(() => (
     <FilesStep

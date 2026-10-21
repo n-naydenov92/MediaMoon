@@ -12,6 +12,7 @@ import styles from './ProfilesStep.module.css'
 
 interface Props {
   readonly pages: TargetingData['pages']
+  readonly activeAdsByPageId: TargetingData['activeAdsByPageId']
   readonly instagramAccounts: readonly InstagramAccount[]
   readonly value: TargetingValue
   readonly onChange: (next: TargetingValue) => void
@@ -32,6 +33,7 @@ function renderAvatar(url: string | null, fallback: ReactNode, alt: string): Rea
 
 export default memo(function ProfilesStep({
   pages,
+  activeAdsByPageId,
   instagramAccounts,
   value,
   onChange,
@@ -49,6 +51,7 @@ export default memo(function ProfilesStep({
       <FormField label="Facebook pages">
         <PagesMultiSelect
           options={pages}
+          activeAdsByPageId={activeAdsByPageId}
           value={value.pageIds}
           onChange={(nextIds) => onChange({
             ...value,

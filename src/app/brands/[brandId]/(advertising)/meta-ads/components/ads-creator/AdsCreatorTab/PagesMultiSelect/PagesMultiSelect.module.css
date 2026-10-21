@@ -76,14 +76,23 @@
   flex-shrink: 0;
 }
 
+.optionLoadDot {
+  flex-shrink: 0;
+}
+
 .optionName {
   font-weight: 600;
   color: var(--text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-width: 0;
+}
+
+.optionActiveAds {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .empty {

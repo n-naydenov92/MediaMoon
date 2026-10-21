@@ -13,7 +13,10 @@ import type {
 } from '@/lib/gateways/MetaAdsGateway'
 import { useAbortableFetch } from './useAbortableFetch'
 
+export type ActiveAdsByPageId = Readonly<Record<string, number>>
+
 const EMPTY_DSA_ENTITIES: DsaEntities = { beneficiaries: [], payors: [] }
+const EMPTY_ACTIVE_ADS: ActiveAdsByPageId = {}
 
 export interface TargetingValue {
   readonly accountId: string
@@ -36,6 +39,7 @@ export interface TargetingData {
   readonly campaigns: readonly Campaign[]
   readonly adSets: readonly AdSet[]
   readonly pages: readonly Page[]
+  readonly activeAdsByPageId: ActiveAdsByPageId
   readonly instagramAccounts: readonly InstagramAccount[]
   readonly dsaEntities: DsaEntities
   readonly refetchAdSets: () => void
@@ -57,6 +61,7 @@ interface CampaignsResponse { campaigns: readonly Campaign[] }
 interface AdSetsResponse { adSets: readonly AdSet[] }
 interface InstagramAccountsResponse { instagramAccounts: readonly InstagramAccount[] }
 interface DsaEntitiesResponse { dsaEntities: DsaEntities }
+interface PageActiveAdsResponse { activeAdsByPageId: ActiveAdsByPageId }
 
 export function useTargetingData({
   brandId,
@@ -94,6 +99,10 @@ export function useTargetingData({
   const dsaResp = useAbortableFetch<DsaEntitiesResponse>(
     accountId ? `/api/meta-ads/dsa-entities?accountId=${accountId}` : null,
   )
+  const pageIdsParam = (pagesResp?.pages ?? []).map((p) => p.id).join(',')
+  const activeAdsResp = useAbortableFetch<PageActiveAdsResponse>(
+    pageIdsParam ? `/api/meta-ads/page-active-ads?brandId=${brandId}&pageIds=${pageIdsParam}` : null,
+  )
 
   const accounts = useMemo(
     () => (accountsResp?.accounts ?? []).filter((a) => allowedAccountIds.includes(a.id)),
@@ -104,6 +113,16 @@ export function useTargetingData({
   const adSets = adSetsResp?.adSets ?? []
   const instagramAccounts = igResp?.instagramAccounts ?? []
   const dsaEntities = dsaResp?.dsaEntities ?? EMPTY_DSA_ENTITIES
+  const activeAdsByPageId = activeAdsResp?.activeAdsByPageId ?? EMPTY_ACTIVE_ADS
 
-  return { accounts, campaigns, adSets, pages, instagramAccounts, dsaEntities, refetchAdSets }
+  return {
+    accounts,
+    campaigns,
+    adSets,
+    pages,
+    activeAdsByPageId,
+    instagramAccounts,
+    dsaEntities,
+    refetchAdSets,
+  }
 }

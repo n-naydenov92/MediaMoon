@@ -8,24 +8,23 @@ import TextField from '@mui/material/TextField'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import FacebookOutlinedIcon from '@mui/icons-material/FacebookOutlined'
+import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord'
 import type { Page } from '@/lib/gateways/MetaAdsGateway'
+import type { ActiveAdsByPageId } from '../CreatorPane/useTargetingData'
+import { formatActiveAds, pageAdLoadColor, triggerPlaceholder } from './helpers'
 import styles from './PagesMultiSelect.module.css'
 
 interface Props {
   readonly options: readonly Page[]
+  readonly activeAdsByPageId: ActiveAdsByPageId
   readonly value: readonly string[]
   readonly onChange: (next: readonly string[]) => void
   readonly disabled?: boolean
 }
 
-function triggerPlaceholder(selectedCount: number, singleName: string | null): string {
-  if (selectedCount === 0) return 'Select pages…'
-  if (selectedCount === 1 && singleName) return singleName
-  return `${selectedCount} selected pages`
-}
-
 export default memo(function PagesMultiSelect({
   options,
+  activeAdsByPageId,
   value,
   onChange,
   disabled = false,
@@ -75,6 +74,7 @@ export default memo(function PagesMultiSelect({
       renderOption={(optionProps, option, { selected: isSelected }) => {
         // eslint-disable-next-line @typescript-eslint/naming-convention -- React 19 requires extracting key before spread
         const { key: _ignored, ...rest } = optionProps as HTMLAttributes<HTMLLIElement> & { key?: string }
+        const activeAds = activeAdsByPageId[option.id]
         return (
           <Tooltip
             key={option.id}
@@ -96,6 +96,14 @@ export default memo(function PagesMultiSelect({
                 tabIndex={-1}
                 size="small"
               />
+              {activeAds !== undefined && (
+                <FiberManualRecordIcon
+                  fontSize="inherit"
+                  color={pageAdLoadColor(activeAds)}
+                  className={styles.optionLoadDot}
+                  aria-hidden
+                />
+              )}
               {option.pictureUrl ? (
                 <Box
                   component="img"
@@ -112,6 +120,16 @@ export default memo(function PagesMultiSelect({
               <Typography component="span" variant="inherit" className={styles.optionName}>
                 {option.name}
               </Typography>
+              {activeAds !== undefined && (
+                <Typography
+                  component="span"
+                  variant="caption"
+                  color="text.secondary"
+                  className={styles.optionActiveAds}
+                >
+                  {`– ${formatActiveAds(activeAds)}`}
+                </Typography>
+              )}
             </Box>
           </Tooltip>
         )
