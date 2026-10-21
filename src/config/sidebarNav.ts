@@ -1,8 +1,7 @@
 import type { NavPanel, NavItem, UserRole } from '@/types'
 
-const ROLES_ALL: readonly UserRole[] = ['admin', 'team', 'stoichkov_only', 'shtonova_only']
-const ROLES_DASHBOARD: readonly UserRole[] = [...ROLES_ALL, 'bubullincas']
 const ROLES_TEAM: readonly UserRole[] = ['admin', 'team']
+const ROLES_DASHBOARD: readonly UserRole[] = [...ROLES_TEAM, 'bubullincas']
 const ROLES_META_ADS: readonly UserRole[] = ['admin', 'team', 'bubullincas']
 const ROLES_ADS_PERFORMANCE: readonly UserRole[] = ['admin', 'team', 'creative_analyst', 'bubullincas']
 
@@ -96,20 +95,6 @@ export const MAIN_PANEL: NavPanel = {
           icon: 'Campaign',
           roles: ROLES_ADS_PERFORMANCE,
           panel: ADVERTISING_PANEL,
-        },
-      ],
-    },
-    {
-      id: 'news',
-      label: '',
-      items: [
-        {
-          kind: 'link',
-          id: 'trending-news',
-          label: 'Trending News',
-          icon: 'TrendingUp',
-          pathSuffix: 'trending-news',
-          roles: ROLES_ALL,
         },
       ],
     },

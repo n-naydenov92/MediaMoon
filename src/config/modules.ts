@@ -6,8 +6,8 @@ import type { ModuleConfig, UserRole } from '@/types'
  * Adding a new module (e.g., "Shippings"):
  *   1. Add a new object to this array
  *   2. Create src/Section/<id>/ with components + config
- *   3. Create src/app/brands/[brandId]/<id>/page.tsx (or extend the [moduleId] dispatcher)
- *   4. Create src/app/api/modules/<id>/route.ts (if needed)
+ *   3. Create src/app/brands/[brandId]/<id>/page.tsx
+ *   4. Create src/app/api/<id>/route.ts (if needed)
  *   5. Add a new role in Clerk (if needed)
  *
  * Groups: a module can declare `children` to render as an expandable group in
@@ -40,14 +40,6 @@ export const MODULE_REGISTRY: readonly ModuleConfig[] = [
         color: '#4285F4',
       },
     ],
-  },
-  {
-    id: 'trending-news',
-    label: 'Trending News',
-    icon: 'TrendingUp',
-    path: '/modules/trending-news',
-    roles: ['admin', 'team', 'stoichkov_only', 'shtonova_only'],
-    color: '#6C63FF',
   },
 ] as const
 

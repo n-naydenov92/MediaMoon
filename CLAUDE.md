@@ -21,20 +21,20 @@ The folder tree mirrors the import graph. Reading the tree tells you which compo
 | **PascalCase folder** | The folder IS a component. Must contain `<FolderName>.tsx`. |
 | **lowercase folder** | Namespace / grouping. No edge-of-folder `.tsx`. Examples: `launch/`, `overview/`, `shared/`, `hooks/`, `components/`. |
 | **camelCase file** | Hook (`useFoo.ts`), helper (`helpers.ts`), utility, type module. |
-| **kebab-case folder** | Top-level module namespace (`src/Section/trending-news/`, `src/app/api/meta-ads/`). Allowed only at module-root level. |
+| **kebab-case folder** | Top-level module namespace (`src/app/brands/[brandId]/(advertising)/meta-ads/`, `src/app/api/meta-ads/`). Allowed only at module-root level. |
 
 ### Per-component folder rule
 
 Every component lives in its own folder named after itself:
 
 ```
-NewsBlock/
-  NewsBlock.tsx                ← the component (matches folder name)
-  NewsBlock.module.css         ← optional CSS module (matches .tsx)
+AdSetEditor/
+  AdSetEditor.tsx              ← the component (matches folder name)
+  AdSetEditor.module.css       ← optional CSS module (matches .tsx)
   helpers.ts                   ← optional pure helpers (always `helpers.ts`, never `<Component>.helpers.ts`)
-  NewsBlockHeader/             ← optional child component (its own folder)
-    NewsBlockHeader.tsx
-    NewsBlockHeader.module.css
+  PlacementsSection/           ← optional child component (its own folder)
+    PlacementsSection.tsx
+    PlacementsSection.module.css
 ```
 
 **Exceptions** — Next.js routing conventions that must match Next.js names: `page.tsx`, `layout.tsx`, `route.ts`, `not-found.tsx`, `loading.tsx`, `error.tsx`, `template.tsx`, `default.tsx`. These live at the routing folder level, not inside per-component folders.
@@ -73,8 +73,8 @@ Module-scope **pure** (non-JSX) functions that aren't the component itself live 
 
 ### Hooks
 
-- File name: camelCase, starts with `use` (`useTrendingFetcher.ts`).
-- Placement: either alongside its sole consumer (`MyComponent/useMyComponentData.ts`) or in a `hooks/` namespace folder when shared across multiple consumers (`src/Section/trending-news/hooks/useEnsureMarketsLoaded.ts`).
+- File name: camelCase, starts with `use` (`useAdsList.ts`).
+- Placement: either alongside its sole consumer (`MyComponent/useMyComponentData.ts`) or in a `hooks/` namespace folder when shared across multiple consumers (`src/components/layout/hooks/useDismissPopover.ts`).
 
 ### No `index.ts` barrels
 
@@ -115,7 +115,7 @@ export default function PageOrchestrator(): JSX.Element { ... }
 
 **MediaMon** is an internal business control hub — a single login, single dashboard from which a team manages all recurring business operations. The long-term ambition is to productize it: make it generic enough to spin up for other businesses that follow proven operational playbooks.
 
-Today it is a **Next.js 16 / React 19 / MUI 5 / Clerk** web app deployed on Vercel. No database yet — Vercel cache is the persistence layer until Prisma + Postgres arrives.
+Today it is a **Next.js 16 / React 19 / MUI 5 / Clerk** web app deployed on Vercel. No database yet — Prisma + Postgres is planned.
 
 ---
 
@@ -127,58 +127,12 @@ Modules planned or in progress:
 
 | Module | Status | Description |
 |---|---|---|
-| Trending News | Live (v1) | AI-curated media monitoring across multiple topics |
 | Data Table | Planned | The table Viktor asked for — as a UI module |
 | Email Automation | Planned | Automated email workflows |
 | Video Generator | Planned | Create videos from prompts |
 | *(anything else)* | Open | Any process that can be automated lives here |
 
 Long-term: if the system proves itself internally, it gets formatted into a product that can be sold to or replicated for other businesses — using processes that have been validated to work.
-
----
-
-## Module 1 — Trending News (Current Focus)
-
-### What It Does
-
-Monitors news across multiple topics. An AI layer analyzes incoming articles and decides which ones are **Trending** (logic: if 5+ sources wrote about the same thing → it's trending). Results are surfaced per topic tab.
-
-### Topic Tabs
-
-- **Overview** — aggregate of all topics, with a "Top Picks" highlight section (like a news homepage)
-- **Stoichkov** — subtabs: Bulgaria / Spain / Worldwide
-- **Shtonova** — Bulgaria only, same structure
-- More tabs can be added via config with zero structural changes
-
-### The Core Problem (Why This Is Hard)
-
-Google blocks scraping tools. Getting real-time, multi-region news data requires:
-
-- **Multiple rotating IPs** — to avoid bans
-- **Real-time data** — most tools deliver with 12–24 h delay; useless for trending detection
-- **Region coverage** — different tools cover different markets (BG, ES, US, etc.)
-- **Depth** — free Google tiers return ~2 out of 10 articles; you miss trending signals
-
-**Solution found:** a paid tool at $49/month that solves all of the above.
-
-### The Cost Problem (Why Naive Usage Burns Money)
-
-Using the $49/month tool naively (one request per user per load) destroys the quota in days if 10 people use it. The implemented solution:
-
-1. **Morning cold load** — fresh data fetched once at session start
-2. **Cache TTL 3–6 hours** — all users share one cached response
-3. **Cache invalidation button** — manual "refresh now" that bypasses TTL; triggers a single new request, not one per user
-4. **No-op on stale cache** — if cache is still valid and no new articles exist, the quota counter does not increment
-
-This means 10 concurrent users = 1 API call per cache window, not 10.
-
-### Current Cost Stack
-
-| Service | Cost |
-|---|---|
-| News data tool | $49 / month |
-| Claude AI (article analysis) | ~$0.005–0.006 per request |
-| Vercel hosting | TBD |
 
 ---
 
@@ -189,28 +143,20 @@ This means 10 concurrent users = 1 API call per cache window, not 10.
 - **Framework:** Next.js 16.2
 - **UI:** React 19 + MUI 5
 - **Auth:** Clerk 6 (role-based module access)
-- **AI:** Claude API (article trending analysis)
-- **Cache:** Vercel edge cache (interim persistence)
 - **Future DB:** Prisma + Postgres
 
 ### Key Patterns
 
 **Gateway Pattern** — the only places that know about external services:
-- `src/lib/gateways/RssGateway.ts`
-- `src/lib/gateways/ClusteringGateway.ts`
-- `src/lib/gateways/TrendsGateway.ts`
 - `src/lib/gateways/WooGateway.ts` — WooCommerce REST per brand (revenue / orders / top products)
 - `src/lib/gateways/GoogleAnalyticsGateway.ts` — GA4 Data API (sessions / active users) via `@google-analytics/data` + service-account JSON; per-brand property IDs in `src/config/analyticsProviders.ts`
-- `src/lib/pipeline.ts` — orchestrates the above
 
 **Module Registry** — `src/config/modules.ts` drives sidebar, root redirect, and Clerk role checks. Adding a module = one entry here + one folder + one API route.
 
 **Context Triad** (per module):
-- `trendingNewsCtx.ts` — context shape
-- `TrendingNewsProvider.tsx` — provider
-- `useTrendingNewsContext.ts` — hook
-
-**AsyncState<T>** — discriminated union in `src/types/index.ts`. Used everywhere instead of boolean loading flags.
+- `brandShellCtx.ts` — context shape
+- `BrandShellProvider.tsx` — provider
+- `useBrandShellContext.ts` — hook
 
 ### Open-Closed Principle (OCP) — Non-negotiable
 
@@ -220,12 +166,6 @@ src/config/modules.ts       ← add entry
 src/modules/<id>/           ← new folder
 src/app/api/<id>/           ← new API route
 Clerk dashboard             ← new role
-```
-Nothing else changes.
-
-New tab inside Trending News:
-```
-src/modules/trending-news/config.ts  ← add entry
 ```
 Nothing else changes.
 

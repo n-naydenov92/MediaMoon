@@ -15,7 +15,6 @@ interface ModuleEntry {
 }
 
 const MODULES: readonly ModuleEntry[] = [
-  { name: 'Trending News', status: 'live' },
   { name: 'Meta Ads', status: 'live' },
   { name: 'Data Table', status: 'soon' },
   { name: 'Email Automation', status: 'soon' },

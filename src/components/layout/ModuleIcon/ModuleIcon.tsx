@@ -3,7 +3,6 @@
 import { memo } from 'react'
 import Box from '@mui/material/Box'
 import type { SvgIconProps } from '@mui/material'
-import TrendingUpIcon from '@mui/icons-material/TrendingUp'
 import LocalShippingIcon from '@mui/icons-material/LocalShipping'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import CampaignIcon from '@mui/icons-material/Campaign'
@@ -18,7 +17,6 @@ import { cssVars } from '@/lib/css'
 import styles from './ModuleIcon.module.css'
 
 const ICON_MAP = {
-  TrendingUp: TrendingUpIcon,
   LocalShipping: LocalShippingIcon,
   Dashboard: DashboardIcon,
   Campaign: CampaignIcon,

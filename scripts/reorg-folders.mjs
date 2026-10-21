@@ -88,10 +88,7 @@ const PHASES = {
     ['src/app/brands/[brandId]/(advertising)/meta-ads/components/shared/CreativePreview/CardMedia/CardMedia.tsx', 'src/app/brands/[brandId]/(advertising)/meta-ads/components/shared/CreativePreview/CreativePreviewCard/CardMedia/CardMedia.tsx'],
     ['src/app/brands/[brandId]/(advertising)/meta-ads/components/shared/CreativePreview/CardSkeleton/CardSkeleton.tsx', 'src/app/brands/[brandId]/(advertising)/meta-ads/components/shared/CreativePreview/CreativePreviewCard/CardSkeleton/CardSkeleton.tsx'],
   ],
-  '4-trending-news': [
-    ['src/Section/trending-news/components/NewsItem/NewsItem.tsx', 'src/Section/trending-news/components/NewsBlock/NewsItem/NewsItem.tsx'],
-    ['src/Section/trending-news/components/TopicPanel/TopicContent/TopicContent.tsx', 'src/Section/trending-news/components/MarketPanel/TopicContent/TopicContent.tsx'],
-    ['src/Section/trending-news/components/TopicPanel/LoadingSkeleton/LoadingSkeleton.tsx', 'src/Section/trending-news/components/MarketPanel/LoadingSkeleton/LoadingSkeleton.tsx'],
+  '4-brand-switcher': [
     ['src/components/ui/DebouncedSearchInput/DebouncedSearchInput.tsx', 'src/components/layout/Sidebar/BrandSwitcher/BrandMenuSearch/DebouncedSearchInput/DebouncedSearchInput.tsx'],
   ],
 }
