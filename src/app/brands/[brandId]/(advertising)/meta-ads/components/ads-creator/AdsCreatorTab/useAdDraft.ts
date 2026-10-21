@@ -24,7 +24,9 @@ import {
   type CreativeSlot,
 } from './creativeSlots'
 import { EMPTY_TARGETING, type TargetingValue } from './CreatorPane/useTargetingData'
-import { adNameMapKey, canSubmitCreator } from './CreatorPane/helpers'
+import { canSubmitCreator } from './CreatorPane/helpers'
+import { hasNamingInput, type AdNaming } from './adNaming'
+import { useAdNaming, type AdNamingActions } from './useAdNaming'
 
 export interface AdDraft {
   readonly files: readonly File[]
@@ -35,12 +37,10 @@ export interface AdDraft {
   readonly setTargeting: Dispatch<SetStateAction<TargetingValue>>
   readonly copy: CopyValue
   readonly setCopy: Dispatch<SetStateAction<CopyValue>>
-  readonly adNames: ReadonlyMap<string, string>
-  readonly setAdNames: Dispatch<SetStateAction<ReadonlyMap<string, string>>>
+  readonly naming: AdNaming
+  readonly namingActions: AdNamingActions
   readonly copyOverrides: ReadonlyMap<string, CopyOverride>
   readonly setCopyOverrides: Dispatch<SetStateAction<ReadonlyMap<string, CopyOverride>>>
-  readonly pageTokens: ReadonlyMap<string, string>
-  readonly setPageTokens: Dispatch<SetStateAction<ReadonlyMap<string, string>>>
   // Every ad slot in order — originals plus duplicates. Naming, validation and
   // publish all key off this, so one file can become several ads with their own copy.
   readonly slots: readonly CreativeSlot[]
@@ -55,18 +55,16 @@ export interface AdDraft {
   readonly clearForNextBatch: () => void
 }
 
-// Owns the whole ad draft: the seven pieces of state, the effects that prune stale
-// map entries when creatives/pages change, the derived validation (empty required
-// copy, cross-BM blocks, can-submit, is-dirty), and the two clear operations
+// Owns the whole ad draft: its state (ad naming via useAdNaming), the effects that
+// prune stale map entries when creatives/pages change, the derived validation (empty
+// required copy, cross-BM blocks, can-submit, is-dirty), and the two clear operations
 // (full reset vs. clear-after-launch). The container just composes it.
 export function useAdDraft(): AdDraft {
   const [files, setFiles] = useState<readonly File[]>([])
   const [assets, setAssets] = useState<readonly AssetCreative[]>([])
   const [targeting, setTargeting] = useState<TargetingValue>(EMPTY_TARGETING)
   const [copy, setCopy] = useState<CopyValue>(EMPTY_COPY)
-  const [adNames, setAdNames] = useState<ReadonlyMap<string, string>>(() => new Map())
   const [copyOverrides, setCopyOverrides] = useState<ReadonlyMap<string, CopyOverride>>(() => new Map())
-  const [pageTokens, setPageTokens] = useState<ReadonlyMap<string, string>>(() => new Map())
   const [duplicates, setDuplicates] = useState<readonly CreativeDuplicate[]>([])
 
   // Originals + duplicates, in display order — the single source of truth for "how
@@ -75,23 +73,8 @@ export function useAdDraft(): AdDraft {
     () => buildCreativeSlots(files, assets, duplicates),
     [files, assets, duplicates],
   )
-
-  // Drop custom page tokens for pages no longer selected.
-  useEffect(() => {
-    setPageTokens((prev) => {
-      if (prev.size === 0) {
-        return prev
-      }
-      const valid = new Set(targeting.pageIds)
-      const next = new Map<string, string>()
-      for (const [key, value] of prev) {
-        if (valid.has(key)) {
-          next.set(key, value)
-        }
-      }
-      return next.size === prev.size ? prev : next
-    })
-  }, [targeting.pageIds])
+  const creativeKeys = useMemo(() => slots.map((s) => s.key), [slots])
+  const { naming, actions: namingActions } = useAdNaming(targeting.pageIds, creativeKeys)
 
   // Drop duplicates whose source file/asset was removed, so an orphan slot can't
   // linger with copy that would never publish.
@@ -105,30 +88,6 @@ export function useAdDraft(): AdDraft {
       return next.length === prev.length ? prev : next
     })
   }, [files, assets])
-
-  // Keep per-ad naming in sync with the current pages × slots — drop entries for
-  // ads no longer present (creative removed or page deselected) so stale names never
-  // leak into a later submit.
-  useEffect(() => {
-    setAdNames((prev) => {
-      if (prev.size === 0) {
-        return prev
-      }
-      const valid = new Set<string>()
-      for (const pageId of targeting.pageIds) {
-        for (const slot of slots) {
-          valid.add(adNameMapKey(pageId, slot.key))
-        }
-      }
-      const next = new Map<string, string>()
-      for (const [key, value] of prev) {
-        if (valid.has(key)) {
-          next.set(key, value)
-        }
-      }
-      return next.size === prev.size ? prev : next
-    })
-  }, [slots, targeting.pageIds])
 
   // Drop per-creative copy overrides for slots no longer present, so a removed
   // creative (or duplicate) can't leak its copy into a later submit.
@@ -149,7 +108,6 @@ export function useAdDraft(): AdDraft {
   }, [slots])
 
   const creativeCount = slots.length
-  const creativeKeys = useMemo(() => slots.map((s) => s.key), [slots])
   // Validate the copy each ad would actually publish (its own override, else the
   // shared base) — not just the shared field. This blocks ads that would go out with
   // an empty primary text / headline, and stops falsely blocking when every creative
@@ -166,7 +124,7 @@ export function useAdDraft(): AdDraft {
   )
   const addedAssetKeys = useMemo(() => new Set(assets.map((a) => a.assetKey)), [assets])
 
-  const canSubmit = canSubmitCreator(targeting, copy, creativeCount)
+  const canSubmit = canSubmitCreator(targeting, creativeCount)
     && emptyRequired.primary === 0
     && emptyRequired.headline === 0
     && emptyRequired.url === 0
@@ -178,22 +136,20 @@ export function useAdDraft(): AdDraft {
     files.length > 0
     || assets.length > 0
     || duplicates.length > 0
-    || adNames.size > 0
+    || hasNamingInput(naming)
     || copyOverrides.size > 0
-    || pageTokens.size > 0
     || targeting.accountId !== ''
     || targeting.campaignId !== ''
     || targeting.adSetId !== ''
     || targeting.pageIds.length > 0
     || targeting.instagramId !== ''
-    || copy.name !== ''
     || copy.url !== ''
     || copy.description !== ''
     || copy.cta !== EMPTY_COPY.cta
     || copy.activate !== EMPTY_COPY.activate
     || copy.primaryTexts.some((t) => t.trim() !== '')
     || copy.headlines.some((t) => t.trim() !== '')
-  ), [files, assets, duplicates, adNames, copyOverrides, pageTokens, targeting, copy])
+  ), [files, assets, duplicates, naming, copyOverrides, targeting, copy])
 
   // Add another ad slot for an existing creative, so it can publish again with its
   // own copy. New duplicates start blank (inherit the shared copy until edited).
@@ -213,20 +169,19 @@ export function useAdDraft(): AdDraft {
     setDuplicates([])
     setTargeting(EMPTY_TARGETING)
     setCopy(EMPTY_COPY)
-    setAdNames(new Map())
+    namingActions.clear()
     setCopyOverrides(new Map())
-    setPageTokens(new Map())
-  }, [])
+  }, [namingActions])
 
-  // After a successful launch: clear what was just sent (creatives + per-ad names +
-  // page tokens) but keep targeting and shared copy so the next batch can reuse them.
+  // After a successful launch: clear what was just sent (creatives + their hand-typed
+  // names) but keep targeting, shared copy, the naming template and page names so the
+  // next batch can reuse them.
   const clearForNextBatch = useCallback(() => {
     setFiles([])
     setAssets([])
     setDuplicates([])
-    setAdNames(new Map())
-    setPageTokens(new Map())
-  }, [])
+    namingActions.resetOverrides()
+  }, [namingActions])
 
   return {
     files,
@@ -237,12 +192,10 @@ export function useAdDraft(): AdDraft {
     setTargeting,
     copy,
     setCopy,
-    adNames,
-    setAdNames,
+    naming,
+    namingActions,
     copyOverrides,
     setCopyOverrides,
-    pageTokens,
-    setPageTokens,
     slots,
     duplicateCreative,
     removeDuplicate,

@@ -9,7 +9,7 @@ import type { BudgetType } from '@/lib/gateways/MetaAdsGateway'
 import BudgetField from '../BudgetField/BudgetField'
 import FieldLabel from '../FieldLabel/FieldLabel'
 import SectionTitle from '../SectionTitle/SectionTitle'
-import SegmentedControl from '../SegmentedControl/SegmentedControl'
+import SegmentedControl from '../../SegmentedControl/SegmentedControl'
 import ScheduleAccordion from './ScheduleAccordion'
 import styles from './BudgetScheduleSection.module.css'
 

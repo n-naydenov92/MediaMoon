@@ -23,6 +23,10 @@
   padding: 6px 20px;
 }
 
+.clearButton {
+  margin-right: auto;
+}
+
 .bulk {
   flex-shrink: 0;
   padding: 0 14px;
@@ -71,6 +75,11 @@
   transform: rotate(180deg);
 }
 
+.modeRow {
+  display: flex;
+  margin-bottom: 12px;
+}
+
 .bulkFields {
   display: flex;
   flex-wrap: wrap;
@@ -87,41 +96,9 @@
   min-width: 84px;
 }
 
-.bulkFields .applyButton {
-  flex-shrink: 0;
-  text-transform: none;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--accent);
-  border-radius: 6px;
-}
-
-.bulkFields .applyButton:hover {
-  background: var(--accent-soft);
-}
-
 .fullNameField {
   flex: 1 1 auto;
   min-width: 0;
-}
-
-.bulkDivider {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 16px 0;
-}
-
-.bulkDivider::before,
-.bulkDivider::after {
-  content: '';
-  flex: 1 1 auto;
-  height: 1px;
-  background: var(--hairline);
-}
-
-.bulkOr {
-  flex-shrink: 0;
 }
 
 .pageRows {
@@ -178,10 +155,13 @@
   flex: 0 0 150px;
 }
 
+/* min-height reserves the "Reset all" icon button's height, so the list doesn't
+   shift down the moment the first row is edited. */
 .listHeader {
   display: flex;
   align-items: center;
   gap: 8px;
+  min-height: 32px;
   margin-bottom: -4px;
 }
 
@@ -189,6 +169,10 @@
   background: var(--surface-2);
   border-radius: 999px;
   padding: 1px 8px;
+}
+
+.resetAllButton {
+  margin-left: auto;
 }
 
 .list {
@@ -232,6 +216,12 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.duplicateIcon {
+  display: inline-flex;
+  flex-shrink: 0;
+  font-size: 16px;
 }
 
 .adRowAvatar {

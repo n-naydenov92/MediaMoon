@@ -7,25 +7,40 @@ import Typography from '@mui/material/Typography'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import LocalOfferOutlinedIcon from '@mui/icons-material/LocalOfferOutlined'
 import FormTextField from '../../../FormTextField/FormTextField'
-import type { AdNameTags } from '../../helpers'
+import SegmentedControl from '../../../SegmentedControl/SegmentedControl'
+import type { AdNameTags, AdNameTemplate, NamingMode } from '../../../adNaming'
 import styles from '../AdNamesDialog.module.css'
+
+const MODE_OPTIONS: readonly { readonly value: NamingMode; readonly label: string }[] = [
+  { value: 'tags', label: 'Tags' },
+  { value: 'custom', label: 'Full name' },
+]
+
+const TAG_FIELDS: readonly { readonly field: keyof AdNameTags; readonly label: string }[] = [
+  { field: 'product', label: 'Product' },
+  { field: 'creativeInfo', label: 'Creative info' },
+  { field: 'textType', label: 'Text type' },
+  { field: 'destination', label: 'Destination' },
+]
 
 interface Props {
   readonly open: boolean
   readonly onToggle: () => void
-  readonly tags: AdNameTags
-  readonly onTagsChange: (next: AdNameTags) => void
-  readonly fullName: string
-  readonly onFullNameChange: (next: string) => void
+  readonly template: AdNameTemplate
+  readonly onModeChange: (mode: NamingMode) => void
+  readonly onTagChange: (field: keyof AdNameTags, value: string) => void
+  readonly onCustomNameChange: (value: string) => void
 }
 
+// Only the selected mode's fields show and apply, so a filled-in but inactive mode
+// can never silently lose to the other one.
 export default memo(function BulkNamingSection({
   open,
   onToggle,
-  tags,
-  onTagsChange,
-  fullName,
-  onFullNameChange,
+  template,
+  onModeChange,
+  onTagChange,
+  onCustomNameChange,
 }: Props): JSX.Element {
   return (
     <Box className={styles.bulk}>
@@ -38,49 +53,36 @@ export default memo(function BulkNamingSection({
       >
         <LocalOfferOutlinedIcon className={styles.bulkIcon} fontSize="inherit" />
         <Typography component="span" variant="caption" color="text.secondary" className={styles.bulkTitle}>
-          Bulk tags
+          Bulk naming
         </Typography>
         <ExpandMoreIcon className={styles.chevron} data-open={open ? 'true' : 'false'} fontSize="inherit" />
       </Box>
       <Collapse in={open} timeout={180} unmountOnExit>
-        <Box className={styles.bulkFields}>
-          <FormTextField
-            label="Product"
-            className={styles.tagField}
-            value={tags.product}
-            onChange={(e) => onTagsChange({ ...tags, product: e.target.value })}
-          />
-          <FormTextField
-            label="Creative info"
-            className={styles.tagField}
-            value={tags.creativeInfo}
-            onChange={(e) => onTagsChange({ ...tags, creativeInfo: e.target.value })}
-          />
-          <FormTextField
-            label="Text type"
-            className={styles.tagField}
-            value={tags.textType}
-            onChange={(e) => onTagsChange({ ...tags, textType: e.target.value })}
-          />
-          <FormTextField
-            label="Destination"
-            className={styles.tagField}
-            value={tags.destination}
-            onChange={(e) => onTagsChange({ ...tags, destination: e.target.value })}
+        <Box className={styles.modeRow}>
+          <SegmentedControl<NamingMode>
+            value={template.mode}
+            options={MODE_OPTIONS}
+            onChange={onModeChange}
+            ariaLabel="Naming mode"
           />
         </Box>
-
-        <Box className={styles.bulkDivider} aria-hidden>
-          <Typography component="span" variant="caption" color="text.disabled" className={styles.bulkOr}>or</Typography>
-        </Box>
-
         <Box className={`${styles.bulkFields} ${styles.bulkFieldsLast}`}>
-          <FormTextField
-            label="Full name for all ads"
-            className={styles.fullNameField}
-            value={fullName}
-            onChange={(e) => onFullNameChange(e.target.value)}
-          />
+          {template.mode === 'tags' ? TAG_FIELDS.map(({ field, label }) => (
+            <FormTextField
+              key={field}
+              label={label}
+              className={styles.tagField}
+              value={template.tags[field]}
+              onChange={(e) => onTagChange(field, e.target.value)}
+            />
+          )) : (
+            <FormTextField
+              label="Full name for all ads"
+              className={styles.fullNameField}
+              value={template.customName}
+              onChange={(e) => onCustomNameChange(e.target.value)}
+            />
+          )}
         </Box>
       </Collapse>
     </Box>

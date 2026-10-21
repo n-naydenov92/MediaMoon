@@ -7,27 +7,36 @@ import Typography from '@mui/material/Typography'
 import MovieOutlinedIcon from '@mui/icons-material/MovieOutlined'
 import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined'
 import StorefrontOutlinedIcon from '@mui/icons-material/StorefrontOutlined'
-import FormTextField from '../../../../FormTextField/FormTextField'
-import { type AdCombo, buildAutoAdName } from '../../../helpers'
+import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined'
+import type { AdCombo } from '../../../../adNaming'
+import type { OverrideActions } from '../../../../useAdNaming'
+import AdNameInput from '../../../AdNameInput/AdNameInput'
 import styles from '../../AdNamesDialog.module.css'
 
 interface Props {
   readonly combo: AdCombo
-  readonly value: string | undefined
+  readonly templateName: string
+  readonly override: string | undefined
+  readonly isDuplicate: boolean
   readonly multiPage: boolean
-  readonly onNameChange: (key: string, value: string, fallback: string) => void
+  readonly actions: OverrideActions
 }
 
-// One editable ad-name row. Memoized and fed only its own `value`, so typing in a
-// sibling row (which rewrites the shared names map) doesn't re-render this field.
+// One ad-name row. Memoized and fed only primitives plus its stable combo, so typing
+// in one row re-renders just that row. Template edits re-render every row, but off
+// the keystroke path — the list reads the template deferred.
 export default memo(function AdNameRow({
   combo,
-  value,
+  templateName,
+  override,
+  isDuplicate,
   multiPage,
-  onNameChange,
+  actions,
 }: Props): JSX.Element {
-  const fallback = buildAutoAdName(combo.creative, combo.pageTok)
   const MediaIcon = combo.creative.media === 'Video' ? MovieOutlinedIcon : ImageOutlinedIcon
+  const ariaLabel = multiPage
+    ? `Ad name for ${combo.creative.name} on ${combo.page.name}`
+    : `Ad name for ${combo.creative.name}`
 
   return (
     <Box className={styles.fileRow}>
@@ -38,6 +47,13 @@ export default memo(function AdNameRow({
         <Typography component="span" variant="caption" color="text.disabled" className={styles.fileName}>
           {combo.creative.name}
         </Typography>
+        {isDuplicate && (
+          <Tooltip title="Same name as another ad">
+            <Box component="span" className={styles.duplicateIcon}>
+              <WarningAmberOutlinedIcon color="warning" fontSize="inherit" />
+            </Box>
+          </Tooltip>
+        )}
         {multiPage && (
           <Tooltip title={combo.page.name}>
             {combo.page.pictureUrl ? (
@@ -56,9 +72,12 @@ export default memo(function AdNameRow({
           </Tooltip>
         )}
       </Box>
-      <FormTextField
-        value={value ?? fallback}
-        onChange={(e) => onNameChange(combo.key, e.target.value, fallback)}
+      <AdNameInput
+        adKey={combo.key}
+        templateName={templateName}
+        override={override}
+        actions={actions}
+        ariaLabel={ariaLabel}
       />
     </Box>
   )

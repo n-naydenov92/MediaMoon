@@ -1,8 +1,5 @@
-import type { Page } from '@/lib/gateways/MetaAdsGateway'
 import type { PublishPayload } from '../../launchPipeline/mediaUpload'
 import type { CopyValue } from '../CopyForm/CopyForm'
-import { assetMediaToken, type AssetCreative } from '../assetCreative'
-import type { CreativeSlot } from '../creativeSlots'
 import type { TargetingValue } from './useTargetingData'
 
 // The five creation steps, in display order. The accordion and completion state key
@@ -31,152 +28,6 @@ export function fileKey(file: File): string {
   return `${file.name}:${file.size}:${file.lastModified}`
 }
 
-export function mediaToken(file: File): 'Video' | 'IMG' {
-  return file.type.startsWith('video/') ? 'Video' : 'IMG'
-}
-
-export function monthToken(now: Date): string {
-  return now.toLocaleString('en-US', { month: 'short' })
-}
-
-export interface AdNameTags {
-  readonly product: string
-  readonly creativeInfo: string
-  readonly textType: string
-  readonly destination: string
-}
-
-export const EMPTY_AD_NAME_TAGS: AdNameTags = {
-  product: '',
-  creativeInfo: '',
-  textType: '',
-  destination: '',
-}
-
-// The free fields the operator overwrites in the generated name string. The
-// destination (e.g. PP/HP) is appended after the page token, so it is its own
-// trailing placeholder rather than part of this list.
-const PLACEHOLDER_PARTS = ['Product', 'CreativeInfo', 'TextType'] as const
-const DESTINATION_PLACEHOLDER = 'Dest'
-
-// Free text shares the "-" field separator, so collapse internal whitespace to
-// "-" and trim — keeps each authored value as one readable token.
-function sanitizeTag(value: string): string {
-  return value.trim().replace(/\s+/g, '-')
-}
-
-// A creative the operator can name per ad — a freshly uploaded file or a library
-// asset. Both reduce to a stable key, a display name, a media token, and (for
-// assets) the descriptive name to use as the editable default.
-export interface NameableCreative {
-  readonly key: string
-  readonly name: string
-  readonly media: 'Video' | 'IMG'
-  readonly baseName: string | null
-}
-
-export function fileNameable(file: File): NameableCreative {
-  return { key: fileKey(file), name: file.name, media: mediaToken(file), baseName: null }
-}
-
-export function assetNameable(asset: AssetCreative): NameableCreative {
-  return { key: asset.assetKey, name: asset.name, media: assetMediaToken(asset), baseName: asset.name }
-}
-
-// A creative slot (original or duplicate) as a nameable. A duplicate reuses its
-// source's media but takes the slot's own key and a "(copy N)" display name, so the
-// naming UI and the ad-name map treat it as a separate, distinguishable ad.
-export function slotNameable(slot: CreativeSlot): NameableCreative {
-  const base = slot.source.kind === 'file'
-    ? fileNameable(slot.source.file)
-    : assetNameable(slot.source.asset)
-  return slot.isDuplicate
-    ? { ...base, key: slot.key, name: `${base.name} (copy ${slot.copyIndex})` }
-    : base
-}
-
-// The pre-filled, editable default each ad shows. Library assets already carry a
-// descriptive name, so they default to it (with the page token appended to keep
-// per-page ads distinct). Uploaded files get the structured placeholder skeleton
-// {Media}-{Month}-Product-CreativeInfo-TextType-Dest[-{Page}]. `pageTok` is the
-// already-resolved page token (custom or auto), appended last, or '' to omit.
-export function buildAutoAdName(
-  creative: NameableCreative,
-  pageTok: string,
-  now: Date = new Date(),
-): string {
-  if (creative.baseName !== null) {
-    return pageTok ? `${creative.baseName}-${pageTok}` : creative.baseName
-  }
-  return [
-    creative.media,
-    monthToken(now),
-    ...PLACEHOLDER_PARTS,
-    DESTINATION_PLACEHOLDER,
-    pageTok,
-  ]
-    .filter(Boolean)
-    .join('-')
-}
-
-// Same structured shape, but from explicit bulk tag values; empty tags are dropped.
-export function buildAdNameFromTags(
-  creative: NameableCreative,
-  pageTok: string,
-  tags: AdNameTags,
-  now: Date = new Date(),
-): string {
-  return [
-    creative.media,
-    monthToken(now),
-    sanitizeTag(tags.product),
-    sanitizeTag(tags.creativeInfo),
-    sanitizeTag(tags.textType),
-    sanitizeTag(tags.destination),
-    pageTok,
-  ]
-    .filter(Boolean)
-    .join('-')
-}
-
-// The custom page token the operator typed, or '' when none — page naming is
-// optional and nothing is appended by default.
-export function resolvePageToken(
-  pageTokens: ReadonlyMap<string, string>,
-  pageId: string,
-): string {
-  return pageTokens.get(pageId) ?? ''
-}
-
-export function adNameMapKey(pageId: string, creativeKey: string): string {
-  return `${pageId}::${creativeKey}`
-}
-
-// One ad per (page × creative). Each combo carries its resolved page token so
-// callers that build names don't re-resolve it per creative.
-export interface AdCombo {
-  readonly page: Page
-  readonly creative: NameableCreative
-  readonly key: string
-  readonly pageTok: string
-}
-
-export function adCombos(
-  pages: readonly Page[],
-  creatives: readonly NameableCreative[],
-  pageTokens: ReadonlyMap<string, string>,
-): readonly AdCombo[] {
-  return pages.flatMap((page) => {
-    const pageTok = resolvePageToken(pageTokens, page.id)
-    return creatives.map((creative) => ({
-      page,
-      creative,
-      key: adNameMapKey(page.id, creative.key),
-      pageTok,
-    }))
-  })
-}
-
 // Immutable Map set/delete — `null` removes the key. Replaces the
 // `new Map(prev); set/delete; onChange(next)` pattern repeated across naming UI.
 export function mapWith<K, V>(map: ReadonlyMap<K, V>, key: K, value: V | null): Map<K, V> {
@@ -187,33 +38,6 @@ export function mapWith<K, V>(map: ReadonlyMap<K, V>, key: K, value: V | null): 
     next.set(key, value)
   }
   return next
-}
-
-interface BuildAdNameMapInput {
-  readonly pages: readonly Page[]
-  readonly creatives: readonly NameableCreative[]
-  readonly pageTokens: ReadonlyMap<string, string>
-  readonly copy: CopyValue
-  readonly adNames: ReadonlyMap<string, string>
-  readonly isSingleAd: boolean
-}
-
-// Final name per ad: the operator's authored value (the shared field for a single
-// ad, else the per-ad entry), falling back to the structured auto name.
-export function buildAdNameMap({
-  pages,
-  creatives,
-  pageTokens,
-  copy,
-  adNames,
-  isSingleAd,
-}: BuildAdNameMapInput): Map<string, string> {
-  const names = new Map<string, string>()
-  for (const { creative, key, pageTok } of adCombos(pages, creatives, pageTokens)) {
-    const authored = (isSingleAd ? copy.name : adNames.get(key)) || ''
-    names.set(key, authored || buildAutoAdName(creative, pageTok))
-  }
-  return names
 }
 
 interface BuildPublishPayloadInput {
@@ -251,17 +75,12 @@ export function buildPublishPayload({
   }
 }
 
-export function canSubmitCreator(
-  targeting: TargetingValue,
-  copy: CopyValue,
-  creativeCount: number,
-): boolean {
+export function canSubmitCreator(targeting: TargetingValue, creativeCount: number): boolean {
   return (
     creativeCount > 0
     && targeting.accountId !== ''
     && targeting.campaignId !== ''
     && targeting.adSetId !== ''
     && targeting.pageIds.length > 0
-    && (targeting.pageIds.length * creativeCount >= 2 || copy.name !== '')
   )
 }

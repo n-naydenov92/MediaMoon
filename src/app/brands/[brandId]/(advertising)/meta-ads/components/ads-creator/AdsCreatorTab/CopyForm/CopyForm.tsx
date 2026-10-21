@@ -1,10 +1,9 @@
 'use client'
 
-import { memo, useCallback, useRef, type ChangeEvent } from 'react'
+import { memo, useCallback, useRef, type ChangeEvent, type ReactNode } from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline'
 import EditNoteOutlinedIcon from '@mui/icons-material/EditNoteOutlined'
 import type { CtaType } from '@/lib/gateways/MetaAdsGateway'
@@ -23,7 +22,6 @@ import styles from './CopyForm.module.css'
 const PRIMARY_TEXT_ROWS = 4
 
 export interface CopyValue {
-  readonly name: string
   readonly primaryTexts: readonly string[]
   readonly headlines: readonly string[]
   readonly description: string
@@ -33,7 +31,6 @@ export interface CopyValue {
 }
 
 export const EMPTY_COPY: CopyValue = {
-  name: '',
   primaryTexts: [''],
   headlines: [''],
   description: '',
@@ -48,7 +45,8 @@ interface Props {
   readonly adsCount: number
   readonly totalCreatives: number
   readonly overrides: ReadonlyMap<string, CopyOverride>
-  readonly onAutoName?: () => void
+  // Ad names are per ad, not copy — the caller owns them and slots the field in here.
+  readonly nameField: ReactNode
   readonly onNameEach?: () => void
   readonly onEditEach?: () => void
 }
@@ -59,7 +57,7 @@ export default memo(function CopyForm({
   adsCount,
   totalCreatives,
   overrides,
-  onAutoName,
+  nameField,
   onNameEach,
   onEditEach,
 }: Props): JSX.Element {
@@ -72,9 +70,6 @@ export default memo(function CopyForm({
 
   const handleActivateChange = useCallback((next: boolean) => {
     onChange({ ...valueRef.current, activate: next })
-  }, [onChange])
-  const handleNameChange = useCallback((e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    onChange({ ...valueRef.current, name: e.target.value })
   }, [onChange])
   const handlePrimaryChange = useCallback((next: readonly string[]) => {
     onChange({ ...valueRef.current, primaryTexts: next })
@@ -148,18 +143,6 @@ export default memo(function CopyForm({
               <Typography component="span" variant="inherit" className={styles.nameLabel}>
                 Ad name
               </Typography>
-              {onAutoName && (
-                <Button
-                  type="button"
-                  size="small"
-                  variant="text"
-                  startIcon={<AutoAwesomeIcon fontSize="inherit" />}
-                  onClick={onAutoName}
-                  className={styles.nameButton}
-                >
-                  Auto-name
-                </Button>
-              )}
               {onNameEach && (
                 <Button
                   type="button"
@@ -173,13 +156,7 @@ export default memo(function CopyForm({
                 </Button>
               )}
             </Box>
-            <FormTextField
-              type="text"
-              value={onNameEach ? '' : value.name}
-              placeholder={onNameEach ? 'Edit each ad name through the “Name each ad” button' : undefined}
-              disabled={Boolean(onNameEach)}
-              onChange={handleNameChange}
-            />
+            {nameField}
           </Box>
         </Box>
       </Box>

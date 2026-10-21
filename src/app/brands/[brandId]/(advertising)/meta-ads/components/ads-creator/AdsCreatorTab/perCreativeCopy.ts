@@ -3,9 +3,8 @@ import { isValidDestinationUrl } from './CopyForm/helpers'
 import { fileKey } from './CreatorPane/helpers'
 import type { AssetCreative } from './assetCreative'
 
-// The copy fields a single creative can diverge on. `name` stays per-ad (handled
-// by adNames, keyed page×file) and `activate` is a batch-wide switch, so neither
-// is overridable here.
+// The copy fields a single creative can diverge on. `activate` is a batch-wide
+// switch, so it isn't overridable here; ad names are per ad (see adNaming.ts).
 export type CopyOverride = Partial<
   Pick<CopyValue, 'primaryTexts' | 'headlines' | 'description' | 'url' | 'cta'>
 >

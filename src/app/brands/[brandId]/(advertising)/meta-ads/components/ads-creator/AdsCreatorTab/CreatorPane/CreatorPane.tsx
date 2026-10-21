@@ -12,6 +12,8 @@ import type { CopyValue } from '../CopyForm/CopyForm'
 import type { CopyOverride, EmptyRequiredCounts } from '../perCreativeCopy'
 import { useBaseFilled } from '../useBaseFilled'
 import type { AdSetRecord, LaunchJob } from '../useLaunchQueue'
+import { buildAdNameMap, slotNameable, type AdNaming } from '../adNaming'
+import type { AdNamingActions } from '../useAdNaming'
 import StepAccordion from '../StepAccordion/StepAccordion'
 import AccountStep from '../AccountStep/AccountStep'
 import CampaignStep from '../CampaignStep/CampaignStep'
@@ -21,17 +23,10 @@ import CopyStep from '../CopyStep/CopyStep'
 import PreviewDialog from '../PreviewDialog/PreviewDialog'
 import PublishBar from '../PublishBar/PublishBar'
 import CreatorHeader from './CreatorHeader/CreatorHeader'
+import AdNameField from './AdNameField/AdNameField'
 import AdNamesDialog from './AdNamesDialog/AdNamesDialog'
 import CopyEachDialog from './CopyEachDialog/CopyEachDialog'
-import {
-  buildAdNameMap,
-  buildAutoAdName,
-  resolvePageToken,
-  slotNameable,
-  STEP_IDS,
-  STEP_LABELS,
-  type Completion,
-} from './helpers'
+import { STEP_IDS, STEP_LABELS, type Completion } from './helpers'
 import { useCreatorSteps } from './useCreatorSteps'
 import { type TargetingValue, useTargetingData } from './useTargetingData'
 import styles from './CreatorPane.module.css'
@@ -55,10 +50,8 @@ interface Props {
   readonly onCopyChange: (next: CopyValue) => void
   readonly copyOverrides: ReadonlyMap<string, CopyOverride>
   readonly onCopyOverridesChange: (next: ReadonlyMap<string, CopyOverride>) => void
-  readonly adNames: ReadonlyMap<string, string>
-  readonly onAdNamesChange: (next: ReadonlyMap<string, string>) => void
-  readonly pageTokens: ReadonlyMap<string, string>
-  readonly onPageTokensChange: (next: ReadonlyMap<string, string>) => void
+  readonly naming: AdNaming
+  readonly namingActions: AdNamingActions
   readonly jobs: readonly LaunchJob[]
   readonly onRetry: (jobId: string) => void
   readonly onStop: (jobId: string) => void
@@ -90,10 +83,8 @@ export default memo(function CreatorPane({
   onCopyChange,
   copyOverrides,
   onCopyOverridesChange,
-  adNames,
-  onAdNamesChange,
-  pageTokens,
-  onPageTokensChange,
+  naming,
+  namingActions,
   jobs,
   onRetry,
   onStop,
@@ -145,7 +136,7 @@ export default memo(function CreatorPane({
     profiles: targeting.pageIds.length > 0
       && (!isSinglePage || data.instagramAccounts.length === 0 || targeting.instagramId !== ''),
     files: creativeCount > 0 && invalidAssetKeys.size === 0,
-    copy: (targeting.pageIds.length * creativeCount >= 2 || copy.name !== '')
+    copy: targeting.pageIds.length * creativeCount > 0
       && emptyRequired.primary === 0
       && emptyRequired.headline === 0
       && emptyRequired.url === 0,
@@ -159,7 +150,6 @@ export default memo(function CreatorPane({
     data.instagramAccounts.length,
     creativeCount,
     invalidAssetKeys,
-    copy.name,
     emptyRequired.primary,
     emptyRequired.headline,
     emptyRequired.url,
@@ -206,27 +196,16 @@ export default memo(function CreatorPane({
     [slots],
   )
 
-  // Single ad: fill the shared Ad name field with the structured template
-  // (page token baked in, since there is exactly one page).
-  const handleAutoNameSingle = useCallback(() => {
-    const [creative] = nameableCreatives
-    const [page] = selectedPages
-    if (!creative) {
-      return
-    }
-    const tok = page ? resolvePageToken(pageTokens, page.id) : ''
-    onCopyChange({ ...copy, name: buildAutoAdName(creative, tok) })
-  }, [copy, nameableCreatives, onCopyChange, pageTokens, selectedPages])
+  // The single-ad name is the field being typed in, so it reads naming live. The
+  // multi-ad summary sits behind the open naming dialog and reads it deferred, so
+  // dialog keystrokes don't re-render the Copy step on the critical path.
+  const deferredNaming = useDeferredValue(naming)
+  const fieldNaming = isSingleAd ? naming : deferredNaming
 
   const handleSubmit = useCallback(() => {
     const adSetName = data.adSets.find((a) => a.id === targeting.adSetId)?.name ?? ''
-    onSubmit(buildAdNameMap({
-      pages: selectedPages, creatives: nameableCreatives, pageTokens, copy, adNames, isSingleAd,
-    }), adSetName)
-  }, [
-    adNames, copy, nameableCreatives, isSingleAd, onSubmit, pageTokens, selectedPages,
-    data.adSets, targeting.adSetId,
-  ])
+    onSubmit(buildAdNameMap({ pages: selectedPages, creatives: nameableCreatives, naming }), adSetName)
+  }, [naming, nameableCreatives, onSubmit, selectedPages, data.adSets, targeting.adSetId])
 
   // Each step's body is memoized so its element keeps a stable identity. StepAccordion
   // is memo'd, but `children` is a prop — a fresh element every render would re-render
@@ -286,6 +265,15 @@ export default memo(function CreatorPane({
     duplicates, onDuplicateCreative, onRemoveDuplicate,
   ])
 
+  const nameFieldEl = useMemo(() => (
+    <AdNameField
+      pages={selectedPages}
+      creatives={nameableCreatives}
+      naming={fieldNaming}
+      actions={namingActions}
+    />
+  ), [selectedPages, nameableCreatives, fieldNaming, namingActions])
+
   const copyStepEl = useMemo(() => (
     <CopyStep
       value={copy}
@@ -293,12 +281,12 @@ export default memo(function CreatorPane({
       adsCount={adsCount}
       totalCreatives={creativeCount}
       overrides={deferredOverrides}
-      onAutoName={isSingleAd ? handleAutoNameSingle : undefined}
+      nameField={nameFieldEl}
       onNameEach={!isSingleAd && creativeCount > 0 ? openAdNames : undefined}
       onEditEach={creativeCount >= 2 ? openCopyEach : undefined}
     />
   ), [
-    copy, onCopyChange, adsCount, deferredOverrides, isSingleAd, handleAutoNameSingle,
+    copy, onCopyChange, adsCount, deferredOverrides, nameFieldEl, isSingleAd,
     openAdNames, openCopyEach, creativeCount,
   ])
 
@@ -391,10 +379,8 @@ export default memo(function CreatorPane({
         onClose={closeAdNames}
         creatives={nameableCreatives}
         selectedPages={selectedPages}
-        names={adNames}
-        onChange={onAdNamesChange}
-        pageTokens={pageTokens}
-        onPageTokensChange={onPageTokensChange}
+        naming={naming}
+        actions={namingActions}
       />
 
       <CopyEachDialog

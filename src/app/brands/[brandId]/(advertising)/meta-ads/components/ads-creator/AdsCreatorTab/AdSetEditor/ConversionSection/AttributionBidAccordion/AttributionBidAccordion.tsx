@@ -7,7 +7,7 @@ import AccordionToggle from '../../AccordionToggle/AccordionToggle'
 import BudgetField from '../../BudgetField/BudgetField'
 import FieldLabel from '../../FieldLabel/FieldLabel'
 import SearchSelect from '../../../SearchSelect/SearchSelect'
-import SegmentedControl from '../../SegmentedControl/SegmentedControl'
+import SegmentedControl from '../../../SegmentedControl/SegmentedControl'
 import {
   BID_STRATEGY_OPTIONS,
   bidStrategyNeedsAmount,

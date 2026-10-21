@@ -4,7 +4,8 @@ import { useCallback } from 'react'
 import type { Market } from '@/types'
 import { type CopyValue } from './CopyForm/CopyForm'
 import { resolveCopy, type CopyOverride } from './perCreativeCopy'
-import { adNameMapKey, buildPublishPayload } from './CreatorPane/helpers'
+import { buildPublishPayload } from './CreatorPane/helpers'
+import { adNameMapKey } from './adNaming'
 import type { CreativeSlot } from './creativeSlots'
 import { type TargetingValue } from './CreatorPane/useTargetingData'
 import type { UseLaunchQueueResult } from './useLaunchQueue'
@@ -39,7 +40,6 @@ export function useLaunchSubmit({
       return
     }
     const isSinglePage = targeting.pageIds.length === 1
-    const isSingleAd = targeting.pageIds.length * slots.length === 1
     const batchId = crypto.randomUUID()
     for (const pageId of targeting.pageIds) {
       for (const slot of slots) {
@@ -47,7 +47,7 @@ export function useLaunchSubmit({
         const resolvedName = resolvedNames.get(adNameMapKey(pageId, slot.key))
         if (slot.source.kind === 'file') {
           const { file } = slot.source
-          const name = resolvedName || copy.name || file.name
+          const name = resolvedName ?? file.name
           queue.enqueue(
             buildPublishPayload({ targeting, copy: adCopy, pageId, name, isSinglePage }),
             file,
@@ -56,7 +56,7 @@ export function useLaunchSubmit({
           )
         } else {
           const { asset } = slot.source
-          const name = resolvedName || (isSingleAd ? copy.name.trim() : '') || asset.name
+          const name = resolvedName ?? asset.name
           queue.enqueueAsset(
             buildPublishPayload({ targeting, copy: adCopy, pageId, name, isSinglePage }),
             asset,

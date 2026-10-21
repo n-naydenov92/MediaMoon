@@ -16,7 +16,7 @@ interface Props {
   readonly onToggle: () => void
   readonly selectedPages: readonly Page[]
   readonly pageTokens: ReadonlyMap<string, string>
-  readonly onPageTokChange: (page: Page, value: string) => void
+  readonly onPageTokenChange: (pageId: string, value: string) => void
 }
 
 export default memo(function PageTokensSection({
@@ -24,7 +24,7 @@ export default memo(function PageTokensSection({
   onToggle,
   selectedPages,
   pageTokens,
-  onPageTokChange,
+  onPageTokenChange,
 }: Props): JSX.Element {
   return (
     <Box className={styles.bulk}>
@@ -37,7 +37,7 @@ export default memo(function PageTokensSection({
       >
         <LabelOutlinedIcon className={styles.bulkIcon} fontSize="inherit" />
         <Typography component="span" variant="caption" color="text.secondary" className={styles.bulkTitle}>
-          Page names — appended to every name
+          Page names
         </Typography>
         <ExpandMoreIcon className={styles.chevron} data-open={open ? 'true' : 'false'} fontSize="inherit" />
       </Box>
@@ -70,7 +70,7 @@ export default memo(function PageTokensSection({
                 className={styles.pageTokenField}
                 placeholder="Add page name"
                 value={pageTokens.get(page.id) ?? ''}
-                onChange={(e) => onPageTokChange(page, e.target.value)}
+                onChange={(e) => onPageTokenChange(page.id, e.target.value)}
               />
             </Box>
           ))}

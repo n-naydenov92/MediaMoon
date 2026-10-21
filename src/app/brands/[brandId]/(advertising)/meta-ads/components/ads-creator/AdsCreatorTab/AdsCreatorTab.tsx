@@ -37,12 +37,10 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
     setTargeting,
     copy,
     setCopy,
-    adNames,
-    setAdNames,
+    naming,
+    namingActions,
     copyOverrides,
     setCopyOverrides,
-    pageTokens,
-    setPageTokens,
     slots,
     duplicateCreative,
     removeDuplicate,
@@ -139,10 +137,8 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
         onCopyChange={setCopy}
         copyOverrides={copyOverrides}
         onCopyOverridesChange={setCopyOverrides}
-        adNames={adNames}
-        onAdNamesChange={setAdNames}
-        pageTokens={pageTokens}
-        onPageTokensChange={setPageTokens}
+        naming={naming}
+        namingActions={namingActions}
         jobs={queue.jobs}
         onRetry={queue.retry}
         onStop={queue.stop}

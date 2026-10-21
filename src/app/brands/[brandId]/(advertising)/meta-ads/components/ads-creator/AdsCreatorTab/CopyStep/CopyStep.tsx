@@ -1,6 +1,6 @@
 'use client'
 
-import { memo } from 'react'
+import { memo, type ReactNode } from 'react'
 import CopyForm, { type CopyValue } from '../CopyForm/CopyForm'
 import type { CopyOverride } from '../perCreativeCopy'
 
@@ -10,7 +10,7 @@ interface Props {
   readonly adsCount: number
   readonly totalCreatives: number
   readonly overrides: ReadonlyMap<string, CopyOverride>
-  readonly onAutoName?: () => void
+  readonly nameField: ReactNode
   readonly onNameEach?: () => void
   readonly onEditEach?: () => void
 }
@@ -21,7 +21,7 @@ export default memo(function CopyStep({
   adsCount,
   totalCreatives,
   overrides,
-  onAutoName,
+  nameField,
   onNameEach,
   onEditEach,
 }: Props): JSX.Element {
@@ -32,7 +32,7 @@ export default memo(function CopyStep({
       adsCount={adsCount}
       totalCreatives={totalCreatives}
       overrides={overrides}
-      onAutoName={onAutoName}
+      nameField={nameField}
       onNameEach={onNameEach}
       onEditEach={onEditEach}
     />

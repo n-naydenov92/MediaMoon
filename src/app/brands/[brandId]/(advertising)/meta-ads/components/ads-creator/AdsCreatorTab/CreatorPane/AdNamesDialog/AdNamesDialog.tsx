@@ -1,18 +1,17 @@
 'use client'
 
-import { memo, useCallback, useDeferredValue, useMemo, useRef, useState } from 'react'
+import { memo, useCallback, useDeferredValue, useMemo, useState } from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline'
 import type { Page } from '@/lib/gateways/MetaAdsGateway'
 import {
-  type AdNameTags,
-  type NameableCreative,
-  EMPTY_AD_NAME_TAGS,
   adCombos,
-  buildAdNameFromTags,
-  mapWith,
-} from '../helpers'
+  hasNamingInput,
+  type AdNaming,
+  type NameableCreative,
+} from '../../adNaming'
+import type { AdNamingActions } from '../../useAdNaming'
 import CreatorDialog from '../../CreatorDialog/CreatorDialog'
 import BulkNamingSection from './BulkNamingSection/BulkNamingSection'
 import PageTokensSection from './PageTokensSection/PageTokensSection'
@@ -24,10 +23,8 @@ interface Props {
   readonly onClose: () => void
   readonly creatives: readonly NameableCreative[]
   readonly selectedPages: readonly Page[]
-  readonly names: ReadonlyMap<string, string>
-  readonly onChange: (next: ReadonlyMap<string, string>) => void
-  readonly pageTokens: ReadonlyMap<string, string>
-  readonly onPageTokensChange: (next: ReadonlyMap<string, string>) => void
+  readonly naming: AdNaming
+  readonly actions: AdNamingActions
 }
 
 export default memo(function AdNamesDialog({
@@ -35,82 +32,28 @@ export default memo(function AdNamesDialog({
   onClose,
   creatives,
   selectedPages,
-  names,
-  onChange,
-  pageTokens,
-  onPageTokensChange,
+  naming,
+  actions,
 }: Props): JSX.Element {
-  const multiPage = selectedPages.length > 1
-  const adsCount = creatives.length * selectedPages.length
-
   const [bulkOpen, setBulkOpen] = useState(true)
-  const toggleBulk = useCallback(() => setBulkOpen((v) => !v), [])
   const [pageNamesOpen, setPageNamesOpen] = useState(true)
-  const togglePageNames = useCallback(() => setPageNamesOpen((v) => !v), [])
-  const [tags, setTags] = useState<AdNameTags>(EMPTY_AD_NAME_TAGS)
-  const [fullName, setFullName] = useState('')
 
+  // A template or page-name keystroke renames every row, so the list reads those
+  // deferred and the fields above stay instant. Hand-typed names stay live: the row
+  // being typed in must render its own keystroke in the same pass, or React resets
+  // the input to the stale value and the caret jumps to the end.
+  const deferredTemplate = useDeferredValue(naming.template)
+  const deferredPageTokens = useDeferredValue(naming.pageTokens)
   const combos = useMemo(
-    () => adCombos(selectedPages, creatives, pageTokens),
-    [selectedPages, creatives, pageTokens],
+    () => adCombos(selectedPages, creatives, deferredPageTokens),
+    [selectedPages, creatives, deferredPageTokens],
   )
 
-  // Live bulk typing rewrites the whole names map each keystroke. The ad-name list
-  // is the heavy consumer, so it reads a deferred copy — keeping the bulk/page fields
-  // responsive while the rows catch up off the keystroke critical path.
-  const deferredNames = useDeferredValue(names)
+  const toggleBulk = useCallback(() => setBulkOpen((v) => !v), [])
+  const togglePageNames = useCallback(() => setPageNamesOpen((v) => !v), [])
 
-  // setName reads the latest names through a ref so its identity stays stable —
-  // memoized rows only re-render the field actually being edited.
-  const namesRef = useRef(names)
-  namesRef.current = names
-
-  // Live: any bulk field or page name rewrites every ad name as you type. Full name
-  // wins when present, else the structured tags; clearing the template falls back to
-  // the auto names. A page token is appended only when the operator has typed one.
-  const rebuildNames = useCallback((
-    nextTags: AdNameTags,
-    nextFullName: string,
-    nextTokens: ReadonlyMap<string, string>,
-  ) => {
-    const trimmed = nextFullName.trim()
-    const hasTags = nextTags.product !== '' || nextTags.creativeInfo !== ''
-      || nextTags.textType !== '' || nextTags.destination !== ''
-    if (trimmed === '' && !hasTags) {
-      onChange(new Map())
-      return
-    }
-    const next = adCombos(selectedPages, creatives, nextTokens).map((c): [string, string] => {
-      if (trimmed !== '') {
-        return [c.key, c.pageTok ? `${trimmed}-${c.pageTok}` : trimmed]
-      }
-      return [c.key, buildAdNameFromTags(c.creative, c.pageTok, nextTags)]
-    })
-    onChange(new Map(next))
-  }, [selectedPages, creatives, onChange])
-
-  const handleTagsChange = useCallback((next: AdNameTags) => {
-    setTags(next)
-    rebuildNames(next, fullName, pageTokens)
-  }, [rebuildNames, fullName, pageTokens])
-
-  const handleFullNameChange = useCallback((next: string) => {
-    setFullName(next)
-    rebuildNames(tags, next, pageTokens)
-  }, [rebuildNames, tags, pageTokens])
-
-  const setName = useCallback((key: string, value: string, fallback: string) => {
-    onChange(mapWith(namesRef.current, key, value === '' || value === fallback ? null : value))
-  }, [onChange])
-
-  // Page name is optional — an empty field appends no token. Typing one rewrites the
-  // generated names live.
-  const setPageTok = useCallback((page: Page, value: string) => {
-    const nextTokens = mapWith(pageTokens, page.id, value)
-    onPageTokensChange(nextTokens)
-    rebuildNames(tags, fullName, nextTokens)
-  }, [pageTokens, onPageTokensChange, rebuildNames, tags, fullName])
-
+  const multiPage = selectedPages.length > 1
+  const adsCount = creatives.length * selectedPages.length
   const countLabel = `${creatives.length} ${creatives.length === 1 ? 'creative' : 'creatives'}`
     + ` · ${adsCount} ${adsCount === 1 ? 'ad' : 'ads'}`
 
@@ -129,42 +72,56 @@ export default memo(function AdNamesDialog({
       maxWidth="md"
       paperClassName={styles.paper}
       footer={(
-        <Button
-          type="button"
-          variant="contained"
-          disableElevation
-          className={styles.saveButton}
-          onClick={onClose}
-        >
-          Save
-        </Button>
+        <>
+          <Button
+            type="button"
+            variant="text"
+            color="inherit"
+            disabled={!hasNamingInput(naming)}
+            className={styles.clearButton}
+            onClick={actions.clear}
+          >
+            Clear all
+          </Button>
+          <Button
+            type="button"
+            variant="contained"
+            disableElevation
+            className={styles.saveButton}
+            onClick={onClose}
+          >
+            Save
+          </Button>
+        </>
       )}
     >
       <Box className={styles.body}>
         <BulkNamingSection
           open={bulkOpen}
           onToggle={toggleBulk}
-          tags={tags}
-          onTagsChange={handleTagsChange}
-          fullName={fullName}
-          onFullNameChange={handleFullNameChange}
+          template={naming.template}
+          onModeChange={actions.setMode}
+          onTagChange={actions.setTag}
+          onCustomNameChange={actions.setCustomName}
         />
 
         <PageTokensSection
           open={pageNamesOpen}
           onToggle={togglePageNames}
           selectedPages={selectedPages}
-          pageTokens={pageTokens}
-          onPageTokChange={setPageTok}
+          pageTokens={naming.pageTokens}
+          onPageTokenChange={actions.setPageToken}
         />
 
         <AdNamesList
           combos={combos}
           adsCount={adsCount}
-          names={deferredNames}
+          template={deferredTemplate}
+          overrides={naming.overrides}
           multiPage={multiPage}
           emptyHint={emptyHint}
-          onNameChange={setName}
+          actions={actions}
+          onResetOverrides={actions.resetOverrides}
         />
       </Box>
     </CreatorDialog>
