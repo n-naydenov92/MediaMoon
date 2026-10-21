@@ -12,7 +12,7 @@ import { convertToEur } from '@/lib/meta/fx'
 import { fetchAllAccounts } from '../summary/accountFetching'
 import { parseBrandId, resolveTargetAccounts } from '../summary/queryParsing'
 
-const ADS_PER_ACCOUNT_LIMIT = 200
+const AD_INSIGHTS_PAGE_SIZE = 200
 const NO_TOKEN_STATUS = 503
 const UPSTREAM_ERROR_STATUS = 502
 const DEFAULT_PAGE_LIMIT = 50
@@ -125,10 +125,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           return null
         }
         const ads = await fetchAdsWithInsights(token, account.id, account.currency, dateParams, {
-          limit: ADS_PER_ACCOUNT_LIMIT,
+          limit: AD_INSIGHTS_PAGE_SIZE,
           filters: metaFilters,
         })
-        return { account, ads: ads.slice(0, ADS_PER_ACCOUNT_LIMIT) }
+        return { account, ads }
       }),
     )
     const usable = perAccount.filter((x): x is NonNullable<typeof x> => x !== null)
