@@ -1,4 +1,19 @@
 const RETRY_BACKOFF_MS = [1000, 3000, 8000] as const
+// The Meta routes answer 504 when Meta was briefly unavailable or did not answer in time.
+const RETRY_NOW_STATUS = 504
+
+export class HttpError extends Error {
+  readonly status: number
+
+  readonly body: Readonly<Record<string, unknown>>
+
+  constructor(status: number, body: Readonly<Record<string, unknown>>) {
+    super(typeof body.error === 'string' ? body.error : `HTTP ${status}`)
+    this.name = 'HttpError'
+    this.status = status
+    this.body = body
+  }
+}
 
 export async function postJson<T>(
   url: string,
@@ -11,10 +26,7 @@ export async function postJson<T>(
     body: JSON.stringify(body),
     signal,
   })
-  if (!response.ok) {
-    throw new Error(await parseError(response))
-  }
-  return (await response.json()) as T
+  return readResponse<T>(response)
 }
 
 export async function postForm<T>(
@@ -23,39 +35,49 @@ export async function postForm<T>(
   signal?: AbortSignal,
 ): Promise<T> {
   const response = await fetch(url, { method: 'POST', body: form, signal })
+  return readResponse<T>(response)
+}
+
+// Retries only failures that are safe to repeat and likely to pass next time: network
+// drops and Meta being briefly unavailable (504). A throttle (429) is never retried —
+// calling Meta during a block only extends it — so the job fails at once with Meta's
+// wait time in the message.
+export async function withRetry<T>(fn: () => Promise<T>): Promise<T> {
+  for (const delay of RETRY_BACKOFF_MS) {
+    try {
+      return await fn()
+    } catch (err) {
+      if (!isRetryable(err)) {
+        throw err
+      }
+      await sleep(delay)
+    }
+  }
+  return fn()
+}
+
+async function readResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
-    throw new Error(await parseError(response))
+    throw new HttpError(response.status, await readErrorBody(response))
   }
   return (await response.json()) as T
 }
 
-async function parseError(response: Response): Promise<string> {
-  const fallback = `HTTP ${response.status}`
+async function readErrorBody(response: Response): Promise<Readonly<Record<string, unknown>>> {
   try {
-    const body = (await response.json()) as { error?: string }
-    return body.error ?? fallback
+    const body: unknown = await response.json()
+    return typeof body === 'object' && body !== null ? (body as Record<string, unknown>) : {}
   } catch {
-    return fallback
+    return {}
   }
 }
 
-export async function withRetry<T>(fn: () => Promise<T>): Promise<T> {
-  let lastError: unknown
-  const delays: readonly (number | undefined)[] = [...RETRY_BACKOFF_MS, undefined]
-  for (const delay of delays) {
-    try {
-      return await fn()
-    } catch (err) {
-      if (err instanceof DOMException && err.name === 'AbortError') {
-        throw err
-      }
-      lastError = err
-      if (delay !== undefined) {
-        await sleep(delay)
-      }
-    }
+function isRetryable(err: unknown): boolean {
+  if (err instanceof HttpError) {
+    return err.status === RETRY_NOW_STATUS
   }
-  throw lastError instanceof Error ? lastError : new Error('Retry exhausted')
+  // fetch rejects with a TypeError when the network drops; an abort must propagate.
+  return err instanceof TypeError
 }
 
 function sleep(ms: number): Promise<void> {
