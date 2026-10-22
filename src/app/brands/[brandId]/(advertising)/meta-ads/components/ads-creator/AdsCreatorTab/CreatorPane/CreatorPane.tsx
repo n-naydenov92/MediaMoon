@@ -8,6 +8,7 @@ import type { StatusFilter } from '@/lib/gateways/MetaAdsGateway'
 import type { AssetCreative } from '../assetCreative'
 import type { CreativeSlot } from '../creativeSlots'
 import { incompatibleAssetKeys } from '../assetCompat'
+import { usePublishTarget } from '../usePublishTarget'
 import type { CopyValue } from '../CopyForm/CopyForm'
 import type { CopyOverride, EmptyRequiredCounts } from '../perCreativeCopy'
 import { useBaseFilled } from '../useBaseFilled'
@@ -116,9 +117,10 @@ export default memo(function CreatorPane({
   const baseFilled = useBaseFilled(copy)
   // Library assets that can't publish to the selected account (cross-BM videos).
   // They block the Files step and Publish until removed, and show an inline error.
+  const publishTarget = usePublishTarget(targeting.accountId)
   const invalidAssetKeys = useMemo(
-    () => incompatibleAssetKeys(assets, targeting.accountId),
-    [assets, targeting.accountId],
+    () => incompatibleAssetKeys(assets, publishTarget),
+    [assets, publishTarget],
   )
 
   // The per-creative editor (CopyEachDialog) writes overrides on every keystroke.
@@ -231,12 +233,11 @@ export default memo(function CreatorPane({
       accountCurrency={accountCurrency}
       dsaEntities={data.dsaEntities}
       onAdSetCreated={onAdSetCreated}
-      brandId={brandId}
     />
   ), [
     data.campaigns, data.adSets, targeting, onTargetingChange, campaignStatus, setCampaignStatus,
     adSetStatus, setAdSetStatus, data.refetchAdSets, accountCurrency, data.dsaEntities,
-    onAdSetCreated, brandId,
+    onAdSetCreated,
   ])
 
   const profilesStepEl = useMemo(() => (

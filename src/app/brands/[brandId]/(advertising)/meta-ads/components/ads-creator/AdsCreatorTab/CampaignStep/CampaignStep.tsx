@@ -16,7 +16,6 @@ import type {
   DsaEntities,
   StatusFilter,
 } from '@/lib/gateways/MetaAdsGateway'
-import type { BrandId } from '@/config/brands'
 import SearchSelect, { type OptionStatus } from '../SearchSelect/SearchSelect'
 import StatusFilterPills from '../StatusFilterPills/StatusFilterPills'
 import AdSetEditor from '../AdSetEditor/AdSetEditor'
@@ -46,7 +45,6 @@ interface Props {
   readonly accountCurrency: string
   readonly dsaEntities: DsaEntities
   readonly onAdSetCreated: (record: AdSetRecord) => void
-  readonly brandId: BrandId
 }
 
 function effectiveToOptionStatus(effective: string): OptionStatus {
@@ -76,7 +74,6 @@ export default memo(function CampaignStep({
   accountCurrency,
   dsaEntities,
   onAdSetCreated,
-  brandId,
 }: Props): JSX.Element {
   const selectedCampaign = useMemo(
     () => campaigns.find((c) => c.id === value.campaignId) ?? null,
@@ -217,7 +214,6 @@ export default memo(function CampaignStep({
         onClose={closeEditor}
         onSuccess={handleDuplicateSuccess}
         accountId={value.accountId}
-        brandId={brandId}
         mode={createOpen ? 'create' : 'duplicate'}
         sourceAdSetId={duplicateSource?.id ?? ''}
         sourceAdSetName={duplicateSource?.name ?? ''}

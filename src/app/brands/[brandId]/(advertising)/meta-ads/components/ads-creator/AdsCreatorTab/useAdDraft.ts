@@ -11,6 +11,7 @@ import {
 import { EMPTY_COPY, type CopyValue } from './CopyForm/CopyForm'
 import { removeAsset, type AssetCreative } from './assetCreative'
 import { incompatibleAssetKeys } from './assetCompat'
+import { usePublishTarget } from './usePublishTarget'
 import {
   countEmptyRequired,
   type CopyOverride,
@@ -120,9 +121,10 @@ export function useAdDraft(): AdDraft {
   )
   // Library assets that can't publish to the selected account (cross-BM videos)
   // block Publish until removed — mirrors the inline error and the Files step.
+  const publishTarget = usePublishTarget(targeting.accountId)
   const invalidAssetKeys = useMemo(
-    () => incompatibleAssetKeys(assets, targeting.accountId),
-    [assets, targeting.accountId],
+    () => incompatibleAssetKeys(assets, publishTarget),
+    [assets, publishTarget],
   )
   const addedAssetKeys = useMemo(() => new Set(assets.map((a) => a.assetKey)), [assets])
 

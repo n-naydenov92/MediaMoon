@@ -14,7 +14,8 @@ import CloseIcon from '@mui/icons-material/Close'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import type { DsaEntities } from '@/lib/gateways/MetaAdsGateway'
-import type { BrandId } from '@/config/brands'
+import { useBrandShellContext } from '@/contexts/brandShell/useBrandShellContext'
+import { findMetaAccount } from '@/lib/tenancy/selection'
 import SectionTitle from './SectionTitle/SectionTitle'
 import SourceRows from './SourceRows/SourceRows'
 import StatusToggle from '../StatusToggle/StatusToggle'
@@ -57,7 +58,6 @@ interface Props {
   readonly onClose: () => void
   readonly onSuccess?: (newAdSetId: string, newAdSetName: string, status: 'PAUSED' | 'ACTIVE') => void
   readonly accountId: string
-  readonly brandId: BrandId
   readonly mode?: AdSetEditorMode
   readonly sourceAdSetId?: string
   readonly sourceAdSetName?: string
@@ -73,7 +73,6 @@ export default memo(function AdSetEditor({
   onClose,
   onSuccess,
   accountId,
-  brandId,
   mode = 'duplicate',
   sourceAdSetId = '',
   sourceAdSetName = '',
@@ -85,6 +84,8 @@ export default memo(function AdSetEditor({
 }: Props): JSX.Element {
   const isCreate = mode === 'create'
   const fullScreen = useMediaQuery('(max-width: 600px)')
+  const { metaAccounts } = useBrandShellContext()
+  const accountMarket = findMetaAccount(metaAccounts, accountId)?.marketCode ?? null
   const [draft, dispatch] = useAdSetDraft(sourceAdSetName)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState<boolean>(false)
@@ -185,7 +186,7 @@ export default memo(function AdSetEditor({
     dispatch({
       type: 'setName',
       value: buildAdSetName({
-        brandId,
+        accountMarket,
         countries: draft.countries,
         ageMin: draft.ageMin,
         ageMax: draft.ageMax,
@@ -196,7 +197,7 @@ export default memo(function AdSetEditor({
     })
   }, [
     dispatch,
-    brandId,
+    accountMarket,
     draft.countries,
     draft.ageMin,
     draft.ageMax,

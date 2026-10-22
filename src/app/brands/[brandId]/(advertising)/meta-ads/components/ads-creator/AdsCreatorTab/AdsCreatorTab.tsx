@@ -1,18 +1,15 @@
 'use client'
 
-import { useCallback, useDeferredValue, useMemo } from 'react'
+import { useCallback, useDeferredValue, useEffect, useMemo } from 'react'
 import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
 import type { BrandId } from '@/config/brands'
-import type { Market } from '@/types'
 import { useBrandShellContext } from '@/contexts/brandShell/useBrandShellContext'
-import { ALL_MARKETS } from '@/lib/markets'
-import { findBrandById } from '@/config/brands'
-import { getAdAccountIds } from '@/config/adAccounts'
+import { accountIdsForSelection } from '@/lib/tenancy/selection'
 import Notice from '../../Notice/Notice'
 import CreatorPane from './CreatorPane/CreatorPane'
 import LibraryPane from './LibraryPane/LibraryPane'
 import DecisionDialog from './DecisionDialog/DecisionDialog'
+import { withAccount } from './CreatorPane/helpers'
 import { addAsset, type AssetCreative } from './assetCreative'
 import { useAdDraft } from './useAdDraft'
 import { useSharedCopyAdd } from './useSharedCopyAdd'
@@ -25,8 +22,7 @@ interface Props {
 }
 
 export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
-  const brand = findBrandById(brandId)
-  const { selectedMarket } = useBrandShellContext()
+  const { selectedMarket, metaAccounts } = useBrandShellContext()
   const queue = useLaunchQueue()
   const {
     files,
@@ -53,20 +49,20 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
     clearForNextBatch,
   } = useAdDraft()
 
-  const targetMarket = useMemo<Market | null>(() => {
-    if (!brand) {
-      return null
-    }
-    if (selectedMarket !== ALL_MARKETS) {
-      return selectedMarket
-    }
-    return brand.markets[0] ?? null
-  }, [brand, selectedMarket])
-
+  // "All markets" offers every account of the brand. The market of an ad is the market
+  // of the account it publishes to, so nothing is assumed from the selector.
   const allowedAccountIds = useMemo(
-    () => (targetMarket ? getAdAccountIds(brandId, targetMarket) : []),
-    [brandId, targetMarket],
+    () => accountIdsForSelection(metaAccounts, selectedMarket),
+    [metaAccounts, selectedMarket],
   )
+
+  // Switching market can take the selected account out of the list. Drop it, so the
+  // draft never publishes to an account the operator can no longer see.
+  useEffect(() => {
+    if (targeting.accountId !== '' && !allowedAccountIds.includes(targeting.accountId)) {
+      setTargeting((prev) => withAccount(prev, ''))
+    }
+  }, [allowedAccountIds, targeting.accountId, setTargeting])
 
   // The library only consumes copy to flag which texts/URL are already added —
   // a non-urgent highlight. Deferring it keeps the heavy library tree off the
@@ -87,7 +83,6 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
 
   const handleSubmit = useLaunchSubmit({
     canSubmit,
-    targetMarket,
     targeting,
     slots,
     copy,
@@ -96,22 +91,11 @@ export default function AdsCreatorTab({ brandId }: Props): JSX.Element {
     clearForNextBatch,
   })
 
-  if (!brand || !targetMarket) {
-    return (
-      <Box component="section" className={styles.rootFallback}>
-        <Notice variant="error" title="Unknown brand">
-          This brand is not configured.
-        </Notice>
-      </Box>
-    )
-  }
-
   if (allowedAccountIds.length === 0) {
     return (
       <Box component="section" className={styles.rootFallback}>
         <Notice variant="info" title="No ad accounts mapped">
-          Map at least one ad account for {brand.label} {targetMarket} in
-          {' '}<Typography component="code" variant="inherit">BRAND_MARKET_AD_ACCOUNTS</Typography> before launching ads.
+          Connect at least one Meta ad account to this brand and market before launching ads.
         </Notice>
       </Box>
     )

@@ -75,6 +75,12 @@ export function buildPublishPayload({
   }
 }
 
+// The campaign, ad set and Instagram actor belong to the account, so picking or
+// dropping an account clears them.
+export function withAccount(targeting: TargetingValue, accountId: string): TargetingValue {
+  return { ...targeting, accountId, campaignId: '', adSetId: '', instagramId: '' }
+}
+
 export function canSubmitCreator(targeting: TargetingValue, creativeCount: number): boolean {
   return (
     creativeCount > 0

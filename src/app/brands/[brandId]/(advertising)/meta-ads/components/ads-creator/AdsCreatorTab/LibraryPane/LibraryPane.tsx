@@ -17,6 +17,7 @@ import ErrorPanel from '@/components/ui/ErrorPanel/ErrorPanel'
 import UpdatedBadge from '@/components/layout/PageHeader/UpdatedBadge/UpdatedBadge'
 import { hasTextVariation, isVariationListFull } from '../CopyForm/VariationList/helpers'
 import { libraryAddBlock } from '../assetCompat'
+import { usePublishTarget } from '../usePublishTarget'
 import type { AssetCreative } from '../assetCreative'
 import DateRangeDropdown from '../../../shared/DateRangeDropdown/DateRangeDropdown'
 import AdvancedFilters from '../../../shared/filters/AdvancedFilters/AdvancedFilters'
@@ -157,6 +158,7 @@ export default memo(function LibraryPane({
   }
 
   const { viewRules } = filters
+  const publishTarget = usePublishTarget(targetAccountId)
   const hasTargetAccount = targetAccountId !== ''
   // Without an account every card is blocked, so "Available only" would empty the grid.
   const hideUnavailable = availableOnly && hasTargetAccount
@@ -164,10 +166,10 @@ export default memo(function LibraryPane({
     const filtered = creatives.filter(
       (c) => creativeMatchesRules(c, viewRules)
         && matchesSearch(c.label, search)
-        && (!hideUnavailable || isCreativeAddable(c, assetByKey.get(c.key) ?? null, targetAccountId)),
+        && (!hideUnavailable || isCreativeAddable(c, assetByKey.get(c.key) ?? null, publishTarget)),
     )
     return rankElements(filtered, sort.field, sort.direction)
-  }, [creatives, viewRules, search, sort.field, sort.direction, hideUnavailable, assetByKey, targetAccountId])
+  }, [creatives, viewRules, search, sort.field, sort.direction, hideUnavailable, assetByKey, publishTarget])
 
   const kind = tabKind(activeTab)
   const isCreatives = kind === 'creative'
@@ -391,7 +393,7 @@ export default memo(function LibraryPane({
                   {rankedCreatives.slice(0, visibleCount).map(({ item }) => {
                     const asset = assetByKey.get(item.key) ?? null
                     const noSource = asset === null
-                    const block = libraryAddBlock(item.creativeType, item.accountId, targetAccountId)
+                    const block = libraryAddBlock(item.creativeType, item.accountId, publishTarget)
                     const reason = noSource ? NO_SOURCE_REASON : block.reason
                     // An added creative that is no longer publishable for the selected
                     // account drops its "Added" state and shows blocked instead — the

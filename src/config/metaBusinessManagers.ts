@@ -58,16 +58,3 @@ export function getBusinessManagerForAccount(accountId: string): MetaBusinessMan
   const normalized = normalizeAccountId(accountId)
   return BUSINESS_MANAGERS.find((bm) => bm.accountIds.includes(normalized)) ?? null
 }
-
-// Two ad accounts share a Business Manager when the same BM token can reach both.
-// That is exactly the boundary for reusing a library video's id: video ids are not
-// downloadable, but they are referenceable by any account the token can see.
-export function sameBusinessManager(a: string, b: string): boolean {
-  const x = getBusinessManagerForAccount(a)
-  const y = getBusinessManagerForAccount(b)
-  return x !== null && y !== null && x.id === y.id
-}
-
-export function getBusinessManagersForBrand(brandId: BrandId): readonly MetaBusinessManager[] {
-  return BUSINESS_MANAGERS.filter((bm) => bm.brandId === brandId)
-}

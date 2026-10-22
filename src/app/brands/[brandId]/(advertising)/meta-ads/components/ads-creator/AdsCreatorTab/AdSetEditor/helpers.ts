@@ -6,7 +6,7 @@ import type {
   Gender,
   PlacementSelection,
 } from '@/lib/gateways/MetaAdsGateway'
-import { findBrandById, type BrandId } from '@/config/brands'
+import type { Market } from '@/types'
 import type { DraftState } from './useAdSetDraft'
 import { goalRequiresCustomEvent } from './ConversionSection/options'
 
@@ -71,7 +71,7 @@ function genderToken(gender: Gender): string {
 }
 
 export interface AdSetNameInput {
-  readonly brandId: BrandId
+  readonly accountMarket: Market | null
   readonly countries: readonly string[]
   readonly ageMin: number
   readonly ageMax: number
@@ -83,13 +83,14 @@ export interface AdSetNameInput {
 // Builds a structured ad set name for consistent later filtering. Shape:
 //   {market}-{ageMin_ageMax}-{gender} | {audience}-{month}-{objective}
 // e.g. BG-18_65+-All | Adv+-Jun-Sales. The brand is implied by the section, so
-// it is omitted; the market comes from the app's market setup. A free-text block
-// can be appended manually after a third " | ". Fields are joined with "-";
-// ranges/lists inside a field use "_" so the field separator stays parseable.
+// it is omitted; the market is the targeted countries, else the ad account's
+// market. A free-text block can be appended manually after a third " | ". Fields
+// are joined with "-"; ranges/lists inside a field use "_" so the field separator
+// stays parseable.
 export function buildAdSetName(input: AdSetNameInput, now: Date = new Date()): string {
   const market = input.countries.length > 0
     ? input.countries.join('_').toUpperCase()
-    : (findBrandById(input.brandId)?.markets[0] ?? 'XX')
+    : (input.accountMarket ?? 'XX')
   const maxAge = input.advantageAudience || input.ageMax >= MAX_AGE ? '65+' : String(input.ageMax)
   const age = `${input.ageMin}_${maxAge}`
   const audience = input.advantageAudience ? 'Adv+' : 'Broad'

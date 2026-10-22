@@ -3,10 +3,13 @@
 import { createContext } from 'react'
 import type { Market } from '@/types'
 import type { MarketSelection } from '@/lib/markets'
+import type { MetaAccountRef } from '@/lib/tenancy/types'
 
 export interface BrandShellContextValue {
   readonly brandId: string
   readonly markets: readonly Market[]
+  // Ids, markets and connections only — tokens never leave the server.
+  readonly metaAccounts: readonly MetaAccountRef[]
   readonly selectedMarket: MarketSelection
   readonly setSelectedMarket: (next: MarketSelection) => void
 }

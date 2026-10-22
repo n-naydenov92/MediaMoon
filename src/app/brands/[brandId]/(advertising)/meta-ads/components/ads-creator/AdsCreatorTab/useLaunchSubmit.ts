@@ -1,7 +1,6 @@
 'use client'
 
 import { useCallback } from 'react'
-import type { Market } from '@/types'
 import { type CopyValue } from './CopyForm/CopyForm'
 import { resolveCopy, type CopyOverride } from './perCreativeCopy'
 import { buildPublishPayload } from './CreatorPane/helpers'
@@ -12,7 +11,6 @@ import type { UseLaunchQueueResult } from './useLaunchQueue'
 
 interface Input {
   readonly canSubmit: boolean
-  readonly targetMarket: Market | null
   readonly targeting: TargetingValue
   readonly slots: readonly CreativeSlot[]
   readonly copy: CopyValue
@@ -23,11 +21,10 @@ interface Input {
 
 // Turn the draft into queued ads: one job per page × slot (uploaded files, library
 // assets and duplicates alike), resolving each ad's name and per-creative copy, then
-// clear what was just sent. Guards on canSubmit/targetMarket so a stray call can't
-// enqueue an incomplete draft.
+// clear what was just sent. Guards on canSubmit so a stray call can't enqueue an
+// incomplete draft.
 export function useLaunchSubmit({
   canSubmit,
-  targetMarket,
   targeting,
   slots,
   copy,
@@ -36,7 +33,7 @@ export function useLaunchSubmit({
   clearForNextBatch,
 }: Input): (resolvedNames: ReadonlyMap<string, string>, adSetName: string) => void {
   return useCallback((resolvedNames: ReadonlyMap<string, string>, adSetName: string) => {
-    if (!canSubmit || !targetMarket) {
+    if (!canSubmit) {
       return
     }
     const isSinglePage = targeting.pageIds.length === 1
@@ -67,5 +64,5 @@ export function useLaunchSubmit({
       }
     }
     clearForNextBatch()
-  }, [canSubmit, clearForNextBatch, copy, copyOverrides, queue, slots, targeting, targetMarket])
+  }, [canSubmit, clearForNextBatch, copy, copyOverrides, queue, slots, targeting])
 }

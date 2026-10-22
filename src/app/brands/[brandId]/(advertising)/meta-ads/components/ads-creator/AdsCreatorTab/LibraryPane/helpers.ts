@@ -4,7 +4,7 @@ import {
   type FilterField,
   type FilterRule,
 } from '@/lib/meta/filterRules'
-import { libraryAddBlock } from '../assetCompat'
+import { libraryAddBlock, type PublishTarget } from '../assetCompat'
 import type { AssetCreative } from '../assetCreative'
 import type { CreativeElement, ElementMetrics } from './decompose'
 import type { ElementTabId, PresetDef, PresetKey, SortDirection, SortFieldId } from './config'
@@ -92,9 +92,9 @@ export function activePresetKey(
 export function isCreativeAddable(
   c: CreativeElement,
   asset: AssetCreative | null,
-  targetAccountId: string,
+  target: PublishTarget,
 ): boolean {
-  return asset !== null && !libraryAddBlock(c.creativeType, c.accountId, targetAccountId).blocked
+  return asset !== null && !libraryAddBlock(c.creativeType, c.accountId, target).blocked
 }
 
 export function matchesSearch(haystack: string, query: string): boolean {

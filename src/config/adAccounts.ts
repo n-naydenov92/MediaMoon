@@ -21,7 +21,3 @@ export const BRAND_MARKET_AD_ACCOUNTS: Record<BrandId, BrandMarketAccounts> = {
     BG: ['act_181255093815434'],
   },
 }
-
-export function getAdAccountIds(brandId: BrandId, market: Market): readonly string[] {
-  return BRAND_MARKET_AD_ACCOUNTS[brandId]?.[market] ?? []
-}

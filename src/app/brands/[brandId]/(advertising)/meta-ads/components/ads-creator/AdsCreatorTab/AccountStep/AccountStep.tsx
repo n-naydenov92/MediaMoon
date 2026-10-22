@@ -9,9 +9,13 @@ import {
   canAccountServeAds,
   type AdAccount,
 } from '@/lib/gateways/MetaAdsGateway'
+import { useBrandShellContext } from '@/contexts/brandShell/useBrandShellContext'
+import { ALL_MARKETS } from '@/lib/markets'
 import FormField from '../FormField/FormField'
 import SearchSelect from '../SearchSelect/SearchSelect'
 import type { TargetingValue } from '../CreatorPane/useTargetingData'
+import { withAccount } from '../CreatorPane/helpers'
+import { marketPrefixedLabel } from './helpers'
 import styles from './AccountStep.module.css'
 
 interface Props {
@@ -34,6 +38,8 @@ function MetaLogo(): JSX.Element {
 }
 
 export default memo(function AccountStep({ accounts, value, onChange }: Props): JSX.Element {
+  const { markets, metaAccounts, selectedMarket } = useBrandShellContext()
+  const showsMarket = selectedMarket === ALL_MARKETS && markets.length > 1
   const selected = useMemo(
     () => accounts.find((a) => a.id === value.accountId) ?? null,
     [accounts, value.accountId],
@@ -48,17 +54,11 @@ export default memo(function AccountStep({ accounts, value, onChange }: Props): 
         <SearchSelect<AdAccount>
           value={selected}
           options={accounts}
-          onChange={(next) => onChange({
-            ...value,
-            accountId: next?.id ?? '',
-            campaignId: '',
-            adSetId: '',
-            instagramId: '',
-          })}
+          onChange={(next) => onChange(withAccount(value, next?.id ?? ''))}
           placeholder="Select an Ad Account…"
           leadingIcon={<MetaLogo />}
           getOptionId={(o) => o.id}
-          getOptionLabel={(o) => o.name}
+          getOptionLabel={(o) => (showsMarket ? marketPrefixedLabel(o, metaAccounts) : o.name)}
           getOptionTooltip={(o) => `${o.name} (${o.id})`}
           getOptionStatus={(o) => accountStatusInfo(o.accountStatus).tone}
           getOptionStatusLabel={(o) => accountStatusInfo(o.accountStatus).label}

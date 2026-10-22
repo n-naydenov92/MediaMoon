@@ -27,7 +27,11 @@ export default async function BrandLayout({ params, children }: Props): Promise<
   }
 
   return (
-    <BrandShellProvider brandId={ctx.brand.id} markets={ctx.brand.markets}>
+    <BrandShellProvider
+      brandId={ctx.brand.id}
+      markets={ctx.brand.markets}
+      metaAccounts={ctx.metaAccounts}
+    >
       <BrandTopbar />
       {children}
     </BrandShellProvider>
