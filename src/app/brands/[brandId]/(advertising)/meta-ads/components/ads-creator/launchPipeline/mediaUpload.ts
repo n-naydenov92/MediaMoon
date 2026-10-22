@@ -36,12 +36,11 @@ interface StartChunkedResponse {
   readonly videoId: string
   readonly startOffset: number
   readonly endOffset: number
-  readonly chunkSize: number
+  readonly maxChunkSize: number
 }
 
 interface StartSingleShotResponse {
   readonly mode: 'single-shot'
-  readonly chunkSize: number
 }
 
 type StartResponse = StartChunkedResponse | StartSingleShotResponse
@@ -49,7 +48,6 @@ type StartResponse = StartChunkedResponse | StartSingleShotResponse
 interface ChunkResponse {
   readonly startOffset: number
   readonly endOffset: number
-  readonly complete: boolean
 }
 
 interface FinalizeResponse {
@@ -85,15 +83,16 @@ export async function uploadVideoChunked(
   if (startResponse.mode !== 'chunked') {
     throw new Error('Server returned unexpected upload mode for video')
   }
-  const { uploadSessionId, videoId, chunkSize } = startResponse
+  const { uploadSessionId, videoId, maxChunkSize } = startResponse
 
-  let offset = 0
-  while (offset < file.size) {
-    const end = Math.min(offset + chunkSize, file.size)
-    const chunk = file.slice(offset, end)
+  // Meta names the next byte range after every step and signals completion with an
+  // empty range (start === end) — the same loop Meta's own SDK runs.
+  let { startOffset, endOffset } = startResponse
+  while (startOffset < endOffset) {
+    const chunk = file.slice(startOffset, Math.min(endOffset, startOffset + maxChunkSize))
     const form = new FormData()
     form.append('uploadSessionId', uploadSessionId)
-    form.append('startOffset', String(offset))
+    form.append('startOffset', String(startOffset))
     form.append('chunk', chunk, 'chunk')
     const response = await withRetry(
       () => postForm<ChunkResponse>(
@@ -102,11 +101,9 @@ export async function uploadVideoChunked(
         signal,
       ),
     )
-    offset = response.startOffset
-    onProgress(Math.min(100, (offset / file.size) * 100))
-    if (response.complete) {
-      break
-    }
+    startOffset = response.startOffset
+    endOffset = response.endOffset
+    onProgress(Math.min(100, (startOffset / file.size) * 100))
   }
 
   await postJson<FinalizeResponse>(

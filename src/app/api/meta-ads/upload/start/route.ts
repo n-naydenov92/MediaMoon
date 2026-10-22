@@ -7,7 +7,9 @@ import { resolveAccountTokenFromRequest } from '@/lib/meta/resolveBrandToken'
 export const runtime = 'nodejs'
 export const maxDuration = 60
 
-const CHUNK_SIZE_BYTES = 4 * 1024 * 1024
+// Meta decides each chunk's range (start_offset..end_offset); this only caps it, since
+// every chunk passes through a serverless function with a ~4.5 MB request body limit.
+const MAX_CHUNK_BYTES = 4 * 1024 * 1024
 
 interface StartRequestBody {
   readonly fileSize?: number
@@ -30,7 +32,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
 
   if (body.mediaType === 'image') {
-    return NextResponse.json({ mode: 'single-shot', chunkSize: CHUNK_SIZE_BYTES })
+    return NextResponse.json({ mode: 'single-shot' })
   }
 
   if (typeof body.fileSize !== 'number' || body.fileSize <= 0) {
@@ -45,7 +47,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       videoId: session.videoId,
       startOffset: session.startOffset,
       endOffset: session.endOffset,
-      chunkSize: CHUNK_SIZE_BYTES,
+      maxChunkSize: MAX_CHUNK_BYTES,
     })
   } catch (err) {
     return metaErrorResponse(err)

@@ -26,7 +26,6 @@ export interface VideoUploadStart {
 export interface VideoUploadTransfer {
   readonly startOffset: number
   readonly endOffset: number
-  readonly complete: boolean
 }
 
 export async function startVideoUpload(
@@ -73,12 +72,9 @@ export async function transferVideoChunk(
   if (json.start_offset === undefined || json.end_offset === undefined) {
     throw new Error('Meta API returned incomplete transfer response')
   }
-  const nextStart = Number(json.start_offset)
-  const nextEnd = Number(json.end_offset)
   return {
-    startOffset: nextStart,
-    endOffset: nextEnd,
-    complete: nextStart === nextEnd,
+    startOffset: Number(json.start_offset),
+    endOffset: Number(json.end_offset),
   }
 }
 

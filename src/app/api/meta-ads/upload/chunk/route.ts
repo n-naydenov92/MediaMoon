@@ -47,7 +47,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({
       startOffset: result.startOffset,
       endOffset: result.endOffset,
-      complete: result.complete,
     })
   } catch (err) {
     return metaErrorResponse(err)
