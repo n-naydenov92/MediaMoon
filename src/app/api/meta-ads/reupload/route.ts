@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { uploadImage } from '@/lib/gateways/MetaAdsGateway'
 import { CROSS_BM_VIDEO_REASON, sameBusinessManager } from '@/config/metaBusinessManagers'
+import { copyImageToAccount } from '@/lib/meta/copyImageToAccount'
 import { metaErrorResponse } from '@/lib/meta/metaErrorResponse'
 import { resolveAccountTokenFromRequest } from '@/lib/meta/resolveBrandToken'
 
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       if (!body.imageUrl) {
         return NextResponse.json({ error: 'imageUrl is required for image re-upload' }, { status: 400 })
       }
-      const imageHash = await reuploadImage(token, accountId, body.imageUrl)
+      const imageHash = await copyImageToAccount(token, accountId, body.imageUrl)
       return NextResponse.json({ imageHash })
     }
 
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       }
       // Same BM: the token can reference the existing video id; only the thumbnail
       // must be turned into an account-local image hash for the publish step.
-      const thumbnailHash = await reuploadImage(token, accountId, body.thumbnailUrl)
+      const thumbnailHash = await copyImageToAccount(token, accountId, body.thumbnailUrl)
       return NextResponse.json({ videoId: body.videoId, thumbnailHash })
     }
 
@@ -64,21 +64,4 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   } catch (err) {
     return metaErrorResponse(err)
   }
-}
-
-async function reuploadImage(token: string, accountId: string, url: string): Promise<string> {
-  const { bytes, mime } = await downloadBytes(url)
-  const filename = mime.includes('png') ? 'library-image.png' : 'library-image.jpg'
-  const { hash } = await uploadImage(token, accountId, bytes, filename, mime)
-  return hash
-}
-
-async function downloadBytes(url: string): Promise<{ bytes: ArrayBuffer; mime: string }> {
-  const response = await fetch(url)
-  if (!response.ok) {
-    throw new Error(`Failed to download source media (HTTP ${response.status})`)
-  }
-  const mime = response.headers.get('content-type') ?? 'application/octet-stream'
-  const bytes = await response.arrayBuffer()
-  return { bytes, mime }
 }

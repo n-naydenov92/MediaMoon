@@ -2,6 +2,12 @@ import type { CtaType } from '@/lib/gateways/MetaAdsGateway'
 import { MAX_IMAGE_BYTES, compressImageIfNeeded } from './imageProcessing'
 import { postForm, postJson, withRetry } from './httpClient'
 
+const META_THUMBNAIL_POLL_MS = 5_000
+// A stop for processing that never finishes, not an estimate of how long it takes:
+// the wait normally ends on Meta's own signal (frames ready, or processing failed).
+const META_THUMBNAIL_MAX_WAIT_MS = 10 * 60_000
+const META_THUMBNAIL_TIMEOUT_MESSAGE = 'Meta is still processing this video after 10 minutes. Retry later.'
+
 export interface PublishPayload {
   readonly accountId: string
   readonly adSetId: string
@@ -49,6 +55,10 @@ interface ChunkResponse {
 interface FinalizeResponse {
   readonly videoId: string
 }
+
+type MetaThumbnailResponse =
+  | { readonly status: 'processing' }
+  | { readonly status: 'ready'; readonly thumbnailHash: string }
 
 interface ImageUploadResponse {
   readonly imageHash: string
@@ -106,6 +116,25 @@ export async function uploadVideoChunked(
   )
   onProgress(100)
   return videoId
+}
+
+// Meta rejects a video creative without a thumbnail. When the browser couldn't take a
+// frame, wait for Meta to process the uploaded video and use the frame it generates.
+export async function waitForMetaThumbnail(
+  videoId: string,
+  accountId: string,
+  signal?: AbortSignal,
+): Promise<string> {
+  const url = `/api/meta-ads/upload/video-thumbnail?accountId=${encodeURIComponent(accountId)}`
+  const deadline = Date.now() + META_THUMBNAIL_MAX_WAIT_MS
+  while (Date.now() < deadline) {
+    const response = await withRetry(() => postJson<MetaThumbnailResponse>(url, { videoId }, signal))
+    if (response.status === 'ready') {
+      return response.thumbnailHash
+    }
+    await delay(META_THUMBNAIL_POLL_MS, signal)
+  }
+  throw new Error(META_THUMBNAIL_TIMEOUT_MESSAGE)
 }
 
 export async function uploadImageSingleShot(
@@ -200,4 +229,14 @@ export async function publishAd(
     signal,
   )
   return response.result
+}
+
+function delay(ms: number, signal?: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(resolve, ms)
+    signal?.addEventListener('abort', () => {
+      clearTimeout(timer)
+      reject(new DOMException('Aborted', 'AbortError'))
+    }, { once: true })
+  })
 }

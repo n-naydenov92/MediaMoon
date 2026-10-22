@@ -86,9 +86,11 @@ export {
   transferVideoChunk,
   finishVideoUpload,
   fetchVideoSource,
+  fetchVideoThumbnailState,
 } from './videoUploadApi'
 
 export type {
   VideoUploadStart,
+  VideoThumbnailState,
   VideoUploadTransfer,
 } from './videoUploadApi'

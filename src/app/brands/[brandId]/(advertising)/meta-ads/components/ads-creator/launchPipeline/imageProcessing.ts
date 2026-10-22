@@ -36,7 +36,21 @@ function waitForVideoEvent(
   })
 }
 
-export async function extractVideoThumbnail(file: File, signal?: AbortSignal): Promise<File> {
+// Null when the browser can't read the video (decoder pool busy, codec it can't decode,
+// tab in the background) — the caller then falls back to the frame Meta generates.
+// Stop still aborts instead of falling back.
+export async function tryExtractVideoThumbnail(file: File, signal?: AbortSignal): Promise<File | null> {
+  try {
+    return await extractVideoThumbnail(file, signal)
+  } catch (err) {
+    if (signal?.aborted) {
+      throw err
+    }
+    return null
+  }
+}
+
+async function extractVideoThumbnail(file: File, signal?: AbortSignal): Promise<File> {
   if (typeof document === 'undefined') {
     throw new Error('Video thumbnail extraction requires a browser environment')
   }

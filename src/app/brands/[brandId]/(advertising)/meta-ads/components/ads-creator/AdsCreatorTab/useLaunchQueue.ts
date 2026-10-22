@@ -1,12 +1,13 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { extractVideoThumbnail } from '../launchPipeline/imageProcessing'
+import { tryExtractVideoThumbnail } from '../launchPipeline/imageProcessing'
 import {
   publishAd,
   reuploadCreativeFromSource,
   uploadImageSingleShot,
   uploadVideoChunked,
+  waitForMetaThumbnail,
   type MediaRef,
   type PublishPayload,
 } from '../launchPipeline/mediaUpload'
@@ -35,6 +36,9 @@ export interface AdJob extends BaseJob {
   readonly fileSize: number
   readonly mediaType: 'video' | 'image'
   readonly progress: number
+  // Uploaded, but the browser couldn't take a thumbnail frame, so the job waits for
+  // Meta to process the video and generate one.
+  readonly waitingForMeta: boolean
   readonly adId: string | null
 }
 
@@ -102,20 +106,26 @@ export function useLaunchQueue(): UseLaunchQueueResult {
     controllersRef.current.set(job.id, controller)
     const { signal } = controller
     try {
-      updateJob(job.id, { status: 'uploading', progress: 0 })
+      updateJob(job.id, { status: 'uploading', progress: 0, waitingForMeta: false })
       let mediaRef: MediaRef
       if (source.kind === 'asset') {
         updateJob(job.id, { progress: 50 })
         mediaRef = await reuploadCreativeFromSource(source.asset, payload.accountId, signal)
       } else if (job.mediaType === 'video') {
         const { file } = source
-        const thumbnailFile = await extractVideoThumbnail(file, signal)
-        const [videoId, thumbnailHash] = await Promise.all([
+        const thumbnailFile = await tryExtractVideoThumbnail(file, signal)
+        const [videoId, browserThumbnailHash] = await Promise.all([
           uploadVideoChunked(file, payload.accountId, (pct: number) => {
             updateJob(job.id, { progress: pct * 0.95 })
           }, signal),
-          uploadImageSingleShot(thumbnailFile, payload.accountId, () => {}, signal),
+          thumbnailFile
+            ? uploadImageSingleShot(thumbnailFile, payload.accountId, () => {}, signal)
+            : Promise.resolve(null),
         ])
+        if (!browserThumbnailHash) {
+          updateJob(job.id, { waitingForMeta: true })
+        }
+        const thumbnailHash = browserThumbnailHash ?? await waitForMetaThumbnail(videoId, payload.accountId, signal)
         mediaRef = { videoId, thumbnailHash }
       } else {
         mediaRef = {
@@ -124,7 +134,7 @@ export function useLaunchQueue(): UseLaunchQueueResult {
           }, signal),
         }
       }
-      updateJob(job.id, { status: 'publishing', progress: 100 })
+      updateJob(job.id, { status: 'publishing', progress: 100, waitingForMeta: false })
       const { adId } = await publishAd(payload, mediaRef, signal)
       updateJob(job.id, { status: 'done', adId })
       // Only drop the retained source on success — a failed job keeps it so Retry can
@@ -171,6 +181,7 @@ export function useLaunchQueue(): UseLaunchQueueResult {
         mediaType,
         status: 'queued',
         progress: 0,
+        waitingForMeta: false,
         error: null,
         adId: null,
       }
@@ -194,6 +205,7 @@ export function useLaunchQueue(): UseLaunchQueueResult {
         mediaType: asset.mediaType,
         status: 'queued',
         progress: 0,
+        waitingForMeta: false,
         error: null,
         adId: null,
       }

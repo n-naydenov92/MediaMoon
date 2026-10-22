@@ -15,7 +15,7 @@ import MovieOutlinedIcon from '@mui/icons-material/MovieOutlined'
 import { cssVars } from '@/lib/css'
 import type { LaunchJob } from '../useLaunchQueue'
 import { buildAdsManagerHref, buildAdSetHref } from '../../../shared/adsManagerHref'
-import { STATUS_LABELS } from './helpers'
+import { PROCESSING_HINT, PROCESSING_LABEL, STATUS_LABELS } from './helpers'
 import styles from './QueueRow.module.css'
 
 interface Props {
@@ -91,7 +91,15 @@ export default memo(function QueueRow({ job, accountId, onRetry, onStop, onDismi
   const MediaIcon = job.mediaType === 'video' ? MovieOutlinedIcon : ImageOutlinedIcon
 
   let statusCell: ReactNode
-  if (isActive) {
+  if (isActive && job.waitingForMeta) {
+    statusCell = (
+      <Tooltip title={PROCESSING_HINT} placement="top" disableInteractive enterDelay={300}>
+        <Typography component="span" variant="inherit" className={styles.statusLabel} data-status="processing">
+          {PROCESSING_LABEL}
+        </Typography>
+      </Tooltip>
+    )
+  } else if (isActive) {
     statusCell = (
       <Box className={styles.activeCell}>
         <Box className={styles.track} style={cssVars({ '--bar-pct': `${Math.round(job.progress)}%` })}>

@@ -98,6 +98,11 @@
   color: var(--text-secondary);
 }
 
+.statusLabel[data-status='processing'] {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
+}
+
 .statusLabel[data-status='done'] {
   background: var(--success-soft);
   color: var(--success);

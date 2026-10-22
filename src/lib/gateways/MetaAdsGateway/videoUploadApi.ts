@@ -111,3 +111,42 @@ export async function finishVideoUpload(
     throw new Error('Meta API did not confirm video upload finish')
   }
 }
+
+const VIDEO_STATUS_ERROR = 'error'
+const DEFAULT_PROCESSING_FAILURE = 'Meta could not process this video.'
+
+interface GraphVideoThumbnailsResponse {
+  readonly status?: {
+    readonly video_status?: string
+    readonly processing_phase?: {
+      readonly status?: string
+      readonly errors?: readonly { readonly message?: string }[]
+    }
+  }
+  readonly thumbnails?: {
+    readonly data?: readonly { readonly uri?: string; readonly is_preferred?: boolean }[]
+  }
+}
+
+export type VideoThumbnailState =
+  | { readonly status: 'processing' }
+  | { readonly status: 'ready'; readonly uri: string }
+  | { readonly status: 'failed'; readonly reason: string }
+
+// Meta generates its own frames for an uploaded video while processing it. One read
+// tells whether a frame exists yet (preferring the one Meta marks preferred), whether
+// processing is still running, or whether it failed.
+export async function fetchVideoThumbnailState(token: string, videoId: string): Promise<VideoThumbnailState> {
+  const url = buildUrl(`/${videoId}`, token, { fields: 'status,thumbnails{uri,is_preferred}' })
+  const json = await callGraphApi<GraphVideoThumbnailsResponse>(url)
+  const frames = json.thumbnails?.data ?? []
+  const frame = frames.find((f) => f.is_preferred && f.uri) ?? frames.find((f) => f.uri)
+  if (frame?.uri) {
+    return { status: 'ready', uri: frame.uri }
+  }
+  const processing = json.status?.processing_phase
+  if (json.status?.video_status === VIDEO_STATUS_ERROR || processing?.status === VIDEO_STATUS_ERROR) {
+    return { status: 'failed', reason: processing?.errors?.[0]?.message ?? DEFAULT_PROCESSING_FAILURE }
+  }
+  return { status: 'processing' }
+}
