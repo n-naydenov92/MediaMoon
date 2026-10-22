@@ -1,7 +1,5 @@
-import { getAdAccountIds } from '@/config/adAccounts'
-import type { BrandId } from '@/config/brands'
-import { getConfiguredBusinessManagersForBrand } from '@/config/metaTokens'
 import { fetchAccountInsights, fetchAdAccounts } from '@/lib/gateways/MetaAdsGateway'
+import { accountIdsForSelection, getMetaConnectionsForBrand, type BrandContext } from '@/lib/tenancy'
 import { convertToEur } from '@/lib/meta/fx'
 import { toMetaInsightsParams, type DateRangeSelection } from '@/lib/meta/dateRange'
 import type { MarketSelection } from '@/lib/markets'
@@ -51,12 +49,12 @@ const EMPTY_PERIOD: SpendAndMeta = {
 }
 
 export async function fetchSpendBothPeriods(
-  brandId: BrandId,
+  ctx: BrandContext,
   current: DateRangeSelection,
   previous: DateRangeSelection,
   market: MarketSelection,
 ): Promise<{ current: SpendAndMeta; previous: SpendAndMeta }> {
-  const targets = await resolveTargetAccounts(brandId, market)
+  const targets = await resolveTargetAccounts(ctx, market)
   if (targets.length === 0) {
     return { current: EMPTY_PERIOD, previous: EMPTY_PERIOD }
   }
@@ -76,35 +74,21 @@ export async function fetchSpendBothPeriods(
 }
 
 async function resolveTargetAccounts(
-  brandId: BrandId,
+  ctx: BrandContext,
   market: MarketSelection,
 ): Promise<readonly AccountTarget[]> {
-  const configured = getConfiguredBusinessManagersForBrand(brandId)
-  if (configured.length === 0) {
-    return []
-  }
-  const marketAllowed = marketAccountFilter(brandId, market)
-  const perBm = await Promise.all(
-    configured.map(async ({ businessManager, token }) => {
+  const connections = await getMetaConnectionsForBrand(ctx.brand.id)
+  const wanted = new Set(accountIdsForSelection(ctx.metaAccounts, market))
+  const perConnection = await Promise.all(
+    connections.map(async ({ accountIds, token }) => {
       const accounts = await fetchAdAccounts(token)
-      const allowed = new Set(businessManager.accountIds)
+      const reachable = new Set(accountIds)
       return accounts
-        .filter((a) => allowed.has(a.id) && marketAllowed(a.id))
+        .filter((a) => reachable.has(a.id) && wanted.has(a.id))
         .map((account) => ({ token, accountId: account.id, currency: account.currency }))
     }),
   )
-  return perBm.flat()
-}
-
-function marketAccountFilter(
-  brandId: BrandId,
-  market: MarketSelection,
-): (accountId: string) => boolean {
-  if (market === 'ALL') {
-    return () => true
-  }
-  const ids = new Set(getAdAccountIds(brandId, market))
-  return (id) => ids.has(id)
+  return perConnection.flat()
 }
 
 async function fetchAllInsights(

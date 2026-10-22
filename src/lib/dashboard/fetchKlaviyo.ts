@@ -1,6 +1,6 @@
 import type { BrandId } from '@/config/brands'
-import { resolveKlaviyoProvider } from '@/config/klaviyoProviders'
 import * as KlaviyoGateway from '@/lib/gateways/KlaviyoGateway'
+import { resolveKlaviyoConfig } from '@/lib/tenancy'
 import type { DateRangeSelection } from '@/lib/meta/dateRange'
 import { rangeFromSelection } from '@/lib/meta/dateRange'
 import type { KlaviyoChannelStats } from '@/types/dashboard'
@@ -10,7 +10,7 @@ export async function fetchKlaviyoForBrand(
   brandId: BrandId,
   dateSelection: DateRangeSelection,
 ): Promise<KlaviyoChannelStats | null> {
-  const provider = resolveKlaviyoProvider(brandId)
+  const provider = await resolveKlaviyoConfig(brandId)
   if (!provider) {
     return null
   }

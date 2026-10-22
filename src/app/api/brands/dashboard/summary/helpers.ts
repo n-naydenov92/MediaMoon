@@ -18,6 +18,7 @@ import { fetchKlaviyoForBrand } from '@/lib/dashboard/fetchKlaviyo'
 import { fetchSpendBothPeriods } from '@/lib/dashboard/fetchSpend'
 import type { MarketSelection } from '@/lib/markets'
 import type { DateRangeSelection } from '@/lib/meta/dateRange'
+import type { BrandContext } from '@/lib/tenancy'
 import type {
   DashboardAnalyticsData,
   DashboardKpis,
@@ -25,15 +26,16 @@ import type {
 } from '@/types/dashboard'
 
 export async function buildSummary(
-  brandId: BrandId,
+  ctx: BrandContext,
   current: DateRangeSelection,
   previous: DateRangeSelection,
   market: MarketSelection,
 ): Promise<DashboardSummary> {
+  const brandId = ctx.brand.id
   const [spend, googleAds, commercePeriods, analyticsPeriods, klaviyoCurrent, klaviyoPrevious] =
     await Promise.all([
-      fetchSpendBothPeriods(brandId, current, previous, market),
-      fetchGoogleAdsBothPeriods(brandId, current, previous, market),
+      fetchSpendBothPeriods(ctx, current, previous, market),
+      fetchGoogleAdsBothPeriods(ctx, current, previous, market),
       fetchCommerceBothPeriods(brandId, current, previous, market),
       fetchAnalyticsBothPeriods(brandId, current, previous, market),
       fetchKlaviyoForBrand(brandId, current),

@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { findBrandById, isBrandId } from '@/config/brands'
 import { fetchCommerceProductsForBrand } from '@/lib/dashboard/fetchCommerce'
 import { parseMarketSelection } from '@/lib/markets'
+import { getBrandContext } from '@/lib/tenancy'
 import { parseDateRangeFromQuery } from '@/lib/meta/dateRange'
 import type { DashboardProducts } from '@/types/dashboard'
 
@@ -13,20 +13,17 @@ const UPSTREAM_ERROR_STATUS = 502
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const params = request.nextUrl.searchParams
   const brandIdRaw = params.get('brandId')
-  if (!brandIdRaw || !isBrandId(brandIdRaw)) {
+  const ctx = brandIdRaw ? await getBrandContext(brandIdRaw) : null
+  if (!ctx) {
     return NextResponse.json(
       { error: 'brandId query param is required or unknown' },
       { status: 400 },
     )
   }
-  const brand = findBrandById(brandIdRaw)
-  if (!brand) {
-    return NextResponse.json({ error: 'unknown brand' }, { status: 400 })
-  }
-  const market = parseMarketSelection(params.get('market') ?? undefined, brand.markets)
+  const market = parseMarketSelection(params.get('market') ?? undefined, ctx.brand.markets)
 
   try {
-    const result = await fetchCommerceProductsForBrand(brandIdRaw, parseDateRangeFromQuery(params), market)
+    const result = await fetchCommerceProductsForBrand(ctx.brand.id, parseDateRangeFromQuery(params), market)
     const products: DashboardProducts = result
       ? { hasCommerce: true, ...result }
       : { hasCommerce: false, topProducts: [], categories: [] }

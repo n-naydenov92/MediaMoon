@@ -3,9 +3,13 @@ import type { BrandConfig, Market } from '@/types'
 
 export type Brand = BrandConfig & { readonly id: BrandId }
 
-export interface MetaAccountRef {
+// An ad account (Meta) or customer (Google Ads) and the market it serves.
+export interface MarketScopedRef {
   readonly id: string
   readonly marketCode: Market
+}
+
+export interface MetaAccountRef extends MarketScopedRef {
   // The Meta connection (a Business Manager today) whose token reaches the account.
   readonly connectionId: string | null
 }
@@ -13,6 +17,7 @@ export interface MetaAccountRef {
 export interface BrandContext {
   readonly brand: Brand
   readonly metaAccounts: readonly MetaAccountRef[]
+  readonly googleAdsCustomers: readonly MarketScopedRef[]
 }
 
 // Server-only: carries a token, so it never goes into a client payload.

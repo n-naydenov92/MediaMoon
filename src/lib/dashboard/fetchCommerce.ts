@@ -1,6 +1,6 @@
 import type { BrandId } from '@/config/brands'
 import { rangeForCommerce } from '@/lib/commerce/rangeInTimezone'
-import { resolveCommerceProvider } from '@/lib/commerce/resolveProvider'
+import { resolveCommerceConfig } from '@/lib/tenancy'
 import * as ShopifyGateway from '@/lib/gateways/ShopifyGateway'
 import * as WooGateway from '@/lib/gateways/WooGateway'
 import type { MarketSelection } from '@/lib/markets'
@@ -25,7 +25,7 @@ export async function fetchCommerceTotalsForBrand(
   dateSelection: DateRangeSelection,
   market: MarketSelection,
 ): Promise<CommerceTotals | null> {
-  const provider = resolveCommerceProvider(brandId)
+  const provider = await resolveCommerceConfig(brandId)
   if (!provider) {
     return null
   }
@@ -49,7 +49,7 @@ export async function fetchCommerceProductsForBrand(
   dateSelection: DateRangeSelection,
   market: MarketSelection,
 ): Promise<CommerceProductsResult | null> {
-  const provider = resolveCommerceProvider(brandId)
+  const provider = await resolveCommerceConfig(brandId)
   if (!provider) {
     return null
   }

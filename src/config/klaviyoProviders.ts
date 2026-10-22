@@ -2,7 +2,7 @@ import type { BrandId } from './brands'
 
 export type KlaviyoIntegrationName = 'WooCommerce' | 'Shopify'
 
-interface KlaviyoProviderEntry {
+export interface KlaviyoProviderEntry {
   readonly brandId: BrandId
   readonly apiKeyEnvVar: string
   readonly integrationName: KlaviyoIntegrationName
@@ -32,23 +32,6 @@ const KLAVIYO_PROVIDERS: readonly KlaviyoProviderEntry[] = [
   },
 ]
 
-export function resolveKlaviyoProvider(brandId: BrandId): KlaviyoProviderConfig | null {
-  const entry = KLAVIYO_PROVIDERS.find((p) => p.brandId === brandId)
-  if (!entry) {
-    return null
-  }
-  const apiKey = readEnv(entry.apiKeyEnvVar)
-  if (!apiKey) {
-    return null
-  }
-  return {
-    brandId: entry.brandId,
-    apiKey,
-    integrationName: entry.integrationName,
-  }
-}
-
-function readEnv(envVar: string): string | null {
-  const value = process.env[envVar]
-  return value && value.length > 0 ? value : null
+export function getKlaviyoProviderEntry(brandId: string): KlaviyoProviderEntry | null {
+  return KLAVIYO_PROVIDERS.find((p) => p.brandId === brandId) ?? null
 }

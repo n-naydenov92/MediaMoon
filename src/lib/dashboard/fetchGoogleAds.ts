@@ -1,11 +1,7 @@
-import type { BrandId } from '@/config/brands'
-import {
-  getGoogleAdsCredentials,
-  getGoogleAdsCustomerIds,
-  type GoogleAdsCredentials,
-} from '@/config/googleAdsAccounts'
+import type { GoogleAdsCredentials } from '@/config/googleAdsAccounts'
 import { fetchAccountInsights, type GoogleAdsAccountInsights } from '@/lib/gateways/GoogleAdsGateway'
-import { MARKETS, type MarketSelection } from '@/lib/markets'
+import type { MarketSelection } from '@/lib/markets'
+import { accountIdsForSelection, resolveGoogleAdsCredentials, type BrandContext } from '@/lib/tenancy'
 import { rangeFromSelection, type DateRangeSelection } from '@/lib/meta/dateRange'
 import { convertToEur } from '@/lib/meta/fx'
 import type { GoogleAdsChannelTotals } from './aggregate'
@@ -18,16 +14,16 @@ export interface GoogleAdsPeriods {
 const EMPTY_PERIODS: GoogleAdsPeriods = { current: null, previous: null }
 
 export async function fetchGoogleAdsBothPeriods(
-  brandId: BrandId,
+  ctx: BrandContext,
   current: DateRangeSelection,
   previous: DateRangeSelection,
   market: MarketSelection,
 ): Promise<GoogleAdsPeriods> {
-  const credentials = getGoogleAdsCredentials()
+  const credentials = await resolveGoogleAdsCredentials()
   if (!credentials) {
     return EMPTY_PERIODS
   }
-  const customerIds = resolveCustomerIds(brandId, market)
+  const customerIds = accountIdsForSelection(ctx.googleAdsCustomers, market)
   if (customerIds.length === 0) {
     return EMPTY_PERIODS
   }
@@ -36,13 +32,6 @@ export async function fetchGoogleAdsBothPeriods(
     fetchPeriodTotals(customerIds, previous, credentials),
   ])
   return { current: currentTotals, previous: previousTotals }
-}
-
-function resolveCustomerIds(brandId: BrandId, market: MarketSelection): readonly string[] {
-  if (market === 'ALL') {
-    return [...new Set(MARKETS.flatMap((m) => getGoogleAdsCustomerIds(brandId, m)))]
-  }
-  return getGoogleAdsCustomerIds(brandId, market)
 }
 
 async function fetchPeriodTotals(

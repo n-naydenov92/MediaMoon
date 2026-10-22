@@ -51,6 +51,6 @@ export const COMMERCE_PROVIDERS: readonly CommerceProviderEntry[] = [
   },
 ]
 
-export function getCommerceProviderEntry(brandId: BrandId): CommerceProviderEntry | null {
+export function getCommerceProviderEntry(brandId: string): CommerceProviderEntry | null {
   return COMMERCE_PROVIDERS.find((p) => p.brandId === brandId) ?? null
 }

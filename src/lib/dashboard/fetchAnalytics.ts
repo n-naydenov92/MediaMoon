@@ -1,7 +1,6 @@
 import type { BrandId } from '@/config/brands'
-import { resolveAnalyticsProvider } from '@/config/analyticsProviders'
 import { rangeForCommerce } from '@/lib/commerce/rangeInTimezone'
-import { resolveCommerceProvider } from '@/lib/commerce/resolveProvider'
+import { resolveAnalyticsConfig, resolveCommerceConfig } from '@/lib/tenancy'
 import {
   fetchAnalyticsRange,
   type AnalyticsRangeResult,
@@ -15,13 +14,13 @@ export async function fetchAnalyticsForBrand(
   dateSelection: DateRangeSelection,
   market: MarketSelection,
 ): Promise<AnalyticsRangeResult | null> {
-  const provider = resolveAnalyticsProvider(brandId)
+  const provider = await resolveAnalyticsConfig(brandId)
   if (!provider) {
     return null
   }
   const range = rangeForCommerce(dateSelection, provider.timezone)
   const result = await fetchAnalyticsRange(provider, range.from, range.to, market)
-  const commerce = resolveCommerceProvider(brandId)
+  const commerce = await resolveCommerceConfig(brandId)
   if (!commerce) {
     return result
   }

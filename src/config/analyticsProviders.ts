@@ -1,6 +1,6 @@
 import type { BrandId } from './brands'
 
-interface AnalyticsProviderEntry {
+export interface AnalyticsProviderEntry {
   readonly brandId: BrandId
   readonly kind: 'ga4'
   readonly propertyEnvVar: string
@@ -34,23 +34,6 @@ const ANALYTICS_PROVIDERS: readonly AnalyticsProviderEntry[] = [
   },
 ]
 
-export function resolveAnalyticsProvider(brandId: BrandId): AnalyticsProviderConfig | null {
-  const entry = ANALYTICS_PROVIDERS.find((p) => p.brandId === brandId)
-  if (!entry) {
-    return null
-  }
-  const propertyId = readEnv(entry.propertyEnvVar)
-  if (!propertyId) {
-    return null
-  }
-  return {
-    kind: entry.kind,
-    propertyId,
-    timezone: entry.timezone,
-  }
-}
-
-function readEnv(envVar: string): string | null {
-  const value = process.env[envVar]
-  return value && value.length > 0 ? value : null
+export function getAnalyticsProviderEntry(brandId: string): AnalyticsProviderEntry | null {
+  return ANALYTICS_PROVIDERS.find((p) => p.brandId === brandId) ?? null
 }

@@ -3,8 +3,9 @@ import {
   readMetaConnectionForAccount,
   readMetaConnections,
   type MetaConnectionRecord,
-} from './source/configSource'
-import type { MetaAccountTokenLookup, MetaConnection } from './types'
+} from '../source/configSource'
+import type { MetaAccountTokenLookup, MetaConnection } from '../types'
+import { readSecret } from './secrets'
 
 // Only connections whose token is configured are returned.
 export async function getMetaConnectionsForBrand(brandId: string): Promise<readonly MetaConnection[]> {
@@ -42,9 +43,4 @@ export async function areOnSameMetaConnection(a: string, b: string): Promise<boo
 
 function toMetaConnection(record: MetaConnectionRecord, token: string): MetaConnection {
   return { id: record.id, label: record.label, token, accountIds: record.accountIds }
-}
-
-function readSecret(envVar: string): string | null {
-  const value = process.env[envVar]
-  return value && value.length > 0 ? value : null
 }
