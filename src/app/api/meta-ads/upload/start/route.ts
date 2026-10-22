@@ -17,7 +17,7 @@ interface StartRequestBody {
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  const resolved = resolveAccountTokenFromRequest(request)
+  const resolved = await resolveAccountTokenFromRequest(request)
   if (!resolved.ok) return resolved.response
 
   let body: StartRequestBody

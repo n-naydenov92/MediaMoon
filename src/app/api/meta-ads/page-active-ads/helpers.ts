@@ -1,5 +1,4 @@
-import type { BrandId } from '@/config/brands'
-import { getConfiguredBusinessManagersForBrand } from '@/config/metaTokens'
+import { getMetaConnectionsForBrand } from '@/lib/tenancy'
 
 const PAGE_ID_PATTERN = /^\d+$/
 const MAX_PAGE_IDS = 50
@@ -14,8 +13,9 @@ export function parsePageIds(raw: string | null): readonly string[] {
 
 // ads_volume hangs off an ad account, but the count it returns is Page-wide (every
 // account), so the counts don't depend on which account the user picks. Uses the same
-// BM as `getMetaTokenForBrand`, so the account is reachable by the token that listed
-// the pages.
-export function adsVolumeAccountId(brandId: BrandId): string | null {
-  return getConfiguredBusinessManagersForBrand(brandId)[0]?.businessManager.accountIds[0] ?? null
+// connection as `resolveBrandToken`, so the account is reachable by the token that
+// listed the pages.
+export async function adsVolumeAccountId(brandId: string): Promise<string | null> {
+  const [connection] = await getMetaConnectionsForBrand(brandId)
+  return connection?.accountIds[0] ?? null
 }

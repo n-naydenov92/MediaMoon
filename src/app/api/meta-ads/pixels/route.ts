@@ -8,7 +8,7 @@ export const runtime = 'nodejs'
 export const maxDuration = 30
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
-  const resolved = resolveAccountTokenFromRequest(request)
+  const resolved = await resolveAccountTokenFromRequest(request)
   if (!resolved.ok) return resolved.response
 
   try {

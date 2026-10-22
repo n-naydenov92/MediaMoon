@@ -19,7 +19,7 @@ interface VideoThumbnailRequestBody {
 // its frames, then copies the preferred frame into the ad account as an image hash.
 // The client polls; one call never waits on Meta, so it stays far under maxDuration.
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  const resolved = resolveAccountTokenFromRequest(request)
+  const resolved = await resolveAccountTokenFromRequest(request)
   if (!resolved.ok) return resolved.response
 
   let body: VideoThumbnailRequestBody

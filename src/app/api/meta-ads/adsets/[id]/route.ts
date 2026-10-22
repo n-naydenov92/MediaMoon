@@ -12,7 +12,7 @@ interface RouteContext {
 }
 
 export async function GET(request: NextRequest, ctx: RouteContext): Promise<NextResponse> {
-  const resolved = resolveAccountTokenFromRequest(request)
+  const resolved = await resolveAccountTokenFromRequest(request)
   if (!resolved.ok) return resolved.response
 
   const { id } = await ctx.params

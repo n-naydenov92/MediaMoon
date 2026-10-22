@@ -1,4 +1,4 @@
-import { normalizeAccountId } from '@/config/metaBusinessManagers'
+import { normalizeAccountId } from '@/lib/meta/accountId'
 import { buildUrl, callGraphApi } from './http'
 import type {
   AdSetDetail,

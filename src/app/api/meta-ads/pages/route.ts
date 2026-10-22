@@ -5,7 +5,7 @@ import { metaErrorResponse } from '@/lib/meta/metaErrorResponse'
 import { resolveBrandTokenFromRequest } from '@/lib/meta/resolveBrandToken'
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
-  const resolved = resolveBrandTokenFromRequest(request)
+  const resolved = await resolveBrandTokenFromRequest(request)
   if (!resolved.ok) return resolved.response
 
   try {

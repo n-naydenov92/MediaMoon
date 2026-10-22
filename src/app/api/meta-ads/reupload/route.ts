@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { CROSS_BM_VIDEO_REASON, sameBusinessManager } from '@/config/metaBusinessManagers'
+import { areOnSameMetaConnection } from '@/lib/tenancy'
 import { copyImageToAccount } from '@/lib/meta/copyImageToAccount'
+import { CROSS_BM_VIDEO_REASON } from '@/lib/meta/crossBmMessages'
 import { metaErrorResponse } from '@/lib/meta/metaErrorResponse'
 import { resolveAccountTokenFromRequest } from '@/lib/meta/resolveBrandToken'
 
@@ -24,7 +25,7 @@ interface ReuploadRequestBody {
 // directly (only its thumbnail is re-uploaded as an account-local image); a video
 // from a different BM cannot be reused at all.
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  const resolved = resolveAccountTokenFromRequest(request)
+  const resolved = await resolveAccountTokenFromRequest(request)
   if (!resolved.ok) return resolved.response
   const { token, accountId } = resolved
 
@@ -51,7 +52,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           { status: 400 },
         )
       }
-      if (!sameBusinessManager(body.sourceAccountId, accountId)) {
+      if (!(await areOnSameMetaConnection(body.sourceAccountId, accountId))) {
         return NextResponse.json({ error: CROSS_BM_VIDEO_REASON }, { status: 422 })
       }
       // Same BM: the token can reference the existing video id; only the thumbnail

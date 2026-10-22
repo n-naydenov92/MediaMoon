@@ -3,7 +3,7 @@
 import { Fragment, memo } from 'react'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
-import { CROSS_BM_BADGE, CROSS_BM_VIDEO_REASON } from '@/config/metaBusinessManagers'
+import { CROSS_BM_BADGE, CROSS_BM_VIDEO_REASON } from '@/lib/meta/crossBmMessages'
 import type { AssetCreative } from '../../assetCreative'
 import { type CopyOverride, type OverridableField } from '../../perCreativeCopy'
 import type { CreativeDuplicate } from '../../creativeSlots'

@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { isBrandId, type BrandId } from '@/config/brands'
-import { getMetaTokenForBrand } from '@/config/metaTokens'
-import { getBusinessManagerForAccount } from '@/config/metaBusinessManagers'
+import type { BrandId } from '@/config/brands'
+import { getBrandContext, getMetaConnectionsForBrand, lookupMetaTokenForAccount } from '@/lib/tenancy'
+
+const NO_TOKEN_STATUS = 503
 
 export type BrandTokenResult =
   | { readonly ok: true; readonly token: string; readonly brandId: BrandId }
@@ -16,42 +17,36 @@ function jsonError(message: string, status: number): NextResponse {
   return NextResponse.json({ error: message }, { status })
 }
 
-export function resolveBrandTokenFromRequest(request: NextRequest): BrandTokenResult {
+export async function resolveBrandTokenFromRequest(request: NextRequest): Promise<BrandTokenResult> {
   return resolveBrandToken(request.nextUrl.searchParams.get('brandId'))
 }
 
-export function resolveBrandToken(brandIdRaw: string | null | undefined): BrandTokenResult {
+export async function resolveBrandToken(brandIdRaw: string | null | undefined): Promise<BrandTokenResult> {
   if (!brandIdRaw) {
     return { ok: false, response: jsonError('brandId query param is required', 400) }
   }
-  if (!isBrandId(brandIdRaw)) {
+  const ctx = await getBrandContext(brandIdRaw)
+  if (!ctx) {
     return { ok: false, response: jsonError(`unknown brandId: ${brandIdRaw}`, 400) }
   }
-  const token = getMetaTokenForBrand(brandIdRaw)
-  if (!token) {
-    return { ok: false, response: jsonError(`Meta token not configured for brand "${brandIdRaw}"`, 503) }
+  const [connection] = await getMetaConnectionsForBrand(ctx.brand.id)
+  if (!connection) {
+    return { ok: false, response: jsonError(`Meta token not configured for brand "${brandIdRaw}"`, NO_TOKEN_STATUS) }
   }
-  return { ok: true, token, brandId: brandIdRaw }
+  return { ok: true, token: connection.token, brandId: ctx.brand.id }
 }
 
-export function resolveAccountTokenFromRequest(request: NextRequest): AccountTokenResult {
+export async function resolveAccountTokenFromRequest(request: NextRequest): Promise<AccountTokenResult> {
   const accountId = request.nextUrl.searchParams.get('accountId')
   if (!accountId) {
     return { ok: false, response: jsonError('accountId query param is required', 400) }
   }
-  const businessManager = getBusinessManagerForAccount(accountId)
-  if (!businessManager) {
+  const lookup = await lookupMetaTokenForAccount(accountId)
+  if (lookup.status === 'unknown-account') {
     return { ok: false, response: jsonError(`unknown accountId: ${accountId}`, 400) }
   }
-  const token = process.env[businessManager.tokenEnvVar]
-  if (!token || token.length === 0) {
-    return {
-      ok: false,
-      response: jsonError(
-        `Meta token not configured for account "${accountId}" (expected ${businessManager.tokenEnvVar})`,
-        503,
-      ),
-    }
+  if (lookup.status === 'no-token') {
+    return { ok: false, response: jsonError(`Meta token not configured for account "${accountId}"`, NO_TOKEN_STATUS) }
   }
-  return { ok: true, token, accountId, brandId: businessManager.brandId }
+  return { ok: true, token: lookup.token, accountId, brandId: lookup.brandId }
 }

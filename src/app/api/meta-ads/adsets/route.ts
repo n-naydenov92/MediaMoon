@@ -10,7 +10,7 @@ function parseStatus(raw: string | null): StatusFilter {
 }
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
-  const resolved = resolveAccountTokenFromRequest(request)
+  const resolved = await resolveAccountTokenFromRequest(request)
   if (!resolved.ok) return resolved.response
 
   const campaignId = request.nextUrl.searchParams.get('campaignId')

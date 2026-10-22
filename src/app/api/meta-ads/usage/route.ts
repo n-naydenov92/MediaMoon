@@ -7,7 +7,7 @@ import { resolveAccountTokenFromRequest } from '@/lib/meta/resolveBrandToken'
 // Debug view of Meta's rate-limit counters for one ad account. Requested only when someone
 // opens the limits dialog or presses its Refresh — never polled.
 export async function GET(request: NextRequest): Promise<NextResponse> {
-  const resolved = resolveAccountTokenFromRequest(request)
+  const resolved = await resolveAccountTokenFromRequest(request)
   if (!resolved.ok) return resolved.response
 
   try {

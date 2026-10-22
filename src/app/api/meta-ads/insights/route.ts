@@ -12,8 +12,8 @@ const DEFAULT_DATE_PRESET = 'today'
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const accountIdParam = request.nextUrl.searchParams.get('accountId')
   const resolved = accountIdParam
-    ? resolveAccountTokenFromRequest(request)
-    : resolveBrandTokenFromRequest(request)
+    ? await resolveAccountTokenFromRequest(request)
+    : await resolveBrandTokenFromRequest(request)
   if (!resolved.ok) return resolved.response
 
   const adId = request.nextUrl.searchParams.get('adId')

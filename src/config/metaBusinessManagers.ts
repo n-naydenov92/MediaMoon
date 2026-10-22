@@ -1,3 +1,4 @@
+import { normalizeAccountId } from '@/lib/meta/accountId'
 import type { BrandId } from './brands'
 
 export interface MetaBusinessManager {
@@ -53,10 +54,6 @@ export const BUSINESS_MANAGERS: readonly MetaBusinessManager[] = [
   },
 ]
 
-export function normalizeAccountId(id: string): string {
-  return id.startsWith('act_') ? id : `act_${id}`
-}
-
 export function getBusinessManagerForAccount(accountId: string): MetaBusinessManager | null {
   const normalized = normalizeAccountId(accountId)
   return BUSINESS_MANAGERS.find((bm) => bm.accountIds.includes(normalized)) ?? null
@@ -70,18 +67,6 @@ export function sameBusinessManager(a: string, b: string): boolean {
   const y = getBusinessManagerForAccount(b)
   return x !== null && y !== null && x.id === y.id
 }
-
-// Canonical user-facing reason a library video can't be used for the chosen account.
-// Lives here because it states the same BM rule as sameBusinessManager; shared by the
-// client (library badge / added-row error) and the publish API's defensive 422.
-export const CROSS_BM_VIDEO_REASON = 'This video is from a different Business Manager — it can’t be used '
-  + 'with the selected account. Upload the video file directly, or pick an account in the same '
-  + 'Business Manager.'
-
-// Short badge label for a cross-BM video, shown on the library card and the added-row.
-// Kept to a single word; the full reason lives in the tooltip.
-// Single source so the wording stays identical everywhere.
-export const CROSS_BM_BADGE = 'Unavailable'
 
 export function getBusinessManagersForBrand(brandId: BrandId): readonly MetaBusinessManager[] {
   return BUSINESS_MANAGERS.filter((bm) => bm.brandId === brandId)

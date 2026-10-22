@@ -1,5 +1,4 @@
-import { isBrandId, type BrandId } from '@/config/brands'
-import { getAdAccountIds, BRAND_MARKET_AD_ACCOUNTS } from '@/config/adAccounts'
+import { accountIdsForMarket, getBrandContext, type BrandContext } from '@/lib/tenancy'
 import { isValidMarket } from '@/lib/markets'
 import {
   CRITERIA_QUERY_KEYS,
@@ -7,15 +6,12 @@ import {
   type TopCriteria,
 } from '@/lib/meta/aggregate'
 
-export function parseBrandId(value: string | null): BrandId | null {
-  if (!value || !isBrandId(value)) {
-    return null
-  }
-  return value
+export async function findBrandFromQuery(value: string | null): Promise<BrandContext | null> {
+  return value ? getBrandContext(value) : null
 }
 
 export function resolveTargetAccounts(
-  brandId: BrandId,
+  ctx: BrandContext,
   marketRaw: string | null,
   accountRaw: string | null,
 ): readonly string[] {
@@ -23,11 +19,9 @@ export function resolveTargetAccounts(
     return [accountRaw]
   }
   if (marketRaw && isValidMarket(marketRaw)) {
-    return getAdAccountIds(brandId, marketRaw)
+    return accountIdsForMarket(ctx.metaAccounts, marketRaw)
   }
-  return Object.values(BRAND_MARKET_AD_ACCOUNTS[brandId] ?? {})
-    .flat()
-    .filter((id): id is string => Boolean(id))
+  return ctx.metaAccounts.map((account) => account.id)
 }
 
 export function parseCriteriaFromQuery(

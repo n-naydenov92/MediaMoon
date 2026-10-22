@@ -6,10 +6,10 @@ import { resolveBrandTokenFromRequest } from '@/lib/meta/resolveBrandToken'
 import { adsVolumeAccountId, parsePageIds } from './helpers'
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
-  const resolved = resolveBrandTokenFromRequest(request)
+  const resolved = await resolveBrandTokenFromRequest(request)
   if (!resolved.ok) return resolved.response
 
-  const accountId = adsVolumeAccountId(resolved.brandId)
+  const accountId = await adsVolumeAccountId(resolved.brandId)
   if (!accountId) {
     return NextResponse.json({ error: `No ad account configured for brand "${resolved.brandId}"` }, { status: 503 })
   }

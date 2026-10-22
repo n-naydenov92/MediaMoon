@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { getConfiguredBusinessManagersForBrand, getMetaTokenForAccount } from '@/config/metaTokens'
+import { getMetaConnectionsForBrand, getMetaTokenForAccount } from '@/lib/tenancy'
 import {
   fetchAdsWithInsights,
   type AdAccount,
@@ -10,7 +10,7 @@ import {
 import { parseDateRangeFromQuery, toMetaInsightsParams } from '@/lib/meta/dateRange'
 import { convertToEur } from '@/lib/meta/fx'
 import { fetchAllAccounts } from '../summary/accountFetching'
-import { parseBrandId, resolveTargetAccounts } from '../summary/queryParsing'
+import { findBrandFromQuery, resolveTargetAccounts } from '../summary/queryParsing'
 import { metaErrorResponse } from '@/lib/meta/metaErrorResponse'
 
 const AD_INSIGHTS_PAGE_SIZE = 200
@@ -79,13 +79,14 @@ const META_NATIVE_FIELDS: ReadonlySet<string> = new Set(['spend', 'impressions']
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const params = request.nextUrl.searchParams
 
-  const brandId = parseBrandId(params.get('brandId'))
-  if (!brandId) {
+  const ctx = await findBrandFromQuery(params.get('brandId'))
+  if (!ctx) {
     return NextResponse.json(
       { error: 'brandId query param is required or unknown' },
       { status: 400 },
     )
   }
+  const brandId = ctx.brand.id
 
   const dateSelection = parseDateRangeFromQuery(params)
   const dateParams = toMetaInsightsParams(dateSelection)
@@ -94,12 +95,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   const offset = parseOffset(params.get('offset'))
   const limit = parseLimit(params.get('limit'))
 
-  const accountIds = resolveTargetAccounts(brandId, params.get('market'), params.get('account'))
+  const accountIds = resolveTargetAccounts(ctx, params.get('market'), params.get('account'))
   if (accountIds.length === 0) {
     return NextResponse.json(emptyResponse())
   }
 
-  if (getConfiguredBusinessManagersForBrand(brandId).length === 0) {
+  if ((await getMetaConnectionsForBrand(brandId)).length === 0) {
     return NextResponse.json(
       { error: `Meta token not configured for brand "${brandId}"` },
       { status: NO_TOKEN_STATUS },
@@ -118,7 +119,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     const perAccount = await Promise.all(
       targets.map(async (account) => {
-        const token = getMetaTokenForAccount(account.id)
+        const token = await getMetaTokenForAccount(account.id)
         if (!token) {
           return null
         }

@@ -1,4 +1,5 @@
-import { CROSS_BM_BADGE, CROSS_BM_VIDEO_REASON, sameBusinessManager } from '@/config/metaBusinessManagers'
+import { sameBusinessManager } from '@/config/metaBusinessManagers'
+import { CROSS_BM_BADGE, CROSS_BM_VIDEO_REASON } from '@/lib/meta/crossBmMessages'
 import type { AssetCreative } from './assetCreative'
 
 const NO_ACCOUNT_REASON = 'Select an account first (Step 1) to add creatives.'

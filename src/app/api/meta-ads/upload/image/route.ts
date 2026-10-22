@@ -10,7 +10,7 @@ export const maxDuration = 60
 const MAX_IMAGE_BYTES = Math.floor(3.5 * 1024 * 1024)
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  const resolved = resolveAccountTokenFromRequest(request)
+  const resolved = await resolveAccountTokenFromRequest(request)
   if (!resolved.ok) return resolved.response
 
   const form = await request.formData()
