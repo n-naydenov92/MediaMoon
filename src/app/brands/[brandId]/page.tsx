@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { findBrandById } from '@/config/brands'
+import { getBrandContext } from '@/lib/tenancy'
 import BrandDashboard from '@/Section/dashboard/BrandDashboard/BrandDashboard'
 
 interface Props {
@@ -8,9 +8,9 @@ interface Props {
 
 export default async function BrandIndexPage({ params }: Props): Promise<JSX.Element> {
   const { brandId } = await params
-  const brand = findBrandById(brandId)
-  if (!brand) {
+  const ctx = await getBrandContext(brandId)
+  if (!ctx) {
     redirect('/brands')
   }
-  return <BrandDashboard brand={brand} />
+  return <BrandDashboard brand={ctx.brand} />
 }

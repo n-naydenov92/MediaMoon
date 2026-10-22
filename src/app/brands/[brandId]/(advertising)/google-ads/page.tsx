@@ -1,4 +1,4 @@
-import { findBrandById } from '@/config/brands'
+import { getBrandContext } from '@/lib/tenancy'
 import ComingSoonPanel from '@/components/layout/ComingSoonPanel/ComingSoonPanel'
 
 interface Props {
@@ -7,6 +7,6 @@ interface Props {
 
 export default async function GoogleAdsPage({ params }: Props): Promise<JSX.Element> {
   const { brandId } = await params
-  const brand = findBrandById(brandId)
-  return <ComingSoonPanel moduleLabel="Google Ads" brandLabel={brand?.label} />
+  const ctx = await getBrandContext(brandId)
+  return <ComingSoonPanel moduleLabel="Google Ads" brandLabel={ctx?.brand.label} />
 }

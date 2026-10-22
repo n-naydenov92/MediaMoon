@@ -1,5 +1,5 @@
 import Box from '@mui/material/Box'
-import { findBrandById } from '@/config/brands'
+import { getBrandContext } from '@/lib/tenancy'
 import ComingSoonPanel from '@/components/layout/ComingSoonPanel/ComingSoonPanel'
 import CreativePreviewProvider from './components/shared/CreativePreview/CreativePreviewProvider/CreativePreviewProvider'
 import styles from './layout.module.css'
@@ -11,8 +11,7 @@ interface Props {
 
 export default async function MetaAdsLayout({ params, children }: Props): Promise<JSX.Element> {
   const { brandId } = await params
-  const brand = findBrandById(brandId)
-  if (!brand) {
+  if (!(await getBrandContext(brandId))) {
     return <ComingSoonPanel moduleLabel="Meta Ads" brandLabel={brandId} />
   }
   return (

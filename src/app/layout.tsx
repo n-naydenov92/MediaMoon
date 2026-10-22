@@ -5,7 +5,7 @@ import { DM_Sans, Syne } from 'next/font/google'
 import { ThemeModeProvider } from '@/styles/ThemeModeProvider'
 import AppShell from '@/components/layout/AppShell/AppShell'
 import { getCurrentUserRole } from '@/lib/currentUserRole'
-import { BRAND_REGISTRY } from '@/config/brands'
+import { listBrands } from '@/lib/tenancy'
 import { getAccessibleBrands } from '@/config/brandAccess'
 import '@/styles/globals.css'
 
@@ -38,7 +38,7 @@ interface Props {
 
 export default async function RootLayout({ children }: Props): Promise<JSX.Element> {
   const role = await getCurrentUserRole()
-  const brands = role ? getAccessibleBrands(role, BRAND_REGISTRY) : []
+  const brands = role ? getAccessibleBrands(role, await listBrands()) : []
 
   return (
     <ClerkProvider>

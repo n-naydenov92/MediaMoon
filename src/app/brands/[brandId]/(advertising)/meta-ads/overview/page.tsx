@@ -1,4 +1,4 @@
-import { findBrandById } from '@/config/brands'
+import { getBrandContext } from '@/lib/tenancy'
 import OverviewTab from '../components/overview/OverviewTab/OverviewTab'
 
 interface Props {
@@ -7,9 +7,9 @@ interface Props {
 
 export default async function OverviewPage({ params }: Props): Promise<JSX.Element | null> {
   const { brandId } = await params
-  const brand = findBrandById(brandId)
-  if (!brand) {
+  const ctx = await getBrandContext(brandId)
+  if (!ctx) {
     return null
   }
-  return <OverviewTab brandId={brand.id} />
+  return <OverviewTab brandId={ctx.brand.id} />
 }

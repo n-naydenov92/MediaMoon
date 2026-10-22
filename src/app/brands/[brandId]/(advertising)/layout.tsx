@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import type { ReactNode } from 'react'
-import { findBrandById } from '@/config/brands'
+import { getBrandContext } from '@/lib/tenancy'
 import { findModuleById } from '@/config/modules'
 import { getCurrentUserRole } from '@/lib/currentUserRole'
 
@@ -18,10 +18,14 @@ export default async function AdvertisingGroupLayout({
 }: Props): Promise<JSX.Element> {
   const { brandId } = await params
 
-  if (!findBrandById(brandId)) redirect('/brands')
+  if (!(await getBrandContext(brandId))) {
+    redirect('/brands')
+  }
 
   const role = await getCurrentUserRole()
-  if (!role) redirect('/unauthorized')
+  if (!role) {
+    redirect('/unauthorized')
+  }
 
   const advertising = findModuleById('advertising')
   if (!advertising || !advertising.roles.includes(role)) {

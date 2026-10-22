@@ -1,4 +1,4 @@
-import { findBrandById } from '@/config/brands'
+import { getBrandContext } from '@/lib/tenancy'
 import PerformanceTab from '../components/performance/PerformanceTab/PerformanceTab'
 
 interface Props {
@@ -7,9 +7,9 @@ interface Props {
 
 export default async function AdsPerformancePage({ params }: Props): Promise<JSX.Element | null> {
   const { brandId } = await params
-  const brand = findBrandById(brandId)
-  if (!brand) {
+  const ctx = await getBrandContext(brandId)
+  if (!ctx) {
     return null
   }
-  return <PerformanceTab brandId={brand.id} />
+  return <PerformanceTab brandId={ctx.brand.id} />
 }
