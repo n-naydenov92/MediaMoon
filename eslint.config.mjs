@@ -24,6 +24,29 @@ const noRestrictedSyntax = [
   },
 ]
 
+// Customer data is read only through the tenancy layer (ADR 0002), so a new customer
+// never needs a code change. Type imports stay allowed until the unions open up (A3).
+const TENANT_DATA_MODULES = [
+  'brands',
+  'adAccounts',
+  'metaBusinessManagers',
+  'googleAdsAccounts',
+  'analyticsProviders',
+  'klaviyoProviders',
+  'commerceProviders',
+]
+
+const noTenantDataImports = [
+  'error',
+  {
+    paths: TENANT_DATA_MODULES.map((name) => ({
+      name: `@/config/${name}`,
+      allowTypeImports: true,
+      message: 'Read customer data through @/lib/tenancy (ADR 0002). Only type imports are allowed.',
+    })),
+  },
+]
+
 export default [
   plugins.stylistic,
   plugins.importX,
@@ -108,6 +131,22 @@ export default [
     files: ['**/meta-ads/**/*.{ts,tsx}'],
     rules: {
       'no-restricted-syntax': 'off',
+    },
+  },
+  {
+    files: ['**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': noTenantDataImports,
+    },
+  },
+  {
+    // The config source is the tenancy layer's one runtime reader of these modules.
+    // The middleware is a temporary exception: it runs on the Edge, where the
+    // database-backed layer won't be available, until its checks move into the
+    // Node proxy (B10).
+    files: ['src/lib/tenancy/source/**/*.ts', 'src/middleware.ts'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': 'off',
     },
   },
   {
