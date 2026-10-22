@@ -1,17 +1,10 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { tryExtractVideoThumbnail } from '../launchPipeline/imageProcessing'
-import {
-  publishAd,
-  reuploadCreativeFromSource,
-  uploadImageSingleShot,
-  uploadVideoChunked,
-  waitForMetaThumbnail,
-  type MediaRef,
-  type PublishPayload,
-} from '../launchPipeline/mediaUpload'
+import { publishAd, type PublishPayload } from '../launchPipeline/mediaUpload'
+import { createSharedUploads } from '../launchPipeline/sharedUploads'
 import type { AssetCreative } from './assetCreative'
+import { mediaKey, mediaUploadTask, type JobSource } from './jobMedia'
 
 export type JobStatus = 'queued' | 'uploading' | 'publishing' | 'done' | 'failed'
 
@@ -77,10 +70,6 @@ export interface UseLaunchQueueResult {
   readonly recordAdSet: (record: AdSetRecord) => void
 }
 
-type JobSource =
-  | { readonly kind: 'file'; readonly file: File }
-  | { readonly kind: 'asset'; readonly asset: AssetCreative }
-
 interface PendingJob {
   readonly job: AdJob
   readonly source: JobSource
@@ -92,6 +81,7 @@ const ACTIVE_STATUSES = new Set<JobStatus>(['uploading', 'publishing'])
 
 export function useLaunchQueue(): UseLaunchQueueResult {
   const [jobs, setJobs] = useState<readonly LaunchJob[]>([])
+  const [sharedUploads] = useState(createSharedUploads)
   const pendingRef = useRef<Map<string, PendingJob>>(new Map())
   const startedRef = useRef<Set<string>>(new Set())
   const controllersRef = useRef<Map<string, AbortController>>(new Map())
@@ -107,33 +97,16 @@ export function useLaunchQueue(): UseLaunchQueueResult {
     const { signal } = controller
     try {
       updateJob(job.id, { status: 'uploading', progress: 0, waitingForMeta: false })
-      let mediaRef: MediaRef
-      if (source.kind === 'asset') {
-        updateJob(job.id, { progress: 50 })
-        mediaRef = await reuploadCreativeFromSource(source.asset, payload.accountId, signal)
-      } else if (job.mediaType === 'video') {
-        const { file } = source
-        const thumbnailFile = await tryExtractVideoThumbnail(file, signal)
-        const [videoId, browserThumbnailHash] = await Promise.all([
-          uploadVideoChunked(file, payload.accountId, (pct: number) => {
-            updateJob(job.id, { progress: pct * 0.95 })
-          }, signal),
-          thumbnailFile
-            ? uploadImageSingleShot(thumbnailFile, payload.accountId, () => {}, signal)
-            : Promise.resolve(null),
-        ])
-        if (!browserThumbnailHash) {
-          updateJob(job.id, { waitingForMeta: true })
-        }
-        const thumbnailHash = browserThumbnailHash ?? await waitForMetaThumbnail(videoId, payload.accountId, signal)
-        mediaRef = { videoId, thumbnailHash }
-      } else {
-        mediaRef = {
-          imageHash: await uploadImageSingleShot(source.file, payload.accountId, (pct: number) => {
-            updateJob(job.id, { progress: pct })
-          }, signal),
-        }
-      }
+      const mediaRef = await sharedUploads.join({
+        key: mediaKey(source, payload.accountId),
+        jobId: job.id,
+        task: mediaUploadTask(source, job.mediaType, payload.accountId),
+        listener: {
+          onProgress: (pct: number) => updateJob(job.id, { progress: pct }),
+          onWaitingForMeta: () => updateJob(job.id, { waitingForMeta: true }),
+        },
+        signal,
+      })
       updateJob(job.id, { status: 'publishing', progress: 100, waitingForMeta: false })
       const { adId } = await publishAd(payload, mediaRef, signal)
       updateJob(job.id, { status: 'done', adId })
@@ -147,7 +120,7 @@ export function useLaunchQueue(): UseLaunchQueueResult {
     } finally {
       controllersRef.current.delete(job.id)
     }
-  }, [updateJob])
+  }, [sharedUploads, updateJob])
 
   useEffect(() => {
     const activeCount = jobs.filter((j) => ACTIVE_STATUSES.has(j.status)).length
