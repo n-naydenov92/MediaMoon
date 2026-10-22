@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { BrandId } from '@/config/brands'
+import type { BrandId } from '@/types'
 import { ALL_MARKETS, type MarketSelection } from '@/lib/markets'
 import type { DateRangeSelection } from '@/lib/meta/dateRange'
 import { stringifyFilterRules, type FilterRule } from '@/lib/meta/filterRules'

@@ -1,7 +1,6 @@
-import type { BrandId } from '@/config/brands'
-import type { Market } from '@/types'
+import type { BrandId } from '@/types'
 import type { DateRangeSelection } from '@/lib/meta/dateRange'
-import { ALL_MARKETS } from '@/lib/markets'
+import { ALL_MARKETS, type MarketSelection } from '@/lib/markets'
 
 export type LeaderboardSlice =
   | 'top-all'
@@ -13,7 +12,7 @@ export type LeaderboardSlice =
 export function buildPerformanceHref(
   brandId: BrandId,
   dateSelection: DateRangeSelection,
-  market: Market | typeof ALL_MARKETS,
+  market: MarketSelection,
   slice: LeaderboardSlice,
 ): string {
   const params = new URLSearchParams({ slice })

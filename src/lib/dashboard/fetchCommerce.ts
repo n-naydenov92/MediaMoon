@@ -1,4 +1,4 @@
-import type { BrandId } from '@/config/brands'
+import type { BrandId } from '@/types'
 import { rangeForCommerce } from '@/lib/commerce/rangeInTimezone'
 import { resolveCommerceConfig } from '@/lib/tenancy'
 import * as ShopifyGateway from '@/lib/gateways/ShopifyGateway'

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import type { BrandId } from '@/config/brands'
+import type { BrandId } from '@/types'
 import type { MarketSelection } from '@/lib/markets'
 import type { DateRangeSelection } from '@/lib/meta/dateRange'
 import { createSessionCache } from '@/lib/sessionCache'

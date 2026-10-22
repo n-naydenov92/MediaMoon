@@ -1,5 +1,11 @@
 import 'server-only'
-import { readBrand, readBrands, readGoogleAdsCustomers, readMetaAccounts } from './source/configSource'
+import {
+  readBrand,
+  readBrands,
+  readGoogleAdsCustomers,
+  readMarketNames,
+  readMetaAccounts,
+} from './source/configSource'
 import type { Brand, BrandContext } from './types'
 
 // The single read path for customer data (ADR 0002). It is backed by the config
@@ -15,6 +21,7 @@ export async function getBrandContext(brandId: string): Promise<BrandContext | n
   }
   return {
     brand,
+    marketNames: readMarketNames(brand),
     metaAccounts: readMetaAccounts(brand),
     googleAdsCustomers: readGoogleAdsCustomers(brand),
   }

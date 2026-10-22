@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, type Dispatch, type SetStateAction } from 'react'
-import type { BrandId } from '@/config/brands'
+import type { BrandId } from '@/types'
 import {
   DEFAULT_COLUMN_IDS,
   parseColumnIds,

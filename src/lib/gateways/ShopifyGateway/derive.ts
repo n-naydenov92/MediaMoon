@@ -1,4 +1,4 @@
-import type { MarketSelection } from '@/lib/markets'
+import { ALL_MARKETS, type MarketSelection } from '@/lib/markets'
 import type { DashboardTopProduct } from '@/types/dashboard'
 import { orderRevenue, parseAmount } from './parse'
 import type { ShopifyOrder } from './types'
@@ -10,7 +10,7 @@ export function filterOrdersByMarket(
   orders: readonly ShopifyOrder[],
   market: MarketSelection,
 ): readonly ShopifyOrder[] {
-  if (market === 'ALL') {
+  if (market === ALL_MARKETS) {
     return orders
   }
   return orders.filter((o) => o.billing_address?.country_code === market)

@@ -1,8 +1,8 @@
-import type { MarketSelection } from '@/lib/markets'
+import { ALL_MARKETS, type MarketSelection } from '@/lib/markets'
 import type { FilterExpression } from './types'
 
 export function buildCountryFilter(market: MarketSelection): FilterExpression | undefined {
-  if (market === 'ALL') {
+  if (market === ALL_MARKETS) {
     return undefined
   }
   return {

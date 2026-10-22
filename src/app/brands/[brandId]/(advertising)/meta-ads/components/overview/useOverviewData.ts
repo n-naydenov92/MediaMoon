@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { Market } from '@/types'
-import type { BrandId } from '@/config/brands'
+import type { BrandId } from '@/types'
 import type {
   AccountSummary,
   AdLeaderboardEntry,
@@ -9,7 +8,7 @@ import type {
   TopCriteria,
 } from '@/lib/meta/aggregate'
 import type { DateRangeSelection } from '@/lib/meta/dateRange'
-import { ALL_MARKETS } from '@/lib/markets'
+import { ALL_MARKETS, type MarketSelection } from '@/lib/markets'
 import { clearSessionCaches, createSessionCache } from '@/lib/sessionCache'
 
 const NO_TOKEN_STATUS = 503
@@ -42,7 +41,7 @@ export interface OverviewControls {
 
 interface OverviewQuery {
   readonly brandId: BrandId
-  readonly market: Market | typeof ALL_MARKETS
+  readonly market: MarketSelection
   readonly dateSelection: DateRangeSelection
 }
 

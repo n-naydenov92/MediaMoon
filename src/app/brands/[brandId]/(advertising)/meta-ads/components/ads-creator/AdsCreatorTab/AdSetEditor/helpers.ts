@@ -6,7 +6,7 @@ import type {
   Gender,
   PlacementSelection,
 } from '@/lib/gateways/MetaAdsGateway'
-import type { Market } from '@/types'
+import type { MarketCode } from '@/types'
 import type { DraftState } from './useAdSetDraft'
 import { goalRequiresCustomEvent } from './ConversionSection/options'
 
@@ -71,7 +71,7 @@ function genderToken(gender: Gender): string {
 }
 
 export interface AdSetNameInput {
-  readonly accountMarket: Market | null
+  readonly accountMarket: MarketCode | null
   readonly countries: readonly string[]
   readonly ageMin: number
   readonly ageMax: number

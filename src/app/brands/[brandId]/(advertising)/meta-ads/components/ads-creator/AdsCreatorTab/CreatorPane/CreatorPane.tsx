@@ -2,7 +2,7 @@
 
 import { memo, useCallback, useDeferredValue, useMemo, useState } from 'react'
 import Box from '@mui/material/Box'
-import type { BrandId } from '@/config/brands'
+import type { BrandId } from '@/types'
 import type { MarketSelection } from '@/lib/markets'
 import type { StatusFilter } from '@/lib/gateways/MetaAdsGateway'
 import type { AssetCreative } from '../assetCreative'

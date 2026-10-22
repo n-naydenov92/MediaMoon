@@ -1,4 +1,4 @@
-import type { BrandId } from '@/config/brands'
+import type { BrandId } from '@/types'
 import {
   averageDailyBounceRate,
   averageDailyConversionRate,

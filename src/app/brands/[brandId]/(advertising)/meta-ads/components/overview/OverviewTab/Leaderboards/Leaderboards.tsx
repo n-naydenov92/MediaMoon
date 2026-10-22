@@ -1,8 +1,7 @@
 import Box from '@mui/material/Box'
-import type { BrandId } from '@/config/brands'
-import type { Market } from '@/types'
+import type { BrandId } from '@/types'
 import type { DateRangeSelection } from '@/lib/meta/dateRange'
-import { ALL_MARKETS } from '@/lib/markets'
+import type { MarketSelection } from '@/lib/markets'
 import { formatEur, formatRoas } from '@/lib/meta/fx'
 import LeaderboardCard from '../../../shared/LeaderboardCard/LeaderboardCard'
 import { buildPerformanceHref, type LeaderboardSlice } from '../../performanceHref'
@@ -13,7 +12,7 @@ interface Props {
   readonly summary: OverviewSummary
   readonly brandId: BrandId
   readonly dateSelection: DateRangeSelection
-  readonly market: Market | typeof ALL_MARKETS
+  readonly market: MarketSelection
 }
 
 export default function Leaderboards({

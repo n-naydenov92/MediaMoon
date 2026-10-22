@@ -4,18 +4,16 @@ import { memo } from 'react'
 import Box from '@mui/material/Box'
 import CheckIcon from '@mui/icons-material/Check'
 import type { MarketSelection } from '@/lib/markets'
-import { MARKET_LABELS } from '@/lib/marketLabels'
 import styles from '../MarketSwitcher.module.css'
 
 interface Props {
   readonly value: MarketSelection
+  readonly label: string
   readonly isSelected: boolean
   readonly onSelect: (value: MarketSelection) => void
 }
 
-export default memo(function MarketMenuItem({ value, isSelected, onSelect }: Props): JSX.Element {
-  const label = MARKET_LABELS[value]
-
+export default memo(function MarketMenuItem({ value, label, isSelected, onSelect }: Props): JSX.Element {
   return (
     <Box component="li">
       <Box

@@ -1,5 +1,5 @@
 import { normalizeAccountId } from '@/lib/meta/accountId'
-import type { BrandId } from './brands'
+import type { BrandId } from '@/types'
 
 export interface MetaBusinessManager {
   readonly id: string

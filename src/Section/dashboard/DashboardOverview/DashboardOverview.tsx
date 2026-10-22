@@ -8,7 +8,6 @@ import Skeleton from '@mui/material/Skeleton'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import PageHeader from '@/components/layout/PageHeader/PageHeader'
-import type { BrandId } from '@/config/brands'
 import { useBrandShellContext } from '@/contexts/brandShell/useBrandShellContext'
 import {
   COMPARISON_LABELS,
@@ -17,7 +16,7 @@ import {
   type DatePreset,
 } from '@/lib/meta/dateRange'
 import { clearSessionCaches, createSessionCache } from '@/lib/sessionCache'
-import type { BrandConfig } from '@/types'
+import type { BrandConfig, BrandId } from '@/types'
 import type { DashboardSummary } from '@/types/dashboard'
 import DashboardAnalytics from './DashboardAnalytics/DashboardAnalytics'
 import DashboardChannelsBreakdown from './DashboardChannelsBreakdown/DashboardChannelsBreakdown'

@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from 'react'
 import Stack from '@mui/material/Stack'
-import type { BrandId } from '@/config/brands'
+import type { BrandId } from '@/types'
 import { useBrandShellContext } from '@/contexts/brandShell/useBrandShellContext'
 import type { CustomRange, DatePreset } from '@/lib/meta/dateRange'
 import Notice from '../../Notice/Notice'

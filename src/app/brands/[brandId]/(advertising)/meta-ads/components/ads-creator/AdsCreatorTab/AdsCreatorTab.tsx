@@ -2,7 +2,7 @@
 
 import { useCallback, useDeferredValue, useEffect, useMemo } from 'react'
 import Box from '@mui/material/Box'
-import type { BrandId } from '@/config/brands'
+import type { BrandId } from '@/types'
 import { useBrandShellContext } from '@/contexts/brandShell/useBrandShellContext'
 import { accountIdsForSelection } from '@/lib/tenancy/selection'
 import Notice from '../../Notice/Notice'

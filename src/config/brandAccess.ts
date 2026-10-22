@@ -1,5 +1,5 @@
-import type { BrandConfig, UserRole } from '@/types'
-import { isBrandId, type BrandId } from './brands'
+import type { BrandConfig, BrandId, UserRole } from '@/types'
+import { isBrandId } from './brands'
 
 /**
  * Per-brand access control. A role may see a brand only when BOTH sides agree:

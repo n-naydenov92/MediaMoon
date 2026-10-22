@@ -25,9 +25,11 @@ const noRestrictedSyntax = [
 ]
 
 // Customer data is read only through the tenancy layer (ADR 0002), so a new customer
-// never needs a code change. Type imports stay allowed until the unions open up (A3).
+// never needs a code change. Type imports stay allowed: the provider config types
+// still live next to their data until the database replaces these modules (A6).
 const TENANT_DATA_MODULES = [
   'brands',
+  'markets',
   'adAccounts',
   'metaBusinessManagers',
   'googleAdsAccounts',

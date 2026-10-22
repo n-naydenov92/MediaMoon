@@ -1,6 +1,4 @@
-import type { BrandConfig } from '@/types'
-
-export type BrandId = 'stoitchkov' | 'thegreenbear' | 'sapphire' | 'bubullincas' | 'monitrade'
+import type { BrandConfig, BrandId } from '@/types'
 
 export const BRAND_REGISTRY: readonly (BrandConfig & { readonly id: BrandId })[] = [
   {

@@ -3,7 +3,7 @@
 import { useCallback, useMemo } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import Box from '@mui/material/Box'
-import type { BrandId } from '@/config/brands'
+import type { BrandId } from '@/types'
 import { useBrandShellContext } from '@/contexts/brandShell/useBrandShellContext'
 import {
   COMPARISON_LABELS,

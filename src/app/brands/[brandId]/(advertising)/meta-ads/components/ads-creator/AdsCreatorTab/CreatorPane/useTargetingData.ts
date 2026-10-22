@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useMemo, useState } from 'react'
-import type { BrandId } from '@/config/brands'
+import type { BrandId } from '@/types'
 import type {
   AdAccount,
   AdSet,

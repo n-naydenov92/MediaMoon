@@ -1,12 +1,12 @@
 import { ALL_MARKETS, type MarketSelection } from '@/lib/markets'
 import { normalizeAccountId } from '@/lib/meta/accountId'
-import type { Market } from '@/types'
+import type { MarketCode } from '@/types'
 import type { MarketScopedRef, MetaAccountRef } from './types'
 
 // Pure and client-safe: the brand shell hands these refs to the browser, so the
 // client imports this file directly, never through the server-only barrel.
 
-export function accountIdsForMarket(refs: readonly MarketScopedRef[], market: Market): readonly string[] {
+export function accountIdsForMarket(refs: readonly MarketScopedRef[], market: MarketCode): readonly string[] {
   return refs.filter((ref) => ref.marketCode === market).map((ref) => ref.id)
 }
 

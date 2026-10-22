@@ -1,4 +1,4 @@
-import type { BrandId } from './brands'
+import type { BrandId } from '@/types'
 
 export type KlaviyoIntegrationName = 'WooCommerce' | 'Shopify'
 

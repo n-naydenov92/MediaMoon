@@ -18,9 +18,16 @@ export const ALL_ROLES: readonly UserRole[] = [
   'bubullincas',
 ] as const
 
-// ─── Markets ────────────────────────────────────────────────────────────────
+// ─── Brands & Markets ───────────────────────────────────────────────────────
+// Both are customer data (ADR 0002), so they are open strings, never fixed lists.
 
-export type Market = 'BG' | 'ES' | 'WORLD'
+export type BrandId = string
+
+// A market's code as stored with its brand, e.g. 'BG'. 'ALL' is reserved for the
+// all-markets selection and is never a market code.
+export type MarketCode = string
+
+export type MarketNames = Readonly<Record<MarketCode, string>>
 
 // ─── Module Registry ─────────────────────────────────────────────────────────
 
@@ -78,5 +85,5 @@ export interface BrandConfig {
   readonly emoji: string // '💪'
   readonly color: string // '#FF6B35'
   readonly description: string
-  readonly markets: readonly Market[]
+  readonly markets: readonly MarketCode[]
 }

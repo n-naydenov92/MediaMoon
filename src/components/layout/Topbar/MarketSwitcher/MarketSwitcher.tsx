@@ -2,28 +2,28 @@
 
 import { memo, useCallback, useId, useMemo, useRef, useState } from 'react'
 import Box from '@mui/material/Box'
-import { ALL_MARKETS, type MarketSelection } from '@/lib/markets'
-import { MARKET_LABELS } from '@/lib/marketLabels'
+import type { MarketSelection } from '@/lib/markets'
+import { ALL_MARKETS_LABEL, marketLabel } from '@/lib/marketLabels'
 import { useDismissPopover } from '@/components/layout/hooks/useDismissPopover'
 import { useBrandShellContext } from '@/contexts/brandShell/useBrandShellContext'
 import { useThemeMode } from '@/styles/useThemeMode'
 import MarketSwitcherTrigger from './MarketSwitcherTrigger/MarketSwitcherTrigger'
-import MarketMenu from './MarketMenu/MarketMenu'
+import MarketMenu, { type MarketOption } from './MarketMenu/MarketMenu'
 import styles from './MarketSwitcher.module.css'
 
 export default memo(function MarketSwitcher(): JSX.Element {
-  const { markets, selectedMarket, setSelectedMarket } = useBrandShellContext()
+  const { markets, marketNames, selectedMarket, setSelectedMarket } = useBrandShellContext()
   const { mode } = useThemeMode()
   const [isOpen, setIsOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement | null>(null)
   const menuId = useId()
 
-  const options = useMemo<readonly MarketSelection[]>(
-    () => [ALL_MARKETS, ...markets],
-    [markets],
+  const options = useMemo<readonly MarketOption[]>(
+    () => markets.map((code) => ({ value: code, label: marketLabel(code, marketNames) })),
+    [markets, marketNames],
   )
 
-  const triggerLabel = MARKET_LABELS[selectedMarket]
+  const triggerLabel = marketLabel(selectedMarket, marketNames)
 
   const dismiss = useCallback(() => {
     setIsOpen(false)
@@ -57,7 +57,7 @@ export default memo(function MarketSwitcher(): JSX.Element {
           options={options}
           selected={selectedMarket}
           onSelect={handleSelect}
-          ariaLabel={MARKET_LABELS.ALL}
+          ariaLabel={ALL_MARKETS_LABEL}
         />
       )}
     </Box>

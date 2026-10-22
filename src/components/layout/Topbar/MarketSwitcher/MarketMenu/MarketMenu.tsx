@@ -3,14 +3,20 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Box from '@mui/material/Box'
 import SearchIcon from '@mui/icons-material/Search'
+import type { MarketCode } from '@/types'
 import { ALL_MARKETS, type MarketSelection } from '@/lib/markets'
-import { MARKET_LABELS } from '@/lib/marketLabels'
+import { ALL_MARKETS_LABEL } from '@/lib/marketLabels'
 import MarketMenuItem from '../MarketMenuItem/MarketMenuItem'
 import styles from '../MarketSwitcher.module.css'
 
+export interface MarketOption {
+  readonly value: MarketCode
+  readonly label: string
+}
+
 interface Props {
   readonly id: string
-  readonly options: readonly MarketSelection[]
+  readonly options: readonly MarketOption[]
   readonly selected: MarketSelection
   readonly onSelect: (value: MarketSelection) => void
   readonly ariaLabel: string
@@ -35,19 +41,12 @@ export default memo(function MarketMenu({
   const trimmed = query.trim().toLowerCase()
   const hasQuery = trimmed.length > 0
 
-  const marketOptions = useMemo(
-    () => options.filter((value) => value !== ALL_MARKETS),
-    [options],
-  )
-
   const filteredMarkets = useMemo(() => {
     if (!hasQuery) {
-      return marketOptions
+      return options
     }
-    return marketOptions.filter((value) =>
-      MARKET_LABELS[value].toLowerCase().includes(trimmed),
-    )
-  }, [marketOptions, hasQuery, trimmed])
+    return options.filter((option) => option.label.toLowerCase().includes(trimmed))
+  }, [options, hasQuery, trimmed])
 
   const handleQueryChange = useCallback((event: React.ChangeEvent<HTMLInputElement>): void => {
     setQuery(event.target.value)
@@ -75,17 +74,19 @@ export default memo(function MarketMenu({
           <>
             <MarketMenuItem
               value={ALL_MARKETS}
+              label={ALL_MARKETS_LABEL}
               isSelected={selected === ALL_MARKETS}
               onSelect={onSelect}
             />
             <Box component="li" className={styles.separator} role="separator" />
           </>
         )}
-        {filteredMarkets.map((value) => (
+        {filteredMarkets.map((option) => (
           <MarketMenuItem
-            key={value}
-            value={value}
-            isSelected={selected === value}
+            key={option.value}
+            value={option.value}
+            label={option.label}
+            isSelected={selected === option.value}
             onSelect={onSelect}
           />
         ))}

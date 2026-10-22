@@ -1,4 +1,4 @@
-import type { BrandId } from '@/config/brands'
+import type { BrandId } from '@/types'
 import * as KlaviyoGateway from '@/lib/gateways/KlaviyoGateway'
 import { resolveKlaviyoConfig } from '@/lib/tenancy'
 import type { DateRangeSelection } from '@/lib/meta/dateRange'

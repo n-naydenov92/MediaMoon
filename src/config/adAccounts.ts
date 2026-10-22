@@ -1,7 +1,6 @@
-import type { Market } from '@/types'
-import type { BrandId } from './brands'
+import type { BrandId, MarketCode } from '@/types'
 
-type BrandMarketAccounts = Partial<Record<Market, readonly string[]>>
+type BrandMarketAccounts = Partial<Record<MarketCode, readonly string[]>>
 
 export const BRAND_MARKET_AD_ACCOUNTS: Record<BrandId, BrandMarketAccounts> = {
   stoitchkov: {

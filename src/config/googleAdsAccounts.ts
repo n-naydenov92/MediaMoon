@@ -1,7 +1,6 @@
-import type { Market } from '@/types'
-import type { BrandId } from './brands'
+import type { BrandId, MarketCode } from '@/types'
 
-type BrandMarketCustomers = Partial<Record<Market, readonly string[]>>
+type BrandMarketCustomers = Partial<Record<MarketCode, readonly string[]>>
 
 // 10-digit Google Ads customer IDs (no dashes), keyed per brand and market.
 // All three brand accounts sit under manager account 9240668043 (GOOGLE_ADS_LOGIN_CUSTOMER_ID).

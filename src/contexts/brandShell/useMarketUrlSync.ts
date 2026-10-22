@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
-import type { Market } from '@/types'
+import type { MarketCode } from '@/types'
 import {
   ALL_MARKETS,
   MARKET_PARAM,
@@ -29,7 +29,7 @@ function writeMarketToUrl(next: MarketSelection): void {
 }
 
 export function useMarketUrlSync(
-  markets: readonly Market[],
+  markets: readonly MarketCode[],
 ): readonly [MarketSelection, (next: MarketSelection) => void] {
   const searchParams = useSearchParams()
   const [selection, setSelection] = useState<MarketSelection>(() =>

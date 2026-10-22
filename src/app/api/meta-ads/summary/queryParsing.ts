@@ -1,5 +1,5 @@
-import { accountIdsForMarket, getBrandContext, type BrandContext } from '@/lib/tenancy'
-import { isValidMarket } from '@/lib/markets'
+import { accountIdsForSelection, getBrandContext, type BrandContext } from '@/lib/tenancy'
+import { ALL_MARKETS } from '@/lib/markets'
 import {
   CRITERIA_QUERY_KEYS,
   defaultCriteriaForPreset,
@@ -18,10 +18,8 @@ export function resolveTargetAccounts(
   if (accountRaw) {
     return [accountRaw]
   }
-  if (marketRaw && isValidMarket(marketRaw)) {
-    return accountIdsForMarket(ctx.metaAccounts, marketRaw)
-  }
-  return ctx.metaAccounts.map((account) => account.id)
+  // A market the brand doesn't have matches no account, rather than widening to all.
+  return accountIdsForSelection(ctx.metaAccounts, marketRaw || ALL_MARKETS)
 }
 
 export function parseCriteriaFromQuery(

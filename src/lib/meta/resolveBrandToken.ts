@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import type { BrandId } from '@/config/brands'
+import type { BrandId } from '@/types'
 import { getBrandContext, getMetaConnectionsForBrand, lookupMetaTokenForAccount } from '@/lib/tenancy'
 
 const NO_TOKEN_STATUS = 503

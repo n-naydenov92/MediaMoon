@@ -1,12 +1,11 @@
-import type { BrandId } from '@/config/brands'
-import type { BrandConfig, Market } from '@/types'
+import type { BrandConfig, BrandId, MarketCode, MarketNames } from '@/types'
 
 export type Brand = BrandConfig & { readonly id: BrandId }
 
 // An ad account (Meta) or customer (Google Ads) and the market it serves.
 export interface MarketScopedRef {
   readonly id: string
-  readonly marketCode: Market
+  readonly marketCode: MarketCode
 }
 
 export interface MetaAccountRef extends MarketScopedRef {
@@ -16,6 +15,7 @@ export interface MetaAccountRef extends MarketScopedRef {
 
 export interface BrandContext {
   readonly brand: Brand
+  readonly marketNames: MarketNames
   readonly metaAccounts: readonly MetaAccountRef[]
   readonly googleAdsCustomers: readonly MarketScopedRef[]
 }

@@ -1,5 +1,4 @@
-import type { BrandId } from '@/config/brands'
-import type { BrandConfig } from '@/types'
+import type { BrandConfig, BrandId } from '@/types'
 import DashboardOverview from '../DashboardOverview/DashboardOverview'
 
 interface Props {

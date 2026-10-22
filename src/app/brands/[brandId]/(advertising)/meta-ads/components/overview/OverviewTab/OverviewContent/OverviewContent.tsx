@@ -1,8 +1,7 @@
 import Box from '@mui/material/Box'
-import type { BrandId } from '@/config/brands'
-import type { Market } from '@/types'
+import type { BrandId } from '@/types'
 import type { DateRangeSelection } from '@/lib/meta/dateRange'
-import type { ALL_MARKETS } from '@/lib/markets'
+import type { MarketSelection } from '@/lib/markets'
 import Notice from '../../../Notice/Notice'
 import Section from '../../../shared/Section/Section'
 import AccountBreakdown from '../AccountBreakdown/AccountBreakdown'
@@ -15,7 +14,7 @@ interface Props {
   readonly summary: OverviewSummary
   readonly brandId: BrandId
   readonly dateSelection: DateRangeSelection
-  readonly market: Market | typeof ALL_MARKETS
+  readonly market: MarketSelection
 }
 
 export default function OverviewContent({

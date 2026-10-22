@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { Market } from '@/types'
-import type { BrandId } from '@/config/brands'
-import { ALL_MARKETS } from '@/lib/markets'
+import type { BrandId } from '@/types'
+import { ALL_MARKETS, type MarketSelection } from '@/lib/markets'
 import type { DateRangeSelection } from '@/lib/meta/dateRange'
 import type { AdRow } from './columnSpecs'
 import { stringifyFilterRules, type FilterRule } from '@/lib/meta/filterRules'
@@ -31,7 +30,7 @@ export interface AdsListControls {
 
 export interface AdsListQuery {
   readonly brandId: BrandId
-  readonly market: Market | typeof ALL_MARKETS
+  readonly market: MarketSelection
   readonly dateSelection: DateRangeSelection
   readonly filters: readonly FilterRule[]
   readonly sort: SortSpec
