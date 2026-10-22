@@ -57,6 +57,8 @@ A second read-only check on 2026-10-21 showed which limit each Ads Creator read 
 
 ## Future: multi-tenant projects (not built yet)
 
+The multi-tenant model itself (workspaces, brands, markets, encrypted per-workspace credentials) is decided in [ADR 0002](0002-multi-tenancy.md).
+
 When users create projects and connect their own Business Managers, add **Facebook Login for Business** with **business-integration system-user tokens**. These are non-expiring and delegated per client business through Meta's asset picker. Store them encrypted per project in Postgres.
 
 `resolveAccountTokenFromRequest` then becomes a database lookup. The gateway and the guard stay as they are, because limits are keyed by app and ad account, not by token.
