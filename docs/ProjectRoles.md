@@ -35,6 +35,11 @@ role sees nothing else.
 - The brand gate in middleware runs for **every** authenticated role (before the
   `creative_analyst` path branch), so private-brand access is denied uniformly — page redirect or
   API 403.
+- The brand gate checks **every** brand a request names — `?brandId=`, the `/brands/:id` path, and
+  the brand behind each `?accountId=` / `?account=` — and denies if any one is not accessible, so a
+  permitted `brandId` can't carry another brand's ad account through. An ad account no Business
+  Manager lists is refused for brand-restricted roles.
+- A signed-in user **without a role** gets 403 on every `/api` route.
 
 ## Where each concern lives
 
@@ -54,10 +59,10 @@ role sees nothing else.
 
 ## How a request is gated (flow)
 
-1. **`middleware.ts`** runs first: signs-in check → resolve role from `sessionClaims` →
-   brand-access gate for **every** role (page redirect or API 403, resolving the target brand
-   from `?brandId=`, or from `?accountId=` via `getBusinessManagerForAccount`) →
-   `creative_analyst` path lock → module-route role check.
+1. **`middleware.ts`** runs first: signs-in check → resolve role from `sessionClaims` → no role
+   on an API route → 403 → brand-access gate for **every** role (page redirect or API 403, checking
+   every brand from `?brandId=`, the path, and `?accountId=` / `?account=` via
+   `getBusinessManagerForAccount`) → `creative_analyst` path lock → module-route role check.
 2. **Server layouts/pages** re-validate on render: `[brandId]/layout.tsx` redirects if the role
    can't access the brand; `(advertising)/layout.tsx` redirects if the role lacks the module.
 3. **UI filtering** hides what the role can't reach: the brand switcher and `/brands` grid only

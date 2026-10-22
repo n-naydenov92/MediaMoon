@@ -17,6 +17,10 @@ const BRAND_ROLE_ALLOWLIST: Partial<Record<BrandId, readonly UserRole[]>> = {
   bubullincas: ['admin', 'bubullincas'],
 }
 
+export function isBrandRestrictedRole(role: UserRole): boolean {
+  return ROLE_BRAND_ALLOWLIST[role] !== undefined
+}
+
 export function canRoleAccessBrand(role: UserRole, brandId: string): boolean {
   return roleAllowsBrand(role, brandId) && brandAllowsRole(brandId, role)
 }

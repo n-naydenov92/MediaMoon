@@ -1,7 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse, type NextRequest } from 'next/server'
 import { findModuleById } from '@/config/modules'
-import { canRoleAccessBrand } from '@/config/brandAccess'
+import { canRoleAccessBrand, isBrandRestrictedRole } from '@/config/brandAccess'
 import { getBusinessManagerForAccount } from '@/config/metaBusinessManagers'
 import { parseRole } from '@/lib/roles'
 import type { UserRole } from '@/types'
@@ -10,6 +10,9 @@ import type { UserRole } from '@/types'
 // page — plus the brand picker. The module registry gates whole modules, not
 // pages, so this one sub-path restriction is enforced here in the middleware.
 const CREATIVE_ANALYST_AREA = 'meta-ads/performance'
+
+const ACCOUNT_PARAMS = ['accountId', 'account'] as const
+const BRAND_PATH = /^\/brands\/([^/]+)/
 
 const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
@@ -34,12 +37,9 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   const role = roleFromClaims(session.sessionClaims)
-
-  if (role) {
-    const denial = enforceBrandAccess(req, role)
-    if (denial) {
-      return denial
-    }
+  const denial = role ? enforceBrandAccess(req, role) : denyApiWithoutRole(req)
+  if (denial) {
+    return denial
   }
 
   if (role === 'creative_analyst') {
@@ -62,35 +62,53 @@ function roleFromClaims(
   return parseRole(claims?.role ?? (claims?.publicMetadata as { role?: unknown } | undefined)?.role)
 }
 
+// API routes don't check roles themselves, so a signed-in user without a role
+// would otherwise reach every brand's data. Pages are gated by their layouts.
+function denyApiWithoutRole(req: NextRequest): NextResponse | null {
+  return isApiRequest(req) ? forbidden('Forbidden: no role assigned') : null
+}
+
 // Brand-restricted roles (e.g. a single-brand operator) may only touch their own
-// brand. The target brand is read from the request — directly via `brandId`, or
-// indirectly via the `accountId` of a Meta ad account — and access is denied with
-// a 403 for API calls or a redirect to the brand picker for page navigations.
+// brand. Every brand the request names is checked — `brandId`, the brand in the
+// path, and the brand behind each ad account id — because the routes read different
+// params: a permitted `brandId` must not carry another brand's `accountId` through.
 function enforceBrandAccess(req: NextRequest, role: UserRole): NextResponse | null {
-  const targetBrandId = resolveTargetBrandId(req)
-  if (!targetBrandId || canRoleAccessBrand(role, targetBrandId)) {
+  if (targetBrandIds(req).every((brandId) => canAccessTarget(role, brandId))) {
     return null
   }
-  if (req.nextUrl.pathname.startsWith('/api/')) {
-    return NextResponse.json({ error: 'Forbidden: brand not accessible for your role' }, { status: 403 })
+  if (isApiRequest(req)) {
+    return forbidden('Forbidden: brand not accessible for your role')
   }
   return NextResponse.redirect(new URL('/brands', req.url))
 }
 
-function resolveTargetBrandId(req: NextRequest): string | null {
+// `null` stands for an ad account that no Business Manager lists.
+function targetBrandIds(req: NextRequest): readonly (string | null)[] {
   const { pathname, searchParams } = req.nextUrl
+  const namedBrands = [...searchParams.getAll('brandId'), pathname.match(BRAND_PATH)?.[1]]
+    .filter((id): id is string => Boolean(id))
+  const accountBrands = ACCOUNT_PARAMS
+    .flatMap((param) => searchParams.getAll(param))
+    .filter(Boolean)
+    .map((accountId) => getBusinessManagerForAccount(accountId)?.brandId ?? null)
+  return [...namedBrands, ...accountBrands]
+}
 
-  const brandParam = searchParams.get('brandId')
-  if (brandParam) {
-    return brandParam
+// An unlisted account can't be traced to a brand, so roles limited to specific
+// brands are refused it; the routes reject it for everyone else.
+function canAccessTarget(role: UserRole, brandId: string | null): boolean {
+  if (brandId === null) {
+    return !isBrandRestrictedRole(role)
   }
+  return canRoleAccessBrand(role, brandId)
+}
 
-  const accountId = searchParams.get('accountId')
-  if (accountId) {
-    return getBusinessManagerForAccount(accountId)?.brandId ?? null
-  }
+function isApiRequest(req: NextRequest): boolean {
+  return req.nextUrl.pathname.startsWith('/api/')
+}
 
-  return pathname.match(/^\/brands\/([^/]+)/)?.[1] ?? null
+function forbidden(message: string): NextResponse {
+  return NextResponse.json({ error: message }, { status: 403 })
 }
 
 function restrictCreativeAnalyst(req: NextRequest): NextResponse {

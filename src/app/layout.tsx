@@ -38,7 +38,7 @@ interface Props {
 
 export default async function RootLayout({ children }: Props): Promise<JSX.Element> {
   const role = await getCurrentUserRole()
-  const brands = role ? getAccessibleBrands(role, BRAND_REGISTRY) : BRAND_REGISTRY
+  const brands = role ? getAccessibleBrands(role, BRAND_REGISTRY) : []
 
   return (
     <ClerkProvider>
