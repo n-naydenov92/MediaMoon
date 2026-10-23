@@ -6,3 +6,129 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+// The tenant: an umbrella of brands that its members share (ADR 0002).
+model Workspace {
+  id          String            @id @default(cuid())
+  name        String
+  slug        String            @unique
+  // Soft delete: restorable for 30 days.
+  deletedAt   DateTime?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  members     WorkspaceMember[]
+  brands      Brand[]
+  connections Connection[]
+  adAccounts  AdAccount[]
+}
+
+// A person, keyed by their id in the Clerk instance of this environment.
+model User {
+  id          String            @id @default(cuid())
+  clerkUserId String            @unique
+  // For display only; Clerk stays the source of truth for sign-in.
+  email       String
+  name        String?
+  imageUrl    String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  memberships WorkspaceMember[]
+}
+
+model WorkspaceMember {
+  id          String    @id @default(cuid())
+  workspaceId String
+  userId      String
+  // Owner is the only built-in role; every workspace keeps at least one.
+  isOwner     Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@index([userId])
+}
+
+model Brand {
+  id          String       @id @default(cuid())
+  workspaceId String
+  slug        String
+  name        String
+  emoji       String
+  color       String
+  description String
+  currency    String
+  timezone    String
+  archivedAt  DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  workspace   Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  markets     Market[]
+  connections Connection[]
+
+  @@unique([workspaceId, slug])
+}
+
+// A market of one brand. The code 'ALL' is reserved for the all-markets
+// selection; a CHECK constraint in the migration refuses it.
+model Market {
+  id         String      @id @default(cuid())
+  brandId    String
+  code       String
+  name       String
+  brand      Brand       @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  adAccounts AdAccount[]
+
+  @@unique([brandId, code])
+}
+
+enum ConnectionProvider {
+  META
+  GOOGLE_ADS
+  GA4
+  WOOCOMMERCE
+  SHOPIFY
+  KLAVIYO
+}
+
+// Access to one external platform. A connection belongs to exactly one
+// workspace; brandId is set when it serves a single brand.
+model Connection {
+  id            String             @id @default(cuid())
+  workspaceId   String
+  brandId       String?
+  provider      ConnectionProvider
+  label         String
+  externalId    String?
+  config        Json               @default("{}")
+  // Names of the env vars that hold this connection's secrets, never their values.
+  secretEnvVars Json?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  workspace     Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  brand         Brand?             @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  adAccounts    AdAccount[]
+
+  @@index([workspaceId])
+  @@index([brandId])
+}
+
+// An ad account (Meta) or customer (Google Ads) reached through a connection,
+// and the market it serves.
+model AdAccount {
+  id           String             @id @default(cuid())
+  workspaceId  String
+  connectionId String
+  marketId     String?
+  provider     ConnectionProvider
+  externalId   String
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  workspace    Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  connection   Connection         @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  market       Market?            @relation(fields: [marketId], references: [id], onDelete: SetNull)
+
+  @@unique([workspaceId, provider, externalId])
+  @@index([connectionId])
+  @@index([marketId])
+}

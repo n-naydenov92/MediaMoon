@@ -152,6 +152,15 @@ export default [
     },
   },
   {
+    // The seed is a CLI that moves the config data into the database, once per
+    // environment, so it reads those modules and reports to the terminal.
+    files: ['prisma/seed.ts', 'prisma/seed/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': 'off',
+      'no-console': 'off',
+    },
+  },
+  {
     // Standalone Node CLI scripts — diagnostics and one-off codemods, not app code.
     files: ['scripts/**/*.mjs'],
     languageOptions: {
