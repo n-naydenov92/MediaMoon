@@ -59,6 +59,11 @@ The product needs three things:
 
 ## Consequences
 
+- **The database enforces the shape of access.**
+  - Composite foreign keys keep every role assignment inside one workspace, and a market inside its brand.
+  - CHECK constraints keep the scope columns consistent and refuse a blank role name.
+  - A role, brand or market in use can't be deleted.
+  - So a bug in a server action can't hand out access across workspaces.
 - **Every request needs the access context.** It is one query, shared within the request through `cache()`.
 - **Market-level access needs ownership checks on Meta writes.** Before changing a campaign or ad set, the server checks that it belongs to an allowed ad account, which costs one more Meta read per write.
 - **The catalog is code.** Adding a permission needs a deploy. Renaming a key drops it from every role unless a migration renames the stored keys too.

@@ -9,77 +9,88 @@ datasource db {
 
 // The tenant: an umbrella of brands that its members share (ADR 0002).
 model Workspace {
-  id          String            @id @default(cuid())
-  name        String
-  slug        String            @unique
+  id              String            @id @default(cuid())
+  name            String
+  slug            String            @unique
   // Soft delete: restorable for 30 days.
-  deletedAt   DateTime?
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-  members     WorkspaceMember[]
-  brands      Brand[]
-  connections Connection[]
-  adAccounts  AdAccount[]
+  deletedAt       DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  members         WorkspaceMember[]
+  brands          Brand[]
+  connections     Connection[]
+  adAccounts      AdAccount[]
+  roles           Role[]
+  roleAssignments RoleAssignment[]
 }
 
 // A person, keyed by their id in the Clerk instance of this environment.
 model User {
-  id          String            @id @default(cuid())
-  clerkUserId String            @unique
+  id                     String            @id @default(cuid())
+  clerkUserId            String            @unique
   // For display only; Clerk stays the source of truth for sign-in.
-  email       String
-  name        String?
-  imageUrl    String?
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-  memberships WorkspaceMember[]
+  email                  String
+  name                   String?
+  imageUrl               String?
+  createdAt              DateTime          @default(now())
+  updatedAt              DateTime          @updatedAt
+  memberships            WorkspaceMember[]
+  rolesCreated           Role[]            @relation("RoleCreatedBy")
+  roleAssignmentsCreated RoleAssignment[]  @relation("RoleAssignmentCreatedBy")
 }
 
 model WorkspaceMember {
-  id          String    @id @default(cuid())
+  id          String           @id @default(cuid())
   workspaceId String
   userId      String
   // Owner is the only built-in role; every workspace keeps at least one.
-  isOwner     Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isOwner     Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+  workspace   Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assignments RoleAssignment[]
 
   @@unique([workspaceId, userId])
+  // Target of RoleAssignment's composite key, which keeps assignments inside one workspace.
+  @@unique([id, workspaceId])
   @@index([userId])
 }
 
 model Brand {
-  id          String       @id @default(cuid())
-  workspaceId String
-  slug        String
-  name        String
-  emoji       String
-  color       String
-  description String
-  currency    String
-  timezone    String
-  archivedAt  DateTime?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  workspace   Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  markets     Market[]
-  connections Connection[]
+  id              String           @id @default(cuid())
+  workspaceId     String
+  slug            String
+  name            String
+  emoji           String
+  color           String
+  description     String
+  currency        String
+  timezone        String
+  archivedAt      DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  workspace       Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  markets         Market[]
+  connections     Connection[]
+  roleAssignments RoleAssignment[]
 
   @@unique([workspaceId, slug])
+  @@unique([id, workspaceId])
 }
 
 // A market of one brand. The code 'ALL' is reserved for the all-markets
 // selection; a CHECK constraint in the migration refuses it.
 model Market {
-  id         String      @id @default(cuid())
-  brandId    String
-  code       String
-  name       String
-  brand      Brand       @relation(fields: [brandId], references: [id], onDelete: Cascade)
-  adAccounts AdAccount[]
+  id              String           @id @default(cuid())
+  brandId         String
+  code            String
+  name            String
+  brand           Brand            @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  adAccounts      AdAccount[]
+  roleAssignments RoleAssignment[]
 
   @@unique([brandId, code])
+  @@unique([id, brandId])
 }
 
 enum ConnectionProvider {
@@ -131,4 +142,51 @@ model AdAccount {
   @@unique([workspaceId, provider, externalId])
   @@index([connectionId])
   @@index([marketId])
+}
+
+// A custom role of one workspace: a name and the permissions it carries (ADR 0003).
+// Owner is not a role; it is WorkspaceMember.isOwner.
+model Role {
+  id          String           @id @default(cuid())
+  workspaceId String
+  name        String
+  // Keys from src/lib/access/permissions.ts. A key the catalog no longer has grants nothing.
+  permissions String[]
+  createdById String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  workspace   Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdBy   User?            @relation("RoleCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  assignments RoleAssignment[]
+
+  @@unique([workspaceId, name])
+  @@unique([id, workspaceId])
+}
+
+// One role given to one member, for the whole workspace, one brand or one market.
+// The composite keys keep the member, role, brand and market in the assignment's
+// workspace, and a market in its brand. A CHECK constraint in the migration keeps
+// brandId, marketId and scopeKey consistent. NoAction (checked at the end of the
+// statement) refuses deleting a role, brand or market in use, yet lets a workspace
+// delete cascade through everything.
+model RoleAssignment {
+  id          String          @id @default(cuid())
+  workspaceId String
+  memberId    String
+  roleId      String
+  brandId     String?
+  marketId    String?
+  // 'workspace', 'brand:<brandId>' or 'market:<marketId>'; a role is given once per place.
+  scopeKey    String
+  createdById String?
+  createdAt   DateTime        @default(now())
+  workspace   Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  member      WorkspaceMember @relation(fields: [memberId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
+  role        Role            @relation(fields: [roleId, workspaceId], references: [id, workspaceId], onDelete: NoAction)
+  brand       Brand?          @relation(fields: [brandId, workspaceId], references: [id, workspaceId], onDelete: NoAction)
+  market      Market?         @relation(fields: [marketId, brandId], references: [id, brandId], onDelete: NoAction)
+  createdBy   User?           @relation("RoleAssignmentCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@unique([memberId, roleId, scopeKey])
+  @@index([roleId])
 }
