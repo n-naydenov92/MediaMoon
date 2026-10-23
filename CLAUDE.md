@@ -143,7 +143,7 @@ Long-term: if the system proves itself internally, it gets formatted into a prod
 - **Framework:** Next.js 16.2
 - **UI:** React 19 + MUI 5
 - **Auth:** Clerk 6 (role-based module access)
-- **DB:** Postgres on Neon (Vercel Marketplace) through Prisma 7. Schema and migrations in `prisma/`; the server-only client in `src/lib/db/client.ts`. Customer data is read only through the tenancy layer, `src/lib/tenancy`
+- **DB:** Postgres on Neon (Vercel Marketplace) through Prisma 7. Schema and migrations in `prisma/`; the server-only client in `src/lib/db/client.ts`. Customer data is read only through the tenancy layer, `src/lib/tenancy`. Regions, cost guards, backups and access: `docs/infrastructure.md`
 
 ### Key Patterns
 

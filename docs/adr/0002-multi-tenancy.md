@@ -73,7 +73,7 @@ MediaMon serves one company, and that company's data is part of the code:
 
 ## Consequences
 
-- **The database is on the critical path.** Every request reads tenancy and access data from Postgres, and Neon's free tier scales to zero, so the first request after idle is slower. Mitigation: one query per request, in the same region.
+- **The database is on the critical path.** Every request reads tenancy and access data from Postgres, and Neon scales to zero after 5 idle minutes, so the first request after idle is slower. Mitigation: one query per request, in the same region.
 - **Invisible work comes first.** The tenancy layer is a large refactor (about 75 files) that lands before any visible feature.
 - **The old config files linger until the access switch.** Prisma can't run in the Edge middleware, so `src/middleware.ts` keeps reading `brands.ts` and `metaBusinessManagers.ts` until access checks move into the database (ADR 0003).
 - **The encryption key becomes critical.** Losing it loses every stored customer secret, so it needs an offline backup.
