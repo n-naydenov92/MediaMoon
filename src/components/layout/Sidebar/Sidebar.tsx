@@ -4,6 +4,7 @@ import { memo, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Box from '@mui/material/Box'
 import type { BrandConfig, UserRole } from '@/types'
+import type { WorkspaceLink } from '@/types/workspace'
 import { LABELS } from '@/components/layout/labels'
 import { getActiveBrandId } from '@/lib/navigation'
 import { useThemeMode } from '@/styles/useThemeMode'
@@ -13,6 +14,7 @@ import BrandSwitcher from '@/components/layout/Sidebar/BrandSwitcher/BrandSwitch
 import SidebarSearch from '@/components/layout/Sidebar/SidebarSearch/SidebarSearch'
 import SidebarNav from '@/components/layout/Sidebar/SidebarNav/SidebarNav'
 import SidebarUserCard from '@/components/layout/Sidebar/SidebarUserCard/SidebarUserCard'
+import WorkspaceSettingsMenu from '@/components/layout/Sidebar/WorkspaceSettingsMenu/WorkspaceSettingsMenu'
 import SidebarResizeHandle from '@/components/layout/Sidebar/SidebarResizeHandle/SidebarResizeHandle'
 import { useSidebarResize } from '@/components/layout/Sidebar/SidebarResizeHandle/useSidebarResize'
 import styles from './Sidebar.module.css'
@@ -20,6 +22,7 @@ import styles from './Sidebar.module.css'
 interface Props {
   readonly brands: readonly BrandConfig[]
   readonly role: UserRole | null
+  readonly settingsWorkspaces: readonly WorkspaceLink[]
   readonly variant?: 'fixed' | 'drawer'
   readonly hidden?: boolean
 }
@@ -27,6 +30,7 @@ interface Props {
 export default memo(function Sidebar({
   brands,
   role,
+  settingsWorkspaces,
   variant = 'fixed',
   hidden = false,
 }: Props): JSX.Element {
@@ -63,7 +67,10 @@ export default memo(function Sidebar({
 
       {role !== null && <SidebarNav brandId={brandId} role={role} />}
 
-      <SidebarUserCard variant={variant} />
+      <Box className={styles.footer}>
+        {settingsWorkspaces.length > 0 && <WorkspaceSettingsMenu workspaces={settingsWorkspaces} />}
+        <SidebarUserCard variant={variant} />
+      </Box>
 
       {variant === 'fixed' && (
         <SidebarResizeHandle

@@ -1,0 +1,31 @@
+.card {
+  padding: 8px 20px;
+}
+
+.list {
+  margin: 0;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  align-items: baseline;
+  gap: 16px;
+  padding: 12px 0;
+}
+
+.row + .row {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.value {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 599px) {
+  .row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}

@@ -26,6 +26,21 @@ export function can(access: AccessContext, permission: Permission, target: Acces
   return membership.assignments.some((assignment) => grants(assignment, permission, scope))
 }
 
+export function isMemberOf(access: AccessContext, workspaceId: string): boolean {
+  return access.memberships.some((membership) => membership.workspaceId === workspaceId)
+}
+
+export function isOwnerOf(access: AccessContext, workspaceId: string): boolean {
+  return access.memberships.some((membership) => membership.workspaceId === workspaceId && membership.isOwner)
+}
+
+/** The workspaces where the person holds `permission` across the whole workspace. */
+export function workspaceIdsWith(access: AccessContext, permission: Permission): readonly string[] {
+  return access.memberships
+    .map((membership) => membership.workspaceId)
+    .filter((workspaceId) => can(access, permission, { workspaceId, scope: { kind: 'workspace' } }))
+}
+
 /** The brand's markets where the person may use `permission`. "All markets" means exactly these. */
 export function allowedMarketIds(
   access: AccessContext,

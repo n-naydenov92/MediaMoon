@@ -10,6 +10,7 @@ export {
   lookupMetaTokenForAccount,
 } from './credentials/meta'
 export { accountIdsForMarket, accountIdsForSelection } from './selection'
+export { getWorkspaceBySlug, listWorkspaceLinks } from './workspaces'
 export type {
   Brand,
   BrandContext,
@@ -17,4 +18,5 @@ export type {
   MetaAccountRef,
   MetaAccountTokenLookup,
   MetaConnection,
+  Workspace,
 } from './types'

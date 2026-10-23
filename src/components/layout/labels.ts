@@ -12,6 +12,7 @@ export const LABELS = {
     findBrand: 'Find brand…',
     noBrandsMatch: 'No brands match',
     escToClose: 'Esc',
+    workspaceSettings: 'Workspace settings',
   },
   themeToggle: { toLightTheme: 'Switch to light theme', toDarkTheme: 'Switch to dark theme' },
   topbar: { refreshData: 'Refresh data' },

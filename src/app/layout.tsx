@@ -5,7 +5,9 @@ import { DM_Sans, Syne } from 'next/font/google'
 import { ThemeModeProvider } from '@/styles/ThemeModeProvider'
 import AppShell from '@/components/layout/AppShell/AppShell'
 import { getCurrentUserRole } from '@/lib/currentUserRole'
-import { listBrands } from '@/lib/tenancy'
+import { workspaceIdsWith } from '@/lib/access/can'
+import { getAccessContext } from '@/lib/access/server/accessContext'
+import { listBrands, listWorkspaceLinks } from '@/lib/tenancy'
 import { getAccessibleBrands } from '@/config/brandAccess'
 import '@/styles/globals.css'
 
@@ -37,15 +39,17 @@ interface Props {
 }
 
 export default async function RootLayout({ children }: Props): Promise<JSX.Element> {
-  const role = await getCurrentUserRole()
+  const [role, access] = await Promise.all([getCurrentUserRole(), getAccessContext()])
   const brands = role ? getAccessibleBrands(role, await listBrands()) : []
+  // Brand pages still follow Clerk roles until the switch; workspace settings already follow the database.
+  const settingsWorkspaces = await listWorkspaceLinks(workspaceIdsWith(access, 'members.view'))
 
   return (
     <ClerkProvider>
       <html lang="en" className={`${syne.variable} ${dmSans.variable}`} suppressHydrationWarning>
         <body>
           <ThemeModeProvider>
-            <AppShell brands={brands} role={role}>{children}</AppShell>
+            <AppShell brands={brands} role={role} settingsWorkspaces={settingsWorkspaces}>{children}</AppShell>
           </ThemeModeProvider>
         </body>
       </html>

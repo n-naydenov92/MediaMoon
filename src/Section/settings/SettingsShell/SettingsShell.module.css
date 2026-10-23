@@ -1,0 +1,18 @@
+.page {
+  max-width: 960px;
+  padding: 24px;
+}
+
+.content {
+  margin-top: 24px;
+}
+
+@media (max-width: 1023px) {
+  .page {
+    padding: 16px;
+  }
+
+  .content {
+    margin-top: 16px;
+  }
+}

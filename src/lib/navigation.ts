@@ -48,6 +48,12 @@ export function isPathnameActive(
   return pathname === href || pathname.startsWith(`${href}/`)
 }
 
+export type SettingsTab = 'members' | 'general'
+
+export function workspaceSettingsPath(workspaceSlug: string, tab: SettingsTab): string {
+  return `/${workspaceSlug}/settings/${tab}`
+}
+
 export function findActiveChildModule(
   children: readonly ModuleConfig[] | undefined,
   brandId: string | null,

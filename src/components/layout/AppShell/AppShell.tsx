@@ -7,6 +7,7 @@ import Box from '@mui/material/Box'
 import Drawer from '@mui/material/Drawer'
 import Sidebar from '@/components/layout/Sidebar/Sidebar'
 import type { BrandConfig, UserRole } from '@/types'
+import type { WorkspaceLink } from '@/types/workspace'
 import { MobileNavProvider } from './MobileNavContext'
 import { isAuthPathname } from './helpers'
 import styles from './AppShell.module.css'
@@ -14,10 +15,11 @@ import styles from './AppShell.module.css'
 interface Props {
   readonly brands: readonly BrandConfig[]
   readonly role: UserRole | null
+  readonly settingsWorkspaces: readonly WorkspaceLink[]
   readonly children: ReactNode
 }
 
-export default memo(function AppShell({ brands, role, children }: Props): JSX.Element {
+export default memo(function AppShell({ brands, role, settingsWorkspaces, children }: Props): JSX.Element {
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [desktopHidden, setDesktopHidden] = useState(false)
@@ -51,6 +53,7 @@ export default memo(function AppShell({ brands, role, children }: Props): JSX.El
         <Sidebar
           brands={brands}
           role={role}
+          settingsWorkspaces={settingsWorkspaces}
           variant="fixed"
           hidden={desktopHidden}
         />
@@ -60,7 +63,7 @@ export default memo(function AppShell({ brands, role, children }: Props): JSX.El
           onClose={closeMobileNav}
           classes={{ paper: styles.mobileDrawerPaper }}
         >
-          <Sidebar brands={brands} role={role} variant="drawer" />
+          <Sidebar brands={brands} role={role} settingsWorkspaces={settingsWorkspaces} variant="drawer" />
         </Drawer>
         <Box component="main" className={styles.main}>
           {children}

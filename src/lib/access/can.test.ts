@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { allowedMarketIds, brandPermissions, can } from './can'
+import { allowedMarketIds, brandPermissions, can, isMemberOf, isOwnerOf, workspaceIdsWith } from './can'
 import { ALL_PERMISSIONS } from './permissions'
 import {
   BG,
@@ -9,6 +9,7 @@ import {
   OTHER_BRAND_ID,
   OTHER_WORKSPACE_ID,
   WORKSPACE,
+  WORKSPACE_ID,
   at,
   brandScope,
   marketScope,
@@ -107,6 +108,28 @@ describe('can', () => {
   it('grants nothing for permission keys it does not know', () => {
     const access = memberWith(role(WORKSPACE, ['meta-ads.everything', '', 'DASHBOARD.VIEW']))
     expect(can(access, 'dashboard.view', at(brandScope()))).toBe(false)
+  })
+})
+
+describe('membership', () => {
+  it('tells members, owners and outsiders apart', () => {
+    const member = memberWith()
+    expect(isMemberOf(member, WORKSPACE_ID)).toBe(true)
+    expect(isOwnerOf(member, WORKSPACE_ID)).toBe(false)
+    expect(isOwnerOf(ownerOf(), WORKSPACE_ID)).toBe(true)
+    expect(isMemberOf(ownerOf(), OTHER_WORKSPACE_ID)).toBe(false)
+  })
+})
+
+describe('workspaceIdsWith', () => {
+  it('lists the workspaces where a permission is held across the whole workspace', () => {
+    const access = {
+      memberships: [
+        ...ownerOf().memberships,
+        { workspaceId: OTHER_WORKSPACE_ID, isOwner: false, assignments: [role(brandScope(), ['members.view'])] },
+      ],
+    }
+    expect(workspaceIdsWith(access, 'members.view')).toEqual([WORKSPACE_ID])
   })
 })
 

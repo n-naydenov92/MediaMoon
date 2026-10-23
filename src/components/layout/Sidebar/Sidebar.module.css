@@ -60,6 +60,11 @@
   margin: 8px 0;
 }
 
+.footer {
+  width: 100%;
+  margin-top: auto;
+}
+
 .root[data-variant='drawer'] {
   width: 100%;
   height: 100%;

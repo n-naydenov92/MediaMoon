@@ -20,6 +20,14 @@ export interface BrandContext {
   readonly googleAdsCustomers: readonly MarketScopedRef[]
 }
 
+export interface Workspace {
+  readonly id: string
+  readonly slug: string
+  readonly name: string
+  readonly brandCount: number
+  readonly memberCount: number
+}
+
 // Server-only: carries a token, so it never goes into a client payload.
 export interface MetaConnection {
   readonly id: string

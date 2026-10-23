@@ -1,0 +1,10 @@
+.trigger.trigger {
+  justify-content: flex-start;
+  color: var(--sb-text-secondary);
+}
+
+.trigger.trigger:hover,
+.trigger.trigger:focus-visible {
+  background-color: var(--sb-bg-elevated);
+  color: var(--sb-text-primary);
+}
