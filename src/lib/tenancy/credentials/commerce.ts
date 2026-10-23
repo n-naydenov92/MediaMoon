@@ -1,11 +1,11 @@
 import 'server-only'
 import type { CommerceProviderConfig } from '@/types/commerce'
-import { activeSource } from '../source/activeSource'
+import { readCommerceProvider } from '../source/db/connections'
 import type { ShopifyRecord, WooCommerceRecord } from '../source/types'
 import { readSecret } from './secrets'
 
 export async function resolveCommerceConfig(brandId: string): Promise<CommerceProviderConfig | null> {
-  const entry = await activeSource.readCommerceProvider(brandId)
+  const entry = await readCommerceProvider(brandId)
   const storeUrlRaw = entry ? readSecret(entry.urlEnvVar) : null
   if (!entry || !storeUrlRaw) {
     return null

@@ -1,4 +1,4 @@
-import type { KlaviyoProviderConfig } from '@/config/klaviyoProviders'
+import type { KlaviyoProviderConfig } from '@/types/integrations'
 
 export const BASE_URL = 'https://a.klaviyo.com/api'
 export const REVISION = '2024-10-15'

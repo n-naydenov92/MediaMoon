@@ -115,7 +115,7 @@ export default function PageOrchestrator(): JSX.Element { ... }
 
 **MediaMon** is an internal business control hub — a single login, single dashboard from which a team manages all recurring business operations. The long-term ambition is to productize it: make it generic enough to spin up for other businesses that follow proven operational playbooks.
 
-Today it is a **Next.js 16 / React 19 / MUI 5 / Clerk** web app deployed on Vercel. No database yet — Prisma + Postgres is planned.
+Today it is a **Next.js 16 / React 19 / MUI 5 / Clerk** web app deployed on Vercel, with a **Postgres (Neon) database through Prisma**. Brands, markets, ad accounts and integrations live in the database (ADR 0002).
 
 ---
 
@@ -143,13 +143,13 @@ Long-term: if the system proves itself internally, it gets formatted into a prod
 - **Framework:** Next.js 16.2
 - **UI:** React 19 + MUI 5
 - **Auth:** Clerk 6 (role-based module access)
-- **Future DB:** Prisma + Postgres
+- **DB:** Postgres on Neon (Vercel Marketplace) through Prisma 7. Schema and migrations in `prisma/`; the server-only client in `src/lib/db/client.ts`. Customer data is read only through the tenancy layer, `src/lib/tenancy`
 
 ### Key Patterns
 
 **Gateway Pattern** — the only places that know about external services:
 - `src/lib/gateways/WooGateway.ts` — WooCommerce REST per brand (revenue / orders / top products)
-- `src/lib/gateways/GoogleAnalyticsGateway.ts` — GA4 Data API (sessions / active users) via `@google-analytics/data` + service-account JSON; per-brand property IDs in `src/config/analyticsProviders.ts`
+- `src/lib/gateways/GoogleAnalyticsGateway.ts` — GA4 Data API (sessions / active users) via `@google-analytics/data` + service-account JSON; each brand's GA4 property comes from its connection in the database (`src/lib/tenancy`)
 - `src/lib/gateways/MetaAdsGateway/` — Meta Marketing API, one system-user token per Business Manager. Every call goes through `http.ts` (usage headers, typed `MetaApiError`, local block while Meta throttles); routes map errors with `src/lib/meta/metaErrorResponse.ts`. Never call `graph.facebook.com` directly. Rate limits and auth: `docs/adr/0001-meta-api-rate-limits.md`
 
 **Module Registry** — `src/config/modules.ts` drives sidebar, root redirect, and Clerk role checks. Adding a module = one entry here + one folder + one API route.

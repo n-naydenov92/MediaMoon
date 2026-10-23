@@ -1,18 +1,8 @@
-import type { KlaviyoIntegrationName } from '@/config/klaviyoProviders'
-import type { Brand, BrandContext } from '../types'
+import type { KlaviyoIntegrationName } from '@/types/integrations'
 
-// What the tenancy layer reads, wherever it lives (config files or the database).
-// Records name the env vars that hold secrets; the layer resolves the values, so a
-// source never handles a secret.
-export interface TenancySource {
-  readBrands(): Promise<readonly Brand[]>
-  readBrandContext(brandId: string): Promise<BrandContext | null>
-  readMetaConnections(brandId: string): Promise<readonly MetaConnectionRecord[]>
-  readMetaConnectionForAccount(accountId: string): Promise<MetaConnectionRecord | null>
-  readCommerceProvider(brandId: string): Promise<CommerceRecord | null>
-  readAnalyticsProvider(brandId: string): Promise<AnalyticsRecord | null>
-  readKlaviyoProvider(brandId: string): Promise<KlaviyoRecord | null>
-}
+// What the database holds for a connection. Records name the env vars that hold
+// secrets; the credential resolvers read the values, so the source never handles
+// a secret.
 
 export interface MetaConnectionRecord {
   readonly id: string

@@ -1,10 +1,10 @@
 import 'server-only'
-import type { AnalyticsProviderConfig } from '@/config/analyticsProviders'
-import { activeSource } from '../source/activeSource'
+import type { AnalyticsProviderConfig } from '@/types/integrations'
+import { readAnalyticsProvider } from '../source/db/connections'
 import { readSecret } from './secrets'
 
 export async function resolveAnalyticsConfig(brandId: string): Promise<AnalyticsProviderConfig | null> {
-  const entry = await activeSource.readAnalyticsProvider(brandId)
+  const entry = await readAnalyticsProvider(brandId)
   const propertyId = entry ? readSecret(entry.propertyEnvVar) : null
   if (!entry || !propertyId) {
     return null

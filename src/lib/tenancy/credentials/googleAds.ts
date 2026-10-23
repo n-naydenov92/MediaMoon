@@ -1,5 +1,5 @@
 import 'server-only'
-import type { GoogleAdsCredentials } from '@/config/googleAdsAccounts'
+import type { GoogleAdsCredentials } from '@/types/integrations'
 import { readSecret } from './secrets'
 
 // One set for every brand today: all customers sit under a single manager account.

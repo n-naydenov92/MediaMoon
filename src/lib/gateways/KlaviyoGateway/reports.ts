@@ -1,4 +1,4 @@
-import type { KlaviyoProviderConfig } from '@/config/klaviyoProviders'
+import type { KlaviyoProviderConfig } from '@/types/integrations'
 import { BASE_URL, klaviyoFetch } from './http'
 import type { KlaviyoBucketTotals } from './types'
 

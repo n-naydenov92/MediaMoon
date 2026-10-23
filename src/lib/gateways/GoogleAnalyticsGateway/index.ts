@@ -1,4 +1,4 @@
-import type { AnalyticsProviderConfig } from '@/config/analyticsProviders'
+import type { AnalyticsProviderConfig } from '@/types/integrations'
 import type { MarketSelection } from '@/lib/markets'
 import { getClient } from './client'
 import { buildCountryFilter, composeAnd, eventInListFilter } from './filters'

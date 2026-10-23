@@ -53,18 +53,11 @@ src/
 
 ---
 
-## Brand Registry
+## Brands
 
-```typescript
-// src/config/brands.ts
-export const BRAND_REGISTRY: readonly BrandConfig[] = [
-  { id: 'stoitchkov',   label: 'Stoitchkov Nutrition', emoji: '💪', color: '#FF6B35', description: '...' },
-  { id: 'thegreenbear', label: 'Thegreenbear',         emoji: '🐻', color: '#10B981', description: '...' },
-  { id: 'sapphire',     label: 'Sapphire',             emoji: '💎', color: '#1877F2', description: '...' },
-]
-```
+Брандовете, маркетите им, ad акаунтите и интеграциите са в базата (таблици `Brand`, `Market`, `AdAccount`, `Connection`; ADR 0002). Кодът ги чете само през `src/lib/tenancy` (`listBrands()`, `getBrandContext()`), никога директно.
 
-`BrandConfig` shape:
+`BrandConfig` shape (каквото слоят връща за бранд):
 ```typescript
 interface BrandConfig {
   readonly id: string           // URL-safe slug
@@ -72,20 +65,17 @@ interface BrandConfig {
   readonly emoji: string        // logo fallback
   readonly color: string        // accent (cards, dropdown)
   readonly description: string  // shown in card
+  readonly markets: readonly MarketCode[]  // e.g. ['BG', 'ES']; names come from the Market rows
 }
 ```
 
-**Брандовете НЯМАТ role gating** — всеки автентикиран user вижда всички брандове. Role-проверката е на ниво модул (`ModuleConfig.roles`).
+**Достъп до брандове:** днес Clerk роля може да е ограничена до определени брандове (`src/config/brandAccess.ts`, виж `docs/ProjectRoles.md`); останалите проверки са на ниво модул (`ModuleConfig.roles`). Phase B мести достъпа в базата.
 
 ---
 
 ## Adding a New Brand
 
-```
-src/config/brands.ts                ← добави entry в BRAND_REGISTRY
-```
-
-Това е всичко. Sidebar-ът, overview-то, routing-ът — нищо друго не се пипа.
+Нов бранд е нов ред в базата (`Brand` + неговите `Market`, `Connection` и `AdAccount` редове). Кодът не се пипа: sidebar-ът, overview-то и routing-ът го показват сами. До екрана за брандове (D1) се добавя от нас; после го прави owner-ът на workspace-а от Settings.
 
 ---
 

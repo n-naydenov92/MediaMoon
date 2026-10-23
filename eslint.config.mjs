@@ -24,27 +24,17 @@ const noRestrictedSyntax = [
   },
 ]
 
-// Customer data is read only through the tenancy layer (ADR 0002), so a new customer
-// never needs a code change. Type imports stay allowed: the provider config types
-// still live next to their data until the database replaces these modules (A6).
-const TENANT_DATA_MODULES = [
-  'brands',
-  'markets',
-  'adAccounts',
-  'metaBusinessManagers',
-  'googleAdsAccounts',
-  'analyticsProviders',
-  'klaviyoProviders',
-  'commerceProviders',
-]
+// Customer data is read only through the tenancy layer, from the database (ADR 0002),
+// so a new customer never needs a code change. These two config copies remain only
+// for the Edge middleware's access check, until B11 removes them.
+const TENANT_DATA_MODULES = ['brands', 'metaBusinessManagers']
 
 const noTenantDataImports = [
   'error',
   {
     paths: TENANT_DATA_MODULES.map((name) => ({
       name: `@/config/${name}`,
-      allowTypeImports: true,
-      message: 'Read customer data through @/lib/tenancy (ADR 0002). Only type imports are allowed.',
+      message: 'Read customer data through @/lib/tenancy (ADR 0002).',
     })),
   },
 ]
@@ -142,22 +132,12 @@ export default [
     },
   },
   {
-    // The config source is the tenancy layer's one runtime reader of these modules.
     // The middleware is a temporary exception: it runs on the Edge, where the
-    // database-backed layer won't be available, until its checks move into the
-    // Node proxy (B10).
-    files: ['src/lib/tenancy/source/**/*.ts', 'src/middleware.ts'],
+    // database-backed layer isn't available, until its checks move into the Node
+    // proxy (B10).
+    files: ['src/middleware.ts'],
     rules: {
       '@typescript-eslint/no-restricted-imports': 'off',
-    },
-  },
-  {
-    // Terminal tools around the database (the seed, the parity check): they read
-    // the config data to move or compare it, and report to the console.
-    files: ['prisma/seed.ts', 'prisma/seed/**/*.ts', 'scripts/**/*.ts'],
-    rules: {
-      '@typescript-eslint/no-restricted-imports': 'off',
-      'no-console': 'off',
     },
   },
   {

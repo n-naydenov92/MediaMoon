@@ -1,4 +1,4 @@
-import type { KlaviyoProviderConfig } from '@/config/klaviyoProviders'
+import type { KlaviyoProviderConfig } from '@/types/integrations'
 import { getPlacedOrderMetricId } from './metrics'
 import { fetchCampaignReport, fetchFlowReport } from './reports'
 import type { KlaviyoRangeResult } from './types'

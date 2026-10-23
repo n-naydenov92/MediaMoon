@@ -1,4 +1,4 @@
-import type { KlaviyoProviderConfig } from '@/config/klaviyoProviders'
+import type { KlaviyoProviderConfig } from '@/types/integrations'
 import { BASE_URL, klaviyoFetch } from './http'
 
 const PLACED_ORDER_METRIC_NAME = 'Placed Order'

@@ -1,5 +1,5 @@
 import { OAuth2Client } from 'google-auth-library'
-import type { GoogleAdsCredentials } from '@/config/googleAdsAccounts'
+import type { GoogleAdsCredentials } from '@/types/integrations'
 
 let cachedClient: OAuth2Client | null = null
 

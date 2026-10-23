@@ -1,4 +1,4 @@
-import type { GoogleAdsCredentials } from '@/config/googleAdsAccounts'
+import type { GoogleAdsCredentials } from '@/types/integrations'
 import { fetchAccountInsights, type GoogleAdsAccountInsights } from '@/lib/gateways/GoogleAdsGateway'
 import type { MarketSelection } from '@/lib/markets'
 import { accountIdsForSelection, resolveGoogleAdsCredentials, type BrandContext } from '@/lib/tenancy'

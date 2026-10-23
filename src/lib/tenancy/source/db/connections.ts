@@ -1,5 +1,5 @@
 import 'server-only'
-import type { KlaviyoIntegrationName } from '@/config/klaviyoProviders'
+import type { KlaviyoIntegrationName } from '@/types/integrations'
 import type { Connection, ConnectionProvider, Prisma } from '@/generated/prisma/client'
 import { getDb } from '@/lib/db/client'
 import { normalizeAccountId } from '@/lib/meta/accountId'

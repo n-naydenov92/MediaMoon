@@ -1,4 +1,4 @@
-import type { GoogleAdsCredentials } from '@/config/googleAdsAccounts'
+import type { GoogleAdsCredentials } from '@/types/integrations'
 import type { CustomRange } from '@/lib/meta/dateRange'
 import { getAccessToken } from './client'
 import { callGoogleAdsSearch } from './http'

@@ -1,12 +1,12 @@
 import 'server-only'
-import { activeSource } from '../source/activeSource'
+import { readMetaConnectionForAccount, readMetaConnections } from '../source/db/connections'
 import type { MetaConnectionRecord } from '../source/types'
 import type { MetaAccountTokenLookup, MetaConnection } from '../types'
 import { readSecret } from './secrets'
 
 // Only connections whose token is configured are returned.
 export async function getMetaConnectionsForBrand(brandId: string): Promise<readonly MetaConnection[]> {
-  const records = await activeSource.readMetaConnections(brandId)
+  const records = await readMetaConnections(brandId)
   return records.flatMap((record) => {
     const token = readSecret(record.tokenEnvVar)
     return token ? [toMetaConnection(record, token)] : []
@@ -14,7 +14,7 @@ export async function getMetaConnectionsForBrand(brandId: string): Promise<reado
 }
 
 export async function lookupMetaTokenForAccount(accountId: string): Promise<MetaAccountTokenLookup> {
-  const record = await activeSource.readMetaConnectionForAccount(accountId)
+  const record = await readMetaConnectionForAccount(accountId)
   if (!record) {
     return { status: 'unknown-account' }
   }
@@ -35,8 +35,8 @@ export async function getMetaTokenForAccount(accountId: string): Promise<string 
 // downloadable, but they are referenceable by any account the token can see.
 export async function areOnSameMetaConnection(a: string, b: string): Promise<boolean> {
   const [x, y] = await Promise.all([
-    activeSource.readMetaConnectionForAccount(a),
-    activeSource.readMetaConnectionForAccount(b),
+    readMetaConnectionForAccount(a),
+    readMetaConnectionForAccount(b),
   ])
   return x !== null && y !== null && x.id === y.id
 }
