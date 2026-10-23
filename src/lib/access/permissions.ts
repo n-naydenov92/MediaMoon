@@ -19,9 +19,8 @@ const DEFINITIONS = {
   'google-ads.view': { level: 'market' },
   'meta-ads.overview.view': { level: 'market' },
   'meta-ads.performance.view': { level: 'market' },
+  // The whole Ads Creator, publishing and launching active included: it is for whoever launches ads.
   'meta-ads.creator.use': { level: 'market' },
-  'meta-ads.creator.publish': { level: 'market' },
-  'meta-ads.creator.activate': { level: 'market' },
 } satisfies Record<string, PermissionDefinition>
 
 export type Permission = keyof typeof DEFINITIONS

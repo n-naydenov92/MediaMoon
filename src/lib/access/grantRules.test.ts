@@ -17,7 +17,7 @@ const MEMBER_MANAGER = memberWith(role(WORKSPACE, ['members.manage', 'meta-ads.p
 
 describe('checkRolePermissions', () => {
   it('lets an owner build a role from any permission that is not owner-only', () => {
-    const result = checkRolePermissions(ownerOf(), WORKSPACE_ID, ['members.manage', 'meta-ads.creator.publish'])
+    const result = checkRolePermissions(ownerOf(), WORKSPACE_ID, ['members.manage', 'meta-ads.creator.use'])
     expect(result).toEqual({ ok: true })
   })
 
@@ -38,7 +38,7 @@ describe('checkRolePermissions', () => {
 
   it('lets a role manager use only permissions they hold themselves', () => {
     expect(checkRolePermissions(ROLE_MANAGER, WORKSPACE_ID, ['meta-ads.performance.view'])).toEqual({ ok: true })
-    expect(checkRolePermissions(ROLE_MANAGER, WORKSPACE_ID, ['meta-ads.creator.publish'])).toEqual({
+    expect(checkRolePermissions(ROLE_MANAGER, WORKSPACE_ID, ['meta-ads.creator.use'])).toEqual({
       ok: false,
       reason: 'exceeds-own-access',
     })
@@ -57,7 +57,7 @@ describe('checkRoleGrant', () => {
   })
 
   it('refuses a role stronger than the giver\'s own access', () => {
-    const result = checkRoleGrant(MEMBER_MANAGER, at(brandScope()), ['meta-ads.creator.publish'])
+    const result = checkRoleGrant(MEMBER_MANAGER, at(brandScope()), ['meta-ads.creator.use'])
     expect(result).toEqual({ ok: false, reason: 'exceeds-own-access' })
   })
 
