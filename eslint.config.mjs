@@ -152,9 +152,9 @@ export default [
     },
   },
   {
-    // The seed is a CLI that moves the config data into the database, once per
-    // environment, so it reads those modules and reports to the terminal.
-    files: ['prisma/seed.ts', 'prisma/seed/**/*.ts'],
+    // Terminal tools around the database (the seed, the parity check): they read
+    // the config data to move or compare it, and report to the console.
+    files: ['prisma/seed.ts', 'prisma/seed/**/*.ts', 'scripts/**/*.ts'],
     rules: {
       '@typescript-eslint/no-restricted-imports': 'off',
       'no-console': 'off',

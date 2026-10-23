@@ -37,7 +37,8 @@ export interface ConnectionPlan {
   readonly label: string
   readonly brandId: string | null
   readonly config: Readonly<Record<string, string>>
-  readonly secretEnvVars: readonly string[]
+  // Role → env var name, e.g. { token: 'META_TOKEN_SAPPHIRE' }.
+  readonly secretEnvVars: Readonly<Record<string, string>>
   readonly adAccounts: readonly AdAccountPlan[]
 }
 
@@ -69,12 +70,12 @@ const DEFAULT_CURRENCY = 'EUR'
 const DEFAULT_TIMEZONE = 'Europe/Sofia'
 
 // The developer token stays app-level; the rest belongs to the manager account.
-const GOOGLE_ADS_SECRET_ENV_VARS = [
-  'GOOGLE_ADS_CLIENT_ID',
-  'GOOGLE_ADS_CLIENT_SECRET',
-  'GOOGLE_ADS_REFRESH_TOKEN',
-  'GOOGLE_ADS_LOGIN_CUSTOMER_ID',
-]
+const GOOGLE_ADS_SECRET_ENV_VARS = {
+  clientId: 'GOOGLE_ADS_CLIENT_ID',
+  clientSecret: 'GOOGLE_ADS_CLIENT_SECRET',
+  refreshToken: 'GOOGLE_ADS_REFRESH_TOKEN',
+  loginCustomerId: 'GOOGLE_ADS_LOGIN_CUSTOMER_ID',
+}
 
 export function buildSeedPlan(): readonly WorkspacePlan[] {
   return WORKSPACE_GROUPS.map((group) => ({
@@ -86,7 +87,7 @@ export function buildSeedPlan(): readonly WorkspacePlan[] {
 }
 
 export function assertSecretNamesAllowed(plan: readonly WorkspacePlan[]): void {
-  const names = plan.flatMap((workspace) => workspace.connections.flatMap((c) => c.secretEnvVars))
+  const names = plan.flatMap((workspace) => workspace.connections.flatMap((c) => Object.values(c.secretEnvVars)))
   const refused = names.filter((name) => !isAllowedSecretEnvVar(name))
   if (refused.length > 0) {
     throw new Error(`Secret env var names outside the allowlist: ${refused.join(', ')}`)
@@ -128,7 +129,7 @@ function metaConnections(brandId: string): readonly ConnectionPlan[] {
     label: bm.label,
     brandId,
     config: {},
-    secretEnvVars: [bm.tokenEnvVar],
+    secretEnvVars: { token: bm.tokenEnvVar },
     adAccounts: bm.accountIds.map((externalId) => ({
       externalId,
       brandId,
@@ -148,7 +149,7 @@ function ga4Connection(brandId: string): ConnectionPlan | null {
     label: 'Google Analytics 4',
     brandId,
     config: { timezone: entry.timezone },
-    secretEnvVars: [entry.propertyEnvVar],
+    secretEnvVars: { propertyId: entry.propertyEnvVar },
     adAccounts: [],
   }
 }
@@ -169,11 +170,11 @@ function commerceConnection(brandId: string): ConnectionPlan | null {
   }
 }
 
-function commerceSecretEnvVars(entry: CommerceProviderEntry): readonly string[] {
+function commerceSecretEnvVars(entry: CommerceProviderEntry): Readonly<Record<string, string>> {
   if (entry.kind === 'woocommerce') {
-    return [entry.urlEnvVar, entry.keyEnvVar, entry.secretEnvVar]
+    return { url: entry.urlEnvVar, key: entry.keyEnvVar, secret: entry.secretEnvVar }
   }
-  return [entry.urlEnvVar, entry.clientIdEnvVar, entry.clientSecretEnvVar]
+  return { url: entry.urlEnvVar, clientId: entry.clientIdEnvVar, clientSecret: entry.clientSecretEnvVar }
 }
 
 function klaviyoConnection(brandId: string): ConnectionPlan | null {
@@ -187,7 +188,7 @@ function klaviyoConnection(brandId: string): ConnectionPlan | null {
     label: 'Klaviyo',
     brandId,
     config: { integrationName: entry.integrationName },
-    secretEnvVars: [entry.apiKeyEnvVar],
+    secretEnvVars: { apiKey: entry.apiKeyEnvVar },
     adAccounts: [],
   }
 }

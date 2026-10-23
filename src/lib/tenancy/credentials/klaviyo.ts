@@ -1,10 +1,10 @@
 import 'server-only'
 import type { KlaviyoProviderConfig } from '@/config/klaviyoProviders'
-import { readKlaviyoProvider } from '../source/configSource'
+import { activeSource } from '../source/activeSource'
 import { readSecret } from './secrets'
 
 export async function resolveKlaviyoConfig(brandId: string): Promise<KlaviyoProviderConfig | null> {
-  const entry = readKlaviyoProvider(brandId)
+  const entry = await activeSource.readKlaviyoProvider(brandId)
   const apiKey = entry ? readSecret(entry.apiKeyEnvVar) : null
   if (!entry || !apiKey) {
     return null

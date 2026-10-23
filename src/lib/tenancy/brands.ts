@@ -1,28 +1,13 @@
 import 'server-only'
-import {
-  readBrand,
-  readBrands,
-  readGoogleAdsCustomers,
-  readMarketNames,
-  readMetaAccounts,
-} from './source/configSource'
+import { cache } from 'react'
+import { activeSource } from './source/activeSource'
 import type { Brand, BrandContext } from './types'
 
-// The single read path for customer data (ADR 0002). It is backed by the config
-// files today; the database replaces the source without changing these signatures.
-export async function listBrands(): Promise<readonly Brand[]> {
-  return readBrands()
-}
+// The single read path for customer data (ADR 0002). The source behind it is
+// switched in one place (source/activeSource). cache() lets the server components
+// of one request share a single read; route handlers simply read.
+export const listBrands = cache(async (): Promise<readonly Brand[]> => activeSource.readBrands())
 
-export async function getBrandContext(brandId: string): Promise<BrandContext | null> {
-  const brand = readBrand(brandId)
-  if (!brand) {
-    return null
-  }
-  return {
-    brand,
-    marketNames: readMarketNames(brand),
-    metaAccounts: readMetaAccounts(brand),
-    googleAdsCustomers: readGoogleAdsCustomers(brand),
-  }
-}
+export const getBrandContext = cache(
+  async (brandId: string): Promise<BrandContext | null> => activeSource.readBrandContext(brandId),
+)

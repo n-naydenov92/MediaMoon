@@ -79,7 +79,7 @@ async function writeConnection(scope: WorkspaceScope, connection: ConnectionPlan
       provider: connection.provider,
       label: connection.label,
       config: connection.config,
-      secretEnvVars: [...connection.secretEnvVars],
+      secretEnvVars: { ...connection.secretEnvVars },
     },
     update: {},
   })

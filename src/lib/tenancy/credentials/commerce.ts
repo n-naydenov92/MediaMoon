@@ -1,14 +1,11 @@
 import 'server-only'
-import type { CommerceProviderEntry } from '@/config/commerceProviders'
 import type { CommerceProviderConfig } from '@/types/commerce'
-import { readCommerceProvider } from '../source/configSource'
+import { activeSource } from '../source/activeSource'
+import type { ShopifyRecord, WooCommerceRecord } from '../source/types'
 import { readSecret } from './secrets'
 
-type WooEntry = Extract<CommerceProviderEntry, { kind: 'woocommerce' }>
-type ShopifyEntry = Extract<CommerceProviderEntry, { kind: 'shopify' }>
-
 export async function resolveCommerceConfig(brandId: string): Promise<CommerceProviderConfig | null> {
-  const entry = readCommerceProvider(brandId)
+  const entry = await activeSource.readCommerceProvider(brandId)
   const storeUrlRaw = entry ? readSecret(entry.urlEnvVar) : null
   if (!entry || !storeUrlRaw) {
     return null
@@ -17,7 +14,7 @@ export async function resolveCommerceConfig(brandId: string): Promise<CommercePr
   return entry.kind === 'woocommerce' ? toWooConfig(entry, storeUrl) : toShopifyConfig(entry, storeUrl)
 }
 
-function toWooConfig(entry: WooEntry, storeUrl: string): CommerceProviderConfig | null {
+function toWooConfig(entry: WooCommerceRecord, storeUrl: string): CommerceProviderConfig | null {
   const consumerKey = readSecret(entry.keyEnvVar)
   const consumerSecret = readSecret(entry.secretEnvVar)
   if (!consumerKey || !consumerSecret) {
@@ -27,7 +24,7 @@ function toWooConfig(entry: WooEntry, storeUrl: string): CommerceProviderConfig 
   return { kind: 'woocommerce', storeUrl, consumerKey, consumerSecret, currency, timezone }
 }
 
-function toShopifyConfig(entry: ShopifyEntry, storeUrl: string): CommerceProviderConfig | null {
+function toShopifyConfig(entry: ShopifyRecord, storeUrl: string): CommerceProviderConfig | null {
   const clientId = readSecret(entry.clientIdEnvVar)
   const clientSecret = readSecret(entry.clientSecretEnvVar)
   if (!clientId || !clientSecret) {
