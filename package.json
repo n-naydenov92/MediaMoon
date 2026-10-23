@@ -4,10 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 8000",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start -p 8000",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "postinstall": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:studio": "prisma studio"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.0.0",
@@ -18,8 +22,12 @@
     "@mui/icons-material": "^5.16.7",
     "@mui/material": "^5.16.7",
     "@mui/material-nextjs": "^5.16.6",
+    "@prisma/adapter-pg": "7.10.1",
+    "@prisma/client": "7.10.1",
+    "@vercel/functions": "^3.10.3",
     "google-auth-library": "^10.6.2",
     "next": "^16.2.3",
+    "pg": "^8.23.1",
     "protobufjs": "^8.4.0",
     "react": "19.0.0",
     "react-day-picker": "^9.14.0",
@@ -32,6 +40,7 @@
     "@next/eslint-plugin-next": "^16.2.6",
     "@stylistic/eslint-plugin": "^5.10.0",
     "@types/node": "^22.7.5",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@typescript-eslint/eslint-plugin": "^8.59.2",
@@ -45,6 +54,7 @@
     "eslint-plugin-n": "^18.0.1",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
+    "prisma": "7.10.1",
     "typescript": "^5.6.3"
   }
 }

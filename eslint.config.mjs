@@ -162,6 +162,6 @@ export default [
     },
   },
   {
-    ignores: ['.next/**', 'node_modules/**', 'public/**', 'next-env.d.ts'],
+    ignores: ['.next/**', 'node_modules/**', 'public/**', 'next-env.d.ts', 'src/generated/**'],
   },
 ]
