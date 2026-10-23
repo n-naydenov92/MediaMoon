@@ -48,6 +48,8 @@ The product needs three things:
 8. **The rules are pure functions with unit tests.**
    - The server loads one `AccessContext` per request (memberships and role assignments) and passes it in.
    - The rules never read the database themselves.
+   - Someone signed in for the first time gets a `User` row and no access. Only an invitation makes them a member.
+   - On a developer's machine, `ACCESS_DEV_ROLE` lets an owner see the app as one of their custom roles. It works only under `next dev`, never on Vercel, and only narrows access.
 9. **Access is enforced where data is fetched, by filtering.**
    - Guards return only the markets and accounts the person may use, so "All markets" means "all of mine".
    - Layouts, pages and API routes check access, following Next.js's Data Access Layer approach.
