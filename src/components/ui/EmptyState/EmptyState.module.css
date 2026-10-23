@@ -1,1 +1,13 @@
-/* EmptyState — structural overrides if needed in future */
+.root {
+  padding-block: 64px;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.root .icon {
+  font-size: 40px;
+}
+
+.description {
+  max-width: 360px;
+}

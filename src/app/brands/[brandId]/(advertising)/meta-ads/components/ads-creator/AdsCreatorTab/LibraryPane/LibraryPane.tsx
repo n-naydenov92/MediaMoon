@@ -19,7 +19,7 @@ import { hasTextVariation, isVariationListFull } from '../CopyForm/VariationList
 import { libraryAddBlock } from '../assetCompat'
 import { usePublishTarget } from '../usePublishTarget'
 import type { AssetCreative } from '../assetCreative'
-import DateRangeDropdown from '../../../shared/DateRangeDropdown/DateRangeDropdown'
+import DateRangeDropdown from '@/components/ui/DateRangeDropdown/DateRangeDropdown'
 import AdvancedFilters from '../../../shared/filters/AdvancedFilters/AdvancedFilters'
 import CreativeCard from './CreativeCard/CreativeCard'
 import ElementFilterChips from './ElementFilterChips/ElementFilterChips'

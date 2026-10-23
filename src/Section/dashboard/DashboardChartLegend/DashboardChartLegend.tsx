@@ -1,5 +1,5 @@
 import Box from '@mui/material/Box'
-import type { ChartPalette } from '@/app/brands/[brandId]/(advertising)/meta-ads/components/overview/spendChartPalette'
+import type { ChartPalette } from '@/lib/charts/spendChartPalette'
 import LegendDot from './LegendDot/LegendDot'
 import styles from './DashboardChartLegend.module.css'
 

@@ -1,0 +1,11 @@
+.root {
+  max-width: 560px;
+  margin: 64px auto 0;
+  padding-inline: 24px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+}

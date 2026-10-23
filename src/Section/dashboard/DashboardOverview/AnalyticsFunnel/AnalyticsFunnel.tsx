@@ -8,7 +8,7 @@ import Typography from '@mui/material/Typography'
 import {
   PALETTE_DARK,
   PALETTE_LIGHT,
-} from '@/app/brands/[brandId]/(advertising)/meta-ads/components/overview/spendChartPalette'
+} from '@/lib/charts/spendChartPalette'
 import { formatPercentage } from '@/lib/meta/fx'
 import { useThemeMode } from '@/styles/useThemeMode'
 import type { FunnelStage } from '@/types/dashboard'

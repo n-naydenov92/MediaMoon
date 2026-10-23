@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import DateRangeDropdown from '@/app/brands/[brandId]/(advertising)/meta-ads/components/shared/DateRangeDropdown/DateRangeDropdown'
+import DateRangeDropdown from '@/components/ui/DateRangeDropdown/DateRangeDropdown'
 import UpdatedBadge from '@/components/layout/PageHeader/UpdatedBadge/UpdatedBadge'
 import type {
   CustomRange,

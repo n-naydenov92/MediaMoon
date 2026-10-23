@@ -5,6 +5,7 @@ import type { ReactNode } from 'react'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import InboxIcon from '@mui/icons-material/InboxOutlined'
+import styles from './EmptyState.module.css'
 
 interface Props {
   readonly title: string
@@ -17,13 +18,13 @@ interface Props {
  */
 export default memo(function EmptyState({ title, description, action }: Props): JSX.Element {
   return (
-    <Stack alignItems="center" spacing={3} sx={{ py: 16, textAlign: 'center', color: 'text.secondary' }}>
-      <InboxIcon sx={{ fontSize: 40, color: 'text.muted' }} />
-      <Typography variant="h3" sx={{ color: 'text.primary' }}>
+    <Stack alignItems="center" spacing={3} className={styles.root}>
+      <InboxIcon className={styles.icon} fontSize="inherit" />
+      <Typography variant="h3" color="text.primary">
         {title}
       </Typography>
       {description && (
-        <Typography variant="body2" sx={{ maxWidth: 360 }}>
+        <Typography variant="body2" className={styles.description}>
           {description}
         </Typography>
       )}

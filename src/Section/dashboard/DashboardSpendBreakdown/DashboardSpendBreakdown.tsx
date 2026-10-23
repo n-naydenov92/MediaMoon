@@ -16,7 +16,7 @@ import {
 import {
   PALETTE_DARK,
   PALETTE_LIGHT,
-} from '@/app/brands/[brandId]/(advertising)/meta-ads/components/overview/spendChartPalette'
+} from '@/lib/charts/spendChartPalette'
 import { formatEur, formatPercentage } from '@/lib/meta/fx'
 import { useThemeMode } from '@/styles/useThemeMode'
 import type { SpendBreakdownPoint } from '@/types/dashboard'

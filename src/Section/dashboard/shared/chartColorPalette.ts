@@ -1,4 +1,4 @@
-import type { ChartPalette } from '@/app/brands/[brandId]/(advertising)/meta-ads/components/overview/spendChartPalette'
+import type { ChartPalette } from '@/lib/charts/spendChartPalette'
 
 export function pickPaletteColor(index: number, palette: ChartPalette): string {
   const ramp = [

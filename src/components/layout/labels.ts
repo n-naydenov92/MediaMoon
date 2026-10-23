@@ -14,6 +14,5 @@ export const LABELS = {
     escToClose: 'Esc',
   },
   themeToggle: { toLightTheme: 'Switch to light theme', toDarkTheme: 'Switch to dark theme' },
-  topbar: { refreshData: 'Refresh data', refreshesIn: 'Refreshes cache in' },
-  cacheStatus: { soon: 'soon', minuteSuffix: 'm', hourSuffix: 'h' },
+  topbar: { refreshData: 'Refresh data' },
 } as const

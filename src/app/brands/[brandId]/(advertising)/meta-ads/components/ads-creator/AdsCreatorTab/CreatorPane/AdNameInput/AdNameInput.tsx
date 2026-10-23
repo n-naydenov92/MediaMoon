@@ -5,7 +5,7 @@ import IconButton from '@mui/material/IconButton'
 import InputAdornment from '@mui/material/InputAdornment'
 import Tooltip from '@mui/material/Tooltip'
 import RestartAltOutlinedIcon from '@mui/icons-material/RestartAltOutlined'
-import FormTextField from '../../FormTextField/FormTextField'
+import FormTextField from '@/components/ui/FormTextField/FormTextField'
 import type { OverrideActions } from '../../useAdNaming'
 
 interface Props {

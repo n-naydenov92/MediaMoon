@@ -12,8 +12,26 @@ const NATIVE_HTML_BANS = [
   { tag: 'select', use: '<Select> from @mui/material' },
 ]
 
+// Styling lives in CSS modules (CLAUDE.md). An inline style object may only set CSS variables.
+const INLINE_STYLE_MESSAGE = 'Inline styles may only set CSS variables (\'--name\'). Put the styling in a CSS module.'
+const STYLE_BANS = [
+  {
+    selector: "JSXAttribute[name.name='sx']",
+    message: 'No sx prop. Put the styling in a CSS module (CLAUDE.md).',
+  },
+  {
+    selector: "JSXAttribute[name.name='style'] > JSXExpressionContainer > ObjectExpression > Property:not([key.value=/^--/])",
+    message: INLINE_STYLE_MESSAGE,
+  },
+  {
+    selector: "JSXAttribute[name.name='style'] > JSXExpressionContainer > TSAsExpression > ObjectExpression > Property:not([key.value=/^--/])",
+    message: INLINE_STYLE_MESSAGE,
+  },
+]
+
 const noRestrictedSyntax = [
   'error',
+  ...STYLE_BANS,
   ...NATIVE_HTML_BANS.map(({ tag, use }) => ({
     selector: `JSXOpeningElement[name.name='${tag}']`,
     message: `Use ${use} instead of <${tag}>. See feedback_prefer_mui.md.`,
@@ -120,9 +138,10 @@ export default [
     },
   },
   {
+    // Meta Ads predates the native-HTML bans, but the styling bans hold here too.
     files: ['**/meta-ads/**/*.{ts,tsx}'],
     rules: {
-      'no-restricted-syntax': 'off',
+      'no-restricted-syntax': ['error', ...STYLE_BANS],
     },
   },
   {

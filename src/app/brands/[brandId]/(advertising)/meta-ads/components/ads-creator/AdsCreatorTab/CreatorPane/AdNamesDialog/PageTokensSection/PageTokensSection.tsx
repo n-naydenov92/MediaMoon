@@ -8,7 +8,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import LabelOutlinedIcon from '@mui/icons-material/LabelOutlined'
 import PublicOutlinedIcon from '@mui/icons-material/PublicOutlined'
 import type { Page } from '@/lib/gateways/MetaAdsGateway'
-import FormTextField from '../../../FormTextField/FormTextField'
+import FormTextField from '@/components/ui/FormTextField/FormTextField'
 import styles from '../AdNamesDialog.module.css'
 
 interface Props {

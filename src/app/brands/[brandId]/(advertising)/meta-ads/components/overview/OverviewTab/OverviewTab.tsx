@@ -12,7 +12,7 @@ import {
   type DatePreset,
 } from '@/lib/meta/dateRange'
 import Notice from '../../Notice/Notice'
-import DateRangeDropdown from '../../shared/DateRangeDropdown/DateRangeDropdown'
+import DateRangeDropdown from '@/components/ui/DateRangeDropdown/DateRangeDropdown'
 import KpiGrid from '../KpiGrid/KpiGrid'
 import KpiSkeletonRows from '../KpiSkeletonRows/KpiSkeletonRows'
 import OverviewContent from './OverviewContent/OverviewContent'

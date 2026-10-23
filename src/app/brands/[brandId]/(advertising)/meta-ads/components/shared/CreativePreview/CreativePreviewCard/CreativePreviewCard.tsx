@@ -15,7 +15,6 @@ import CardSkeleton from './CardSkeleton/CardSkeleton'
 import type { CreativePreviewState } from '../creativePreviewTypes'
 import styles from './CreativePreviewCard.module.css'
 
-const POPPER_Z_INDEX = 1300
 const MOBILE_QUERY = '(max-width: 1023px)'
 
 const POPPER_MODIFIERS = [
@@ -32,7 +31,7 @@ interface Props {
   readonly onClose: () => void
 }
 
-const CreativePreviewCard = memo(function CreativePreviewCard({
+export default memo(function CreativePreviewCard({
   anchor,
   state,
   onPointerEnter,
@@ -78,7 +77,7 @@ const CreativePreviewCard = memo(function CreativePreviewCard({
       anchorEl={anchor}
       placement="right-start"
       modifiers={POPPER_MODIFIERS}
-      style={{ zIndex: POPPER_Z_INDEX }}
+      className={styles.popper}
     >
       <Box
         className={styles.card}
@@ -107,5 +106,3 @@ function renderState(state: CreativePreviewState): JSX.Element | null {
       return null
   }
 }
-
-export default CreativePreviewCard

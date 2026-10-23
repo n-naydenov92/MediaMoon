@@ -10,7 +10,7 @@ import RestartAltRoundedIcon from '@mui/icons-material/RestartAltRounded'
 import SpeedOutlinedIcon from '@mui/icons-material/SpeedOutlined'
 import type { LaunchJob } from '../../useLaunchQueue'
 import QueueLauncher from '../../QueueLauncher/QueueLauncher'
-import DecisionDialog from '../../DecisionDialog/DecisionDialog'
+import DecisionDialog from '@/components/ui/DecisionDialog/DecisionDialog'
 import MetaLimitsDialog from '../../MetaLimitsDialog/MetaLimitsDialog'
 import styles from './CreatorHeader.module.css'
 

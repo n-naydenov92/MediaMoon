@@ -15,7 +15,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { PALETTE_DARK, PALETTE_LIGHT } from '@/app/brands/[brandId]/(advertising)/meta-ads/components/overview/spendChartPalette'
+import { PALETTE_DARK, PALETTE_LIGHT } from '@/lib/charts/spendChartPalette'
 import { shortDate } from '@/lib/dateFormat'
 import { useThemeMode } from '@/styles/useThemeMode'
 import type { DashboardDailyPoint } from '@/types/dashboard'

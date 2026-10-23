@@ -15,7 +15,7 @@ import type { DailyPoint } from '@/lib/meta/aggregate'
 import { shortDate } from '@/lib/dateFormat'
 import { useThemeMode } from '@/styles/useThemeMode'
 import SpendChartTooltip from '../SpendChartTooltip/SpendChartTooltip'
-import { PALETTE_DARK, PALETTE_LIGHT } from '../../spendChartPalette'
+import { PALETTE_DARK, PALETTE_LIGHT } from '@/lib/charts/spendChartPalette'
 import { enrichWithRoas, shortMoney, shortRoas } from './helpers'
 import styles from './SpendChart.module.css'
 

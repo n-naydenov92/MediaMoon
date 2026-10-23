@@ -1,4 +1,4 @@
-import type { ChartPalette } from '@/app/brands/[brandId]/(advertising)/meta-ads/components/overview/spendChartPalette'
+import type { ChartPalette } from '@/lib/charts/spendChartPalette'
 import type { SpendChannel } from '@/types/dashboard'
 
 export function channelColor(channel: SpendChannel, palette: ChartPalette): string {

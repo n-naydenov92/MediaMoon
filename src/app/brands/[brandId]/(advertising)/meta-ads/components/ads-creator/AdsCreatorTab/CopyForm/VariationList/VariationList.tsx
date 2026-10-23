@@ -6,7 +6,7 @@ import IconButton from '@mui/material/IconButton'
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 import CloseIcon from '@mui/icons-material/Close'
 import FormField from '../../FormField/FormField'
-import FormTextField from '../../FormTextField/FormTextField'
+import FormTextField from '@/components/ui/FormTextField/FormTextField'
 import { addAt, removeAt, setAt } from './helpers'
 import styles from '../CopyForm.module.css'
 

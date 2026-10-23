@@ -1,3 +1,8 @@
+/* MUI's modal layer, so the preview sits above the page it is opened from. */
+.popper {
+  z-index: 1300;
+}
+
 .card,
 .sheet {
   font-family: var(--font-dm-sans), system-ui, sans-serif;
