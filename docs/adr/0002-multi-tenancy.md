@@ -1,7 +1,7 @@
 # ADR 0002 — Multi-tenancy: workspaces, brands and markets
 
 - **Status:** Accepted, 2026-10-22
-- **Related:** [ADR 0001](0001-meta-api-rate-limits.md) (Meta API rate limits and authentication). Access control (permissions, custom roles, scopes) gets its own ADR 0003.
+- **Related:** [ADR 0001](0001-meta-api-rate-limits.md) (Meta API rate limits and authentication). Access control (permissions, custom roles, scopes) is [ADR 0003](0003-access-control.md).
 
 ## Context
 
